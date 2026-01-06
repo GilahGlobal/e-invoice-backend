@@ -16,6 +16,122 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/complete-forgot-password": {
+            "post": {
+                "description": "Complete forgot password process",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Complete Forgot Password",
+                "parameters": [
+                    {
+                        "description": "Complete forgot password request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CompleteForgotPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "forgot password complete successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/initiate-forgot-password": {
+            "post": {
+                "description": "Initiate forgot password process",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Initiate Forgot Password",
+                "parameters": [
+                    {
+                        "description": "Forgot password request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.InitiateForgotPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "forgot password initiated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Login to the system",
@@ -1450,11 +1566,7 @@ const docTemplate = `{
         },
         "/invoice/upload": {
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
+                "security": [],
                 "description": "Receives invoice data as a json",
                 "consumes": [
                     "application/json"
@@ -2172,14 +2284,40 @@ const docTemplate = `{
                 }
             }
         },
-        "models.CreateUserRequestModel": {
+        "models.CompleteForgotPassword": {
             "type": "object",
             "required": [
                 "email",
-                "name",
+                "otp",
                 "password"
             ],
             "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "otp": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                }
+            }
+        },
+        "models.CreateUserRequestModel": {
+            "type": "object",
+            "required": [
+                "company_name",
+                "email",
+                "name",
+                "password",
+                "phone_number",
+                "tin"
+            ],
+            "properties": {
+                "company_name": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -2192,8 +2330,25 @@ const docTemplate = `{
                     "type": "string",
                     "minLength": 6
                 },
+                "phone_number": {
+                    "type": "string"
+                },
                 "platform_configs": {
                     "$ref": "#/definitions/models.PlatformConfigsAuth"
+                },
+                "tin": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InitiateForgotPassword": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
                 }
             }
         },

@@ -6,6 +6,7 @@ import (
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
+	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -133,4 +134,81 @@ func (base *Controller) Logout(c *fiber.Ctx) error {
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "user logout successfully", respData)
 	return c.Status(code).JSON(rd)
+}
+
+// @Summary Initiate Forgot Password
+// @Description Initiate forgot password process
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param data body models.InitiateForgotPassword true "Forgot password request payload"
+// @Success 200 {object} models.Response "forgot password initiated successfully"
+// @Failure 400 {object} models.Response "Bad request, validation failed"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 422 {object} models.Response "Unprocessable entity"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /auth/initiate-forgot-password [post]
+func (base *Controller) InitiateForgotPassword(c *fiber.Ctx) error {
+	var req models.InitiateForgotPassword
+	err := c.BodyParser(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+
+	}
+	err = base.Validator.Struct(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, base.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	err = auth.InitiateForgotPassword(req, base.Db.Postgresql.DB())
+	if err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	base.Logger.Info("forgot password initiated successfully")
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "forgot password initiated successfully", nil)
+	return c.Status(http.StatusOK).JSON(rd)
+}
+
+// @Summary Complete Forgot Password
+// @Description Complete forgot password process
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param data body models.CompleteForgotPassword true "Complete forgot password request payload"
+// @Success 200 {object} models.Response "forgot password complete successfully"
+// @Failure 400 {object} models.Response "Bad request, validation failed"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 422 {object} models.Response "Unprocessable entity"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /auth/complete-forgot-password [post]
+func (base *Controller) CompleteForgotPassword(c *fiber.Ctx) error {
+	var req models.CompleteForgotPassword
+	err := c.BodyParser(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+
+	}
+
+	err = base.Validator.Struct(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, base.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	err = auth.CompleteForgotPassword(req, base.Db.Postgresql.DB())
+	if err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	base.Logger.Info("forgot password completed successfully")
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "forgot password completed successfully", nil)
+	return c.Status(http.StatusOK).JSON(rd)
 }

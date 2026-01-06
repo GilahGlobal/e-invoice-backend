@@ -305,8 +305,24 @@ definitions:
       org_id:
         type: string
     type: object
+  models.CompleteForgotPassword:
+    properties:
+      email:
+        type: string
+      otp:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - otp
+    - password
+    type: object
   models.CreateUserRequestModel:
     properties:
+      company_name:
+        type: string
       email:
         type: string
       name:
@@ -316,12 +332,26 @@ definitions:
       password:
         minLength: 6
         type: string
+      phone_number:
+        type: string
       platform_configs:
         $ref: '#/definitions/models.PlatformConfigsAuth'
+      tin:
+        type: string
     required:
+    - company_name
     - email
     - name
     - password
+    - phone_number
+    - tin
+    type: object
+  models.InitiateForgotPassword:
+    properties:
+      email:
+        type: string
+    required:
+    - email
     type: object
   models.LoginRequestModel:
     properties:
@@ -364,6 +394,82 @@ info:
   title: Gention E-invoicing Service API
   version: "1.0"
 paths:
+  /auth/complete-forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Complete forgot password process
+      parameters:
+      - description: Complete forgot password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.CompleteForgotPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: forgot password complete successfully
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Complete Forgot Password
+      tags:
+      - Auth
+  /auth/initiate-forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Initiate forgot password process
+      parameters:
+      - description: Forgot password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.InitiateForgotPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: forgot password initiated successfully
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Initiate Forgot Password
+      tags:
+      - Auth
   /auth/login:
     post:
       consumes:
@@ -1298,8 +1404,7 @@ paths:
           description: Bad request
           schema:
             $ref: '#/definitions/models.Response'
-      security:
-      - BearerAuth: []
+      security: []
       summary: Initializes invoice creation in one go
       tags:
       - Internal Invoice

@@ -6,6 +6,7 @@ import (
 	userRepo "einvoice-access-point/internal/repository/business"
 	"einvoice-access-point/pkg/common"
 	"einvoice-access-point/pkg/config"
+	"einvoice-access-point/pkg/database/redis"
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
@@ -16,6 +17,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -106,6 +108,9 @@ func CreateUser(req models.CreateUserRequestModel, db *gorm.DB) (fiber.Map, int,
 		APIKeyHash:      apiKeyHashStr,
 		PlatformConfigs: platformConfigs,
 		AccStatus:       0,
+		TIN:             req.TIN,
+		PhoneNumber:     req.PhoneNumber,
+		CompanyName:     req.CompanyName,
 	}
 
 	err = userRepo.CreateBusiness(&user, pdb)
@@ -119,6 +124,7 @@ func CreateUser(req models.CreateUserRequestModel, db *gorm.DB) (fiber.Map, int,
 		"name":        user.Name,
 		"business_id": user.BusinessID,
 		"service_id":  user.ServiceID,
+		"tin":         user.TIN,
 	}
 
 	return responseData, http.StatusCreated, nil
@@ -195,4 +201,72 @@ func LogoutUser(accessUuid, ownerId string, db *gorm.DB) (fiber.Map, int, error)
 	responseData = fiber.Map{}
 
 	return responseData, http.StatusOK, nil
+}
+
+func InitiateForgotPassword(req models.InitiateForgotPassword, db *gorm.DB) error {
+	redisClient := redis.NewClient()
+	ctx := redisClient.Context()
+	pdb := inst.InitDB(db, true)
+	var (
+		user = models.Business{}
+	)
+	queryError, err := pdb.SelectOneFromDb(&user, "email = ?", req.Email)
+	if err != nil {
+		return fmt.Errorf("Account details cannot be retrieved")
+	}
+
+	if queryError != nil {
+		return queryError
+	}
+
+	otp, err := utility.GenerateOTP(6)
+	if err != nil {
+		return fmt.Errorf("failed to generate OTP: %w", err)
+	}
+	key := "forgot_password_otp_" + user.ID
+	duration := 15 * time.Minute // 15 minutes expiration
+
+	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
+	// Send otp to user's email - to be implemented
+	return nil
+}
+
+func CompleteForgotPassword(req models.CompleteForgotPassword, db *gorm.DB) error {
+	redisClient := redis.NewClient()
+	ctx := redisClient.Context()
+	pdb := inst.InitDB(db, true)
+	var (
+		user = models.Business{}
+	)
+
+	queryError, err := pdb.SelectOneFromDb(&user, "email = ?", req.Email)
+	if err != nil {
+		return fmt.Errorf("Account details cannot be retrieved")
+	}
+
+	if queryError != nil {
+		return queryError
+	}
+
+	key := "forgot_password_otp_" + user.ID
+
+	otp, err := redisClient.Get(ctx, key).Result()
+
+	if err != nil {
+		return errors.New("unable to verify token")
+	}
+
+	if otp != req.OTP {
+		return errors.New("invalid OTP provided")
+	}
+
+	password, err := utility.HashPassword(req.Password)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	user.Password = password
+	pdb.UpdateFields(user, user, user.ID)
+	redisClient.Del(ctx, key)
+	return nil
 }

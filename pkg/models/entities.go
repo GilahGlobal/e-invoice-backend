@@ -23,6 +23,9 @@ type Business struct {
 	APIKeyHash      string                 `gorm:"type:text;index" json:"-"`
 	BusinessID      string                 `gorm:"column:business_id;type:uuid;not null;index" json:"business_id"`
 	ServiceID       string                 `gorm:"column:service_id;type:varchar(20);not null;index" json:"service_id"`
+	TIN             string                 `gorm:"column:tin;type:varchar(20)" json:"tin"`
+	PhoneNumber     string                 `gorm:"column:phone_number;type:varchar(13)" json:"phone_number"`
+	CompanyName     string                 `gorm:"column:company_name;type:varchar(250)" json:"company_name"`
 	PlatformConfigs PlatformConfigs        `gorm:"type:jsonb;not null;default:'{}'" json:"platform_configs"`
 	Invoices        []Invoice              `gorm:"foreignKey:BusinessID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"invoices"`
 	CreatedAt       time.Time              `gorm:"column:created_at;not null;autoCreateTime" json:"created_at"`
