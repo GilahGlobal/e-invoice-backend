@@ -64,5 +64,5 @@ func FirsAllInOneProcess(payload firs_models.InvoiceRequest, invoiceModel *model
 		return fmt.Errorf("failed to confirm invoice, didnt get 200 or delivered is false"), true
 	}
 
-	return nil, false
+	return nil, true
 }
