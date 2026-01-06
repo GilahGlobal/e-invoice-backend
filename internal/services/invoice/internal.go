@@ -60,7 +60,7 @@ func CreateInvoice(db *gorm.DB, payload firs_models.InvoiceRequest, invoiceNumbe
 		return nil, &errDetails, fmt.Errorf("%s: %w", errDetails, err), isInvoiceSigned
 	}
 
-	if err, isInvoiceSigned := FirsAllInOneProcess(payload, invoice, db); err != nil {
+	if err, isInvoiceSigned = FirsAllInOneProcess(payload, invoice, db); err != nil {
 		errDetails := fmt.Sprintf("failed to process invoice through all steps: %v", err)
 		return invoice, &errDetails, fmt.Errorf("%s", errDetails), isInvoiceSigned
 	}
