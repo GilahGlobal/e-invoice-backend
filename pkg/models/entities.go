@@ -15,7 +15,7 @@ import (
 // Business represents a business entity with dynamic platform support
 type Business struct {
 	ID              string                 `gorm:"type:uuid;primaryKey;unique;not null" json:"id"`
-	Name            string                 `gorm:"column:name;type:varchar(250);not null;unique" json:"name"`
+	Name            string                 `gorm:"column:name;type:varchar(250);not null" json:"name"`
 	Email           string                 `gorm:"column:email;type:varchar(100);unique" json:"email"`
 	Password        string                 `gorm:"column:password;type:text;not null" json:"-"`
 	AccStatus       int                    `gorm:"column:acc_status;type:int;default:0" json:"acc_status"`

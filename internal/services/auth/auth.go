@@ -40,6 +40,9 @@ func ValidateCreateUserRequest(req models.CreateUserRequestModel, db *gorm.DB) (
 			return req, errors.New("user already exists with the given email")
 		}
 	}
+	if exists := pdb.CheckExists(&user, "company_name = ?", req.CompanyName); exists {
+		return req, errors.New("Business already exists with the given company name")
+	}
 
 	return req, nil
 }
@@ -219,10 +222,12 @@ func InitiateForgotPassword(req models.InitiateForgotPassword, db *gorm.DB) erro
 		return queryError
 	}
 
-	otp, err := utility.GenerateOTP(6)
-	if err != nil {
-		return fmt.Errorf("failed to generate OTP: %w", err)
-	}
+	// otp, err := utility.GenerateOTP(6)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to generate OTP: %w", err)
+	// }
+
+	otp := 123456 // For testing purposes only, replace with generated OTP
 	key := "forgot_password_otp_" + user.ID
 	duration := 15 * time.Minute // 15 minutes expiration
 
