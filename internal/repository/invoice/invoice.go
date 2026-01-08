@@ -95,17 +95,21 @@ func FindMinimalInvoicesByBusinessID(db database.DatabaseManager, businessID str
 		irn,
 		platform,
 		current_status,
-		(
-			SELECT COALESCE(entry->>'status', 'pending')
-			FROM jsonb_array_elements(status_history) AS entry
-			WHERE entry->>'step' = invoices.current_status
-			ORDER BY entry->>'timestamp' DESC
-			LIMIT 1
-		) AS status_text,
+		CASE
+			WHEN current_status IN ('signed_invoice', 'transmitted_invoice')
+				THEN 'partial_success'
+			ELSE (
+				SELECT COALESCE(entry->>'status', 'pending')
+				FROM jsonb_array_elements(status_history) AS entry
+				WHERE entry->>'step' = invoices.current_status
+				ORDER BY entry->>'timestamp' DESC
+				LIMIT 1
+			)
+		END AS status_text,
 		created_at
 	FROM invoices
 	WHERE business_id = ? AND deleted_at IS NULL
-	ORDER BY created_at DESC
+	ORDER BY created_at DESC;
 	`
 
 	if err := db.DB().Raw(query, businessID).Scan(&result).Error; err != nil {

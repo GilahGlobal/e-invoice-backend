@@ -3,11 +3,13 @@ package business
 import (
 	"einvoice-access-point/internal/services/business"
 	"einvoice-access-point/pkg/database"
+	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type Controller struct {
@@ -61,5 +63,54 @@ func (base *Controller) GetBusinessByID(c *fiber.Ctx) error {
 	}
 
 	rd := utility.BuildSuccessResponse(http.StatusOK, "business gotten successfully", business)
+	return c.Status(http.StatusOK).JSON(rd)
+}
+
+// @Summary      Update Business ID
+// @Description Update Business ID of a business using its ID
+// @Tags         Business
+// @Accept       json
+// @Produce      json
+// @Security BearerAuth
+// @Param        id   path      string  true  "Business ID" format(uuid)
+// @Param data body models.UpdateBusinessIDRequest true "Update business ID request payload"
+// @Success      200 {object} models.Response "Business updated successfully"
+// @Failure      400 {object} models.Response "Bad request"
+// @Failure      401 {object} models.Response "Unauthorized"
+// @Failure      404 {object} models.Response "Business not found"
+// @Failure      500 {object} models.Response "Internal server error"
+// @Router       /business/business-id/{id} [patch]
+func (base *Controller) UpdateBusinessID(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	_, err := uuid.Parse(id)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "invalid business id format", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+	var req models.UpdateBusinessIDRequest
+	err = c.BodyParser(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+
+	}
+	err = base.Validator.Struct(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, base.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	err = business.UpdateBusinessID(base.Db.Postgresql.DB(), id, req.BusinessID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(http.StatusBadRequest).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(http.StatusOK, "business id updated successfully", nil)
 	return c.Status(http.StatusOK).JSON(rd)
 }
