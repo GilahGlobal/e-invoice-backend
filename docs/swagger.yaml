@@ -661,12 +661,6 @@ paths:
       - application/json
       description: Update Business ID of a business using its ID
       parameters:
-      - description: Business ID
-        format: uuid
-        in: path
-        name: id
-        required: true
-        type: string
       - description: Update business ID request payload
         in: body
         name: data

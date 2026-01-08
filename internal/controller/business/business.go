@@ -72,7 +72,6 @@ func (base *Controller) GetBusinessByID(c *fiber.Ctx) error {
 // @Accept       json
 // @Produce      json
 // @Security BearerAuth
-// @Param        id   path      string  true  "Business ID" format(uuid)
 // @Param data body models.UpdateBusinessIDRequest true "Update business ID request payload"
 // @Success      200 {object} models.Response "Business updated successfully"
 // @Failure      400 {object} models.Response "Bad request"

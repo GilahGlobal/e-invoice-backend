@@ -366,14 +366,6 @@ const docTemplate = `{
                 "summary": "Update Business ID",
                 "parameters": [
                     {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "Business ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "Update business ID request payload",
                         "name": "data",
                         "in": "body",
