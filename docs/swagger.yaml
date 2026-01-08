@@ -655,7 +655,7 @@ paths:
       summary: Get Business by ID
       tags:
       - Business
-  /business/business-id/{id}:
+  /business/business-id:
     patch:
       consumes:
       - application/json

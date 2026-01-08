@@ -346,7 +346,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/business/business-id/{id}": {
+        "/business/business-id": {
             "patch": {
                 "security": [
                     {

@@ -3,13 +3,13 @@ package business
 import (
 	"einvoice-access-point/internal/services/business"
 	"einvoice-access-point/pkg/database"
+	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 type Controller struct {
@@ -79,25 +79,19 @@ func (base *Controller) GetBusinessByID(c *fiber.Ctx) error {
 // @Failure      401 {object} models.Response "Unauthorized"
 // @Failure      404 {object} models.Response "Business not found"
 // @Failure      500 {object} models.Response "Internal server error"
-// @Router       /business/business-id/{id} [patch]
+// @Router       /business/business-id [patch]
 func (base *Controller) UpdateBusinessID(c *fiber.Ctx) error {
-	id := c.Params("id")
-	if id == "" {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
 
-	_, err := uuid.Parse(id)
-	if err != nil {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "invalid business id format", err, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
-	}
 	var req models.UpdateBusinessIDRequest
 	err = c.BodyParser(&req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
-
 	}
 	err = base.Validator.Struct(&req)
 	if err != nil {
@@ -105,7 +99,7 @@ func (base *Controller) UpdateBusinessID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	err = business.UpdateBusinessID(base.Db.Postgresql.DB(), id, req.BusinessID)
+	err = business.UpdateBusinessID(base.Db.Postgresql.DB(), userDetails.ID, req.BusinessID)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(http.StatusBadRequest).JSON(rd)

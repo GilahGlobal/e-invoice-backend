@@ -112,3 +112,8 @@ func FindBusinessByID(db database.DatabaseManager, id string) (*models.Business,
 
 	return &business, nil
 }
+
+func UpdateNRSBusinessID(db database.DatabaseManager, businessID, id string) error {
+	result := db.DB().Model(&models.Business{}).Where("id = ? AND acc_status = ?", id, 0).Update("business_id", businessID)
+	return result.Error
+}
