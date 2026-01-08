@@ -3,6 +3,7 @@ package business
 import (
 	repository "einvoice-access-point/internal/repository/business"
 	inst "einvoice-access-point/pkg/dbinit"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -71,4 +72,26 @@ func GetBusinessByID(db *gorm.DB, id string) (fiber.Map, error) {
 	}
 
 	return response, nil
+}
+
+func UpdateBusinessID(db *gorm.DB, id, businessID string) error {
+	pdb := inst.InitDB(db, true)
+
+	business, err := repository.FindBusinessByID(pdb, id)
+	if err != nil {
+		return err
+	}
+
+	if business == nil {
+		return errors.New("business account not found")
+	}
+
+	business.BusinessID = businessID
+
+	err = repository.UpdateAUser(business, pdb)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
