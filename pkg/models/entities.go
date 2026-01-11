@@ -21,7 +21,7 @@ type Business struct {
 	AccStatus       int                    `gorm:"column:acc_status;type:int;default:0" json:"acc_status"`
 	APIKey          common.EncryptedString `gorm:"type:text" json:"api_key"`
 	APIKeyHash      string                 `gorm:"type:text;index" json:"-"`
-	BusinessID      string                 `gorm:"column:business_id;type:uuid;not null;index" json:"business_id"`
+	BusinessID      *string                `gorm:"column:business_id;type:uuid;index" json:"business_id"`
 	ServiceID       string                 `gorm:"column:service_id;type:varchar(20);not null;index" json:"service_id"`
 	TIN             string                 `gorm:"column:tin;type:varchar(20)" json:"tin"`
 	PhoneNumber     string                 `gorm:"column:phone_number;type:varchar(13)" json:"phone_number"`
@@ -50,9 +50,7 @@ func (b *Business) BeforeCreate(tx *gorm.DB) error {
 	if b.ID == "" {
 		b.ID = uuid.New().String()
 	}
-	if b.BusinessID == "" {
-		b.BusinessID = uuid.New().String()
-	}
+
 	return nil
 }
 
