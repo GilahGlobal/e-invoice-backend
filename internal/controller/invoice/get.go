@@ -4,6 +4,7 @@ import (
 	"einvoice-access-point/external/firs_models"
 	"einvoice-access-point/internal/services/invoice"
 	"einvoice-access-point/pkg/middleware"
+	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
 	"strings"
 
@@ -169,7 +170,7 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	invoice, errDetails, err, _ := invoice.CreateInvoice(base.Db.Postgresql.DB(), payload, invoiceNumber, businessID)
+	invoice, errDetails, err, _ := invoice.CreateInvoice(base.Db.Postgresql.DB(), payload, invoiceNumber, businessID, nil)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -247,9 +248,17 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
+
 	if invoiceExists != nil {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "invoice with the same invoice number already exists", nil, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
+		blockedStatuses := map[string]bool{
+			models.StatusSignedInvoice: true,
+			models.StatusTransmitted:   true,
+			models.StatusConfirmed:     true,
+		}
+		if blockedStatuses[invoiceExists.CurrentStatus] {
+			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "invoice with the same invoice number already exists and cannot be overwritten", nil, nil)
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
 	}
 
 	irnPayload := make(map[string]string)
@@ -294,7 +303,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	value := irnPayload["irn"]
 	req.IRN = &value
 
-	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(base.Db.Postgresql.DB(), req, *req.InvoiceNumber, userDetails.ID)
+	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(base.Db.Postgresql.DB(), req, *req.InvoiceNumber, userDetails.ID, invoiceExists)
 
 	response := map[string]interface{}{
 		"metadata": createdInvoice.StatusHistory,

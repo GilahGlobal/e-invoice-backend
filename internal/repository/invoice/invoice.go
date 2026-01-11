@@ -144,3 +144,8 @@ func DeleteInvoiceByBusinessAndID(db database.DatabaseManager, businessID, invoi
 
 	return nil
 }
+
+func UpdateInvoice(db database.DatabaseManager, invoiceNumber string, invoiceData []byte) error {
+	result := db.DB().Model(&models.Invoice{}).Where("invoice_number = ?", invoiceNumber).Update("invoice_data", invoiceData)
+	return result.Error
+}

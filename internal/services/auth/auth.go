@@ -105,7 +105,6 @@ func CreateUser(req models.CreateUserRequestModel, db *gorm.DB) (fiber.Map, int,
 		Name:            name,
 		Email:           email,
 		Password:        password,
-		BusinessID:      "ac0d4848-c898-49ce-8fc7-46f529a9354a",
 		ServiceID:       "6A2BC898", //userRepo.GenerateUniqueServiceID(pdb.Db)
 		APIKey:          common.EncryptedString(encryptedAPIKey),
 		APIKeyHash:      apiKeyHashStr,
@@ -158,7 +157,6 @@ func LoginUser(req models.LoginRequestModel, db *gorm.DB) (fiber.Map, int, error
 	if err != nil {
 		return responseData, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
 	}
-
 	tokens := map[string]string{
 		"access_token": tokenData.AccessToken,
 		"exp":          strconv.Itoa(int(tokenData.ExpiresAt.Unix())),
@@ -174,7 +172,7 @@ func LoginUser(req models.LoginRequestModel, db *gorm.DB) (fiber.Map, int, error
 
 	responseData = fiber.Map{
 
-		"user": map[string]string{
+		"user": map[string]interface{}{
 			"id":          userData.ID,
 			"email":       userData.Email,
 			"name":        userData.Name,

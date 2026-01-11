@@ -29,7 +29,7 @@ func FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys *utility.Cryp
 
 	validateIrn := firs_models.IRNValidationRequest{
 		InvoiceReference: payload.Invoice.InvoiceID,
-		BusinessID:       business.BusinessID,
+		BusinessID:       *business.BusinessID,
 		IRN:              *theIRN,
 	}
 
@@ -62,7 +62,7 @@ func otherFirsProcesses(payload zoho.WebhookPayload, business *models.Business, 
 
 	pdb := inst.InitDB(db, true)
 
-	newInvoiceResp, err := converter.ConvertZohoToFIRS(payload.Invoice, business.BusinessID, business.Name, theIRN)
+	newInvoiceResp, err := converter.ConvertZohoToFIRS(payload.Invoice, *business.BusinessID, business.Name, theIRN)
 	if err != nil {
 		return err
 	}
