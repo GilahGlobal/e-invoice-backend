@@ -24,14 +24,14 @@ type InvoiceRequest struct {
 	ContractDocumentReference   *DocumentReference     `json:"contract_document_reference" validate:"omitempty"`
 	AdditionalDocumentReference []DocumentReference    `json:"_document_reference" validate:"omitempty,dive"`
 	AccountingSupplierParty     Party                  `json:"accounting_supplier_party" validate:"required"`
-	AccountingCustomerParty     Party                  `json:"accounting_customer_party" validate:"required"`
+	AccountingCustomerParty     *Party                 `json:"accounting_customer_party" validate:"omitempty"`
 	PayeeParty                  *Party                 `json:"payee_party" validate:"omitempty"`
 	TaxRepresentativeParty      *Party                 `json:"tax_representative_party" validate:"omitempty"`
 	ActualDeliveryDate          *string                `json:"actual_delivery_date" validate:"omitempty"`
 	PaymentMeans                []PaymentMeans         `json:"payment_means" validate:"omitempty,dive"`
 	PaymentTermsNote            *string                `json:"payment_terms_note" validate:"omitempty"`
 	AllowanceCharge             []AllowanceCharge      `json:"allowance_charge" validate:"omitempty,dive"`
-	TaxTotal                    []TaxTotal             `json:"tax_total" validate:"omitempty,dive"`
+	TaxTotal                    []TaxTotal             `json:"tax_total" validate:"required,dive"`
 	LegalMonetaryTotal          LegalMonetaryTotal     `json:"legal_monetary_total" validate:"required"`
 	InvoiceLine                 []InvoiceLine          `json:"invoice_line" validate:"required,dive"`
 }
@@ -47,20 +47,20 @@ type DocumentReference struct {
 }
 
 type Party struct {
-	PartyName           *string        `json:"party_name" validate:"omitempty,min=2"`
+	PartyName           string         `json:"party_name" validate:"required,min=2"`
 	TIN                 string         `json:"tin" validate:"required"`
 	Email               string         `json:"email" validate:"required,email"`
-	Telephone           *string        `json:"telephone" validate:"omitempty,startswith=+,numeric,min=13,max=14"`
+	Telephone           *string        `json:"telephone" validate:"omitempty,startswith=+,numeric,min=7"`
 	BusinessDescription *string        `json:"business_description" validate:"omitempty,min=5"`
-	PostalAddress       *PostalAddress `json:"postal_address" validate:"omitempty"`
+	PostalAddress       *PostalAddress `json:"postal_address" validate:"required"`
 }
 
 type PostalAddress struct {
-	StreetName  string `json:"street_name,omitempty" validate:"omitempty"`
-	CityName    string `json:"city_name,omitempty" validate:"omitempty"`
-	PostalZone  string `json:"postal_zone,omitempty" validate:"omitempty"`
-	Country     string `json:"country,omitempty" validate:"omitempty"`
-	CountryCode string `json:"country_code,omitempty" validate:"omitempty"`
+	StreetName  string `json:"street_name" validate:"required"`
+	CityName    string `json:"city_name" validate:"required"`
+	PostalZone  string `json:"postal_zone" validate:"required"`
+	Country     string `json:"country" validate:"required"`
+	CountryCode string `json:"country_code" validate:"required"`
 }
 
 type PaymentMeans struct {

@@ -51,7 +51,7 @@ func ConvertZohoToFIRS(zoho zoho.Invoice, organizationID, organizationName, irn 
 		DocumentCurrencyCode: zoho.CurrencyCode,
 		TaxCurrencyCode:      &zoho.CurrencyCode,
 		AccountingSupplierParty: firs_models.Party{
-			PartyName: &organizationName,
+			PartyName: organizationName,
 			TIN:       "TIN-UNKNOWN",          // Placeholder, as TIN is not provided in Zoho data
 			Email:     "supplier@example.com", // Placeholder, as supplier email is not provided                  // Optional, not provided in Zoho data
 			PostalAddress: &firs_models.PostalAddress{
@@ -61,8 +61,8 @@ func ConvertZohoToFIRS(zoho zoho.Invoice, organizationID, organizationName, irn 
 				Country:    "NG",
 			},
 		},
-		AccountingCustomerParty: firs_models.Party{
-			PartyName: &zoho.CustomerName,
+		AccountingCustomerParty: &firs_models.Party{
+			PartyName: zoho.CustomerName,
 			TIN:       "TIN-" + zoho.CustomerID, // Using customer_id as part of TIN
 			Email:     zoho.Email,
 			Telephone: &contactPhone,
