@@ -239,7 +239,12 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 
 	err = base.Validator.Struct(&req)
 	if err != nil {
-		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, base.Validator), nil)
+		rd := utility.BuildErrorResponse(
+			fiber.StatusUnprocessableEntity,
+			"error", "Validation failed",
+			utility.ValidationErrorsToJSON(err, firs_models.InvoiceRequest{}),
+			nil,
+		)
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 

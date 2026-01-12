@@ -52,6 +52,7 @@ func CreateInvoice(db *gorm.DB, payload firs_models.InvoiceRequest, invoiceNumbe
 			return nil, nil, errors.New("failed to update invoice"), isInvoiceSigned
 		}
 
+		invoice, _ = repository.FindInvoiceByNumber(pdb, invoiceExists.InvoiceNumber)
 		if err, isInvoiceSigned = UncompletedFirsProcesses(db, invoiceExists.CurrentStatus, payload, invoiceExists); err != nil {
 			errDetails := fmt.Sprintf("failed to process invoice through all steps: %v", err)
 			return invoice, &errDetails, fmt.Errorf("%s", errDetails), isInvoiceSigned

@@ -71,7 +71,18 @@ func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload firs_mo
 	pdb := inst.InitDB(db, true)
 	switch currentStatus {
 	case models.StatusValidatedInvoice:
-		_, theErr, err := SignInvoice(payload)
+		_, theErr, err := ValidateInvoice(payload)
+		if err != nil {
+			_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusValidatedInvoice, "failed")
+			return fmt.Errorf("failed to validate invoice: %v - %v", *theErr, err), false
+		}
+
+		err = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusValidatedInvoice, "success")
+		if err != nil {
+			return fmt.Errorf("failed to update invoice status: %v", err), false
+		}
+
+		_, theErr, err = SignInvoice(payload)
 		if err != nil {
 			_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusSignedInvoice, "failed")
 			return fmt.Errorf("failed to sign invoice: %v - %v", *theErr, err), false

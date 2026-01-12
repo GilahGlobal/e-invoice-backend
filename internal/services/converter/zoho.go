@@ -45,7 +45,7 @@ func ConvertZohoToFIRS(zoho zoho.Invoice, organizationID, organizationName, irn 
 		DueDate:              &zoho.DueDate,
 		IssueTime:            &issueTime,
 		InvoiceTypeCode:      "381", // Default invoice type code
-		PaymentStatus:        &zohotatus,
+		PaymentStatus:        zohotatus,
 		Note:                 &zoho.Notes,
 		TaxPointDate:         &zoho.Date, // Using invoice_date as tax_point_date
 		DocumentCurrencyCode: zoho.CurrencyCode,

@@ -2,6 +2,7 @@ package utility
 
 import (
 	"encoding/json"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -9,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func FormatDate(date, currentISOFormat, newISOFormat string) (string, error) {
@@ -183,4 +186,72 @@ func FormatPhone(num string) string {
 		return "+234" + num[1:]
 	}
 	return num
+}
+
+func ValidationErrorsToJSON(err error, dto any) map[string]string {
+	errors := make(map[string]string)
+
+	validationErrors := err.(validator.ValidationErrors)
+
+	rootType := reflect.TypeOf(dto)
+	if rootType.Kind() == reflect.Ptr {
+		rootType = rootType.Elem()
+	}
+
+	for _, ve := range validationErrors {
+		jsonPath := resolveJSONPath(rootType, ve.Namespace())
+		if jsonPath == "" {
+			jsonPath = strings.ToLower(ve.Field())
+		}
+
+		switch ve.Tag() {
+		case "required":
+			errors[jsonPath] = "this field is required"
+
+		case "startswith":
+			errors[jsonPath] = fmt.Sprintf("must start with '%s'", ve.Param())
+
+		case "regexp":
+			errors[jsonPath] = "must be a valid Nigerian phone number (+234XXXXXXXXXX or 0XXXXXXXXXX)"
+
+		case "min":
+			errors[jsonPath] = "minimum field length must be " + ve.Param()
+
+		default:
+			errors[jsonPath] = ve.Error()
+		}
+	}
+
+	return errors
+}
+
+func resolveJSONPath(t reflect.Type, namespace string) string {
+	parts := strings.Split(namespace, ".")[1:]
+
+	var jsonParts []string
+
+	for _, part := range parts {
+		if t.Kind() == reflect.Ptr {
+			t = t.Elem()
+		}
+
+		field, ok := t.FieldByName(part)
+		if !ok {
+			jsonParts = append(jsonParts, strings.ToLower(part))
+			continue
+		}
+
+		jsonTag := field.Tag.Get("json")
+		jsonKey := strings.Split(jsonTag, ",")[0]
+
+		if jsonKey == "" || jsonKey == "-" {
+			jsonKey = strings.ToLower(part)
+		}
+
+		jsonParts = append(jsonParts, jsonKey)
+
+		t = field.Type
+	}
+
+	return strings.Join(jsonParts, ".")
 }
