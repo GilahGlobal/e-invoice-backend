@@ -19,6 +19,7 @@ func BusinessRoute(app *fiber.App, ApiVersion string, validator *validator.Valid
 		businessUrlSec.Get("", businessController.GetAllBusiness)
 		businessUrlSec.Get("/:id", businessController.GetBusinessByID)
 		businessUrlSec.Patch("/business-id", businessController.UpdateBusinessID)
+		businessUrlSec.Patch("", businessController.UpdateBusinessProfile)
 	}
 
 	return app

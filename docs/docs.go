@@ -344,6 +344,67 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update Business Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Update Business Details",
+                "parameters": [
+                    {
+                        "description": "Update business details request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UpdateBusinessDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Business not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
             }
         },
         "/business/business-id": {
@@ -371,7 +432,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateBusinessIDRequest"
+                            "$ref": "#/definitions/dtos.UpdateBusinessIDRequest"
                         }
                     }
                 ],
@@ -1880,8 +1941,42 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dtos.UpdateBusinessDto": {
+            "type": "object",
+            "properties": {
+                "company_name": {
+                    "type": "string",
+                    "maxLength": 250
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 2
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.UpdateBusinessIDRequest": {
+            "type": "object",
+            "required": [
+                "business_id"
+            ],
+            "properties": {
+                "business_id": {
+                    "type": "string"
+                }
+            }
+        },
         "firs_models.AllowanceCharge": {
             "type": "object",
+            "required": [
+                "amount"
+            ],
             "properties": {
                 "amount": {
                     "type": "number"
@@ -1893,6 +1988,10 @@ const docTemplate = `{
         },
         "firs_models.DocumentReference": {
             "type": "object",
+            "required": [
+                "irn",
+                "issue_date"
+            ],
             "properties": {
                 "irn": {
                     "type": "string"
@@ -1998,6 +2097,10 @@ const docTemplate = `{
         },
         "firs_models.InvoiceDeliveryPeriod": {
             "type": "object",
+            "required": [
+                "end_date",
+                "start_date"
+            ],
             "properties": {
                 "end_date": {
                     "type": "string"
@@ -2009,6 +2112,14 @@ const docTemplate = `{
         },
         "firs_models.InvoiceLine": {
             "type": "object",
+            "required": [
+                "hsn_code",
+                "invoiced_quantity",
+                "item",
+                "line_extension_amount",
+                "price",
+                "product_category"
+            ],
             "properties": {
                 "discount_amount": {
                     "type": "number"
@@ -2026,7 +2137,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "invoiced_quantity": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "item": {
                     "$ref": "#/definitions/firs_models.Item"
@@ -2044,6 +2156,16 @@ const docTemplate = `{
         },
         "firs_models.InvoiceRequest": {
             "type": "object",
+            "required": [
+                "accounting_supplier_party",
+                "business_id",
+                "document_currency_code",
+                "invoice_line",
+                "invoice_type_code",
+                "issue_date",
+                "legal_monetary_total",
+                "tax_total"
+            ],
             "properties": {
                 "_document_reference": {
                     "type": "array",
@@ -2103,7 +2225,8 @@ const docTemplate = `{
                     }
                 },
                 "invoice_number": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1
                 },
                 "invoice_type_code": {
                     "type": "string"
@@ -2139,7 +2262,12 @@ const docTemplate = `{
                     }
                 },
                 "payment_status": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "PENDING",
+                        "PAID",
+                        "REJECTED"
+                    ]
                 },
                 "payment_terms_note": {
                     "type": "string"
@@ -2166,6 +2294,9 @@ const docTemplate = `{
         },
         "firs_models.Item": {
             "type": "object",
+            "required": [
+                "name"
+            ],
             "properties": {
                 "description": {
                     "type": "string"
@@ -2180,6 +2311,12 @@ const docTemplate = `{
         },
         "firs_models.LegalMonetaryTotal": {
             "type": "object",
+            "required": [
+                "line_extension_amount",
+                "payable_amount",
+                "tax_exclusive_amount",
+                "tax_inclusive_amount"
+            ],
             "properties": {
                 "line_extension_amount": {
                     "type": "number"
@@ -2197,21 +2334,30 @@ const docTemplate = `{
         },
         "firs_models.Party": {
             "type": "object",
+            "required": [
+                "email",
+                "party_name",
+                "postal_address",
+                "tin"
+            ],
             "properties": {
                 "business_description": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 5
                 },
                 "email": {
                     "type": "string"
                 },
                 "party_name": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 2
                 },
                 "postal_address": {
                     "$ref": "#/definitions/firs_models.PostalAddress"
                 },
                 "telephone": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 7
                 },
                 "tin": {
                     "type": "string"
@@ -2220,6 +2366,10 @@ const docTemplate = `{
         },
         "firs_models.PaymentMeans": {
             "type": "object",
+            "required": [
+                "payment_due_date",
+                "payment_means_code"
+            ],
             "properties": {
                 "payment_due_date": {
                     "type": "string"
@@ -2231,6 +2381,13 @@ const docTemplate = `{
         },
         "firs_models.PostalAddress": {
             "type": "object",
+            "required": [
+                "city_name",
+                "country",
+                "country_code",
+                "postal_zone",
+                "street_name"
+            ],
             "properties": {
                 "city_name": {
                     "type": "string"
@@ -2251,6 +2408,11 @@ const docTemplate = `{
         },
         "firs_models.Price": {
             "type": "object",
+            "required": [
+                "base_quantity",
+                "price_amount",
+                "price_unit"
+            ],
             "properties": {
                 "base_quantity": {
                     "type": "integer"
@@ -2265,6 +2427,10 @@ const docTemplate = `{
         },
         "firs_models.TaxCategory": {
             "type": "object",
+            "required": [
+                "id",
+                "percent"
+            ],
             "properties": {
                 "id": {
                     "type": "string"
@@ -2276,6 +2442,11 @@ const docTemplate = `{
         },
         "firs_models.TaxSubtotal": {
             "type": "object",
+            "required": [
+                "tax_amount",
+                "tax_category",
+                "taxable_amount"
+            ],
             "properties": {
                 "tax_amount": {
                     "type": "number"
@@ -2290,6 +2461,9 @@ const docTemplate = `{
         },
         "firs_models.TaxTotal": {
             "type": "object",
+            "required": [
+                "tax_amount"
+            ],
             "properties": {
                 "tax_amount": {
                     "type": "number"
@@ -2309,7 +2483,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "payment_status": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "PENDING",
+                        "PAID",
+                        "REJECTED"
+                    ]
                 },
                 "reference": {
                     "type": "string"
@@ -2462,17 +2641,6 @@ const docTemplate = `{
                 },
                 "status_code": {
                     "type": "integer"
-                }
-            }
-        },
-        "models.UpdateBusinessIDRequest": {
-            "type": "object",
-            "required": [
-                "business_id"
-            ],
-            "properties": {
-                "business_id": {
-                    "type": "string"
                 }
             }
         }
