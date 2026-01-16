@@ -2,8 +2,8 @@ package firs
 
 import (
 	"einvoice-access-point/external/firs_models"
+	"einvoice-access-point/internal/dtos"
 	"einvoice-access-point/pkg/config"
-	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
 	"fmt"
 	"strings"
@@ -22,7 +22,7 @@ func Login(email, password string) (*utility.Response, error) {
 			"x-api-key":    configs.Firs.FirsApiKey,
 			"x-api-secret": configs.Firs.FirsClientKey,
 		},
-		Body: models.LoginRequestModel{
+		Body: dtos.LoginRequestDto{
 			Email:    email,
 			Password: password,
 		},

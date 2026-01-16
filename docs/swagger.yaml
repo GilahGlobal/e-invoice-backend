@@ -1,25 +1,642 @@
 basePath: /api/v1
 definitions:
-  dtos.UpdateBusinessDto:
+  dtos.AccountingPlatformConfigAuth:
     properties:
-      company_name:
-        maxLength: 250
+      api_key:
+        example: api-key-123456789
+        type: string
+      api_secret:
+        example: api-secret-123456789
+        type: string
+      auth_token:
+        example: auth-token-123456789
+        type: string
+      hmac_secret:
+        example: hmac-secret-123456789
+        type: string
+      org_id:
+        example: org-123456789
+        type: string
+    type: object
+  dtos.AllowanceCharge:
+    properties:
+      amount:
+        type: number
+      charge_indicator:
+        type: boolean
+    required:
+    - amount
+    type: object
+  dtos.BaseResponseDto:
+    properties:
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.CompleteForgotPasswordDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      otp:
+        example: "123456"
+        type: string
+      password:
+        example: password123
+        minLength: 6
+        type: string
+    required:
+    - email
+    - otp
+    - password
+    type: object
+  dtos.DocumentReference:
+    properties:
+      irn:
+        type: string
+      issue_date:
+        type: string
+    required:
+    - irn
+    - issue_date
+    type: object
+  dtos.GetAllInvoicesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dtos.MinimalInvoiceDTO'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.GetBusinessResponseDto:
+    properties:
+      acc_status:
+        example: active
+        type: string
+      api_key:
+        example: sk_test_12345
+        type: string
+      business_id:
+        example: BUS-12345
+        type: string
+      created_at:
+        example: "2026-01-16T12:00:00Z"
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      id:
+        example: b2c8f0e7-9b6a-4d1e-bd2a-2d0d6f9f93c7
+        type: string
+      name:
+        example: Acme Inc.
+        type: string
+      platform_configs:
+        $ref: '#/definitions/dtos.PlatformConfigsAuth'
+      service_id:
+        example: SRV-98765
+        type: string
+      updated_at:
+        example: "2026-01-16T12:30:00Z"
+        type: string
+    type: object
+  dtos.GetInvoiceDetailsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.Invoice'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.InitiateForgotPasswordDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+    required:
+    - email
+    type: object
+  dtos.Invoice:
+    properties:
+      business_id:
+        example: business-uuid
+        type: string
+      created_at:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+      current_status:
+        example: validated_irn
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      invoice_data:
+        $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+      invoice_number:
+        example: INV-1001
+        type: string
+      irn:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      platform:
+        description: e.g., zoho, quickbooks
+        example: zoho
+        type: string
+      platform_metadata:
+        type: string
+      status_history:
+        items:
+          $ref: '#/definitions/dtos.InvoiceStepMetadata'
+        type: array
+      timestamp:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+      updated_at:
+        example: "2024-01-02T12:00:00Z"
+        type: string
+    type: object
+  dtos.InvoiceData:
+    properties:
+      invoice_number:
+        example: INV-1001
+        type: string
+      irn:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      qr_code:
+        example: iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN...
+        type: string
+    type: object
+  dtos.InvoiceDeliveryPeriod:
+    properties:
+      end_date:
+        type: string
+      start_date:
+        type: string
+    required:
+    - end_date
+    - start_date
+    type: object
+  dtos.InvoiceLine:
+    properties:
+      discount_amount:
+        type: number
+      discount_rate:
+        type: number
+      fee_amount:
+        type: number
+      fee_rate:
+        type: number
+      hsn_code:
+        type: string
+      invoiced_quantity:
+        minimum: 1
+        type: integer
+      item:
+        $ref: '#/definitions/dtos.Item'
+      line_extension_amount:
+        type: number
+      price:
+        $ref: '#/definitions/dtos.Price'
+      product_category:
+        type: string
+    required:
+    - hsn_code
+    - invoiced_quantity
+    - item
+    - line_extension_amount
+    - price
+    - product_category
+    type: object
+  dtos.InvoiceStepMetadata:
+    properties:
+      status:
+        example: success
+        type: string
+      step:
+        example: validated_irn
+        type: string
+      timestamp:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+    type: object
+  dtos.Item:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      sellers_item_identification:
+        type: string
+    required:
+    - name
+    type: object
+  dtos.LegalMonetaryTotal:
+    properties:
+      line_extension_amount:
+        type: number
+      payable_amount:
+        type: number
+      tax_exclusive_amount:
+        type: number
+      tax_inclusive_amount:
+        type: number
+    required:
+    - line_extension_amount
+    - payable_amount
+    - tax_exclusive_amount
+    - tax_inclusive_amount
+    type: object
+  dtos.LoginRequestDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dtos.LoginResponseDto:
+    properties:
+      access_token:
+        type: string
+      data:
+        $ref: '#/definitions/dtos.UserResponse'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.MinimalInvoiceDTO:
+    properties:
+      created_at:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+      current_status:
+        example: validated_irn
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      invoice_number:
+        example: INV-1001
+        type: string
+      irn:
+        example: INV-1001-a456-426614174000
+        type: string
+      platform:
+        example: internal
+        type: string
+      status_text:
+        example: success
+        type: string
+    type: object
+  dtos.Party:
+    properties:
+      business_description:
+        minLength: 5
         type: string
       email:
         type: string
+      party_name:
+        minLength: 2
+        type: string
+      postal_address:
+        $ref: '#/definitions/dtos.PostalAddress'
+      telephone:
+        minLength: 7
+        type: string
+      tin:
+        type: string
+    required:
+    - email
+    - party_name
+    - postal_address
+    - tin
+    type: object
+  dtos.PaymentMeans:
+    properties:
+      payment_due_date:
+        type: string
+      payment_means_code:
+        type: string
+    required:
+    - payment_due_date
+    - payment_means_code
+    type: object
+  dtos.PlatformConfigsAuth:
+    additionalProperties:
+      $ref: '#/definitions/dtos.AccountingPlatformConfigAuth'
+    type: object
+  dtos.PostalAddress:
+    properties:
+      city_name:
+        type: string
+      country:
+        type: string
+      country_code:
+        type: string
+      postal_zone:
+        type: string
+      street_name:
+        type: string
+    required:
+    - city_name
+    - country
+    - country_code
+    - postal_zone
+    - street_name
+    type: object
+  dtos.Price:
+    properties:
+      base_quantity:
+        type: integer
+      price_amount:
+        type: number
+      price_unit:
+        type: string
+    required:
+    - base_quantity
+    - price_amount
+    - price_unit
+    type: object
+  dtos.RegisterDto:
+    properties:
+      company_name:
+        example: Acme Inc.
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
       name:
+        example: John Doe
+        maxLength: 250
+        minLength: 2
+        type: string
+      password:
+        example: password123
+        minLength: 6
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      platform_configs:
+        $ref: '#/definitions/dtos.PlatformConfigsAuth'
+      tin:
+        example: TIN-123456789
+        type: string
+    required:
+    - company_name
+    - email
+    - name
+    - password
+    - phone_number
+    - tin
+    type: object
+  dtos.RegisterResponseDto:
+    properties:
+      data:
+        properties:
+          business_id:
+            example: 123e4567-e89b-12d3-a456-426614174000
+            type: string
+          email:
+            example: john.doe@example.com
+            type: string
+          id:
+            example: 123e4567-e89b-12d3-a456-426614174000
+            type: string
+          name:
+            example: John Doe
+            type: string
+          service_id:
+            example: 123e4567-e89b-12d3-a456-426614174000
+            type: string
+          tin:
+            example: TIN-123456789
+            type: string
+        type: object
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.TaxCategory:
+    properties:
+      id:
+        type: string
+      percent:
+        type: number
+    required:
+    - id
+    - percent
+    type: object
+  dtos.TaxSubtotal:
+    properties:
+      tax_amount:
+        type: number
+      tax_category:
+        $ref: '#/definitions/dtos.TaxCategory'
+      taxable_amount:
+        type: number
+    required:
+    - tax_amount
+    - tax_category
+    - taxable_amount
+    type: object
+  dtos.TaxTotal:
+    properties:
+      tax_amount:
+        type: number
+      tax_subtotal:
+        items:
+          $ref: '#/definitions/dtos.TaxSubtotal'
+        type: array
+    required:
+    - tax_amount
+    type: object
+  dtos.UpdateBusinessDto:
+    properties:
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      company_name:
+        example: Acme Inc.
+        maxLength: 250
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      name:
+        example: John Doe
         maxLength: 250
         minLength: 2
         type: string
       phone_number:
+        example: "+1234567890"
         type: string
     type: object
-  dtos.UpdateBusinessIDRequest:
+  dtos.UploadInvoiceRequestDto:
     properties:
+      _document_reference:
+        items:
+          $ref: '#/definitions/dtos.DocumentReference'
+        type: array
+      accounting_cost:
+        type: string
+      accounting_customer_party:
+        $ref: '#/definitions/dtos.Party'
+      accounting_supplier_party:
+        $ref: '#/definitions/dtos.Party'
+      actual_delivery_date:
+        type: string
+      allowance_charge:
+        items:
+          $ref: '#/definitions/dtos.AllowanceCharge'
+        type: array
+      billing_reference:
+        items:
+          $ref: '#/definitions/dtos.DocumentReference'
+        type: array
       business_id:
         type: string
+      buyer_reference:
+        type: string
+      contract_document_reference:
+        $ref: '#/definitions/dtos.DocumentReference'
+      dispatch_document_reference:
+        $ref: '#/definitions/dtos.DocumentReference'
+      document_currency_code:
+        type: string
+      due_date:
+        type: string
+      invoice_delivery_period:
+        $ref: '#/definitions/dtos.InvoiceDeliveryPeriod'
+      invoice_line:
+        items:
+          $ref: '#/definitions/dtos.InvoiceLine'
+        type: array
+      invoice_number:
+        minLength: 1
+        type: string
+      invoice_type_code:
+        type: string
+      irn:
+        type: string
+      issue_date:
+        type: string
+      issue_time:
+        type: string
+      legal_monetary_total:
+        $ref: '#/definitions/dtos.LegalMonetaryTotal'
+      note:
+        type: string
+      order_reference:
+        type: string
+      originator_document_reference:
+        $ref: '#/definitions/dtos.DocumentReference'
+      payee_party:
+        $ref: '#/definitions/dtos.Party'
+      payment_means:
+        items:
+          $ref: '#/definitions/dtos.PaymentMeans'
+        type: array
+      payment_status:
+        enum:
+        - PENDING
+        - PAID
+        - REJECTED
+        type: string
+      payment_terms_note:
+        type: string
+      receipt_document_reference:
+        $ref: '#/definitions/dtos.DocumentReference'
+      tax_currency_code:
+        type: string
+      tax_point_date:
+        type: string
+      tax_representative_party:
+        $ref: '#/definitions/dtos.Party'
+      tax_total:
+        items:
+          $ref: '#/definitions/dtos.TaxTotal'
+        type: array
     required:
+    - accounting_supplier_party
     - business_id
+    - document_currency_code
+    - invoice_line
+    - invoice_type_code
+    - issue_date
+    - legal_monetary_total
+    - tax_total
+    type: object
+  dtos.UploadInvoiceResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.InvoiceData'
+      message:
+        example: Action performed successfully
+        type: string
+      metadata:
+        items:
+          $ref: '#/definitions/dtos.InvoiceStepMetadata'
+        type: array
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.UserResponse:
+    properties:
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: John Doe
+        type: string
+      service_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
     type: object
   firs_models.AllowanceCharge:
     properties:
@@ -384,85 +1001,10 @@ definitions:
     required:
     - tin
     type: object
-  models.AccountingPlatformConfigAuth:
-    properties:
-      api_key:
-        type: string
-      api_secret:
-        type: string
-      auth_token:
-        type: string
-      hmac_secret:
-        type: string
-      org_id:
-        type: string
-    type: object
-  models.CompleteForgotPassword:
-    properties:
-      email:
-        type: string
-      otp:
-        type: string
-      password:
-        minLength: 6
-        type: string
-    required:
-    - email
-    - otp
-    - password
-    type: object
-  models.CreateUserRequestModel:
-    properties:
-      company_name:
-        type: string
-      email:
-        type: string
-      name:
-        maxLength: 250
-        minLength: 2
-        type: string
-      password:
-        minLength: 6
-        type: string
-      phone_number:
-        type: string
-      platform_configs:
-        $ref: '#/definitions/models.PlatformConfigsAuth'
-      tin:
-        type: string
-    required:
-    - company_name
-    - email
-    - name
-    - password
-    - phone_number
-    - tin
-    type: object
-  models.InitiateForgotPassword:
-    properties:
-      email:
-        type: string
-    required:
-    - email
-    type: object
-  models.LoginRequestModel:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
-    type: object
   models.Ping:
     properties:
       message:
         type: string
-    type: object
-  models.PlatformConfigsAuth:
-    additionalProperties:
-      $ref: '#/definitions/models.AccountingPlatformConfigAuth'
     type: object
   models.Response:
     properties:
@@ -497,14 +1039,14 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.CompleteForgotPassword'
+          $ref: '#/definitions/dtos.CompleteForgotPasswordDto'
       produces:
       - application/json
       responses:
         "200":
           description: forgot password complete successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.BaseResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
@@ -535,14 +1077,14 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.InitiateForgotPassword'
+          $ref: '#/definitions/dtos.InitiateForgotPasswordDto'
       produces:
       - application/json
       responses:
         "200":
           description: forgot password initiated successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.BaseResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
@@ -573,14 +1115,14 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.LoginRequestModel'
+          $ref: '#/definitions/dtos.LoginRequestDto'
       produces:
       - application/json
       responses:
         "200":
           description: Login successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.LoginResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
@@ -611,7 +1153,7 @@ paths:
         "200":
           description: user logout successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.BaseResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
@@ -639,19 +1181,19 @@ paths:
       - application/json
       description: Onboard to the system
       parameters:
-      - description: Login request payload
+      - description: Register request payload
         in: body
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.CreateUserRequestModel'
+          $ref: '#/definitions/dtos.RegisterDto'
       produces:
       - application/json
       responses:
         "200":
           description: Registered successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.RegisterResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
@@ -675,14 +1217,14 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve a list of all businesses in the system
+      description: Retrieve details of a specific business using its ID
       produces:
       - application/json
       responses:
         "200":
-          description: Businesses retrieved successfully
+          description: Business retrieved successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.GetBusinessResponseDto'
         "400":
           description: Bad request
           schema:
@@ -691,13 +1233,17 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/models.Response'
+        "404":
+          description: Business not found
+          schema:
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/models.Response'
       security:
       - BearerAuth: []
-      summary: Get All Businesses
+      summary: Get Business by ID
       tags:
       - Business
     patch:
@@ -737,86 +1283,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Update Business Details
-      tags:
-      - Business
-  /business/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve details of a specific business using its ID
-      parameters:
-      - description: Business ID
-        format: uuid
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Business retrieved successfully
-          schema:
-            $ref: '#/definitions/models.Response'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.Response'
-        "404":
-          description: Business not found
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.Response'
-      security:
-      - BearerAuth: []
-      summary: Get Business by ID
-      tags:
-      - Business
-  /business/business-id:
-    patch:
-      consumes:
-      - application/json
-      description: Update Business ID of a business using its ID
-      parameters:
-      - description: Update business ID request payload
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.UpdateBusinessIDRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Business updated successfully
-          schema:
-            $ref: '#/definitions/models.Response'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.Response'
-        "404":
-          description: Business not found
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.Response'
-      security:
-      - BearerAuth: []
-      summary: Update Business ID
       tags:
       - Business
   /entity:
@@ -1046,25 +1512,18 @@ paths:
       summary: FIRS API Health Check
       tags:
       - Health
-  /invoice/business/{business_id}:
+  /invoice:
     get:
       consumes:
       - application/json
       description: Returns a list of invoices with minimal details for a business
-      parameters:
-      - description: Business ID
-        format: uuid
-        in: path
-        name: business_id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: invoices fetched successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.GetAllInvoicesResponseDto'
         "400":
           description: Bad Request
           schema:
@@ -1074,18 +1533,12 @@ paths:
       summary: Get all invoices by business ID
       tags:
       - Internal Invoice
-  /invoice/business/{business_id}/{invoice_id}:
+  /invoice/{invoice_id}:
     delete:
       consumes:
       - application/json
       description: Deletes an invoice by business_id and invoice_id
       parameters:
-      - description: Business ID
-        format: uuid
-        in: path
-        name: business_id
-        required: true
-        type: string
       - description: Invoice ID
         format: uuid
         in: path
@@ -1113,12 +1566,6 @@ paths:
       - application/json
       description: Returns full invoice details by business ID and invoice ID
       parameters:
-      - description: Business ID
-        format: uuid
-        in: path
-        name: business_id
-        required: true
-        type: string
       - description: Invoice ID
         format: uuid
         in: path
@@ -1129,9 +1576,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: invoice details fetched successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.GetInvoiceDetailsResponseDto'
         "400":
           description: Bad Request
           schema:
@@ -1179,11 +1626,6 @@ paths:
         name: file
         required: true
         type: file
-      - description: Business ID
-        in: formData
-        name: business_id
-        required: true
-        type: string
       - description: Invoice Number
         in: formData
         name: invoice_number
@@ -1563,14 +2005,14 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/firs_models.InvoiceRequest'
+          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
       produces:
       - application/json
       responses:
         "200":
           description: Invoice created successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.UploadInvoiceResponseDto'
         "400":
           description: Bad request
           schema:

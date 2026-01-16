@@ -1,10 +1,10 @@
 package auth
 
 import (
+	"einvoice-access-point/internal/dtos"
 	"einvoice-access-point/internal/services/auth"
 	"einvoice-access-point/pkg/database"
 	"einvoice-access-point/pkg/middleware"
-	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
 	"net/http"
 
@@ -23,15 +23,15 @@ type Controller struct {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param data body models.CreateUserRequestModel true "Login request payload"
-// @Success 200 {object} models.Response "Registered successfully"
+// @Param data body dtos.RegisterDto true "Register request payload"
+// @Success 200 {object} dtos.RegisterResponseDto "Registered successfully"
 // @Failure 400 {object} models.Response "Bad request, validation failed"
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 422 {object} models.Response "Unprocessable entity"
 // @Failure 500 {object} models.Response "Internal server error"
 // @Router /auth/register [post]
 func (base *Controller) Register(c *fiber.Ctx) error {
-	var req models.CreateUserRequestModel
+	var req dtos.RegisterDto
 
 	err := c.BodyParser(&req)
 	if err != nil {
@@ -67,15 +67,15 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param data body models.LoginRequestModel true "Login request payload"
-// @Success 200 {object} models.Response "Login successfully"
+// @Param data body dtos.LoginRequestDto true "Login request payload"
+// @Success 200 {object} dtos.LoginResponseDto "Login successfully"
 // @Failure 400 {object} models.Response "Bad request, validation failed"
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 422 {object} models.Response "Unprocessable entity"
 // @Failure 500 {object} models.Response "Internal server error"
 // @Router /auth/login [post]
 func (base *Controller) Login(c *fiber.Ctx) error {
-	var req models.LoginRequestModel
+	var req dtos.LoginRequestDto
 
 	err := c.BodyParser(&req)
 	if err != nil {
@@ -108,7 +108,7 @@ func (base *Controller) Login(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} models.Response "user logout successfully"
+// @Success 200 {object} dtos.BaseResponseDto "user logout successfully"
 // @Failure 400 {object} models.Response "Bad request, validation failed"
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 422 {object} models.Response "Unprocessable entity"
@@ -141,15 +141,15 @@ func (base *Controller) Logout(c *fiber.Ctx) error {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param data body models.InitiateForgotPassword true "Forgot password request payload"
-// @Success 200 {object} models.Response "forgot password initiated successfully"
+// @Param data body dtos.InitiateForgotPasswordDto true "Forgot password request payload"
+// @Success 200 {object} dtos.BaseResponseDto "forgot password initiated successfully"
 // @Failure 400 {object} models.Response "Bad request, validation failed"
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 422 {object} models.Response "Unprocessable entity"
 // @Failure 500 {object} models.Response "Internal server error"
 // @Router /auth/initiate-forgot-password [post]
 func (base *Controller) InitiateForgotPassword(c *fiber.Ctx) error {
-	var req models.InitiateForgotPassword
+	var req dtos.InitiateForgotPasswordDto
 	err := c.BodyParser(&req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
@@ -179,15 +179,15 @@ func (base *Controller) InitiateForgotPassword(c *fiber.Ctx) error {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param data body models.CompleteForgotPassword true "Complete forgot password request payload"
-// @Success 200 {object} models.Response "forgot password complete successfully"
+// @Param data body dtos.CompleteForgotPasswordDto true "Complete forgot password request payload"
+// @Success 200 {object} dtos.BaseResponseDto "forgot password complete successfully"
 // @Failure 400 {object} models.Response "Bad request, validation failed"
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 422 {object} models.Response "Unprocessable entity"
 // @Failure 500 {object} models.Response "Internal server error"
 // @Router /auth/complete-forgot-password [post]
 func (base *Controller) CompleteForgotPassword(c *fiber.Ctx) error {
-	var req models.CompleteForgotPassword
+	var req dtos.CompleteForgotPasswordDto
 	err := c.BodyParser(&req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)

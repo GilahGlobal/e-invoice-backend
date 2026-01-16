@@ -26,10 +26,10 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, validator *validator.Valida
 		webhookUrl.Post("/firs", invoiceController.FirsWebhook)
 	}
 	{
-		invoiceUrlSec.Get("/business/:business_id", invoiceController.GetAllInvoicesByBusinessID)
-		invoiceUrlSec.Get("/business/:business_id/:invoice_id", invoiceController.GetInvoiceDetails)
+		invoiceUrlSec.Get("", invoiceController.GetAllInvoices)
+		invoiceUrlSec.Get("/:invoice_id", invoiceController.GetInvoiceDetails)
 		invoiceUrlSec.Post("/create", invoiceController.CreateInvoice)
-		invoiceUrlSec.Delete("/business/:business_id/:invoice_id", invoiceController.DeleteInvoice)
+		invoiceUrlSec.Delete("/:invoice_id", invoiceController.DeleteInvoice)
 		invoiceUrlSec.Post("/upload", invoiceController.UploadInvoice)
 	}
 	{

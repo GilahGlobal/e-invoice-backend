@@ -76,18 +76,17 @@ func (base *Controller) DownloadInvoice(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param business_id path string true "Business ID" format(uuid)
-// @Success 200 {object} models.Response
+// @Success 200 {object} dtos.GetAllInvoicesResponseDto "invoices fetched successfully"
 // @Failure 400 {object} models.Response
-// @Router /invoice/business/{business_id} [get]
-func (base *Controller) GetAllInvoicesByBusinessID(c *fiber.Ctx) error {
-	businessID := c.Params("business_id")
-	if businessID == "" {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business_id is required", nil, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
+// @Router /invoice [get]
+func (base *Controller) GetAllInvoices(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
 
-	invoices, err := invoice.GetAllInvoicesByBusinessID(base.Db.Postgresql.DB(), businessID)
+	invoices, err := invoice.GetAllInvoicesByBusinessID(base.Db.Postgresql.DB(), userDetails.ID)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -104,21 +103,25 @@ func (base *Controller) GetAllInvoicesByBusinessID(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param business_id path string true "Business ID" format(uuid)
 // @Param invoice_id path string true "Invoice ID" format(uuid)
-// @Success 200 {object} models.Response
+// @Success 200 {object} dtos.GetInvoiceDetailsResponseDto "invoice details fetched successfully"
 // @Failure 400 {object} models.Response
-// @Router /invoice/business/{business_id}/{invoice_id} [get]
+// @Router /invoice/{invoice_id} [get]
 func (base *Controller) GetInvoiceDetails(c *fiber.Ctx) error {
-	businessID := c.Params("business_id")
 	invoiceID := c.Params("invoice_id")
 
-	if businessID == "" || invoiceID == "" {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business_id and invoice_id are required", nil, nil)
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	if invoiceID == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "invoice_id is required", nil, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	invoice, err := invoice.GetInvoiceDetails(base.Db.Postgresql.DB(), businessID, invoiceID)
+	invoice, err := invoice.GetInvoiceDetails(base.Db.Postgresql.DB(), userDetails.ID, invoiceID)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -136,17 +139,20 @@ func (base *Controller) GetInvoiceDetails(c *fiber.Ctx) error {
 // @Produce json
 // @Security BearerAuth
 // @Param file formData file true "Invoice JSON File"
-// @Param business_id formData string true "Business ID"
 // @Param invoice_number formData string true "Invoice Number"
 // @Success 200 {object} models.Response "Invoice created successfully"
 // @Failure 400 {object} models.Response "Bad request"
 // @Router /invoice/create [post]
 func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 
-	businessID := c.FormValue("business_id")
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
 	invoiceNumber := c.FormValue("invoice_number")
 
-	if businessID == "" || invoiceNumber == "" {
+	if invoiceNumber == "" {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business_id or invoice number is required", nil, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
@@ -170,7 +176,7 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	invoice, errDetails, err, _ := invoice.CreateInvoice(base.Db.Postgresql.DB(), payload, invoiceNumber, businessID, nil)
+	invoice, errDetails, err, _ := invoice.CreateInvoice(base.Db.Postgresql.DB(), payload, invoiceNumber, userDetails.ID, nil)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -187,21 +193,25 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 // @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Param business_id path string true "Business ID" format(uuid)
 // @Param invoice_id path string true "Invoice ID" format(uuid)
 // @Success 200 {object} models.Response
 // @Failure 400 {object} models.Response
-// @Router /invoice/business/{business_id}/{invoice_id} [delete]
+// @Router /invoice/{invoice_id} [delete]
 func (base *Controller) DeleteInvoice(c *fiber.Ctx) error {
-	businessID := c.Params("business_id")
 	invoiceID := c.Params("invoice_id")
 
-	if businessID == "" || invoiceID == "" {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business_id and invoice_id required", nil, nil)
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	if invoiceID == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "invoice_id is required", nil, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	if err := invoice.DeleteInvoice(base.Db.Postgresql.DB(), businessID, invoiceID); err != nil {
+	if err := invoice.DeleteInvoice(base.Db.Postgresql.DB(), userDetails.ID, invoiceID); err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
@@ -218,8 +228,8 @@ func (base *Controller) DeleteInvoice(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security
-// @Param   payload  body  firs_models.InvoiceRequest  true  "Invoice Payload"
-// @Success 200 {object} models.Response "Invoice created successfully"
+// @Param   payload  body  dtos.UploadInvoiceRequestDto  true  "Invoice Payload"
+// @Success 200 {object} dtos.UploadInvoiceResponseDto "Invoice created successfully"
 // @Failure 400 {object} models.Response "Bad request"
 // @Router /invoice/upload [post]
 func (base *Controller) UploadInvoice(c *fiber.Ctx) error {

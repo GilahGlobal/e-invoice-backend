@@ -2,6 +2,7 @@ package auth
 
 import (
 	"crypto/sha256"
+	"einvoice-access-point/internal/dtos"
 	authRepo "einvoice-access-point/internal/repository/auth"
 	userRepo "einvoice-access-point/internal/repository/business"
 	"einvoice-access-point/pkg/common"
@@ -23,7 +24,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func ValidateCreateUserRequest(req models.CreateUserRequestModel, db *gorm.DB) (models.CreateUserRequestModel, error) {
+func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.RegisterDto, error) {
 
 	pdb := inst.InitDB(db, true)
 	user := models.Business{}
@@ -47,7 +48,7 @@ func ValidateCreateUserRequest(req models.CreateUserRequestModel, db *gorm.DB) (
 	return req, nil
 }
 
-func CreateUser(req models.CreateUserRequestModel, db *gorm.DB) (fiber.Map, int, error) {
+func CreateUser(req dtos.RegisterDto, db *gorm.DB) (fiber.Map, int, error) {
 
 	pdb := inst.InitDB(db, true)
 
@@ -131,31 +132,30 @@ func CreateUser(req models.CreateUserRequestModel, db *gorm.DB) (fiber.Map, int,
 
 	return responseData, http.StatusCreated, nil
 }
-func LoginUser(req models.LoginRequestModel, db *gorm.DB) (fiber.Map, int, error) {
+func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (*dtos.LoginResponseDto, int, error) {
 
 	pdb := inst.InitDB(db, true)
 	var (
-		user         = models.Business{}
-		responseData fiber.Map
+		user = models.Business{}
 	)
 
 	exists := pdb.CheckExists(&user, "email = ?", req.Email)
 	if !exists {
-		return responseData, 400, fmt.Errorf("invalid credentials")
+		return nil, 400, fmt.Errorf("invalid credentials")
 	}
 
 	if !utility.CompareHash(req.Password, user.Password) {
-		return responseData, 400, fmt.Errorf("invalid credentials")
+		return nil, 400, fmt.Errorf("invalid credentials")
 	}
 
 	userData, err := userRepo.GetUserByEmail(pdb, req.Email)
 	if err != nil {
-		return responseData, http.StatusInternalServerError, fmt.Errorf("unable to fetch user " + err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("unable to fetch user " + err.Error())
 	}
 
 	tokenData, err := middleware.CreateToken(user)
 	if err != nil {
-		return responseData, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
 	}
 	tokens := map[string]string{
 		"access_token": tokenData.AccessToken,
@@ -167,22 +167,21 @@ func LoginUser(req models.LoginRequestModel, db *gorm.DB) (fiber.Map, int, error
 	err = authRepo.CreateAccessToken(&accessToken, pdb, tokens)
 
 	if err != nil {
-		return responseData, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
 	}
 
-	responseData = fiber.Map{
-
-		"user": map[string]interface{}{
-			"id":          userData.ID,
-			"email":       userData.Email,
-			"name":        userData.Name,
-			"business_id": userData.BusinessID,
-			"service_id":  userData.ServiceID,
+	responseData := dtos.LoginResponseDto{
+		Data: dtos.UserResponse{
+			ID:         userData.ID,
+			Email:      userData.Email,
+			Name:       userData.Name,
+			BusinessID: userData.BusinessID,
+			ServiceID:  userData.ServiceID,
 		},
-		"access_token": tokenData.AccessToken,
+		AccessToken: tokenData.AccessToken,
 	}
 
-	return responseData, http.StatusOK, nil
+	return &responseData, http.StatusOK, nil
 }
 
 func LogoutUser(accessUuid, ownerId string, db *gorm.DB) (fiber.Map, int, error) {
@@ -204,7 +203,7 @@ func LogoutUser(accessUuid, ownerId string, db *gorm.DB) (fiber.Map, int, error)
 	return responseData, http.StatusOK, nil
 }
 
-func InitiateForgotPassword(req models.InitiateForgotPassword, db *gorm.DB) error {
+func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) error {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
 	pdb := inst.InitDB(db, true)
@@ -234,7 +233,7 @@ func InitiateForgotPassword(req models.InitiateForgotPassword, db *gorm.DB) erro
 	return nil
 }
 
-func CompleteForgotPassword(req models.CompleteForgotPassword, db *gorm.DB) error {
+func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) error {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
 	pdb := inst.InitDB(db, true)
