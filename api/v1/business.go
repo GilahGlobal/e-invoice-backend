@@ -16,9 +16,8 @@ func BusinessRoute(app *fiber.App, ApiVersion string, validator *validator.Valid
 
 	businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(db.Postgresql.DB()))
 	{
-		businessUrlSec.Get("", businessController.GetAllBusiness)
-		businessUrlSec.Get("/:id", businessController.GetBusinessByID)
-		businessUrlSec.Patch("/business-id", businessController.UpdateBusinessID)
+		// businessUrlSec.Get("", businessController.GetAllBusiness)
+		businessUrlSec.Get("", businessController.GetBusiness)
 		businessUrlSec.Patch("", businessController.UpdateBusinessProfile)
 	}
 

@@ -76,16 +76,6 @@ func GetBusinessByID(db *gorm.DB, id string) (fiber.Map, error) {
 	return response, nil
 }
 
-func UpdateBusinessID(db *gorm.DB, id, businessID string) error {
-	pdb := inst.InitDB(db, true)
-
-	err := repository.UpdateNRSBusinessID(pdb, businessID, id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func GetBusinessDetails(db *gorm.DB, id string) (*models.Business, error) {
 	pdb := inst.InitDB(db, true)
 
@@ -117,6 +107,9 @@ func UpdateBusinessDetails(db *gorm.DB, business models.Business, payload dtos.U
 	}
 	if payload.CompanyName != nil {
 		updates["company_name"] = *payload.CompanyName
+	}
+	if payload.BusinessID != nil {
+		updates["business_id"] = *payload.BusinessID
 	}
 
 	_, err := pdb.UpdateFields(business, updates, business.ID)
