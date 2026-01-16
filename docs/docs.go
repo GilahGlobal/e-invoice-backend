@@ -307,7 +307,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve details of a specific business using its ID",
+                "description": "Retrieve details of a specific business",
                 "consumes": [
                     "application/json"
                 ],
@@ -317,7 +317,7 @@ const docTemplate = `{
                 "tags": [
                     "Business"
                 ],
-                "summary": "Get Business by ID",
+                "summary": "Get Business Details",
                 "responses": {
                     "200": {
                         "description": "Business retrieved successfully",
@@ -383,7 +383,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Business updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
                         }
                     },
                     "400": {
@@ -786,7 +786,7 @@ const docTemplate = `{
                 "tags": [
                     "Internal Invoice"
                 ],
-                "summary": "Get all invoices by business ID",
+                "summary": "Get all invoices",
                 "responses": {
                     "200": {
                         "description": "invoices fetched successfully",
@@ -1600,7 +1600,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns full invoice details by business ID and invoice ID",
+                "description": "Returns full invoice details by invoice ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -1642,7 +1642,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Deletes an invoice by business_id and invoice_id",
+                "description": "Deletes an invoice invoice_id",
                 "consumes": [
                     "application/json"
                 ],
@@ -1665,9 +1665,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Invoice deleted successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
                         }
                     },
                     "400": {
@@ -1821,10 +1821,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "charge_indicator": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -1876,10 +1878,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "irn": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "issue_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 }
             }
         },
@@ -2061,10 +2065,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "end_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "start_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 }
             }
         },
@@ -2080,35 +2086,43 @@ const docTemplate = `{
             ],
             "properties": {
                 "discount_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 2500
                 },
                 "discount_rate": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 5
                 },
                 "fee_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 450
                 },
                 "fee_rate": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 2
                 },
                 "hsn_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "1282.10"
                 },
                 "invoiced_quantity": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 10
                 },
                 "item": {
                     "$ref": "#/definitions/dtos.Item"
                 },
                 "line_extension_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "price": {
                     "$ref": "#/definitions/dtos.Price"
                 },
                 "product_category": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Electronics"
                 }
             }
         },
@@ -2136,13 +2150,16 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "A high-performance laptop suitable for gaming and work."
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Laptop"
                 },
                 "sellers_item_identification": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "LAP-12345"
                 }
             }
         },
@@ -2156,16 +2173,20 @@ const docTemplate = `{
             ],
             "properties": {
                 "line_extension_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "payable_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1700.75
                 },
                 "tax_exclusive_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "tax_inclusive_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1700.75
                 }
             }
         },
@@ -2251,24 +2272,29 @@ const docTemplate = `{
             "properties": {
                 "business_description": {
                     "type": "string",
-                    "minLength": 5
+                    "minLength": 5,
+                    "example": "Acme Inc. is a leading technology company."
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "business@example.com"
                 },
                 "party_name": {
                     "type": "string",
-                    "minLength": 2
+                    "minLength": 2,
+                    "example": "Acme Inc."
                 },
                 "postal_address": {
                     "$ref": "#/definitions/dtos.PostalAddress"
                 },
                 "telephone": {
                     "type": "string",
-                    "minLength": 7
+                    "minLength": 7,
+                    "example": "+234804567890"
                 },
                 "tin": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123456789012345"
                 }
             }
         },
@@ -2280,10 +2306,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "payment_due_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "payment_means_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10"
                 }
             }
         },
@@ -2304,19 +2332,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "city_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Ikeja"
                 },
                 "country": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Nigeria"
                 },
                 "country_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "NG"
                 },
                 "postal_zone": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10001"
                 },
                 "street_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123 Broad Street"
                 }
             }
         },
@@ -2329,13 +2362,16 @@ const docTemplate = `{
             ],
             "properties": {
                 "base_quantity": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "price_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 5000
                 },
                 "price_unit": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "NGN per 1"
                 }
             }
         },
@@ -2436,10 +2472,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "VAT"
                 },
                 "percent": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 15
                 }
             }
         },
@@ -2452,13 +2490,15 @@ const docTemplate = `{
             ],
             "properties": {
                 "tax_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "tax_category": {
                     "$ref": "#/definitions/dtos.TaxCategory"
                 },
                 "taxable_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 }
             }
         },
@@ -2469,7 +2509,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "tax_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "tax_subtotal": {
                     "type": "array",
@@ -2527,7 +2568,8 @@ const docTemplate = `{
                     }
                 },
                 "accounting_cost": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2000"
                 },
                 "accounting_customer_party": {
                     "$ref": "#/definitions/dtos.Party"
@@ -2536,7 +2578,8 @@ const docTemplate = `{
                     "$ref": "#/definitions/dtos.Party"
                 },
                 "actual_delivery_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "allowance_charge": {
                     "type": "array",
@@ -2551,10 +2594,12 @@ const docTemplate = `{
                     }
                 },
                 "business_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "buyer_reference": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "contract_document_reference": {
                     "$ref": "#/definitions/dtos.DocumentReference"
@@ -2563,10 +2608,12 @@ const docTemplate = `{
                     "$ref": "#/definitions/dtos.DocumentReference"
                 },
                 "document_currency_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "NGN"
                 },
                 "due_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-20"
                 },
                 "invoice_delivery_period": {
                     "$ref": "#/definitions/dtos.InvoiceDeliveryPeriod"
@@ -2579,28 +2626,35 @@ const docTemplate = `{
                 },
                 "invoice_number": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "INV-001"
                 },
                 "invoice_type_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "381"
                 },
                 "irn": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "IRN-001-20122345"
                 },
                 "issue_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "issue_time": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12:00:00"
                 },
                 "legal_monetary_total": {
                     "$ref": "#/definitions/dtos.LegalMonetaryTotal"
                 },
                 "note": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Invoice note"
                 },
                 "order_reference": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "originator_document_reference": {
                     "$ref": "#/definitions/dtos.DocumentReference"
@@ -2620,19 +2674,23 @@ const docTemplate = `{
                         "PENDING",
                         "PAID",
                         "REJECTED"
-                    ]
+                    ],
+                    "example": "PENDING"
                 },
                 "payment_terms_note": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Payment terms note"
                 },
                 "receipt_document_reference": {
                     "$ref": "#/definitions/dtos.DocumentReference"
                 },
                 "tax_currency_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "NGN"
                 },
                 "tax_point_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "tax_representative_party": {
                     "$ref": "#/definitions/dtos.Party"
@@ -2703,10 +2761,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "charge_indicator": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -2718,10 +2778,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "irn": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "issue_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 }
             }
         },
@@ -2827,10 +2889,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "end_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "start_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 }
             }
         },
@@ -2846,35 +2910,43 @@ const docTemplate = `{
             ],
             "properties": {
                 "discount_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 2500
                 },
                 "discount_rate": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 5
                 },
                 "fee_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 450
                 },
                 "fee_rate": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 2
                 },
                 "hsn_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "1282.10"
                 },
                 "invoiced_quantity": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 10
                 },
                 "item": {
                     "$ref": "#/definitions/firs_models.Item"
                 },
                 "line_extension_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "price": {
                     "$ref": "#/definitions/firs_models.Price"
                 },
                 "product_category": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Electronics"
                 }
             }
         },
@@ -2898,7 +2970,8 @@ const docTemplate = `{
                     }
                 },
                 "accounting_cost": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2000"
                 },
                 "accounting_customer_party": {
                     "$ref": "#/definitions/firs_models.Party"
@@ -2907,7 +2980,8 @@ const docTemplate = `{
                     "$ref": "#/definitions/firs_models.Party"
                 },
                 "actual_delivery_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "allowance_charge": {
                     "type": "array",
@@ -2922,10 +2996,12 @@ const docTemplate = `{
                     }
                 },
                 "business_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "buyer_reference": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "contract_document_reference": {
                     "$ref": "#/definitions/firs_models.DocumentReference"
@@ -2934,10 +3010,12 @@ const docTemplate = `{
                     "$ref": "#/definitions/firs_models.DocumentReference"
                 },
                 "document_currency_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "NGN"
                 },
                 "due_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-20"
                 },
                 "invoice_delivery_period": {
                     "$ref": "#/definitions/firs_models.InvoiceDeliveryPeriod"
@@ -2950,28 +3028,35 @@ const docTemplate = `{
                 },
                 "invoice_number": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "INV-001"
                 },
                 "invoice_type_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "381"
                 },
                 "irn": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "IRN-001-20122345"
                 },
                 "issue_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "issue_time": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12:00:00"
                 },
                 "legal_monetary_total": {
                     "$ref": "#/definitions/firs_models.LegalMonetaryTotal"
                 },
                 "note": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Invoice note"
                 },
                 "order_reference": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "originator_document_reference": {
                     "$ref": "#/definitions/firs_models.DocumentReference"
@@ -2991,19 +3076,23 @@ const docTemplate = `{
                         "PENDING",
                         "PAID",
                         "REJECTED"
-                    ]
+                    ],
+                    "example": "PENDING"
                 },
                 "payment_terms_note": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Payment terms note"
                 },
                 "receipt_document_reference": {
                     "$ref": "#/definitions/firs_models.DocumentReference"
                 },
                 "tax_currency_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "NGN"
                 },
                 "tax_point_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "tax_representative_party": {
                     "$ref": "#/definitions/firs_models.Party"
@@ -3023,13 +3112,16 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "A high-performance laptop suitable for gaming and work."
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Laptop"
                 },
                 "sellers_item_identification": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "LAP-12345"
                 }
             }
         },
@@ -3043,16 +3135,20 @@ const docTemplate = `{
             ],
             "properties": {
                 "line_extension_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "payable_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1700.75
                 },
                 "tax_exclusive_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "tax_inclusive_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1700.75
                 }
             }
         },
@@ -3067,24 +3163,29 @@ const docTemplate = `{
             "properties": {
                 "business_description": {
                     "type": "string",
-                    "minLength": 5
+                    "minLength": 5,
+                    "example": "Acme Inc. is a leading technology company."
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "business@example.com"
                 },
                 "party_name": {
                     "type": "string",
-                    "minLength": 2
+                    "minLength": 2,
+                    "example": "Acme Inc."
                 },
                 "postal_address": {
                     "$ref": "#/definitions/firs_models.PostalAddress"
                 },
                 "telephone": {
                     "type": "string",
-                    "minLength": 7
+                    "minLength": 7,
+                    "example": "+234804567890"
                 },
                 "tin": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123456789012345"
                 }
             }
         },
@@ -3096,10 +3197,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "payment_due_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "payment_means_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10"
                 }
             }
         },
@@ -3114,19 +3217,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "city_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Ikeja"
                 },
                 "country": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Nigeria"
                 },
                 "country_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "NG"
                 },
                 "postal_zone": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10001"
                 },
                 "street_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123 Broad Street"
                 }
             }
         },
@@ -3139,13 +3247,16 @@ const docTemplate = `{
             ],
             "properties": {
                 "base_quantity": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "price_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 5000
                 },
                 "price_unit": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "NGN per 1"
                 }
             }
         },
@@ -3157,10 +3268,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "VAT"
                 },
                 "percent": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 15
                 }
             }
         },
@@ -3173,13 +3286,15 @@ const docTemplate = `{
             ],
             "properties": {
                 "tax_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "tax_category": {
                     "$ref": "#/definitions/firs_models.TaxCategory"
                 },
                 "taxable_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 }
             }
         },
@@ -3190,7 +3305,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "tax_amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 1500.75
                 },
                 "tax_subtotal": {
                     "type": "array",

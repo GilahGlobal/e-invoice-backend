@@ -21,8 +21,10 @@ definitions:
   dtos.AllowanceCharge:
     properties:
       amount:
+        example: 1500.75
         type: number
       charge_indicator:
+        example: true
         type: boolean
     required:
     - amount
@@ -59,8 +61,10 @@ definitions:
   dtos.DocumentReference:
     properties:
       irn:
+        example: ITW001-E9E0C0D3-20240619
         type: string
       issue_date:
+        example: "2026-01-16"
         type: string
     required:
     - irn
@@ -190,8 +194,10 @@ definitions:
   dtos.InvoiceDeliveryPeriod:
     properties:
       end_date:
+        example: "2026-01-16"
         type: string
       start_date:
+        example: "2026-01-16"
         type: string
     required:
     - end_date
@@ -200,25 +206,33 @@ definitions:
   dtos.InvoiceLine:
     properties:
       discount_amount:
+        example: 2500
         type: number
       discount_rate:
+        example: 5
         type: number
       fee_amount:
+        example: 450
         type: number
       fee_rate:
+        example: 2
         type: number
       hsn_code:
+        example: "1282.10"
         type: string
       invoiced_quantity:
+        example: 10
         minimum: 1
         type: integer
       item:
         $ref: '#/definitions/dtos.Item'
       line_extension_amount:
+        example: 1500.75
         type: number
       price:
         $ref: '#/definitions/dtos.Price'
       product_category:
+        example: Electronics
         type: string
     required:
     - hsn_code
@@ -243,10 +257,13 @@ definitions:
   dtos.Item:
     properties:
       description:
+        example: A high-performance laptop suitable for gaming and work.
         type: string
       name:
+        example: Laptop
         type: string
       sellers_item_identification:
+        example: LAP-12345
         type: string
     required:
     - name
@@ -254,12 +271,16 @@ definitions:
   dtos.LegalMonetaryTotal:
     properties:
       line_extension_amount:
+        example: 1500.75
         type: number
       payable_amount:
+        example: 1700.75
         type: number
       tax_exclusive_amount:
+        example: 1500.75
         type: number
       tax_inclusive_amount:
+        example: 1700.75
         type: number
     required:
     - line_extension_amount
@@ -320,19 +341,24 @@ definitions:
   dtos.Party:
     properties:
       business_description:
+        example: Acme Inc. is a leading technology company.
         minLength: 5
         type: string
       email:
+        example: business@example.com
         type: string
       party_name:
+        example: Acme Inc.
         minLength: 2
         type: string
       postal_address:
         $ref: '#/definitions/dtos.PostalAddress'
       telephone:
+        example: "+234804567890"
         minLength: 7
         type: string
       tin:
+        example: "123456789012345"
         type: string
     required:
     - email
@@ -343,8 +369,10 @@ definitions:
   dtos.PaymentMeans:
     properties:
       payment_due_date:
+        example: "2026-01-16"
         type: string
       payment_means_code:
+        example: "10"
         type: string
     required:
     - payment_due_date
@@ -357,14 +385,19 @@ definitions:
   dtos.PostalAddress:
     properties:
       city_name:
+        example: Ikeja
         type: string
       country:
+        example: Nigeria
         type: string
       country_code:
+        example: NG
         type: string
       postal_zone:
+        example: "10001"
         type: string
       street_name:
+        example: 123 Broad Street
         type: string
     required:
     - city_name
@@ -376,10 +409,13 @@ definitions:
   dtos.Price:
     properties:
       base_quantity:
+        example: 1
         type: integer
       price_amount:
+        example: 5000
         type: number
       price_unit:
+        example: NGN per 1
         type: string
     required:
     - base_quantity
@@ -455,8 +491,10 @@ definitions:
   dtos.TaxCategory:
     properties:
       id:
+        example: VAT
         type: string
       percent:
+        example: 15
         type: number
     required:
     - id
@@ -465,10 +503,12 @@ definitions:
   dtos.TaxSubtotal:
     properties:
       tax_amount:
+        example: 1500.75
         type: number
       tax_category:
         $ref: '#/definitions/dtos.TaxCategory'
       taxable_amount:
+        example: 1500.75
         type: number
     required:
     - tax_amount
@@ -478,6 +518,7 @@ definitions:
   dtos.TaxTotal:
     properties:
       tax_amount:
+        example: 1500.75
         type: number
       tax_subtotal:
         items:
@@ -514,12 +555,14 @@ definitions:
           $ref: '#/definitions/dtos.DocumentReference'
         type: array
       accounting_cost:
+        example: "2000"
         type: string
       accounting_customer_party:
         $ref: '#/definitions/dtos.Party'
       accounting_supplier_party:
         $ref: '#/definitions/dtos.Party'
       actual_delivery_date:
+        example: "2026-01-16"
         type: string
       allowance_charge:
         items:
@@ -530,16 +573,20 @@ definitions:
           $ref: '#/definitions/dtos.DocumentReference'
         type: array
       business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
         type: string
       buyer_reference:
+        example: ITW001-E9E0C0D3-20240619
         type: string
       contract_document_reference:
         $ref: '#/definitions/dtos.DocumentReference'
       dispatch_document_reference:
         $ref: '#/definitions/dtos.DocumentReference'
       document_currency_code:
+        example: NGN
         type: string
       due_date:
+        example: "2026-01-20"
         type: string
       invoice_delivery_period:
         $ref: '#/definitions/dtos.InvoiceDeliveryPeriod'
@@ -548,21 +595,28 @@ definitions:
           $ref: '#/definitions/dtos.InvoiceLine'
         type: array
       invoice_number:
+        example: INV-001
         minLength: 1
         type: string
       invoice_type_code:
+        example: "381"
         type: string
       irn:
+        example: IRN-001-20122345
         type: string
       issue_date:
+        example: "2026-01-16"
         type: string
       issue_time:
+        example: "12:00:00"
         type: string
       legal_monetary_total:
         $ref: '#/definitions/dtos.LegalMonetaryTotal'
       note:
+        example: Invoice note
         type: string
       order_reference:
+        example: ITW001-E9E0C0D3-20240619
         type: string
       originator_document_reference:
         $ref: '#/definitions/dtos.DocumentReference'
@@ -577,14 +631,18 @@ definitions:
         - PENDING
         - PAID
         - REJECTED
+        example: PENDING
         type: string
       payment_terms_note:
+        example: Payment terms note
         type: string
       receipt_document_reference:
         $ref: '#/definitions/dtos.DocumentReference'
       tax_currency_code:
+        example: NGN
         type: string
       tax_point_date:
+        example: "2026-01-16"
         type: string
       tax_representative_party:
         $ref: '#/definitions/dtos.Party'
@@ -641,8 +699,10 @@ definitions:
   firs_models.AllowanceCharge:
     properties:
       amount:
+        example: 1500.75
         type: number
       charge_indicator:
+        example: true
         type: boolean
     required:
     - amount
@@ -650,8 +710,10 @@ definitions:
   firs_models.DocumentReference:
     properties:
       irn:
+        example: ITW001-E9E0C0D3-20240619
         type: string
       issue_date:
+        example: "2026-01-16"
         type: string
     required:
     - irn
@@ -722,8 +784,10 @@ definitions:
   firs_models.InvoiceDeliveryPeriod:
     properties:
       end_date:
+        example: "2026-01-16"
         type: string
       start_date:
+        example: "2026-01-16"
         type: string
     required:
     - end_date
@@ -732,25 +796,33 @@ definitions:
   firs_models.InvoiceLine:
     properties:
       discount_amount:
+        example: 2500
         type: number
       discount_rate:
+        example: 5
         type: number
       fee_amount:
+        example: 450
         type: number
       fee_rate:
+        example: 2
         type: number
       hsn_code:
+        example: "1282.10"
         type: string
       invoiced_quantity:
+        example: 10
         minimum: 1
         type: integer
       item:
         $ref: '#/definitions/firs_models.Item'
       line_extension_amount:
+        example: 1500.75
         type: number
       price:
         $ref: '#/definitions/firs_models.Price'
       product_category:
+        example: Electronics
         type: string
     required:
     - hsn_code
@@ -767,12 +839,14 @@ definitions:
           $ref: '#/definitions/firs_models.DocumentReference'
         type: array
       accounting_cost:
+        example: "2000"
         type: string
       accounting_customer_party:
         $ref: '#/definitions/firs_models.Party'
       accounting_supplier_party:
         $ref: '#/definitions/firs_models.Party'
       actual_delivery_date:
+        example: "2026-01-16"
         type: string
       allowance_charge:
         items:
@@ -783,16 +857,20 @@ definitions:
           $ref: '#/definitions/firs_models.DocumentReference'
         type: array
       business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
         type: string
       buyer_reference:
+        example: ITW001-E9E0C0D3-20240619
         type: string
       contract_document_reference:
         $ref: '#/definitions/firs_models.DocumentReference'
       dispatch_document_reference:
         $ref: '#/definitions/firs_models.DocumentReference'
       document_currency_code:
+        example: NGN
         type: string
       due_date:
+        example: "2026-01-20"
         type: string
       invoice_delivery_period:
         $ref: '#/definitions/firs_models.InvoiceDeliveryPeriod'
@@ -801,21 +879,28 @@ definitions:
           $ref: '#/definitions/firs_models.InvoiceLine'
         type: array
       invoice_number:
+        example: INV-001
         minLength: 1
         type: string
       invoice_type_code:
+        example: "381"
         type: string
       irn:
+        example: IRN-001-20122345
         type: string
       issue_date:
+        example: "2026-01-16"
         type: string
       issue_time:
+        example: "12:00:00"
         type: string
       legal_monetary_total:
         $ref: '#/definitions/firs_models.LegalMonetaryTotal'
       note:
+        example: Invoice note
         type: string
       order_reference:
+        example: ITW001-E9E0C0D3-20240619
         type: string
       originator_document_reference:
         $ref: '#/definitions/firs_models.DocumentReference'
@@ -830,14 +915,18 @@ definitions:
         - PENDING
         - PAID
         - REJECTED
+        example: PENDING
         type: string
       payment_terms_note:
+        example: Payment terms note
         type: string
       receipt_document_reference:
         $ref: '#/definitions/firs_models.DocumentReference'
       tax_currency_code:
+        example: NGN
         type: string
       tax_point_date:
+        example: "2026-01-16"
         type: string
       tax_representative_party:
         $ref: '#/definitions/firs_models.Party'
@@ -858,10 +947,13 @@ definitions:
   firs_models.Item:
     properties:
       description:
+        example: A high-performance laptop suitable for gaming and work.
         type: string
       name:
+        example: Laptop
         type: string
       sellers_item_identification:
+        example: LAP-12345
         type: string
     required:
     - name
@@ -869,12 +961,16 @@ definitions:
   firs_models.LegalMonetaryTotal:
     properties:
       line_extension_amount:
+        example: 1500.75
         type: number
       payable_amount:
+        example: 1700.75
         type: number
       tax_exclusive_amount:
+        example: 1500.75
         type: number
       tax_inclusive_amount:
+        example: 1700.75
         type: number
     required:
     - line_extension_amount
@@ -885,19 +981,24 @@ definitions:
   firs_models.Party:
     properties:
       business_description:
+        example: Acme Inc. is a leading technology company.
         minLength: 5
         type: string
       email:
+        example: business@example.com
         type: string
       party_name:
+        example: Acme Inc.
         minLength: 2
         type: string
       postal_address:
         $ref: '#/definitions/firs_models.PostalAddress'
       telephone:
+        example: "+234804567890"
         minLength: 7
         type: string
       tin:
+        example: "123456789012345"
         type: string
     required:
     - email
@@ -908,8 +1009,10 @@ definitions:
   firs_models.PaymentMeans:
     properties:
       payment_due_date:
+        example: "2026-01-16"
         type: string
       payment_means_code:
+        example: "10"
         type: string
     required:
     - payment_due_date
@@ -918,14 +1021,19 @@ definitions:
   firs_models.PostalAddress:
     properties:
       city_name:
+        example: Ikeja
         type: string
       country:
+        example: Nigeria
         type: string
       country_code:
+        example: NG
         type: string
       postal_zone:
+        example: "10001"
         type: string
       street_name:
+        example: 123 Broad Street
         type: string
     required:
     - city_name
@@ -937,10 +1045,13 @@ definitions:
   firs_models.Price:
     properties:
       base_quantity:
+        example: 1
         type: integer
       price_amount:
+        example: 5000
         type: number
       price_unit:
+        example: NGN per 1
         type: string
     required:
     - base_quantity
@@ -950,8 +1061,10 @@ definitions:
   firs_models.TaxCategory:
     properties:
       id:
+        example: VAT
         type: string
       percent:
+        example: 15
         type: number
     required:
     - id
@@ -960,10 +1073,12 @@ definitions:
   firs_models.TaxSubtotal:
     properties:
       tax_amount:
+        example: 1500.75
         type: number
       tax_category:
         $ref: '#/definitions/firs_models.TaxCategory'
       taxable_amount:
+        example: 1500.75
         type: number
     required:
     - tax_amount
@@ -973,6 +1088,7 @@ definitions:
   firs_models.TaxTotal:
     properties:
       tax_amount:
+        example: 1500.75
         type: number
       tax_subtotal:
         items:
@@ -1217,7 +1333,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve details of a specific business using its ID
+      description: Retrieve details of a specific business
       produces:
       - application/json
       responses:
@@ -1243,7 +1359,7 @@ paths:
             $ref: '#/definitions/models.Response'
       security:
       - BearerAuth: []
-      summary: Get Business by ID
+      summary: Get Business Details
       tags:
       - Business
     patch:
@@ -1263,7 +1379,7 @@ paths:
         "200":
           description: Business updated successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.BaseResponseDto'
         "400":
           description: Bad request
           schema:
@@ -1530,14 +1646,14 @@ paths:
             $ref: '#/definitions/models.Response'
       security:
       - BearerAuth: []
-      summary: Get all invoices by business ID
+      summary: Get all invoices
       tags:
       - Internal Invoice
   /invoice/{invoice_id}:
     delete:
       consumes:
       - application/json
-      description: Deletes an invoice by business_id and invoice_id
+      description: Deletes an invoice invoice_id
       parameters:
       - description: Invoice ID
         format: uuid
@@ -1549,9 +1665,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Invoice deleted successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/dtos.BaseResponseDto'
         "400":
           description: Bad Request
           schema:
@@ -1564,7 +1680,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Returns full invoice details by business ID and invoice ID
+      description: Returns full invoice details by invoice ID
       parameters:
       - description: Invoice ID
         format: uuid

@@ -40,8 +40,8 @@ func (base *Controller) GetAllBusiness(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// @Summary      Get Business by ID
-// @Description  Retrieve details of a specific business using its ID
+// @Summary      Get Business Details
+// @Description  Retrieve details of a specific business
 // @Tags         Business
 // @Accept       json
 // @Produce      json
@@ -76,7 +76,7 @@ func (base *Controller) GetBusiness(c *fiber.Ctx) error {
 // @Produce      json
 // @Security BearerAuth
 // @Param data body dtos.UpdateBusinessDto true "Update business details request payload"
-// @Success      200 {object} models.Response "Business updated successfully"
+// @Success      200 {object} dtos.BaseResponseDto "Business updated successfully"
 // @Failure      400 {object} models.Response "Bad request"
 // @Failure      401 {object} models.Response "Unauthorized"
 // @Failure      404 {object} models.Response "Business not found"

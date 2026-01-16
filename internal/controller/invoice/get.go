@@ -69,8 +69,8 @@ func (base *Controller) DownloadInvoice(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// GetAllInvoicesByBusinessID godoc
-// @Summary Get all invoices by business ID
+// GetAllInvoices godoc
+// @Summary Get all invoices
 // @Description Returns a list of invoices with minimal details for a business
 // @Tags Internal Invoice
 // @Accept json
@@ -98,7 +98,7 @@ func (base *Controller) GetAllInvoices(c *fiber.Ctx) error {
 
 // GetInvoiceDetails godoc
 // @Summary Get one invoice details
-// @Description Returns full invoice details by business ID and invoice ID
+// @Description Returns full invoice details by invoice ID
 // @Tags Internal Invoice
 // @Accept json
 // @Produce json
@@ -188,13 +188,13 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 
 // DeleteInvoice godoc
 // @Summary Delete Invoice
-// @Description Deletes an invoice by business_id and invoice_id
+// @Description Deletes an invoice invoice_id
 // @Tags Internal Invoice
 // @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param invoice_id path string true "Invoice ID" format(uuid)
-// @Success 200 {object} models.Response
+// @Success 200 {object} dtos.BaseResponseDto "Invoice deleted successfully"
 // @Failure 400 {object} models.Response
 // @Router /invoice/{invoice_id} [delete]
 func (base *Controller) DeleteInvoice(c *fiber.Ctx) error {
