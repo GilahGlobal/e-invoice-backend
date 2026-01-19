@@ -100,11 +100,13 @@ func (es *EncryptedString) AfterFind(tx *gorm.DB) error {
 	if es == nil || *es == "" {
 		return nil
 	}
-	dec, err := DecryptAES(string(*es))
-	if err != nil {
-		return err
-	}
-	*es = EncryptedString(dec)
+	// DOn't forget to decrypt after find
+
+	// dec, err := DecryptAES(string(*es))
+	// if err != nil {
+	// 	return err
+	// }
+	// *es = EncryptedString(dec)
 	return nil
 }
 
