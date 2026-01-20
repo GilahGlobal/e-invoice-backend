@@ -17,7 +17,7 @@ import (
 // @Security BearerAuth
 // @Param irn path string true "Invoice Reference Number (IRN)"
 // @Param request body firs_models.UpdateInvoice true "Update Invoice Request"
-// @Success 200 {object} models.Response "Invoice updated successfully"
+// @Success 200 {object} dtos.BaseResponseDto "Invoice updated successfully"
 // @Failure 400 {object} models.Response "Bad request"
 // @Failure 422 {object} models.Response "Validation failed"
 // @Router /invoice/update/{irn} [patch]

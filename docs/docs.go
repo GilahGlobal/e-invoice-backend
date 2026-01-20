@@ -1432,7 +1432,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
                         }
                     },
                     "400": {
