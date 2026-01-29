@@ -6,6 +6,10 @@ import (
 	"crypto/rsa"
 	"einvoice-access-point/external/firs"
 	"einvoice-access-point/external/firs_models"
+	"einvoice-access-point/internal/dtos"
+	repository "einvoice-access-point/internal/repository/invoice"
+	inst "einvoice-access-point/pkg/dbinit"
+	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
 	"encoding/base64"
 	"encoding/json"
@@ -16,6 +20,7 @@ import (
 	"time"
 
 	qrcode "github.com/skip2/go-qrcode"
+	"gorm.io/gorm"
 )
 
 func PrepareIRN(irn string) string {
@@ -56,7 +61,7 @@ func ValidateIRN(invoiceReq firs_models.IRNValidationRequest) (*firs_models.Firs
 	return theResp, nil, nil
 }
 
-func ValidateInvoice(invoiceReq firs_models.InvoiceRequest) (*firs_models.FirsResponse, *string, error) {
+func ValidateInvoice(invoiceReq dtos.UploadInvoiceRequestDto) (*firs_models.FirsResponse, *string, error) {
 
 	resp, err := firs.ValidateInvoice(invoiceReq)
 	if err != nil {
@@ -114,7 +119,7 @@ func SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IRNSigningRespo
 	return theResp, nil
 }
 
-func SignInvoice(invoiceReq firs_models.InvoiceRequest) (*firs_models.FirsResponse, *string, error) {
+func SignInvoice(invoiceReq dtos.UploadInvoiceRequestDto) (*firs_models.FirsResponse, *string, error) {
 
 	resp, err := firs.SignInvoice(invoiceReq)
 	if err != nil {
@@ -137,4 +142,55 @@ func GenerateIRN(invoiceNumber, serviceId string) (*string, error) {
 		return nil, err
 	}
 	return &irn, nil
+}
+
+func AddBulkUploadLog(db *gorm.DB, fileUrl, fileKey string) error {
+	pdb := inst.InitDB(db, true)
+
+	payload := &models.BulkUpload{
+		ID:      utility.GenerateUUID(),
+		FileURL: fileUrl,
+		FileKey: fileKey,
+	}
+
+	if err := repository.CreateBulkUploadLog(pdb, payload); err != nil {
+		errDetails := "failed to save bulk upload log"
+		return fmt.Errorf("%s: %w", errDetails, err)
+	}
+	return nil
+}
+
+func UpdateBulkUploadLog(db *gorm.DB, fileKey string, payload interface{}) error {
+	pdb := inst.InitDB(db, true)
+
+	repositoryLog, err := repository.GetBulkUploadLogByFileKey(pdb, fileKey)
+	if err != nil {
+		errDetails := "failed to retrieve bulk upload log"
+		return fmt.Errorf("%s: %w", errDetails, err)
+	}
+	if repositoryLog == nil {
+		errDetails := "bulk upload log not found"
+		return fmt.Errorf("%s for file key: %s", errDetails, fileKey)
+	}
+
+	data, ok := payload.(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("invalid payload type")
+	}
+
+	repositoryLog.TotalRecords = data["TotalRows"].(int)
+	repositoryLog.ValidRecords = data["ValidRows"].(int)
+	repositoryLog.SuccessfulInvoices = data["SuccessfulInvoices"].(int)
+	repositoryLog.UnsuccessfulInvoices = data["UnsuccessfulInvoices"].(int)
+	repositoryLog.Duration = data["Duration"].(time.Duration)
+	repositoryLog.StartedAt = data["StartTime"].(*time.Time)
+	repositoryLog.CompletedAt = data["EndTime"].(*time.Time)
+	repositoryLog.Status = "completed"
+
+	if err := repository.UpdateBulkUploadLog(pdb, fileKey, repositoryLog); err != nil {
+
+		errDetails := "failed to update bulk upload log"
+		return fmt.Errorf("%s: %w", errDetails, err)
+	}
+	return nil
 }

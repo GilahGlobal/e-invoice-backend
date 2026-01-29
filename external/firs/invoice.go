@@ -2,6 +2,7 @@ package firs
 
 import (
 	"einvoice-access-point/external/firs_models"
+	"einvoice-access-point/internal/dtos"
 	"einvoice-access-point/pkg/config"
 	"einvoice-access-point/pkg/utility"
 	"fmt"
@@ -28,7 +29,7 @@ func ValidateIRN(invoiceReq firs_models.IRNValidationRequest) (*utility.Response
 	return utility.PostRequest(utility.DefaultHTTPClient, config, theResp)
 }
 
-func ValidateInvoice(req firs_models.InvoiceRequest) (*utility.Response, error) {
+func ValidateInvoice(req dtos.UploadInvoiceRequestDto) (*utility.Response, error) {
 
 	var (
 		configs = config.GetConfig()
@@ -49,7 +50,7 @@ func ValidateInvoice(req firs_models.InvoiceRequest) (*utility.Response, error) 
 	return utility.PostRequest(utility.DefaultHTTPClient, config, theResp)
 }
 
-func SignInvoice(req firs_models.InvoiceRequest) (*utility.Response, error) {
+func SignInvoice(req dtos.UploadInvoiceRequestDto) (*utility.Response, error) {
 
 	var (
 		configs = config.GetConfig()

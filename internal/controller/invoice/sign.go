@@ -2,6 +2,7 @@ package invoice
 
 import (
 	"einvoice-access-point/external/firs_models"
+	"einvoice-access-point/internal/dtos"
 	"einvoice-access-point/internal/services/invoice"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/utility"
@@ -54,13 +55,13 @@ func (base *Controller) SignIRN(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body firs_models.InvoiceRequest true "Invoice Request"
+// @Param request body dtos.UploadInvoiceRequestDto true "Invoice Request"
 // @Success 201 {object} models.Response "Invoice signed successfully"
 // @Failure 400 {object} models.Response "Bad request"
 // @Failure 422 {object} models.Response "Validation failed"
 // @Router /invoice/sign [post]
 func (base *Controller) SignInvoice(c *fiber.Ctx) error {
-	var req firs_models.InvoiceRequest
+	var req dtos.UploadInvoiceRequestDto
 
 	err := c.BodyParser(&req)
 	if err != nil {

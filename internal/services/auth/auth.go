@@ -132,7 +132,7 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (fiber.Map, int, error) {
 
 	return responseData, http.StatusCreated, nil
 }
-func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (*dtos.LoginResponseDto, int, error) {
+func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, int, error) {
 
 	pdb := inst.InitDB(db, true)
 	var (
@@ -170,18 +170,18 @@ func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (*dtos.LoginResponseDto, i
 		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
 	}
 
-	responseData := dtos.LoginResponseDto{
-		Data: dtos.UserResponse{
+	responseData := map[string]interface{}{
+		"data": dtos.UserResponse{
 			ID:         userData.ID,
 			Email:      userData.Email,
 			Name:       userData.Name,
 			BusinessID: userData.BusinessID,
 			ServiceID:  userData.ServiceID,
 		},
-		AccessToken: tokenData.AccessToken,
+		"access_token": tokenData.AccessToken,
 	}
 
-	return &responseData, http.StatusOK, nil
+	return responseData, http.StatusOK, nil
 }
 
 func LogoutUser(accessUuid, ownerId string, db *gorm.DB) (fiber.Map, int, error) {

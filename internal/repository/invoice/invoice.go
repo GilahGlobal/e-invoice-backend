@@ -149,3 +149,25 @@ func UpdateInvoice(db database.DatabaseManager, invoiceNumber string, invoiceDat
 	result := db.DB().Model(&models.Invoice{}).Where("invoice_number = ?", invoiceNumber).Update("invoice_data", invoiceData)
 	return result.Error
 }
+
+func CreateBulkUploadLog(db database.DatabaseManager, payload *models.BulkUpload) error {
+	return db.DB().Create(payload).Error
+}
+
+func GetBulkUploadLogByFileKey(db database.DatabaseManager, fileKey string) (*models.BulkUpload, error) {
+	var bulkUpload models.BulkUpload
+	err := db.DB().Where("file_key = ?", fileKey).First(&bulkUpload).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &bulkUpload, nil
+}
+
+func UpdateBulkUploadLog(db database.DatabaseManager, fileKey string, payload *models.BulkUpload) error {
+
+	result := db.DB().Model(&models.BulkUpload{}).Where("file_key = ?", fileKey).Updates(payload)
+	return result.Error
+}
