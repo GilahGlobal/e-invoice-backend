@@ -1015,7 +1015,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/firs_models.InvoiceRequest"
+                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
                         }
                     }
                 ],
@@ -1516,7 +1516,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/firs_models.InvoiceRequest"
+                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
                         }
                     }
                 ],
@@ -2326,8 +2326,9 @@ const docTemplate = `{
             "required": [
                 "city_name",
                 "country",
-                "country_code",
+                "lga",
                 "postal_zone",
+                "state",
                 "street_name"
             ],
             "properties": {
@@ -2337,15 +2338,19 @@ const docTemplate = `{
                 },
                 "country": {
                     "type": "string",
-                    "example": "Nigeria"
-                },
-                "country_code": {
-                    "type": "string",
                     "example": "NG"
+                },
+                "lga": {
+                    "type": "string",
+                    "example": "NG-AB-ANO"
                 },
                 "postal_zone": {
                     "type": "string",
                     "example": "10001"
+                },
+                "state": {
+                    "type": "string",
+                    "example": "NG-AB"
                 },
                 "street_name": {
                     "type": "string",
@@ -2473,7 +2478,33 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string",
-                    "example": "VAT"
+                    "enum": [
+                        "STANDARD_GST",
+                        "REDUCED_GST",
+                        "ZERO_GST",
+                        "STANDARD_VAT",
+                        "REDUCED_VAT",
+                        "ZERO_VAT",
+                        "STATE_SALES_TAX",
+                        "LOCAL_SALES_TAX",
+                        "ALCOHOL_EXCISE_TAX",
+                        "TOBACCO_EXCISE_TAX",
+                        "FUEL_EXCISE_TAX",
+                        "CORPORATE_INCOME_TAX",
+                        "PERSONAL_INCOME_TAX",
+                        "SOCIAL_SECURITY_TAX",
+                        "MEDICARE_TAX",
+                        "REAL_ESTATE_TAX",
+                        "PERSONAL_PROPERTY_TAX",
+                        "CARBON_TAX",
+                        "PLASTIC_TAX",
+                        "IMPORT_DUTY",
+                        "EXPORT_DUTY",
+                        "LUXURY_TAX",
+                        "SERVICE_TAX",
+                        "TOURISM_TAX"
+                    ],
+                    "example": "STANDARD_VAT"
                 },
                 "percent": {
                     "type": "number",
@@ -2558,6 +2589,7 @@ const docTemplate = `{
                 "invoice_type_code",
                 "issue_date",
                 "legal_monetary_total",
+                "tax_currency_code",
                 "tax_total"
             ],
             "properties": {
@@ -2631,6 +2663,28 @@ const docTemplate = `{
                 },
                 "invoice_type_code": {
                     "type": "string",
+                    "enum": [
+                        "380",
+                        "381",
+                        "384",
+                        "385",
+                        "386",
+                        "388",
+                        "389",
+                        "390",
+                        "392",
+                        "393",
+                        "394",
+                        "395",
+                        "396",
+                        "397",
+                        "399",
+                        "400",
+                        "402",
+                        "404",
+                        "406",
+                        "408"
+                    ],
                     "example": "381"
                 },
                 "irn": {
@@ -2754,39 +2808,6 @@ const docTemplate = `{
                 }
             }
         },
-        "firs_models.AllowanceCharge": {
-            "type": "object",
-            "required": [
-                "amount"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "charge_indicator": {
-                    "type": "boolean",
-                    "example": true
-                }
-            }
-        },
-        "firs_models.DocumentReference": {
-            "type": "object",
-            "required": [
-                "irn",
-                "issue_date"
-            ],
-            "properties": {
-                "irn": {
-                    "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
-                },
-                "issue_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                }
-            }
-        },
         "firs_models.FirsTransactionVatPayload": {
             "type": "object",
             "properties": {
@@ -2878,441 +2899,6 @@ const docTemplate = `{
                 },
                 "irn": {
                     "type": "string"
-                }
-            }
-        },
-        "firs_models.InvoiceDeliveryPeriod": {
-            "type": "object",
-            "required": [
-                "end_date",
-                "start_date"
-            ],
-            "properties": {
-                "end_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                },
-                "start_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                }
-            }
-        },
-        "firs_models.InvoiceLine": {
-            "type": "object",
-            "required": [
-                "hsn_code",
-                "invoiced_quantity",
-                "item",
-                "line_extension_amount",
-                "price",
-                "product_category"
-            ],
-            "properties": {
-                "discount_amount": {
-                    "type": "number",
-                    "example": 2500
-                },
-                "discount_rate": {
-                    "type": "number",
-                    "example": 5
-                },
-                "fee_amount": {
-                    "type": "number",
-                    "example": 450
-                },
-                "fee_rate": {
-                    "type": "number",
-                    "example": 2
-                },
-                "hsn_code": {
-                    "type": "string",
-                    "example": "1282.10"
-                },
-                "invoiced_quantity": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "example": 10
-                },
-                "item": {
-                    "$ref": "#/definitions/firs_models.Item"
-                },
-                "line_extension_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "price": {
-                    "$ref": "#/definitions/firs_models.Price"
-                },
-                "product_category": {
-                    "type": "string",
-                    "example": "Electronics"
-                }
-            }
-        },
-        "firs_models.InvoiceRequest": {
-            "type": "object",
-            "required": [
-                "accounting_supplier_party",
-                "business_id",
-                "document_currency_code",
-                "invoice_line",
-                "invoice_type_code",
-                "issue_date",
-                "legal_monetary_total",
-                "tax_total"
-            ],
-            "properties": {
-                "_document_reference": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/firs_models.DocumentReference"
-                    }
-                },
-                "accounting_cost": {
-                    "type": "string",
-                    "example": "2000"
-                },
-                "accounting_customer_party": {
-                    "$ref": "#/definitions/firs_models.Party"
-                },
-                "accounting_supplier_party": {
-                    "$ref": "#/definitions/firs_models.Party"
-                },
-                "actual_delivery_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                },
-                "allowance_charge": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/firs_models.AllowanceCharge"
-                    }
-                },
-                "billing_reference": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/firs_models.DocumentReference"
-                    }
-                },
-                "business_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "buyer_reference": {
-                    "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
-                },
-                "contract_document_reference": {
-                    "$ref": "#/definitions/firs_models.DocumentReference"
-                },
-                "dispatch_document_reference": {
-                    "$ref": "#/definitions/firs_models.DocumentReference"
-                },
-                "document_currency_code": {
-                    "type": "string",
-                    "example": "NGN"
-                },
-                "due_date": {
-                    "type": "string",
-                    "example": "2026-01-20"
-                },
-                "invoice_delivery_period": {
-                    "$ref": "#/definitions/firs_models.InvoiceDeliveryPeriod"
-                },
-                "invoice_line": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/firs_models.InvoiceLine"
-                    }
-                },
-                "invoice_number": {
-                    "type": "string",
-                    "minLength": 1,
-                    "example": "INV-001"
-                },
-                "invoice_type_code": {
-                    "type": "string",
-                    "example": "381"
-                },
-                "irn": {
-                    "type": "string",
-                    "example": "IRN-001-20122345"
-                },
-                "issue_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                },
-                "issue_time": {
-                    "type": "string",
-                    "example": "12:00:00"
-                },
-                "legal_monetary_total": {
-                    "$ref": "#/definitions/firs_models.LegalMonetaryTotal"
-                },
-                "note": {
-                    "type": "string",
-                    "example": "Invoice note"
-                },
-                "order_reference": {
-                    "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
-                },
-                "originator_document_reference": {
-                    "$ref": "#/definitions/firs_models.DocumentReference"
-                },
-                "payee_party": {
-                    "$ref": "#/definitions/firs_models.Party"
-                },
-                "payment_means": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/firs_models.PaymentMeans"
-                    }
-                },
-                "payment_status": {
-                    "type": "string",
-                    "enum": [
-                        "PENDING",
-                        "PAID",
-                        "REJECTED"
-                    ],
-                    "example": "PENDING"
-                },
-                "payment_terms_note": {
-                    "type": "string",
-                    "example": "Payment terms note"
-                },
-                "receipt_document_reference": {
-                    "$ref": "#/definitions/firs_models.DocumentReference"
-                },
-                "tax_currency_code": {
-                    "type": "string",
-                    "example": "NGN"
-                },
-                "tax_point_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                },
-                "tax_representative_party": {
-                    "$ref": "#/definitions/firs_models.Party"
-                },
-                "tax_total": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/firs_models.TaxTotal"
-                    }
-                }
-            }
-        },
-        "firs_models.Item": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "example": "A high-performance laptop suitable for gaming and work."
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Laptop"
-                },
-                "sellers_item_identification": {
-                    "type": "string",
-                    "example": "LAP-12345"
-                }
-            }
-        },
-        "firs_models.LegalMonetaryTotal": {
-            "type": "object",
-            "required": [
-                "line_extension_amount",
-                "payable_amount",
-                "tax_exclusive_amount",
-                "tax_inclusive_amount"
-            ],
-            "properties": {
-                "line_extension_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "payable_amount": {
-                    "type": "number",
-                    "example": 1700.75
-                },
-                "tax_exclusive_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "tax_inclusive_amount": {
-                    "type": "number",
-                    "example": 1700.75
-                }
-            }
-        },
-        "firs_models.Party": {
-            "type": "object",
-            "required": [
-                "email",
-                "party_name",
-                "postal_address",
-                "tin"
-            ],
-            "properties": {
-                "business_description": {
-                    "type": "string",
-                    "minLength": 5,
-                    "example": "Acme Inc. is a leading technology company."
-                },
-                "email": {
-                    "type": "string",
-                    "example": "business@example.com"
-                },
-                "party_name": {
-                    "type": "string",
-                    "minLength": 2,
-                    "example": "Acme Inc."
-                },
-                "postal_address": {
-                    "$ref": "#/definitions/firs_models.PostalAddress"
-                },
-                "telephone": {
-                    "type": "string",
-                    "minLength": 7,
-                    "example": "+234804567890"
-                },
-                "tin": {
-                    "type": "string",
-                    "example": "123456789012345"
-                }
-            }
-        },
-        "firs_models.PaymentMeans": {
-            "type": "object",
-            "required": [
-                "payment_due_date",
-                "payment_means_code"
-            ],
-            "properties": {
-                "payment_due_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                },
-                "payment_means_code": {
-                    "type": "string",
-                    "example": "10"
-                }
-            }
-        },
-        "firs_models.PostalAddress": {
-            "type": "object",
-            "required": [
-                "city_name",
-                "country",
-                "country_code",
-                "postal_zone",
-                "street_name"
-            ],
-            "properties": {
-                "city_name": {
-                    "type": "string",
-                    "example": "Ikeja"
-                },
-                "country": {
-                    "type": "string",
-                    "example": "Nigeria"
-                },
-                "country_code": {
-                    "type": "string",
-                    "example": "NG"
-                },
-                "postal_zone": {
-                    "type": "string",
-                    "example": "10001"
-                },
-                "street_name": {
-                    "type": "string",
-                    "example": "123 Broad Street"
-                }
-            }
-        },
-        "firs_models.Price": {
-            "type": "object",
-            "required": [
-                "base_quantity",
-                "price_amount",
-                "price_unit"
-            ],
-            "properties": {
-                "base_quantity": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "price_amount": {
-                    "type": "number",
-                    "example": 5000
-                },
-                "price_unit": {
-                    "type": "string",
-                    "example": "NGN per 1"
-                }
-            }
-        },
-        "firs_models.TaxCategory": {
-            "type": "object",
-            "required": [
-                "id",
-                "percent"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "example": "VAT"
-                },
-                "percent": {
-                    "type": "number",
-                    "example": 15
-                }
-            }
-        },
-        "firs_models.TaxSubtotal": {
-            "type": "object",
-            "required": [
-                "tax_amount",
-                "tax_category",
-                "taxable_amount"
-            ],
-            "properties": {
-                "tax_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "tax_category": {
-                    "$ref": "#/definitions/firs_models.TaxCategory"
-                },
-                "taxable_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                }
-            }
-        },
-        "firs_models.TaxTotal": {
-            "type": "object",
-            "required": [
-                "tax_amount"
-            ],
-            "properties": {
-                "tax_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "tax_subtotal": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/firs_models.TaxSubtotal"
-                    }
                 }
             }
         },

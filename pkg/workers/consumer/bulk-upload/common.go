@@ -16,7 +16,6 @@ func DetermineFileType(fileBytes []byte, filename string) string {
 	if isExcelSignature(fileBytes) {
 		return "excel"
 	}
-
 	// 2. If we have a filename, use extension as hint
 	if filename != "" {
 		ext := strings.ToLower(filepath.Ext(filename))
@@ -24,9 +23,7 @@ func DetermineFileType(fileBytes []byte, filename string) string {
 		case ".xlsx", ".xls", ".xlsm", ".xlsb":
 			return "excel" // Trust extension if we didn't detect signature
 		case ".csv", ".tsv":
-			if isCSVContent(fileBytes) {
-				return "csv"
-			}
+			return "csv"
 		}
 	}
 

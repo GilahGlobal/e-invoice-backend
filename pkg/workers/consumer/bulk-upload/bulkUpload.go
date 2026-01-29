@@ -229,7 +229,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		}
 		if blockedStatuses[invoiceExists.CurrentStatus] {
 			log.Println("invoice cannot be overwritten", invoicePayload.InvoiceNumber)
-			return fmt.Errorf("invoice %s cannot be overwritten", invoicePayload.InvoiceNumber)
+			return nil
 		}
 	}
 
