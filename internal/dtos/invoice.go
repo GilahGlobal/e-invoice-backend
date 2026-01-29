@@ -1,18 +1,18 @@
 package dtos
 
 type UploadInvoiceRequestDto struct {
-	InvoiceNumber               *string                `json:"invoice_number" example:"INV-001" validate:"omitempty,alphanum,min=1"`
+	InvoiceNumber               string                 `json:"invoice_number" example:"INV-001" validate:"min=1"`
 	BusinessID                  string                 `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"required,uuid"`
 	IRN                         *string                `json:"irn" example:"IRN-001-20122345" validate:"omitempty"`
-	IssueDate                   string                 `json:"issue_date" example:"2026-01-16" validate:"required"`
-	DueDate                     *string                `json:"due_date" example:"2026-01-20" validate:"omitempty"`
+	IssueDate                   string                 `json:"issue_date" example:"2026-01-16" validate:"required,nrsdate"`
+	DueDate                     *string                `json:"due_date" example:"2026-01-20" validate:"omitempty,nrsdate"`
 	IssueTime                   *string                `json:"issue_time" example:"12:00:00" validate:"omitempty"`
-	InvoiceTypeCode             string                 `json:"invoice_type_code" example:"381" validate:"required"`
-	PaymentStatus               string                 `json:"payment_status" example:"PENDING" validate:"oneof=PENDING PAID REJECTED"`
+	InvoiceTypeCode             string                 `json:"invoice_type_code" example:"381" validate:"required,oneof=380 381 384 385 386 388 389 390 392 393 394 395 396 397 399 400 402 404 406 408"`
+	PaymentStatus               *string                `json:"payment_status" example:"PENDING" validate:"omitempty,oneof=PENDING PAID REJECTED"`
 	Note                        *string                `json:"note" example:"Invoice note" validate:"omitempty"`
-	TaxPointDate                *string                `json:"tax_point_date" example:"2026-01-16" validate:"omitempty"`
+	TaxPointDate                *string                `json:"tax_point_date" example:"2026-01-16" validate:"omitempty,nrsdate"`
 	DocumentCurrencyCode        string                 `json:"document_currency_code" example:"NGN" validate:"required"`
-	TaxCurrencyCode             *string                `json:"tax_currency_code" example:"NGN" validate:"omitempty"`
+	TaxCurrencyCode             string                 `json:"tax_currency_code" example:"NGN" validate:"required"`
 	AccountingCost              *string                `json:"accounting_cost" example:"2000" validate:"omitempty"`
 	BuyerReference              *string                `json:"buyer_reference" example:"ITW001-E9E0C0D3-20240619" validate:"omitempty"`
 	InvoiceDeliveryPeriod       *InvoiceDeliveryPeriod `json:"invoice_delivery_period" validate:"omitempty"`
@@ -27,7 +27,7 @@ type UploadInvoiceRequestDto struct {
 	AccountingCustomerParty     *Party                 `json:"accounting_customer_party" validate:"omitempty"`
 	PayeeParty                  *Party                 `json:"payee_party" validate:"omitempty"`
 	TaxRepresentativeParty      *Party                 `json:"tax_representative_party" validate:"omitempty"`
-	ActualDeliveryDate          *string                `json:"actual_delivery_date" example:"2026-01-16" validate:"omitempty"`
+	ActualDeliveryDate          *string                `json:"actual_delivery_date" example:"2026-01-16" validate:"omitempty,nrsdate"`
 	PaymentMeans                []PaymentMeans         `json:"payment_means" validate:"omitempty,dive"`
 	PaymentTermsNote            *string                `json:"payment_terms_note" example:"Payment terms note" validate:"omitempty"`
 	AllowanceCharge             []AllowanceCharge      `json:"allowance_charge" validate:"omitempty,dive"`
@@ -37,13 +37,13 @@ type UploadInvoiceRequestDto struct {
 }
 
 type InvoiceDeliveryPeriod struct {
-	StartDate string `json:"start_date" example:"2026-01-16" validate:"required"`
-	EndDate   string `json:"end_date" example:"2026-01-16" validate:"required"`
+	StartDate string `json:"start_date" example:"2026-01-16" validate:"required,nrsdate"`
+	EndDate   string `json:"end_date" example:"2026-01-16" validate:"required,nrsdate"`
 }
 
 type DocumentReference struct {
 	IRN       string `json:"irn" example:"ITW001-E9E0C0D3-20240619" validate:"required"`
-	IssueDate string `json:"issue_date" example:"2026-01-16" validate:"required"`
+	IssueDate string `json:"issue_date" example:"2026-01-16" validate:"required,nrsdate"`
 }
 
 type Party struct {
@@ -56,16 +56,17 @@ type Party struct {
 }
 
 type PostalAddress struct {
-	StreetName  string `json:"street_name" example:"123 Broad Street" validate:"required"`
-	CityName    string `json:"city_name" example:"Ikeja" validate:"required"`
-	PostalZone  string `json:"postal_zone" example:"10001" validate:"required"`
-	Country     string `json:"country" example:"Nigeria" validate:"required"`
-	CountryCode string `json:"country_code" example:"NG" validate:"required"`
+	StreetName string `json:"street_name" example:"123 Broad Street" validate:"required"`
+	CityName   string `json:"city_name" example:"Ikeja" validate:"required"`
+	PostalZone string `json:"postal_zone" example:"10001" validate:"required"`
+	LGA        string `json:"lga" example:"NG-AB-ANO" validate:"required"`
+	State      string `json:"state" example:"NG-AB" validate:"required"`
+	Country    string `json:"country" example:"NG" validate:"required"`
 }
 
 type PaymentMeans struct {
 	PaymentMeansCode string `json:"payment_means_code" example:"10" validate:"required"`
-	PaymentDueDate   string `json:"payment_due_date" example:"2026-01-16" validate:"required"`
+	PaymentDueDate   string `json:"payment_due_date" example:"2026-01-16" validate:"required,nrsdate"`
 }
 
 type AllowanceCharge struct {
@@ -85,7 +86,7 @@ type TaxSubtotal struct {
 }
 
 type TaxCategory struct {
-	ID      string  `json:"id" example:"VAT" validate:"required"`
+	ID      string  `json:"id" example:"STANDARD_VAT" validate:"required,oneof=STANDARD_GST REDUCED_GST ZERO_GST STANDARD_VAT REDUCED_VAT ZERO_VAT STATE_SALES_TAX LOCAL_SALES_TAX ALCOHOL_EXCISE_TAX TOBACCO_EXCISE_TAX FUEL_EXCISE_TAX CORPORATE_INCOME_TAX PERSONAL_INCOME_TAX SOCIAL_SECURITY_TAX MEDICARE_TAX REAL_ESTATE_TAX PERSONAL_PROPERTY_TAX CARBON_TAX PLASTIC_TAX IMPORT_DUTY EXPORT_DUTY LUXURY_TAX SERVICE_TAX TOURISM_TAX"`
 	Percent float64 `json:"percent" example:"15.00" validate:"required"`
 }
 

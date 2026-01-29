@@ -1,7 +1,7 @@
 package invoice
 
 import (
-	"einvoice-access-point/external/firs_models"
+	"einvoice-access-point/internal/dtos"
 	repository "einvoice-access-point/internal/repository/invoice"
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/models"
@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func FirsAllInOneProcess(payload firs_models.InvoiceRequest, invoiceModel *models.Invoice, db *gorm.DB) (error, bool) {
+func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *models.Invoice, db *gorm.DB) (error, bool) {
 
 	pdb := inst.InitDB(db, true)
 
@@ -67,7 +67,7 @@ func FirsAllInOneProcess(payload firs_models.InvoiceRequest, invoiceModel *model
 	return nil, true
 }
 
-func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload firs_models.InvoiceRequest, invoiceModel *models.Invoice) (error, bool) {
+func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload dtos.UploadInvoiceRequestDto, invoiceModel *models.Invoice) (error, bool) {
 	pdb := inst.InitDB(db, true)
 	switch currentStatus {
 	case models.StatusValidatedInvoice:

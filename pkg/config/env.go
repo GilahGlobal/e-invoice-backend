@@ -14,6 +14,7 @@ type Configuration struct {
 	Zoho         ZOHO
 	Mail         MAIL
 	Redis        Redis
+	S3           S3
 }
 
 type BaseConfig struct {
@@ -68,6 +69,11 @@ type BaseConfig struct {
 	REDIS_DB   string `mapstructure:"REDIS_DB"`
 
 	ZOHO_API_URL string `mapstructure:"ZOHO_API_URL"`
+
+	S3_ACCESS_KEY_ID     string `mapstructure:"S3_ACCESS_KEY_ID"`
+	S3_SECRET_ACCESS_KEY string `mapstructure:"S3_SECRET_ACCESS_KEY"`
+	S3_BUCKET            string `mapstructure:"S3_BUCKET"`
+	S3_REGION            string `mapstructure:"S3_REGION"`
 }
 
 func (config *BaseConfig) SetupConfigurationn() *Configuration {
@@ -142,6 +148,12 @@ func (config *BaseConfig) SetupConfigurationn() *Configuration {
 			REDIS_PORT: config.REDIS_PORT,
 			REDIS_HOST: config.REDIS_HOST,
 			REDIS_DB:   config.REDIS_DB,
+		},
+		S3: S3{
+			AccessKeyID:     config.S3_ACCESS_KEY_ID,
+			SecretAccessKey: config.S3_SECRET_ACCESS_KEY,
+			Bucket:          config.S3_BUCKET,
+			Region:          config.S3_REGION,
 		},
 	}
 }

@@ -1,11 +1,17 @@
 package invoice
 
 import (
+	"context"
 	"einvoice-access-point/external/firs_models"
+	"einvoice-access-point/internal/dtos"
 	"einvoice-access-point/internal/services/invoice"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
+	"einvoice-access-point/pkg/s3"
 	"einvoice-access-point/pkg/utility"
+	"einvoice-access-point/pkg/workers"
+	"einvoice-access-point/pkg/workers/producer"
+	"log"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -150,12 +156,6 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
 		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
-	invoiceNumber := c.FormValue("invoice_number")
-
-	if invoiceNumber == "" {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business_id or invoice number is required", nil, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
-	}
 
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -170,19 +170,31 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 	}
 	defer fileContent.Close()
 
-	var payload firs_models.InvoiceRequest
-	if err := utility.DecodeJSONWithDefaults(fileContent, &payload); err != nil {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "invalid JSON format", nil, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
-	}
-
-	invoice, errDetails, err, _ := invoice.CreateInvoice(base.Db.Postgresql.DB(), payload, invoiceNumber, userDetails.ID, nil)
+	ctx := context.Background()
+	fileURL, fileKey, err := s3.UploadFileToS3(ctx, fileContent, file)
 	if err != nil {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
+		log.Println("S3 upload failed:", err)
+		return c.Status(500).JSON(fiber.Map{"error": "upload failed"})
 	}
 
-	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice created successfully", invoice)
+	err = invoice.AddBulkUploadLog(base.Db.Postgresql.DB(), fileURL, fileKey)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", "failed to log bulk upload", nil, nil)
+		return c.Status(fiber.StatusInternalServerError).JSON(rd)
+	}
+
+	err = producer.NewProducer().EnqueueTask(workers.BulkUploadTask, workers.BulkUploadInput{
+		ID:         userDetails.ID,
+		FileKey:    fileKey,
+		ServiceID:  userDetails.ServiceID,
+		BusinessID: *userDetails.BusinessID,
+	})
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", "failed to enqueue bulk upload task", nil, nil)
+		return c.Status(fiber.StatusInternalServerError).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice uploaded successfully", fileURL)
 	return c.Status(fiber.StatusCreated).JSON(rd)
 }
 
@@ -239,7 +251,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
-	var req firs_models.InvoiceRequest
+	var req dtos.UploadInvoiceRequestDto
 
 	err = c.BodyParser(&req)
 	if err != nil {
@@ -258,7 +270,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	invoiceExists, err := invoice.GetInvoiceByInvoiceNumber(base.Db.Postgresql.DB(), *req.InvoiceNumber, userDetails.ID)
+	invoiceExists, err := invoice.GetInvoiceByInvoiceNumber(base.Db.Postgresql.DB(), req.InvoiceNumber, userDetails.ID)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -276,59 +288,30 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	irnPayload := make(map[string]string)
-	if req.InvoiceNumber != nil {
-		irnPayload["invoice_number"] = *req.InvoiceNumber
-	}
-
+	var irnPayload dtos.InvoiceData
 	if req.IRN == nil {
-		generatedIRN, err := invoice.GenerateIRN(*req.InvoiceNumber, userDetails.ServiceID)
+		IRNData, err := invoice.IRNGeneration(req.InvoiceNumber, userDetails.ServiceID, req.BusinessID)
 		if err != nil {
-			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+			rd := *err
 			return c.Status(fiber.StatusBadRequest).JSON(rd)
 		}
-
-		_, _, err = invoice.ValidateIRN(firs_models.IRNValidationRequest{
-			InvoiceReference: *req.InvoiceNumber,
-			BusinessID:       req.BusinessID,
-			IRN:              *generatedIRN,
-		})
-		if err != nil {
-			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
-			return c.Status(fiber.StatusBadRequest).JSON(rd)
-		}
-
-		keys, err := utility.LoadCryptoKeys("crypto_keys.txt")
-		if err != nil {
-			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
-			return c.Status(fiber.StatusBadRequest).JSON(rd)
-		}
-
-		signedIRNResponse, err := invoice.SignIRN(*generatedIRN, keys)
-		if err != nil {
-			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
-			return c.Status(fiber.StatusBadRequest).JSON(rd)
-		}
-		irnPayload["irn"] = *generatedIRN
-		irnPayload["qr_code"] = signedIRNResponse.QrCodeImage
+		irnPayload = *IRNData
+		req.IRN = &irnPayload.IRN
 	} else {
-		irnPayload["irn"] = *req.IRN
+		irnPayload = dtos.InvoiceData{
+			InvoiceNumber: req.InvoiceNumber,
+			IRN:           *req.IRN,
+			QRCode:        invoiceExists.QrCode,
+		}
 	}
 
-	value := irnPayload["irn"]
-	req.IRN = &value
-
-	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(base.Db.Postgresql.DB(), req, *req.InvoiceNumber, userDetails.ID, invoiceExists)
+	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(base.Db.Postgresql.DB(), req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, invoiceExists)
 
 	response := map[string]interface{}{
 		"metadata": createdInvoice.StatusHistory,
 	}
 	if isInvoiceSigned {
-		response["data"] = map[string]string{
-			"invoice_number": irnPayload["invoice_number"],
-			"irn":            irnPayload["irn"],
-			"qr_code":        irnPayload["qr_code"],
-		}
+		response["data"] = irnPayload
 	}
 
 	if err != nil {

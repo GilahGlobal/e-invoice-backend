@@ -2,15 +2,20 @@ package invoice
 
 import (
 	"einvoice-access-point/external/firs_models"
+	"einvoice-access-point/internal/dtos"
 	repository "einvoice-access-point/internal/repository/invoice"
+	"strings"
+
 	"einvoice-access-point/pkg/database"
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/models"
+	"einvoice-access-point/pkg/utility"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -26,7 +31,7 @@ func GetInvoiceDetails(db *gorm.DB, businessID, invoiceID string) (*models.Invoi
 	return repository.FindInvoiceByBusinessAndID(pdb, businessID, invoiceID)
 }
 
-func CreateInvoice(db *gorm.DB, payload firs_models.InvoiceRequest, invoiceNumber, businessID string, invoiceExists *models.Invoice) (*models.Invoice, *string, error, bool) {
+func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode string, invoiceExists *models.Invoice) (*models.Invoice, *string, error, bool) {
 
 	pdb := inst.InitDB(db, true)
 	isInvoiceSigned := false
@@ -62,6 +67,7 @@ func CreateInvoice(db *gorm.DB, payload firs_models.InvoiceRequest, invoiceNumbe
 		invoice = &models.Invoice{
 			InvoiceNumber:    invoiceNumber,
 			IRN:              *payload.IRN,
+			QrCode:           qrCode,
 			BusinessID:       businessID,
 			Platform:         "internal",
 			PlatformMetadata: platformMetadata,
@@ -96,4 +102,39 @@ func GetInvoiceByInvoiceNumber(db *gorm.DB, invoiceNumber, businessID string) (*
 
 func UpdateInvoiceData(db database.DatabaseManager, invoiceNumber string, invoiceData []byte) error {
 	return repository.UpdateInvoice(db, invoiceNumber, invoiceData)
+}
+
+func IRNGeneration(invoiceNumber, serviceId, businessID string) (*dtos.InvoiceData, *models.Response) {
+	generatedIRN, err := GenerateIRN(strings.ToUpper(invoiceNumber), serviceId)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return nil, &rd
+	}
+
+	_, _, err = ValidateIRN(firs_models.IRNValidationRequest{
+		InvoiceReference: invoiceNumber,
+		BusinessID:       businessID,
+		IRN:              *generatedIRN,
+	})
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return nil, &rd
+	}
+
+	keys, err := utility.LoadCryptoKeys("crypto_keys.txt")
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return nil, &rd
+	}
+
+	signedIRNResponse, err := SignIRN(*generatedIRN, keys)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return nil, &rd
+	}
+	return &dtos.InvoiceData{
+		InvoiceNumber: invoiceNumber,
+		IRN:           *generatedIRN,
+		QRCode:        signedIRNResponse.QrCodeImage,
+	}, nil
 }

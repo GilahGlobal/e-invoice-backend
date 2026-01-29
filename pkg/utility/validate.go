@@ -6,12 +6,14 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"time"
 
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/nyaruka/phonenumbers"
 )
@@ -138,4 +140,9 @@ func cleanEmptyValues(v reflect.Value) bool {
 		z := reflect.Zero(v.Type())
 		return reflect.DeepEqual(v.Interface(), z.Interface())
 	}
+}
+
+func IsValidNRSDate(fl validator.FieldLevel) bool {
+	_, err := time.Parse("2006-01-02", fl.Field().String())
+	return err == nil
 }
