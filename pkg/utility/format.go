@@ -217,6 +217,12 @@ func ValidationErrorsToJSON(err error, dto any) map[string]string {
 		case "min":
 			errors[jsonPath] = "minimum field length must be " + ve.Param()
 
+		case "oneof":
+			errors[jsonPath] = "must be one of the following values: " + ve.Param()
+
+		case "nrsdate":
+			errors[jsonPath] = "must be a valid date in the format YYYY-MM-DD"
+
 		default:
 			errors[jsonPath] = ve.Error()
 		}
