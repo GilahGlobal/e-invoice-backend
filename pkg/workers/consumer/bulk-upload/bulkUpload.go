@@ -5,6 +5,7 @@ import (
 	"einvoice-access-point/internal/dtos"
 	"einvoice-access-point/internal/services/invoice"
 	"einvoice-access-point/pkg/database"
+	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/s3"
 	"einvoice-access-point/pkg/utility"
@@ -24,13 +25,14 @@ const TypeBulkUpload = "bulk:upload"
 
 type BulkUploadConsumer struct {
 	db             *database.Database
+	testDb         *database.Database
 	logger         *utility.Logger
 	validator      *validator.Validate
 	excelProcessor *ExcelProcessor
 	csvProcessor   *CSVProcessor
 }
 
-func NewBulkUploadConsumer(db *database.Database, logger *utility.Logger) *BulkUploadConsumer {
+func NewBulkUploadConsumer(db, testDB *database.Database, logger *utility.Logger) *BulkUploadConsumer {
 	v := validator.New()
 
 	// Register custom validations
@@ -42,6 +44,7 @@ func NewBulkUploadConsumer(db *database.Database, logger *utility.Logger) *BulkU
 
 	return &BulkUploadConsumer{
 		db:             db,
+		testDb:         testDB,
 		logger:         logger,
 		validator:      v,
 		excelProcessor: NewExcelProcessor(v),
@@ -122,6 +125,7 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 		payload.ID,
 		payload.BusinessID,
 		payload.ServiceID,
+		payload.IsSandbox,
 	)
 
 	stats.SuccessfulInvoices = processedResults.SuccessCount
@@ -135,7 +139,7 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 
 	return nil
 }
-func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invoices []dtos.UploadInvoiceRequestDto, maxWorkers int, id, businessId, serviceID string) *ProcessResults {
+func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invoices []dtos.UploadInvoiceRequestDto, maxWorkers int, id, businessId, serviceID string, isSandbox bool) *ProcessResults {
 	results := &ProcessResults{
 		SuccessCount: 0,
 		ErrorCount:   0,
@@ -153,7 +157,7 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 		wg.Add(1)
 		go func(workerID int) {
 			defer wg.Done()
-			qc.invoiceWorker(ctx, workerID, workChan, resultsChan, id, businessId, serviceID)
+			qc.invoiceWorker(ctx, workerID, workChan, resultsChan, id, businessId, serviceID, isSandbox)
 		}(i)
 	}
 
@@ -187,7 +191,7 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 	return results
 }
 
-func (qc *BulkUploadConsumer) invoiceWorker(ctx context.Context, workerID int, workChan <-chan *dtos.UploadInvoiceRequestDto, resultsChan chan<- ProcessResult, id, businessId, serviceID string) {
+func (qc *BulkUploadConsumer) invoiceWorker(ctx context.Context, workerID int, workChan <-chan *dtos.UploadInvoiceRequestDto, resultsChan chan<- ProcessResult, id, businessId, serviceID string, isSandbox bool) {
 	for invoice := range workChan {
 		select {
 		case <-ctx.Done():
@@ -196,8 +200,8 @@ func (qc *BulkUploadConsumer) invoiceWorker(ctx context.Context, workerID int, w
 		default:
 			result := ProcessResult{Invoice: invoice}
 
-			// Add processing logic here
-			err := qc.processSingleInvoice(ctx, invoice, id, businessId, serviceID)
+			// processing logic here
+			err := qc.processSingleInvoice(ctx, invoice, id, businessId, serviceID, isSandbox)
 			if err != nil {
 				result.Error = err
 				log.Println("Failed to process invoice",
@@ -211,11 +215,12 @@ func (qc *BulkUploadConsumer) invoiceWorker(ctx context.Context, workerID int, w
 	}
 }
 
-func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoicePayload *dtos.UploadInvoiceRequestDto, id, businessId, serviceID string) error {
+func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoicePayload *dtos.UploadInvoiceRequestDto, id, businessId, serviceID string, isSandbox bool) error {
 
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
-	invoiceExists, err := invoice.GetInvoiceByInvoiceNumber(qc.db.Postgresql.DB(), invoicePayload.InvoiceNumber, id)
+	db := middleware.GetDatabaseInstance(isSandbox, qc.db, qc.testDb)
+	invoiceExists, err := invoice.GetInvoiceByInvoiceNumber(db, invoicePayload.InvoiceNumber, id)
 
 	if err != nil {
 		return fmt.Errorf("database error: %w", err)
@@ -235,7 +240,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 
 	var irnPayload dtos.InvoiceData
 	if invoicePayload.IRN == nil {
-		IRNData, err := invoice.IRNGeneration(invoicePayload.InvoiceNumber, serviceID, businessId)
+		IRNData, err := invoice.IRNGeneration(invoicePayload.InvoiceNumber, serviceID, businessId, isSandbox)
 		if err != nil {
 			rd := *err
 			return fmt.Errorf("IRN generation failed: %s", rd.Message)
@@ -248,7 +253,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		}
 		invoicePayload.IRN = &invoiceExists.IRN
 	}
-	_, _, err, invoiceSigned := invoice.CreateInvoice(qc.db.Postgresql.DB(), *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, invoiceExists)
+	_, _, err, invoiceSigned := invoice.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, invoiceExists, isSandbox)
 	if err != nil && !invoiceSigned {
 		errorArray := strings.Split(err.Error(), "-")
 		return fmt.Errorf("invoice creation failed: %s", strings.TrimSpace(errorArray[len(errorArray)-1]))

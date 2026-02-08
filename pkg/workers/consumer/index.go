@@ -18,14 +18,14 @@ type QueueConsumer struct {
 	bulkupload *bulkupload.BulkUploadConsumer
 }
 
-func NewQueueConsumer(db *database.Database, redisConnection asynq.RedisClientOpt) *QueueConsumer {
+func NewQueueConsumer(db, testDB *database.Database, redisConnection asynq.RedisClientOpt) *QueueConsumer {
 	svr := asynq.NewServer(
 		redisConnection,
 		asynq.Config{
 			Concurrency: 10,
 		},
 	)
-	bulkupload := bulkupload.NewBulkUploadConsumer(db, utility.NewLogger())
+	bulkupload := bulkupload.NewBulkUploadConsumer(db, testDB, utility.NewLogger())
 	return &QueueConsumer{svr: svr, logger: utility.NewLogger(), bulkupload: bulkupload}
 }
 

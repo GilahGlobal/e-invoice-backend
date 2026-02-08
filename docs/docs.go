@@ -300,6 +300,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/toggle-mode": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Toggle Application mode from either sandox to prod or vice cers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Toggle Application mode",
+                "responses": {
+                    "200": {
+                        "description": "Application mode toggled successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.LoginResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/business": {
             "get": {
                 "security": [
@@ -2200,6 +2249,10 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "is_sandbox": {
+                    "type": "boolean",
+                    "default": true
+                },
                 "password": {
                     "type": "string"
                 }
@@ -2797,6 +2850,10 @@ const docTemplate = `{
                 "id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "is_sandbox": {
+                    "type": "boolean",
+                    "example": true
                 },
                 "name": {
                     "type": "string",

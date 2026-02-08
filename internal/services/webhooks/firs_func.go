@@ -15,7 +15,7 @@ import (
 )
 
 func FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys *utility.CryptoKeys, business *models.Business,
-	invoiceModel *models.Invoice, db *gorm.DB) (*string, *string, error) {
+	invoiceModel *models.Invoice, db *gorm.DB, isSandBox bool) (*string, *string, error) {
 
 	pdb := inst.InitDB(db, true)
 
@@ -33,7 +33,7 @@ func FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys *utility.Cryp
 		IRN:              *theIRN,
 	}
 
-	_, theErr, err := invoice.ValidateIRN(validateIrn)
+	_, theErr, err := invoice.ValidateIRN(validateIrn, isSandBox)
 	if err != nil {
 		_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusValidatedIRN, "failed")
 		return nil, nil, fmt.Errorf("failed to validate irn: %v - %v", *theErr, err)
@@ -49,7 +49,7 @@ func FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys *utility.Cryp
 	_ = repository.UpdateInvoiceIRN(pdb, invoiceModel, *theIRN)
 
 	go func(p zoho.WebhookPayload, b *models.Business, inv *models.Invoice, d *gorm.DB, irn string) {
-		if err := otherFirsProcesses(p, b, inv, d, irn); err != nil {
+		if err := otherFirsProcesses(p, b, inv, d, irn, isSandBox); err != nil {
 			fmt.Println("Error in otherFirsProcesses: ", err)
 		}
 	}(payload, business, invoiceModel, db, *theIRN)
@@ -58,7 +58,7 @@ func FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys *utility.Cryp
 
 }
 
-func otherFirsProcesses(payload zoho.WebhookPayload, business *models.Business, invoiceModel *models.Invoice, db *gorm.DB, theIRN string) error {
+func otherFirsProcesses(payload zoho.WebhookPayload, business *models.Business, invoiceModel *models.Invoice, db *gorm.DB, theIRN string, isSandBox bool) error {
 
 	pdb := inst.InitDB(db, true)
 
@@ -67,14 +67,14 @@ func otherFirsProcesses(payload zoho.WebhookPayload, business *models.Business, 
 		return err
 	}
 
-	_, theErr, err := invoice.ValidateInvoice(newInvoiceResp)
+	_, theErr, err := invoice.ValidateInvoice(newInvoiceResp, isSandBox)
 	if err != nil {
 		_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusValidatedInvoice, "failed")
 		return fmt.Errorf("failed to validate invoice: %v - %v", *theErr, err)
 	}
 	_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusValidatedInvoice, "success")
 
-	_, theErr, err = invoice.SignInvoice(newInvoiceResp)
+	_, theErr, err = invoice.SignInvoice(newInvoiceResp, isSandBox)
 	if err != nil {
 		_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusSignedInvoice, "failed")
 		return fmt.Errorf("failed to sign invoice: %v - %v", *theErr, err)
@@ -95,7 +95,7 @@ func otherFirsProcesses(payload zoho.WebhookPayload, business *models.Business, 
 	}
 	_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "success")
 
-	confirmInvoiceResp, theErr, err := invoice.ConfirmInvoice(theIRN)
+	confirmInvoiceResp, theErr, err := invoice.ConfirmInvoice(theIRN, isSandBox)
 	if err != nil {
 		return fmt.Errorf("failed to confirm invoice: %v - %v", *theErr, err)
 	}

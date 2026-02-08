@@ -31,7 +31,7 @@ func GetInvoiceDetails(db *gorm.DB, businessID, invoiceID string) (*models.Invoi
 	return repository.FindInvoiceByBusinessAndID(pdb, businessID, invoiceID)
 }
 
-func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode string, invoiceExists *models.Invoice) (*models.Invoice, *string, error, bool) {
+func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode string, invoiceExists *models.Invoice, isSandbox bool) (*models.Invoice, *string, error, bool) {
 
 	pdb := inst.InitDB(db, true)
 	isInvoiceSigned := false
@@ -58,7 +58,7 @@ func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNum
 		}
 
 		invoice, _ = repository.FindInvoiceByNumber(pdb, invoiceExists.InvoiceNumber)
-		if err, isInvoiceSigned = UncompletedFirsProcesses(db, invoiceExists.CurrentStatus, payload, invoiceExists); err != nil {
+		if err, isInvoiceSigned = UncompletedFirsProcesses(db, invoiceExists.CurrentStatus, payload, invoiceExists, isSandbox); err != nil {
 			errDetails := fmt.Sprintf("failed to process invoice through all steps: %v", err)
 			return invoice, &errDetails, fmt.Errorf("%s", errDetails), isInvoiceSigned
 		}
@@ -81,7 +81,7 @@ func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNum
 			errDetails := "failed to save invoice"
 			return nil, &errDetails, fmt.Errorf("%s: %w", errDetails, err), isInvoiceSigned
 		}
-		if err, isInvoiceSigned = FirsAllInOneProcess(payload, invoice, db); err != nil {
+		if err, isInvoiceSigned = FirsAllInOneProcess(payload, invoice, db, isSandbox); err != nil {
 			errDetails := fmt.Sprintf("failed to process invoice through all steps: %v", err)
 			return invoice, &errDetails, fmt.Errorf("%s", errDetails), isInvoiceSigned
 		}
@@ -104,7 +104,7 @@ func UpdateInvoiceData(db database.DatabaseManager, invoiceNumber string, invoic
 	return repository.UpdateInvoice(db, invoiceNumber, invoiceData)
 }
 
-func IRNGeneration(invoiceNumber, serviceId, businessID string) (*dtos.InvoiceData, *models.Response) {
+func IRNGeneration(invoiceNumber, serviceId, businessID string, isSandbox bool) (*dtos.InvoiceData, *models.Response) {
 	generatedIRN, err := GenerateIRN(strings.ToUpper(invoiceNumber), serviceId)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
@@ -115,7 +115,7 @@ func IRNGeneration(invoiceNumber, serviceId, businessID string) (*dtos.InvoiceDa
 		InvoiceReference: invoiceNumber,
 		BusinessID:       businessID,
 		IRN:              *generatedIRN,
-	})
+	}, isSandbox)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return nil, &rd

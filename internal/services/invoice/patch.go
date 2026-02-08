@@ -6,9 +6,9 @@ import (
 	"fmt"
 )
 
-func UpdateInvoice(invoiceUpdate firs_models.UpdateInvoice, irn string) (*firs_models.FirsResponse, *string, error) {
+func UpdateInvoice(invoiceUpdate firs_models.UpdateInvoice, irn string, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
 
-	resp, err := firs.UpdateInvoice(invoiceUpdate, irn)
+	resp, err := firs.UpdateInvoice(invoiceUpdate, irn, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to validate irn: %w", err)
 	}

@@ -18,9 +18,9 @@ func main() {
 		panic("Logger initialization failed: logger is nil")
 	}
 	configuration := config.Setup(logger, "../app")
-	postgresql.ConnectToDatabase(logger, configuration.Database)
+	postgresql.ConnectToDatabase(logger, configuration.Database, configuration.TestDatabase)
 
-	db := database.Connection()
+	db, testDb := database.Connection()
 
 	redisUrl := fmt.Sprintf("%s:%s", config.Config.Redis.REDIS_HOST, config.Config.Redis.REDIS_PORT)
 	redisConnection := asynq.RedisClientOpt{Addr: redisUrl, DB: 1}
@@ -30,7 +30,7 @@ func main() {
 		logger.Error("Failed to start scheduler", "error", err)
 	}
 
-	consumer := consumer.NewQueueConsumer(db, redisConnection)
+	consumer := consumer.NewQueueConsumer(db, testDb, redisConnection)
 	if err := consumer.Start(); err != nil {
 		logger.Error("Failed to start consumer", "error", err)
 	}
