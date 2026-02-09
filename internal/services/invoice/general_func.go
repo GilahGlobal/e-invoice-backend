@@ -10,11 +10,11 @@ import (
 	"gorm.io/gorm"
 )
 
-func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *models.Invoice, db *gorm.DB) (error, bool) {
+func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *models.Invoice, db *gorm.DB, isSandbox bool) (error, bool) {
 
 	pdb := inst.InitDB(db, true)
 
-	_, theErr, err := ValidateInvoice(payload)
+	_, theErr, err := ValidateInvoice(payload, isSandbox)
 	if err != nil {
 		_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusValidatedInvoice, "failed")
 		return fmt.Errorf("failed to validate invoice: %v - %v", *theErr, err), false
@@ -25,7 +25,7 @@ func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *mod
 		return fmt.Errorf("failed to update invoice status: %v", err), false
 	}
 
-	_, theErr, err = SignInvoice(payload)
+	_, theErr, err = SignInvoice(payload, isSandbox)
 	if err != nil {
 		_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusSignedInvoice, "failed")
 		return fmt.Errorf("failed to sign invoice: %v - %v", *theErr, err), false
@@ -55,7 +55,7 @@ func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *mod
 		return fmt.Errorf("failed to update invoice status: %v", err), true
 	}
 
-	confirmInvoiceResp, theErr, err := ConfirmInvoice(*payload.IRN)
+	confirmInvoiceResp, theErr, err := ConfirmInvoice(*payload.IRN, isSandbox)
 	if err != nil {
 		return fmt.Errorf("failed to confirm invoice: %v - %v", *theErr, err), true
 	}
@@ -67,11 +67,11 @@ func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *mod
 	return nil, true
 }
 
-func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload dtos.UploadInvoiceRequestDto, invoiceModel *models.Invoice) (error, bool) {
+func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload dtos.UploadInvoiceRequestDto, invoiceModel *models.Invoice, isSandbox bool) (error, bool) {
 	pdb := inst.InitDB(db, true)
 	switch currentStatus {
 	case models.StatusValidatedInvoice:
-		_, theErr, err := ValidateInvoice(payload)
+		_, theErr, err := ValidateInvoice(payload, isSandbox)
 		if err != nil {
 			_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusValidatedInvoice, "failed")
 			return fmt.Errorf("failed to validate invoice: %v - %v", *theErr, err), false
@@ -82,7 +82,7 @@ func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload dtos.Up
 			return fmt.Errorf("failed to update invoice status: %v", err), false
 		}
 
-		_, theErr, err = SignInvoice(payload)
+		_, theErr, err = SignInvoice(payload, isSandbox)
 		if err != nil {
 			_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusSignedInvoice, "failed")
 			return fmt.Errorf("failed to sign invoice: %v - %v", *theErr, err), false
@@ -112,7 +112,7 @@ func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload dtos.Up
 			return fmt.Errorf("failed to update invoice status: %v", err), true
 		}
 
-		confirmInvoiceResp, theErr, err := ConfirmInvoice(*payload.IRN)
+		confirmInvoiceResp, theErr, err := ConfirmInvoice(*payload.IRN, isSandbox)
 		if err != nil {
 			return fmt.Errorf("failed to confirm invoice: %v - %v", *theErr, err), true
 		}
@@ -123,7 +123,7 @@ func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload dtos.Up
 
 		return nil, true
 	case models.StatusSignedIRN:
-		return FirsAllInOneProcess(payload, invoiceModel, db)
+		return FirsAllInOneProcess(payload, invoiceModel, db, isSandbox)
 	default:
 		return fmt.Errorf("unknown status: %s", currentStatus), false
 	}

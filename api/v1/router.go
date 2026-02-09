@@ -14,7 +14,7 @@ import (
 	"github.com/gofiber/swagger"
 )
 
-func Setup(logger *utility.Logger, validator *validator.Validate, db *database.Database, keys *utility.CryptoKeys) *fiber.App {
+func Setup(logger *utility.Logger, validator *validator.Validate, db, testDb *database.Database, keys *utility.CryptoKeys) *fiber.App {
 
 	/////////////////////////////////////////////
 	//Initiate Fiber App
@@ -60,12 +60,12 @@ func Setup(logger *utility.Logger, validator *validator.Validate, db *database.D
 	//All Routes Registered
 	/////////////////////////////////////////////
 
-	HealthRoute(r, ApiVersion, validator, db, logger)
-	AuthRoute(r, ApiVersion, validator, db, logger)
-	EntityRoute(r, ApiVersion, validator, db, logger)
-	BusinessRoute(r, ApiVersion, validator, db, logger)
-	CallbackRoute(r, ApiVersion, validator, db, logger)
-	InvoiceRoute(r, ApiVersion, validator, db, logger, keys)
+	HealthRoute(r, ApiVersion, validator, db, testDb, logger)
+	AuthRoute(r, ApiVersion, validator, db, testDb, logger)
+	EntityRoute(r, ApiVersion, validator, db, testDb, logger)
+	BusinessRoute(r, ApiVersion, validator, db, testDb, logger)
+	CallbackRoute(r, ApiVersion, validator, db, testDb, logger)
+	InvoiceRoute(r, ApiVersion, validator, db, testDb, logger, keys)
 	RegisterBaseRoutes(r, ApiVersion)
 
 	return r

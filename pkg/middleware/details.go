@@ -1,7 +1,10 @@
 package middleware
 
 import (
+	"einvoice-access-point/pkg/database"
+
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 func GetUserDetails(c *fiber.Ctx) (*UserDataClaims, error) {
@@ -15,4 +18,11 @@ func GetUserDetails(c *fiber.Ctx) (*UserDataClaims, error) {
 	}
 
 	return claims, nil
+}
+
+func GetDatabaseInstance(IsSandbox bool, prodDB, sandboxDB *database.Database) *gorm.DB {
+	if IsSandbox {
+		return sandboxDB.Postgresql.DB()
+	}
+	return prodDB.Postgresql.DB()
 }

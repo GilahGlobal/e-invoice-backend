@@ -15,8 +15,8 @@ import (
 	"strings"
 )
 
-func ConfirmInvoice(irn string) (*firs_models.FirsResponse, *string, error) {
-	resp, err := firs.ConfirmInvoice(irn)
+func ConfirmInvoice(irn string, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
+	resp, err := firs.ConfirmInvoice(irn, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to confirm invoice status with irn: %w", err)
 	}
@@ -30,9 +30,9 @@ func ConfirmInvoice(irn string) (*firs_models.FirsResponse, *string, error) {
 	return theResp, nil, nil
 }
 
-func DownloadInvoice(irn string) (*string, *string, error) {
+func DownloadInvoice(irn string, isSandbox bool) (*string, *string, error) {
 	configs := config.GetConfig()
-	resp, err := firs.DownloadInvoice(irn)
+	resp, err := firs.DownloadInvoice(irn, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to download invoice with irn: %w", err)
 	}

@@ -45,9 +45,9 @@ func GenerateIRNumber(invoiceNumber, serviceID string, timestamp time.Time) (str
 	return irn, nil
 }
 
-func ValidateIRN(invoiceReq firs_models.IRNValidationRequest) (*firs_models.FirsResponse, *string, error) {
+func ValidateIRN(invoiceReq firs_models.IRNValidationRequest, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
 
-	resp, err := firs.ValidateIRN(invoiceReq)
+	resp, err := firs.ValidateIRN(invoiceReq, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to validate irn: %w", err)
 	}
@@ -61,9 +61,9 @@ func ValidateIRN(invoiceReq firs_models.IRNValidationRequest) (*firs_models.Firs
 	return theResp, nil, nil
 }
 
-func ValidateInvoice(invoiceReq dtos.UploadInvoiceRequestDto) (*firs_models.FirsResponse, *string, error) {
+func ValidateInvoice(invoiceReq dtos.UploadInvoiceRequestDto, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
 
-	resp, err := firs.ValidateInvoice(invoiceReq)
+	resp, err := firs.ValidateInvoice(invoiceReq, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to validate invoice: %w", err)
 	}
@@ -119,9 +119,9 @@ func SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IRNSigningRespo
 	return theResp, nil
 }
 
-func SignInvoice(invoiceReq dtos.UploadInvoiceRequestDto) (*firs_models.FirsResponse, *string, error) {
+func SignInvoice(invoiceReq dtos.UploadInvoiceRequestDto, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
 
-	resp, err := firs.SignInvoice(invoiceReq)
+	resp, err := firs.SignInvoice(invoiceReq, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to sign invoice: %w", err)
 	}

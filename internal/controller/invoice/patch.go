@@ -3,6 +3,7 @@ package invoice
 import (
 	"einvoice-access-point/external/firs_models"
 	"einvoice-access-point/internal/services/invoice"
+	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/utility"
 
 	"github.com/gofiber/fiber/v2"
@@ -22,6 +23,12 @@ import (
 // @Failure 422 {object} models.Response "Validation failed"
 // @Router /invoice/update/{irn} [patch]
 func (base *Controller) UpdateInvoice(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
 	irn := c.Params("irn")
 	if irn == "" {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
@@ -30,7 +37,7 @@ func (base *Controller) UpdateInvoice(c *fiber.Ctx) error {
 
 	var req firs_models.UpdateInvoice
 
-	err := c.BodyParser(&req)
+	err = c.BodyParser(&req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -42,7 +49,7 @@ func (base *Controller) UpdateInvoice(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	respData, errDetails, err := invoice.UpdateInvoice(req, irn)
+	respData, errDetails, err := invoice.UpdateInvoice(req, irn, userDetails.IsSandbox)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)

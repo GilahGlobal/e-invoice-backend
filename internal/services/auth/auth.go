@@ -128,6 +128,7 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (fiber.Map, int, error) {
 		"business_id": user.BusinessID,
 		"service_id":  user.ServiceID,
 		"tin":         user.TIN,
+		"is_sandbox":  true,
 	}
 
 	return responseData, http.StatusCreated, nil
@@ -153,7 +154,7 @@ func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, i
 		return nil, http.StatusInternalServerError, fmt.Errorf("unable to fetch user " + err.Error())
 	}
 
-	tokenData, err := middleware.CreateToken(user)
+	tokenData, err := middleware.CreateToken(user, req.IsSandbox)
 	if err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
 	}
@@ -177,6 +178,7 @@ func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, i
 			Name:       userData.Name,
 			BusinessID: userData.BusinessID,
 			ServiceID:  userData.ServiceID,
+			IsSandbox:  req.IsSandbox,
 		},
 		"access_token": tokenData.AccessToken,
 	}
@@ -271,4 +273,43 @@ func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) err
 	pdb.UpdateFields(user, user, user.ID)
 	redisClient.Del(ctx, key)
 	return nil
+}
+
+func ToggleApllicationMode(db *gorm.DB, email string, isSandbox bool) (map[string]interface{}, int, error) {
+	pdb := inst.InitDB(db, true)
+
+	userData, err := userRepo.GetUserByEmail(pdb, email)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("unable to fetch user " + err.Error())
+	}
+
+	tokenData, err := middleware.CreateToken(userData, isSandbox)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
+	}
+	tokens := map[string]string{
+		"access_token": tokenData.AccessToken,
+		"exp":          strconv.Itoa(int(tokenData.ExpiresAt.Unix())),
+	}
+
+	accessToken := models.AccessToken{ID: tokenData.AccessUuid, OwnerID: userData.ID}
+
+	err = authRepo.CreateAccessToken(&accessToken, pdb, tokens)
+
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
+	}
+
+	responseData := map[string]interface{}{
+		"data": dtos.UserResponse{
+			ID:         userData.ID,
+			Email:      userData.Email,
+			Name:       userData.Name,
+			BusinessID: userData.BusinessID,
+			ServiceID:  userData.ServiceID,
+			IsSandbox:  isSandbox,
+		},
+		"access_token": tokenData.AccessToken,
+	}
+	return responseData, http.StatusOK, nil
 }

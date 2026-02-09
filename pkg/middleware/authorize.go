@@ -3,6 +3,7 @@ package middleware
 import (
 	authRepo "einvoice-access-point/internal/repository/auth"
 	"einvoice-access-point/pkg/config"
+	"einvoice-access-point/pkg/database/postgresql"
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/utility"
 	"strings"
@@ -12,9 +13,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func Authorize(db *gorm.DB) fiber.Handler {
-
-	pgd := inst.InitDB(db, true)
+func Authorize(db, testDB *gorm.DB) fiber.Handler {
+	var pgd *postgresql.Postgresql
 	return func(c *fiber.Ctx) error {
 
 		configs := config.GetConfig()
@@ -51,6 +51,12 @@ func Authorize(db *gorm.DB) fiber.Handler {
 			rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", invalidUser, "Unauthorized", nil)
 			return c.Status(fiber.StatusUnauthorized).JSON(rd)
 
+		}
+
+		if claims.IsSandbox {
+			pgd = inst.InitDB(testDB, true)
+		} else {
+			pgd = inst.InitDB(db, true)
 		}
 
 		accessToken, err := authRepo.GetByID(claims.AccessUuid, pgd)

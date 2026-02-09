@@ -5,6 +5,7 @@ type BulkUploadInput struct {
 	FileKey    string
 	BusinessID string
 	ServiceID  string
+	IsSandbox  bool
 }
 
 const (

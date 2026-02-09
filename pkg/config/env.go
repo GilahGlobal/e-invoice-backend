@@ -11,6 +11,7 @@ type Configuration struct {
 	TestDatabase Database
 	App          App
 	Firs         FIRS
+	FirsSandbox  FIRS
 	Zoho         ZOHO
 	Mail         MAIL
 	Redis        Redis
@@ -58,6 +59,12 @@ type BaseConfig struct {
 	FIRS_CLIENT_KEY string `mapstructure:"FIRS_CLIENT_KEY"`
 	FIRS_PUBLIC_KEY string `mapstructure:"FIRS_PUBLIC_KEY"`
 	FIRS_CERT_KEY   string `mapstructure:"FIRS_CERT_KEY"`
+
+	SANDBOX_FIRS_API_URL    string `mapstructure:"SANDBOX_FIRS_API_URL"`
+	SANDBOX_FIRS_API_KEY    string `mapstructure:"SANDBOX_FIRS_API_KEY"`
+	SANDBOX_FIRS_CLIENT_KEY string `mapstructure:"SANDBOX_FIRS_CLIENT_KEY"`
+	SANDBOX_FIRS_PUBLIC_KEY string `mapstructure:"SANDBOX_FIRS_PUBLIC_KEY"`
+	SANDBOX_FIRS_CERT_KEY   string `mapstructure:"SANDBOX_FIRS_CERT_KEY"`
 
 	MAIL_SERVER   string `mapstructure:"MAIL_SERVER"`
 	MAIL_PASSWORD string `mapstructure:"MAIL_PASSWORD"`
@@ -133,6 +140,15 @@ func (config *BaseConfig) SetupConfigurationn() *Configuration {
 			FirsPublicKey: config.FIRS_PUBLIC_KEY,
 			FirsCertKey:   config.FIRS_CERT_KEY,
 		},
+
+		FirsSandbox: FIRS{
+			FirsApiUrl:    config.SANDBOX_FIRS_API_URL,
+			FirsApiKey:    config.SANDBOX_FIRS_API_KEY,
+			FirsClientKey: config.SANDBOX_FIRS_CLIENT_KEY,
+			FirsPublicKey: config.SANDBOX_FIRS_PUBLIC_KEY,
+			FirsCertKey:   config.SANDBOX_FIRS_CERT_KEY,
+		},
+
 		Zoho: ZOHO{
 			ZohoApiUrl: config.ZOHO_API_URL,
 		},

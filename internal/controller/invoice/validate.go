@@ -5,6 +5,7 @@ import (
 	"einvoice-access-point/internal/dtos"
 	"einvoice-access-point/internal/services/invoice"
 	"einvoice-access-point/pkg/database"
+	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/utility"
 
 	"github.com/go-playground/validator/v10"
@@ -13,6 +14,7 @@ import (
 
 type Controller struct {
 	Db        *database.Database
+	TestDB    *database.Database
 	Validator *validator.Validate
 	Logger    *utility.Logger
 	Keys      *utility.CryptoKeys
@@ -31,9 +33,15 @@ type Controller struct {
 // @Failure 422 {object} models.Response "Validation failed"
 // @Router /invoice/validate-irn [post]
 func (base *Controller) ValidateIRN(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
 	var req firs_models.IRNValidationRequest
 
-	err := c.BodyParser(&req)
+	err = c.BodyParser(&req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -45,7 +53,7 @@ func (base *Controller) ValidateIRN(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	respData, errDetails, err := invoice.ValidateIRN(req)
+	respData, errDetails, err := invoice.ValidateIRN(req, userDetails.IsSandbox)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -69,9 +77,14 @@ func (base *Controller) ValidateIRN(c *fiber.Ctx) error {
 // @Failure 422 {object} models.Response "Validation failed"
 // @Router /invoice/validate [post]
 func (base *Controller) ValidateInvoice(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
 	var req dtos.UploadInvoiceRequestDto
 
-	err := c.BodyParser(&req)
+	err = c.BodyParser(&req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -83,7 +96,7 @@ func (base *Controller) ValidateInvoice(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	respData, errDetails, err := invoice.ValidateInvoice(req)
+	respData, errDetails, err := invoice.ValidateInvoice(req, userDetails.IsSandbox)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)

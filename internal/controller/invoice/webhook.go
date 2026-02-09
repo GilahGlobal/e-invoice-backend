@@ -3,6 +3,7 @@ package invoice
 import (
 	"einvoice-access-point/external/zoho"
 	services "einvoice-access-point/internal/services/webhooks"
+	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/utility"
 	"fmt"
 
@@ -15,7 +16,13 @@ func (base *Controller) HandleZohoWebhook(c *fiber.Ctx) error {
 	fmt.Printf("Webhook body is: %s\n\n", string(body))
 
 	organisationID := c.Query("organisation_id")
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
 
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
 	if organisationID == "" {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "No organisation ID present", nil, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -37,7 +44,7 @@ func (base *Controller) HandleZohoWebhook(c *fiber.Ctx) error {
 	// Keep raw body for signature check
 	signature := c.Get("X-Zoho-Signature")
 
-	respData, errDetails, err := services.HandleZohoWebhookService(payload, string(c.Body()), signature, base.Db.Postgresql.DB(), base.Logger, base.Keys, organisationID)
+	respData, errDetails, err := services.HandleZohoWebhookService(payload, string(c.Body()), signature, db, base.Logger, base.Keys, organisationID, userDetails.IsSandbox)
 	if err != nil {
 		if err == services.ErrInvalidSignature {
 			rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Invalid webhook signature", nil, nil)

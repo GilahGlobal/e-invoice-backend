@@ -61,9 +61,14 @@ func (base *Controller) SignIRN(c *fiber.Ctx) error {
 // @Failure 422 {object} models.Response "Validation failed"
 // @Router /invoice/sign [post]
 func (base *Controller) SignInvoice(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
 	var req dtos.UploadInvoiceRequestDto
 
-	err := c.BodyParser(&req)
+	err = c.BodyParser(&req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -75,7 +80,7 @@ func (base *Controller) SignInvoice(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	respData, errDetails, err := invoice.SignInvoice(req)
+	respData, errDetails, err := invoice.SignInvoice(req, userDetails.IsSandbox)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)

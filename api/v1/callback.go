@@ -10,8 +10,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func CallbackRoute(app *fiber.App, ApiVersion string, validator *validator.Validate, db *database.Database, logger *utility.Logger) *fiber.App {
-	callController := callback.Controller{Db: db, Validator: validator, Logger: logger}
+func CallbackRoute(app *fiber.App, ApiVersion string, validator *validator.Validate, db, testDb *database.Database, logger *utility.Logger) *fiber.App {
+	callController := callback.Controller{Db: db, TestDB: testDb, Validator: validator, Logger: logger}
 
 	callUrlSec := app.Group(fmt.Sprintf("%v", ApiVersion))
 	{

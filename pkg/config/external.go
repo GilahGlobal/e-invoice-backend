@@ -7,7 +7,6 @@ type FIRS struct {
 	FirsPublicKey string
 	FirsCertKey   string
 }
-
 type ZOHO struct {
 	ZohoApiUrl string
 }

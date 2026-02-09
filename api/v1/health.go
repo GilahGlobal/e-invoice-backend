@@ -10,8 +10,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func HealthRoute(app *fiber.App, ApiVersion string, validator *validator.Validate, db *database.Database, logger *utility.Logger) *fiber.App {
-	healthController := health.Controller{Db: db, Validator: validator, Logger: logger}
+func HealthRoute(app *fiber.App, ApiVersion string, validator *validator.Validate, db, testDB *database.Database, logger *utility.Logger) *fiber.App {
+	healthController := health.Controller{Db: db, Validator: validator, Logger: logger, TestDb: testDB}
 
 	healthGroup := app.Group(fmt.Sprintf("%v", ApiVersion))
 	healthGroup.Post("/health", healthController.Post)
