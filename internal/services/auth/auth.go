@@ -15,6 +15,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -256,6 +257,7 @@ func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) err
 
 	otp, err := redisClient.Get(ctx, key).Result()
 
+	log.Println(err)
 	if err != nil {
 		return errors.New("unable to verify token")
 	}

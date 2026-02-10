@@ -2,6 +2,7 @@ package redis
 
 import (
 	"einvoice-access-point/pkg/config"
+	"log"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -20,8 +21,9 @@ func (rdb *Redis) RedisDb() *redis.Client {
 
 func NewClient() *redis.Client {
 	redisConfig := config.GetConfig().Redis
+	log.Println(redisConfig.REDIS_URL)
 	client := redis.NewClient(&redis.Options{
-		Addr:     redisConfig.REDIS_HOST + ":" + redisConfig.REDIS_PORT,
+		Addr:     redisConfig.REDIS_URL,
 		Password: "",
 		DB:       0,
 	})

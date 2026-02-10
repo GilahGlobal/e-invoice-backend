@@ -180,7 +180,7 @@ func (base *Controller) InitiateForgotPassword(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	err = auth.InitiateForgotPassword(req, base.Db.Postgresql.DB())
+	err = auth.InitiateForgotPassword(req, base.TestDB.Postgresql.DB())
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -219,7 +219,7 @@ func (base *Controller) CompleteForgotPassword(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	err = auth.CompleteForgotPassword(req, base.Db.Postgresql.DB())
+	err = auth.CompleteForgotPassword(req, base.TestDB.Postgresql.DB())
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)

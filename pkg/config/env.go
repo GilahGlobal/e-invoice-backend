@@ -74,6 +74,7 @@ type BaseConfig struct {
 	REDIS_PORT string `mapstructure:"REDIS_PORT"`
 	REDIS_HOST string `mapstructure:"REDIS_HOST"`
 	REDIS_DB   string `mapstructure:"REDIS_DB"`
+	REDIS_URL  string `mapstructure:"REDIS_URL"`
 
 	ZOHO_API_URL string `mapstructure:"ZOHO_API_URL"`
 
@@ -164,6 +165,7 @@ func (config *BaseConfig) SetupConfigurationn() *Configuration {
 			REDIS_PORT: config.REDIS_PORT,
 			REDIS_HOST: config.REDIS_HOST,
 			REDIS_DB:   config.REDIS_DB,
+			REDIS_URL:  config.REDIS_URL,
 		},
 		S3: S3{
 			AccessKeyID:     config.S3_ACCESS_KEY_ID,
