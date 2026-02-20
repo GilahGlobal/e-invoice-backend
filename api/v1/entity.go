@@ -11,10 +11,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func EntityRoute(app *fiber.App, ApiVersion string, validator *validator.Validate, db *database.Database, logger *utility.Logger) *fiber.App {
-	entityController := entity.Controller{Db: db, Validator: validator, Logger: logger}
+func EntityRoute(app *fiber.App, ApiVersion string, validator *validator.Validate, db, testDb *database.Database, logger *utility.Logger) *fiber.App {
+	entityController := entity.Controller{Db: db, TestDB: testDb, Validator: validator, Logger: logger}
 
-	entityUrlSec := app.Group(fmt.Sprintf("%v/entity", ApiVersion), middleware.Authorize(db.Postgresql.DB()))
+	// entityUrlSec := app.Group(fmt.Sprintf("%v/entity", ApiVersion), middleware.Authorize(db.Postgresql.DB(), testDb.Postgresql.DB()))
+	entityUrlSec := app.Group(fmt.Sprintf("%v/entity", ApiVersion), middleware.Authorize(nil, testDb.Postgresql.DB()))
 	{
 		entityUrlSec.Get("", entityController.GetEntities)
 		entityUrlSec.Get("/:entity_id", entityController.GetEntity)

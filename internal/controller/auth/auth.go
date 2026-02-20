@@ -14,6 +14,7 @@ import (
 
 type Controller struct {
 	Db        *database.Database
+	TestDB    *database.Database
 	Validator *validator.Validate
 	Logger    *utility.Logger
 }
@@ -45,17 +46,25 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	reqData, err := auth.ValidateCreateUserRequest(req, base.Db.Postgresql.DB())
+	reqData, err := auth.ValidateCreateUserRequest(req, base.TestDB.Postgresql.DB())
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	respData, code, err := auth.CreateUser(reqData, base.Db.Postgresql.DB())
+	// create test account
+	respData, code, err := auth.CreateUser(reqData, base.TestDB.Postgresql.DB())
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
+
+	// create prod account
+	// _, _, err = auth.CreateUser(reqData, base.Db.Postgresql.DB())
+	// if err != nil {
+	// 	rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	// 	return c.Status(fiber.StatusBadRequest).JSON(rd)
+	// }
 
 	base.Logger.Info("user created successfully")
 	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "user created successfully", respData)
@@ -90,7 +99,19 @@ func (base *Controller) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	respData, code, err := auth.LoginUser(req, base.Db.Postgresql.DB())
+	if !req.IsSandbox {
+		err = auth.SynchronizeSandboxToProduction(base.Db, base.TestDB, req.Email)
+		if err != nil {
+			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
+		// rd := utility.BuildErrorResponse(400, "error", "live environment not available at the moment", err, nil)
+		// return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(req.IsSandbox, base.Db, base.TestDB)
+
+	respData, code, err := auth.LoginUser(req, db)
 	if err != nil {
 		rd := utility.BuildErrorResponse(code, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -116,15 +137,17 @@ func (base *Controller) Login(c *fiber.Ctx) error {
 // @Router /auth/logout [get]
 func (base *Controller) Logout(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
+
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
 
 	accessUuid := userDetails.AccessUuid
 	ownerId := userDetails.ID
 
-	respData, code, err := auth.LogoutUser(accessUuid, ownerId, base.Db.Postgresql.DB())
+	respData, code, err := auth.LogoutUser(accessUuid, ownerId, db)
 	if err != nil {
 		rd := utility.BuildErrorResponse(code, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -162,7 +185,7 @@ func (base *Controller) InitiateForgotPassword(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	err = auth.InitiateForgotPassword(req, base.Db.Postgresql.DB())
+	err = auth.InitiateForgotPassword(req, base.TestDB.Postgresql.DB())
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -201,7 +224,7 @@ func (base *Controller) CompleteForgotPassword(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	err = auth.CompleteForgotPassword(req, base.Db.Postgresql.DB())
+	err = auth.CompleteForgotPassword(req, base.TestDB.Postgresql.DB())
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -211,4 +234,45 @@ func (base *Controller) CompleteForgotPassword(c *fiber.Ctx) error {
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "forgot password completed successfully", nil)
 	return c.Status(http.StatusOK).JSON(rd)
+}
+
+// @Summary Toggle Application mode
+// @Description Toggle Application mode from either sandox to prod or vice cers
+// @Tags Auth
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dtos.LoginResponseDto "Application mode toggled successfully"
+// @Failure 400 {object} models.Response "Bad request, validation failed"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 422 {object} models.Response "Unprocessable entity"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /auth/toggle-mode [get]
+func (base *Controller) ToggleApplicationMode(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+	if !userDetails.IsSandbox {
+		// err := auth.SynchronizeSandboxToProduction(base.Db, base.TestDB, userDetails.Email)
+		// if err != nil {
+		// 	rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		// 	return c.Status(fiber.StatusBadRequest).JSON(rd)
+		// }
+		rd := utility.BuildErrorResponse(400, "error", "live environment not available at the moment", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+	db := middleware.GetDatabaseInstance(!userDetails.IsSandbox, base.Db, base.TestDB)
+
+	respData, code, err := auth.ToggleApllicationMode(db, userDetails.Email, !userDetails.IsSandbox)
+	if err != nil {
+		rd := utility.BuildErrorResponse(code, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	base.Logger.Info("application mode switched successfully")
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "application mode switched successfully", respData)
+	return c.Status(code).JSON(rd)
 }

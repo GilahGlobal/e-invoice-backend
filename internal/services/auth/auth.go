@@ -7,6 +7,7 @@ import (
 	userRepo "einvoice-access-point/internal/repository/business"
 	"einvoice-access-point/pkg/common"
 	"einvoice-access-point/pkg/config"
+	"einvoice-access-point/pkg/database"
 	"einvoice-access-point/pkg/database/redis"
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/middleware"
@@ -15,6 +16,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -26,7 +28,7 @@ import (
 
 func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.RegisterDto, error) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 	user := models.Business{}
 
 	if req.Email != "" {
@@ -50,7 +52,7 @@ func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.Register
 
 func CreateUser(req dtos.RegisterDto, db *gorm.DB) (fiber.Map, int, error) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	config := config.GetConfig()
 	serverSecret := config.Server.Secret
@@ -128,13 +130,14 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (fiber.Map, int, error) {
 		"business_id": user.BusinessID,
 		"service_id":  user.ServiceID,
 		"tin":         user.TIN,
+		"is_sandbox":  true,
 	}
 
 	return responseData, http.StatusCreated, nil
 }
-func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (*dtos.LoginResponseDto, int, error) {
+func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, int, error) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 	var (
 		user = models.Business{}
 	)
@@ -153,7 +156,7 @@ func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (*dtos.LoginResponseDto, i
 		return nil, http.StatusInternalServerError, fmt.Errorf("unable to fetch user " + err.Error())
 	}
 
-	tokenData, err := middleware.CreateToken(user)
+	tokenData, err := middleware.CreateToken(user, req.IsSandbox)
 	if err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
 	}
@@ -170,23 +173,24 @@ func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (*dtos.LoginResponseDto, i
 		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
 	}
 
-	responseData := dtos.LoginResponseDto{
-		Data: dtos.UserResponse{
+	responseData := map[string]interface{}{
+		"data": dtos.UserResponse{
 			ID:         userData.ID,
 			Email:      userData.Email,
 			Name:       userData.Name,
 			BusinessID: userData.BusinessID,
 			ServiceID:  userData.ServiceID,
+			IsSandbox:  req.IsSandbox,
 		},
-		AccessToken: tokenData.AccessToken,
+		"access_token": tokenData.AccessToken,
 	}
 
-	return &responseData, http.StatusOK, nil
+	return responseData, http.StatusOK, nil
 }
 
 func LogoutUser(accessUuid, ownerId string, db *gorm.DB) (fiber.Map, int, error) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 	var (
 		responseData fiber.Map
 	)
@@ -206,7 +210,7 @@ func LogoutUser(accessUuid, ownerId string, db *gorm.DB) (fiber.Map, int, error)
 func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) error {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 	var (
 		user = models.Business{}
 	)
@@ -236,7 +240,7 @@ func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) err
 func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) error {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 	var (
 		user = models.Business{}
 	)
@@ -254,6 +258,7 @@ func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) err
 
 	otp, err := redisClient.Get(ctx, key).Result()
 
+	log.Println(err)
 	if err != nil {
 		return errors.New("unable to verify token")
 	}
@@ -270,5 +275,136 @@ func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) err
 	user.Password = password
 	pdb.UpdateFields(user, user, user.ID)
 	redisClient.Del(ctx, key)
+	return nil
+}
+
+func ToggleApllicationMode(db *gorm.DB, email string, isSandbox bool) (map[string]interface{}, int, error) {
+	pdb := inst.InitDB(db, false)
+
+	userData, err := userRepo.GetUserByEmail(pdb, email)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("unable to fetch user " + err.Error())
+	}
+
+	tokenData, err := middleware.CreateToken(userData, isSandbox)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
+	}
+	tokens := map[string]string{
+		"access_token": tokenData.AccessToken,
+		"exp":          strconv.Itoa(int(tokenData.ExpiresAt.Unix())),
+	}
+
+	accessToken := models.AccessToken{ID: tokenData.AccessUuid, OwnerID: userData.ID}
+
+	err = authRepo.CreateAccessToken(&accessToken, pdb, tokens)
+
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
+	}
+
+	responseData := map[string]interface{}{
+		"data": dtos.UserResponse{
+			ID:         userData.ID,
+			Email:      userData.Email,
+			Name:       userData.Name,
+			BusinessID: userData.BusinessID,
+			ServiceID:  userData.ServiceID,
+			IsSandbox:  isSandbox,
+		},
+		"access_token": tokenData.AccessToken,
+	}
+	return responseData, http.StatusOK, nil
+}
+
+func SynchronizeSandboxToProduction(prodDB, sandboxDB *database.Database, email string) error {
+	pDB := inst.InitDB(prodDB.Postgresql.DB(), false)
+	sDB := inst.InitDB(sandboxDB.Postgresql.DB(), false)
+
+	exists := pDB.CheckExistsInTable("businesses", "email = ?", email)
+
+	if !exists {
+		sandboxExists := sDB.CheckExistsInTable("businesses", "email = ?", email)
+		if sandboxExists {
+			userData, err := userRepo.GetUserByEmail(sDB, email)
+			if err != nil {
+				log.Println("unable to fetch user from sandbox: " + err.Error())
+				return fmt.Errorf("unable to fetch user from sandbox: " + err.Error())
+			}
+
+			config := config.GetConfig()
+			serverSecret := config.Server.Secret
+
+			apiKey, err := utility.GenerateSecureToken(32, serverSecret)
+			if err != nil {
+				log.Println("failed to generate api key: " + err.Error())
+				return fmt.Errorf("failed to generate api key: %w", err)
+			}
+			encryptedAPIKey, err := common.EncryptAES(apiKey)
+			if err != nil {
+				log.Println("failed to encrypt API key: " + err.Error())
+				return fmt.Errorf("failed to encrypt API key: %w", err)
+			}
+			apiKeyHash := sha256.Sum256([]byte(apiKey))
+			apiKeyHashStr := hex.EncodeToString(apiKeyHash[:])
+
+			platformConfigs := models.PlatformConfigs{}
+			for platform, cfg := range userData.PlatformConfigs {
+				encryptedHMACSecret, err := common.EncryptAES(string(cfg.HMACSecret))
+				if err != nil {
+					log.Printf("failed to encrypt HMAC secret for %s: %v", platform, err)
+					return fmt.Errorf("failed to encrypt HMAC secret for %s: %w", platform, err)
+				}
+				encryptedAPIKey, err := common.EncryptAES(string(cfg.APIKey))
+				if err != nil {
+					log.Printf("failed to encrypt API key for %s: %v", platform, err)
+					return fmt.Errorf("failed to encrypt API key for %s: %w", platform, err)
+				}
+				encryptedAPISecret, err := common.EncryptAES(string(cfg.APISecret))
+				if err != nil {
+					log.Printf("failed to encrypt API secret for %s: %v", platform, err)
+					return fmt.Errorf("failed to encrypt API secret for %s: %w", platform, err)
+				}
+				encryptedAuthToken, err := common.EncryptAES(string(cfg.AuthToken))
+				if err != nil {
+					log.Printf("failed to encrypt Auth token for %s: %v", platform, err)
+					return fmt.Errorf("failed to encrypt Auth token for %s: %w", platform, err)
+				}
+
+				platformConfigs[platform] = models.AccountingPlatformConfig{
+					OrgID:      cfg.OrgID,
+					HMACSecret: common.EncryptedString(encryptedHMACSecret),
+					AuthToken:  common.EncryptedString(encryptedAuthToken),
+					APIKey:     common.EncryptedString(encryptedAPIKey),
+					APISecret:  common.EncryptedString(encryptedAPISecret),
+				}
+			}
+
+			user := models.Business{
+				ID:              utility.GenerateUUID(),
+				Name:            userData.Name,
+				Email:           userData.Email,
+				Password:        userData.Password,
+				ServiceID:       "6A2BC898", //userRepo.GenerateUniqueServiceID(pdb.Db)
+				APIKey:          common.EncryptedString(encryptedAPIKey),
+				APIKeyHash:      apiKeyHashStr,
+				PlatformConfigs: platformConfigs,
+				AccStatus:       0,
+				TIN:             userData.TIN,
+				PhoneNumber:     userData.PhoneNumber,
+				CompanyName:     userData.CompanyName,
+			}
+
+			err = userRepo.CreateBusiness(&user, pDB)
+			if err != nil {
+				log.Println(err)
+			}
+		} else {
+			return nil
+		}
+	} else {
+		return nil
+	}
+
 	return nil
 }

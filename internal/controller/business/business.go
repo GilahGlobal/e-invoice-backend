@@ -14,6 +14,7 @@ import (
 
 type Controller struct {
 	Db        *database.Database
+	TestDb    *database.Database
 	Validator *validator.Validate
 	Logger    *utility.Logger
 }
@@ -59,7 +60,8 @@ func (base *Controller) GetBusiness(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
 
-	business, err := business.GetBusinessByID(base.Db.Postgresql.DB(), userDetails.ID)
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDb)
+	business, err := business.GetBusinessByID(db, userDetails.ID)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusNotFound, "error", err.Error(), err, nil)
 		return c.Status(http.StatusNotFound).JSON(rd)
@@ -88,6 +90,7 @@ func (base *Controller) UpdateBusinessProfile(c *fiber.Ctx) error {
 		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
 		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDb)
 
 	var req dtos.UpdateBusinessDto
 	err = c.BodyParser(&req)
@@ -101,7 +104,7 @@ func (base *Controller) UpdateBusinessProfile(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	businessData, err := business.GetBusinessDetails(base.Db.Postgresql.DB(), userDetails.ID)
+	businessData, err := business.GetBusinessDetails(db, userDetails.ID)
 
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)

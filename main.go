@@ -33,9 +33,10 @@ func main() {
 	}
 
 	configuration := config.Setup(logger, "./app")
-	postgresql.ConnectToDatabase(logger, configuration.Database)
+	postgresql.ConnectToDatabase(logger, configuration.Database, configuration.TestDatabase)
 	validatorRef := validator.New()
-	db := database.Connection()
+	validatorRef.RegisterValidation("nrsdate", utility.IsValidNRSDate)
+	db, testDb := database.Connection()
 
 	// Load crypto key from application onstart
 	keys, err := utility.LoadCryptoKeys("crypto_keys.txt")
@@ -45,12 +46,17 @@ func main() {
 	}
 
 	// Run migrations if enabled
-	if configuration.Database.Migrate {
-		migrations.RunAllMigrations(db)
-		// seed.SeedDatabase(db)
+	// if configuration.Database.Migrate {
+	// 	migrations.RunAllMigrations(db)
+	// 	// seed.SeedDatabase(db)
+	// }
+
+	if configuration.TestDatabase.Migrate {
+		migrations.RunAllMigrations(testDb)
+		// seed.SeedDatabase(testDb)
 	}
 
-	app := v1.Setup(logger, validatorRef, db, keys)
+	app := v1.Setup(logger, validatorRef, db, testDb, keys)
 
 	host := os.Getenv("HOST")
 	port := os.Getenv("PORT")

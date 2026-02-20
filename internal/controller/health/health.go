@@ -13,6 +13,7 @@ import (
 
 type Controller struct {
 	Db        *database.Database
+	TestDb    *database.Database
 	Validator *validator.Validate
 	Logger    *utility.Logger
 }

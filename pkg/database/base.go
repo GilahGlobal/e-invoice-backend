@@ -17,7 +17,8 @@ type Database struct {
 }
 
 var DB *Database = &Database{}
+var TestDB *Database = &Database{}
 
-func Connection() *Database {
-	return DB
+func Connection() (*Database, *Database) {
+	return DB, TestDB
 }

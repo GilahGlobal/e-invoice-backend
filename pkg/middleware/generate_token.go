@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func CreateToken(user models.Business) (*TokenDetailDTO, error) {
+func CreateToken(user models.Business, isSandbox bool) (*TokenDetailDTO, error) {
 	var (
 		configs   = config.GetConfig()
 		tokenData = &TokenDetailDTO{}
@@ -27,6 +27,7 @@ func CreateToken(user models.Business) (*TokenDetailDTO, error) {
 		user.BusinessID,
 		user.ServiceID,
 		tokenData.AccessUuid,
+		isSandbox,
 		jwt.RegisteredClaims{
 			Issuer:    user.Email,
 			ExpiresAt: jwt.NewNumericDate(tokenData.ExpiresAt),

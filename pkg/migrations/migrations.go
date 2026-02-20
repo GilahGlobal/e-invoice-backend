@@ -10,6 +10,7 @@ func AuthMigrationModels() []interface{} {
 		&models.Invoice{},
 		&models.AccessToken{},
 		&models.TokenManager{},
+		&models.BulkUpload{},
 	}
 
 }

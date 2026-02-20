@@ -292,6 +292,9 @@ definitions:
     properties:
       email:
         type: string
+      is_sandbox:
+        default: true
+        type: boolean
       password:
         type: string
     required:
@@ -388,13 +391,16 @@ definitions:
         example: Ikeja
         type: string
       country:
-        example: Nigeria
-        type: string
-      country_code:
         example: NG
+        type: string
+      lga:
+        example: NG-AB-ANO
         type: string
       postal_zone:
         example: "10001"
+        type: string
+      state:
+        example: NG-AB
         type: string
       street_name:
         example: 123 Broad Street
@@ -402,8 +408,9 @@ definitions:
     required:
     - city_name
     - country
-    - country_code
+    - lga
     - postal_zone
+    - state
     - street_name
     type: object
   dtos.Price:
@@ -491,7 +498,32 @@ definitions:
   dtos.TaxCategory:
     properties:
       id:
-        example: VAT
+        enum:
+        - STANDARD_GST
+        - REDUCED_GST
+        - ZERO_GST
+        - STANDARD_VAT
+        - REDUCED_VAT
+        - ZERO_VAT
+        - STATE_SALES_TAX
+        - LOCAL_SALES_TAX
+        - ALCOHOL_EXCISE_TAX
+        - TOBACCO_EXCISE_TAX
+        - FUEL_EXCISE_TAX
+        - CORPORATE_INCOME_TAX
+        - PERSONAL_INCOME_TAX
+        - SOCIAL_SECURITY_TAX
+        - MEDICARE_TAX
+        - REAL_ESTATE_TAX
+        - PERSONAL_PROPERTY_TAX
+        - CARBON_TAX
+        - PLASTIC_TAX
+        - IMPORT_DUTY
+        - EXPORT_DUTY
+        - LUXURY_TAX
+        - SERVICE_TAX
+        - TOURISM_TAX
+        example: STANDARD_VAT
         type: string
       percent:
         example: 15
@@ -599,6 +631,27 @@ definitions:
         minLength: 1
         type: string
       invoice_type_code:
+        enum:
+        - "380"
+        - "381"
+        - "384"
+        - "385"
+        - "386"
+        - "388"
+        - "389"
+        - "390"
+        - "392"
+        - "393"
+        - "394"
+        - "395"
+        - "396"
+        - "397"
+        - "399"
+        - "400"
+        - "402"
+        - "404"
+        - "406"
+        - "408"
         example: "381"
         type: string
       irn:
@@ -658,6 +711,7 @@ definitions:
     - invoice_type_code
     - issue_date
     - legal_monetary_total
+    - tax_currency_code
     - tax_total
     type: object
   dtos.UploadInvoiceResponseDto:
@@ -689,35 +743,15 @@ definitions:
       id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
+      is_sandbox:
+        example: true
+        type: boolean
       name:
         example: John Doe
         type: string
       service_id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-    type: object
-  firs_models.AllowanceCharge:
-    properties:
-      amount:
-        example: 1500.75
-        type: number
-      charge_indicator:
-        example: true
-        type: boolean
-    required:
-    - amount
-    type: object
-  firs_models.DocumentReference:
-    properties:
-      irn:
-        example: ITW001-E9E0C0D3-20240619
-        type: string
-      issue_date:
-        example: "2026-01-16"
-        type: string
-    required:
-    - irn
-    - issue_date
     type: object
   firs_models.FirsTransactionVatPayload:
     properties:
@@ -780,322 +814,6 @@ definitions:
     - business_id
     - invoice_reference
     - irn
-    type: object
-  firs_models.InvoiceDeliveryPeriod:
-    properties:
-      end_date:
-        example: "2026-01-16"
-        type: string
-      start_date:
-        example: "2026-01-16"
-        type: string
-    required:
-    - end_date
-    - start_date
-    type: object
-  firs_models.InvoiceLine:
-    properties:
-      discount_amount:
-        example: 2500
-        type: number
-      discount_rate:
-        example: 5
-        type: number
-      fee_amount:
-        example: 450
-        type: number
-      fee_rate:
-        example: 2
-        type: number
-      hsn_code:
-        example: "1282.10"
-        type: string
-      invoiced_quantity:
-        example: 10
-        minimum: 1
-        type: integer
-      item:
-        $ref: '#/definitions/firs_models.Item'
-      line_extension_amount:
-        example: 1500.75
-        type: number
-      price:
-        $ref: '#/definitions/firs_models.Price'
-      product_category:
-        example: Electronics
-        type: string
-    required:
-    - hsn_code
-    - invoiced_quantity
-    - item
-    - line_extension_amount
-    - price
-    - product_category
-    type: object
-  firs_models.InvoiceRequest:
-    properties:
-      _document_reference:
-        items:
-          $ref: '#/definitions/firs_models.DocumentReference'
-        type: array
-      accounting_cost:
-        example: "2000"
-        type: string
-      accounting_customer_party:
-        $ref: '#/definitions/firs_models.Party'
-      accounting_supplier_party:
-        $ref: '#/definitions/firs_models.Party'
-      actual_delivery_date:
-        example: "2026-01-16"
-        type: string
-      allowance_charge:
-        items:
-          $ref: '#/definitions/firs_models.AllowanceCharge'
-        type: array
-      billing_reference:
-        items:
-          $ref: '#/definitions/firs_models.DocumentReference'
-        type: array
-      business_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      buyer_reference:
-        example: ITW001-E9E0C0D3-20240619
-        type: string
-      contract_document_reference:
-        $ref: '#/definitions/firs_models.DocumentReference'
-      dispatch_document_reference:
-        $ref: '#/definitions/firs_models.DocumentReference'
-      document_currency_code:
-        example: NGN
-        type: string
-      due_date:
-        example: "2026-01-20"
-        type: string
-      invoice_delivery_period:
-        $ref: '#/definitions/firs_models.InvoiceDeliveryPeriod'
-      invoice_line:
-        items:
-          $ref: '#/definitions/firs_models.InvoiceLine'
-        type: array
-      invoice_number:
-        example: INV-001
-        minLength: 1
-        type: string
-      invoice_type_code:
-        example: "381"
-        type: string
-      irn:
-        example: IRN-001-20122345
-        type: string
-      issue_date:
-        example: "2026-01-16"
-        type: string
-      issue_time:
-        example: "12:00:00"
-        type: string
-      legal_monetary_total:
-        $ref: '#/definitions/firs_models.LegalMonetaryTotal'
-      note:
-        example: Invoice note
-        type: string
-      order_reference:
-        example: ITW001-E9E0C0D3-20240619
-        type: string
-      originator_document_reference:
-        $ref: '#/definitions/firs_models.DocumentReference'
-      payee_party:
-        $ref: '#/definitions/firs_models.Party'
-      payment_means:
-        items:
-          $ref: '#/definitions/firs_models.PaymentMeans'
-        type: array
-      payment_status:
-        enum:
-        - PENDING
-        - PAID
-        - REJECTED
-        example: PENDING
-        type: string
-      payment_terms_note:
-        example: Payment terms note
-        type: string
-      receipt_document_reference:
-        $ref: '#/definitions/firs_models.DocumentReference'
-      tax_currency_code:
-        example: NGN
-        type: string
-      tax_point_date:
-        example: "2026-01-16"
-        type: string
-      tax_representative_party:
-        $ref: '#/definitions/firs_models.Party'
-      tax_total:
-        items:
-          $ref: '#/definitions/firs_models.TaxTotal'
-        type: array
-    required:
-    - accounting_supplier_party
-    - business_id
-    - document_currency_code
-    - invoice_line
-    - invoice_type_code
-    - issue_date
-    - legal_monetary_total
-    - tax_total
-    type: object
-  firs_models.Item:
-    properties:
-      description:
-        example: A high-performance laptop suitable for gaming and work.
-        type: string
-      name:
-        example: Laptop
-        type: string
-      sellers_item_identification:
-        example: LAP-12345
-        type: string
-    required:
-    - name
-    type: object
-  firs_models.LegalMonetaryTotal:
-    properties:
-      line_extension_amount:
-        example: 1500.75
-        type: number
-      payable_amount:
-        example: 1700.75
-        type: number
-      tax_exclusive_amount:
-        example: 1500.75
-        type: number
-      tax_inclusive_amount:
-        example: 1700.75
-        type: number
-    required:
-    - line_extension_amount
-    - payable_amount
-    - tax_exclusive_amount
-    - tax_inclusive_amount
-    type: object
-  firs_models.Party:
-    properties:
-      business_description:
-        example: Acme Inc. is a leading technology company.
-        minLength: 5
-        type: string
-      email:
-        example: business@example.com
-        type: string
-      party_name:
-        example: Acme Inc.
-        minLength: 2
-        type: string
-      postal_address:
-        $ref: '#/definitions/firs_models.PostalAddress'
-      telephone:
-        example: "+234804567890"
-        minLength: 7
-        type: string
-      tin:
-        example: "123456789012345"
-        type: string
-    required:
-    - email
-    - party_name
-    - postal_address
-    - tin
-    type: object
-  firs_models.PaymentMeans:
-    properties:
-      payment_due_date:
-        example: "2026-01-16"
-        type: string
-      payment_means_code:
-        example: "10"
-        type: string
-    required:
-    - payment_due_date
-    - payment_means_code
-    type: object
-  firs_models.PostalAddress:
-    properties:
-      city_name:
-        example: Ikeja
-        type: string
-      country:
-        example: Nigeria
-        type: string
-      country_code:
-        example: NG
-        type: string
-      postal_zone:
-        example: "10001"
-        type: string
-      street_name:
-        example: 123 Broad Street
-        type: string
-    required:
-    - city_name
-    - country
-    - country_code
-    - postal_zone
-    - street_name
-    type: object
-  firs_models.Price:
-    properties:
-      base_quantity:
-        example: 1
-        type: integer
-      price_amount:
-        example: 5000
-        type: number
-      price_unit:
-        example: NGN per 1
-        type: string
-    required:
-    - base_quantity
-    - price_amount
-    - price_unit
-    type: object
-  firs_models.TaxCategory:
-    properties:
-      id:
-        example: VAT
-        type: string
-      percent:
-        example: 15
-        type: number
-    required:
-    - id
-    - percent
-    type: object
-  firs_models.TaxSubtotal:
-    properties:
-      tax_amount:
-        example: 1500.75
-        type: number
-      tax_category:
-        $ref: '#/definitions/firs_models.TaxCategory'
-      taxable_amount:
-        example: 1500.75
-        type: number
-    required:
-    - tax_amount
-    - tax_category
-    - taxable_amount
-    type: object
-  firs_models.TaxTotal:
-    properties:
-      tax_amount:
-        example: 1500.75
-        type: number
-      tax_subtotal:
-        items:
-          $ref: '#/definitions/firs_models.TaxSubtotal'
-        type: array
-    required:
-    - tax_amount
     type: object
   firs_models.UpdateInvoice:
     properties:
@@ -1327,6 +1045,37 @@ paths:
           schema:
             $ref: '#/definitions/models.Response'
       summary: Register
+      tags:
+      - Auth
+  /auth/toggle-mode:
+    get:
+      description: Toggle Application mode from either sandox to prod or vice cers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Application mode toggled successfully
+          schema:
+            $ref: '#/definitions/dtos.LoginResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Toggle Application mode
       tags:
       - Auth
   /business:
@@ -1833,7 +1582,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/firs_models.InvoiceRequest'
+          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
       produces:
       - application/json
       responses:
@@ -2148,7 +1897,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/firs_models.InvoiceRequest'
+          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
       produces:
       - application/json
       responses:

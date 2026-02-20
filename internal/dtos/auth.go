@@ -33,8 +33,9 @@ type UpdateUserRequestModel struct {
 }
 
 type LoginRequestDto struct {
-	Email    string `json:"email" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Email     string `json:"email" validate:"required"`
+	Password  string `json:"password" validate:"required"`
+	IsSandbox bool   `json:"is_sandbox" default:"true" validate:"omitempty"`
 }
 type UserResponse struct {
 	ID         string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
@@ -42,6 +43,7 @@ type UserResponse struct {
 	Name       string  `json:"name" example:"John Doe"`
 	BusinessID *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
 	ServiceID  string  `json:"service_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	IsSandbox  bool    `json:"is_sandbox" example:"true"`
 }
 type LoginResponseDto struct {
 	BaseResponseDto

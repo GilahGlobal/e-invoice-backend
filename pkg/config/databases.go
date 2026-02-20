@@ -16,4 +16,5 @@ type Redis struct {
 	REDIS_PORT string
 	REDIS_HOST string
 	REDIS_DB   string
+	REDIS_URL  string
 }

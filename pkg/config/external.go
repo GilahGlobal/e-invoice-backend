@@ -7,7 +7,13 @@ type FIRS struct {
 	FirsPublicKey string
 	FirsCertKey   string
 }
-
 type ZOHO struct {
 	ZohoApiUrl string
+}
+
+type S3 struct {
+	AccessKeyID     string
+	SecretAccessKey string
+	Bucket          string
+	Region          string
 }

@@ -25,7 +25,7 @@ var (
 
 // HandleZohoWebhookService handles all the webhook logic
 func HandleZohoWebhookService(payload zoho.WebhookPayload, rawBody string, signature string,
-	db *gorm.DB, logger *utility.Logger, firsKeys *utility.CryptoKeys, orgID string) (*zoho.WebhookResponse, *string, error) {
+	db *gorm.DB, logger *utility.Logger, firsKeys *utility.CryptoKeys, orgID string, isSandbox bool) (*zoho.WebhookResponse, *string, error) {
 	platform := "zoho"
 
 	business, config, err := GetBuinessConfigs(db, platform, orgID)
@@ -40,7 +40,7 @@ func HandleZohoWebhookService(payload zoho.WebhookPayload, rawBody string, signa
 		return nil, nil, ErrInvalidSignature
 	}
 
-	respData, errDetails, err := processZohoWebhook(payload, db, logger, firsKeys, business, *config)
+	respData, errDetails, err := processZohoWebhook(payload, db, logger, firsKeys, business, *config, isSandbox)
 	if err != nil {
 		return nil, errDetails, err
 	}
@@ -50,7 +50,7 @@ func HandleZohoWebhookService(payload zoho.WebhookPayload, rawBody string, signa
 
 // ProcessWebhook processes the Zoho webhook payload
 func processZohoWebhook(payload zoho.WebhookPayload, db *gorm.DB, logger *utility.Logger, firsKeys *utility.CryptoKeys,
-	business *models.Business, accConfig models.AccountingPlatformConfig) (*zoho.WebhookResponse, *string, error) {
+	business *models.Business, accConfig models.AccountingPlatformConfig, isSandbox bool) (*zoho.WebhookResponse, *string, error) {
 
 	logger.Info("Processing invoice",
 		zap.String("invoice_id", payload.Invoice.InvoiceID),
@@ -58,7 +58,7 @@ func processZohoWebhook(payload zoho.WebhookPayload, db *gorm.DB, logger *utilit
 		zap.String("customer_name", payload.Invoice.CustomerName),
 		zap.Float64("total", payload.Invoice.Total))
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	platformMetadata := models.PlatformMetadata{
 		"zoho": models.InvoicePlatformData{
@@ -106,7 +106,7 @@ func processZohoWebhook(payload zoho.WebhookPayload, db *gorm.DB, logger *utilit
 		return nil, &errDetails, fmt.Errorf("failed to save invoice: %w", err)
 	}
 
-	theIRN, theQrCode, err := FirsZohoAllInOneProcess(payload, firsKeys, business, invoice, db)
+	theIRN, theQrCode, err := FirsZohoAllInOneProcess(payload, firsKeys, business, invoice, db, isSandbox)
 	if err != nil {
 		errDetails := "failed to running one or more firs process"
 		logger.Error("Failed to running firs processes", zap.Error(err))
@@ -140,7 +140,7 @@ func processZohoWebhook(payload zoho.WebhookPayload, db *gorm.DB, logger *utilit
 
 func GetBuinessConfigs(db *gorm.DB, platform, orgID string) (*models.Business, *models.AccountingPlatformConfig, error) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	business, err := businessRepository.FindBusinessByPlatformOrgID(pdb, platform, orgID)
 	if err != nil {
