@@ -12,7 +12,7 @@ import (
 
 func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *models.Invoice, db *gorm.DB, isSandbox bool) (error, bool) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	_, theErr, err := ValidateInvoice(payload, isSandbox)
 	if err != nil {
@@ -68,7 +68,7 @@ func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *mod
 }
 
 func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload dtos.UploadInvoiceRequestDto, invoiceModel *models.Invoice, isSandbox bool) (error, bool) {
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 	switch currentStatus {
 	case models.StatusValidatedInvoice:
 		_, theErr, err := ValidateInvoice(payload, isSandbox)

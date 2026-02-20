@@ -145,7 +145,7 @@ func GenerateIRN(invoiceNumber, serviceId string) (*string, error) {
 }
 
 func AddBulkUploadLog(db *gorm.DB, fileUrl, fileKey string) error {
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	payload := &models.BulkUpload{
 		ID:      utility.GenerateUUID(),
@@ -161,7 +161,7 @@ func AddBulkUploadLog(db *gorm.DB, fileUrl, fileKey string) error {
 }
 
 func UpdateBulkUploadLog(db *gorm.DB, fileKey string, payload interface{}) error {
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	repositoryLog, err := repository.GetBulkUploadLogByFileKey(pdb, fileKey)
 	if err != nil {

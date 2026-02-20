@@ -15,13 +15,13 @@ import (
 )
 
 func ConnectToDatabase(logger *utility.Logger, configDatabases, testDatabase config.Database) (*gorm.DB, *gorm.DB) {
-	// dbsCV := configDatabases
+	dbsCV := configDatabases
 
-	// utility.LogAndPrint(logger, "connecting to database")
-	// connectedDB := connectToDb(dbsCV.DB_HOST, dbsCV.USERNAME, dbsCV.PASSWORD, dbsCV.DB_NAME, dbsCV.DB_PORT, dbsCV.SSLMODE, dbsCV.TIMEZONE, logger)
+	utility.LogAndPrint(logger, "connecting to prod database")
+	connectedDB := connectToDb(dbsCV.DB_HOST, dbsCV.USERNAME, dbsCV.PASSWORD, dbsCV.DB_NAME, dbsCV.DB_PORT, dbsCV.SSLMODE, dbsCV.TIMEZONE, logger)
 
-	// utility.LogAndPrint(logger, "connected to database")
-	// database.DB.Postgresql = NewPostgresqlConnection(connectedDB)
+	utility.LogAndPrint(logger, "connected to prod database")
+	database.DB.Postgresql = NewPostgresqlConnection(connectedDB)
 
 	testDB := testDatabase
 	utility.LogAndPrint(logger, "connecting to test database")

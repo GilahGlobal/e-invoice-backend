@@ -54,9 +54,9 @@ func Authorize(db, testDB *gorm.DB) fiber.Handler {
 		}
 
 		if claims.IsSandbox {
-			pgd = inst.InitDB(testDB, true)
+			pgd = inst.InitDB(testDB, false)
 		} else {
-			pgd = inst.InitDB(db, true)
+			pgd = inst.InitDB(db, false)
 		}
 
 		accessToken, err := authRepo.GetByID(claims.AccessUuid, pgd)
