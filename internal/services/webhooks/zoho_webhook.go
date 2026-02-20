@@ -58,7 +58,7 @@ func processZohoWebhook(payload zoho.WebhookPayload, db *gorm.DB, logger *utilit
 		zap.String("customer_name", payload.Invoice.CustomerName),
 		zap.Float64("total", payload.Invoice.Total))
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	platformMetadata := models.PlatformMetadata{
 		"zoho": models.InvoicePlatformData{
@@ -140,7 +140,7 @@ func processZohoWebhook(payload zoho.WebhookPayload, db *gorm.DB, logger *utilit
 
 func GetBuinessConfigs(db *gorm.DB, platform, orgID string) (*models.Business, *models.AccountingPlatformConfig, error) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	business, err := businessRepository.FindBusinessByPlatformOrgID(pdb, platform, orgID)
 	if err != nil {

@@ -17,7 +17,7 @@ import (
 func FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys *utility.CryptoKeys, business *models.Business,
 	invoiceModel *models.Invoice, db *gorm.DB, isSandBox bool) (*string, *string, error) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	theIRN, err := invoice.GenerateIRN(payload.Invoice.InvoiceNumber, business.ServiceID)
 	if err != nil {
@@ -60,7 +60,7 @@ func FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys *utility.Cryp
 
 func otherFirsProcesses(payload zoho.WebhookPayload, business *models.Business, invoiceModel *models.Invoice, db *gorm.DB, theIRN string, isSandBox bool) error {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	newInvoiceResp, err := converter.ConvertZohoToFIRS(payload.Invoice, *business.BusinessID, business.Name, theIRN)
 	if err != nil {

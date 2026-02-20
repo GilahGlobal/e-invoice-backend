@@ -21,19 +21,19 @@ import (
 
 func GetAllInvoicesByBusinessID(db *gorm.DB, businessID string) ([]models.MinimalInvoiceDTO, error) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	return repository.FindMinimalInvoicesByBusinessID(pdb, businessID)
 }
 
 func GetInvoiceDetails(db *gorm.DB, businessID, invoiceID string) (*models.Invoice, error) {
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 	return repository.FindInvoiceByBusinessAndID(pdb, businessID, invoiceID)
 }
 
 func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode string, invoiceExists *models.Invoice, isSandbox bool) (*models.Invoice, *string, error, bool) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 	isInvoiceSigned := false
 	var invoice *models.Invoice
 
@@ -91,12 +91,12 @@ func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNum
 }
 
 func DeleteInvoice(db *gorm.DB, businessID, invoiceID string) error {
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 	return repository.DeleteInvoiceByBusinessAndID(pdb, businessID, invoiceID)
 }
 
 func GetInvoiceByInvoiceNumber(db *gorm.DB, invoiceNumber, businessID string) (*models.Invoice, error) {
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 	return repository.FindInvoiceByNumberAndBusinessID(pdb, invoiceNumber, businessID)
 }
 

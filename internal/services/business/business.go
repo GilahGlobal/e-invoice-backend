@@ -13,7 +13,7 @@ import (
 
 func GetAllBusinesses(db *gorm.DB) ([]fiber.Map, error) {
 
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	businesses, err := repository.FindAllBusinesses(pdb)
 	if err != nil {
@@ -47,7 +47,7 @@ func GetAllBusinesses(db *gorm.DB) ([]fiber.Map, error) {
 }
 
 func GetBusinessByID(db *gorm.DB, id string) (fiber.Map, error) {
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	business, err := repository.FindBusinessByID(pdb, id)
 	if err != nil {
@@ -77,7 +77,7 @@ func GetBusinessByID(db *gorm.DB, id string) (fiber.Map, error) {
 }
 
 func GetBusinessDetails(db *gorm.DB, id string) (*models.Business, error) {
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	business := &models.Business{}
 	_, err := pdb.SelectOneFromDb(business, "id = ?", id)
@@ -92,7 +92,7 @@ func GetBusinessDetails(db *gorm.DB, id string) (*models.Business, error) {
 }
 
 func UpdateBusinessDetails(db *gorm.DB, business models.Business, payload dtos.UpdateBusinessDto) error {
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	updates := make(map[string]interface{})
 

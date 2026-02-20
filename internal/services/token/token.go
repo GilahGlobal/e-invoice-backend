@@ -12,7 +12,7 @@ import (
 )
 
 func GetValidAccessToken(db *gorm.DB, accConfig models.AccountingPlatformConfig, provider, orgID string, code ...string) (string, error) {
-	pdb := inst.InitDB(db, true)
+	pdb := inst.InitDB(db, false)
 
 	token, err := repository.FindToken(pdb, provider, orgID)
 	if err != nil {

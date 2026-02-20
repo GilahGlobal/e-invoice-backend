@@ -100,8 +100,13 @@ func (base *Controller) Login(c *fiber.Ctx) error {
 	}
 
 	if !req.IsSandbox {
-		rd := utility.BuildErrorResponse(400, "error", "live environment not available at the moment", err, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
+		err = auth.SynchronizeSandboxToProduction(base.Db, base.TestDB, req.Email)
+		if err != nil {
+			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
+		// rd := utility.BuildErrorResponse(400, "error", "live environment not available at the moment", err, nil)
+		// return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
 	db := middleware.GetDatabaseInstance(req.IsSandbox, base.Db, base.TestDB)
@@ -250,10 +255,15 @@ func (base *Controller) ToggleApplicationMode(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 	if !userDetails.IsSandbox {
+		// err := auth.SynchronizeSandboxToProduction(base.Db, base.TestDB, userDetails.Email)
+		// if err != nil {
+		// 	rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		// 	return c.Status(fiber.StatusBadRequest).JSON(rd)
+		// }
 		rd := utility.BuildErrorResponse(400, "error", "live environment not available at the moment", err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
-	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	db := middleware.GetDatabaseInstance(!userDetails.IsSandbox, base.Db, base.TestDB)
 
 	respData, code, err := auth.ToggleApllicationMode(db, userDetails.Email, !userDetails.IsSandbox)
 	if err != nil {
