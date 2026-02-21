@@ -153,12 +153,12 @@ func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, i
 
 	userData, err := userRepo.GetUserByEmail(pdb, req.Email)
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("unable to fetch user " + err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("unable to fetch user: %w", err)
 	}
 
 	tokenData, err := middleware.CreateToken(user, req.IsSandbox)
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: %w", err)
 	}
 	tokens := map[string]string{
 		"access_token": tokenData.AccessToken,
@@ -170,7 +170,7 @@ func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, i
 	err = authRepo.CreateAccessToken(&accessToken, pdb, tokens)
 
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: %w", err)
 	}
 
 	responseData := map[string]interface{}{
@@ -199,7 +199,7 @@ func LogoutUser(accessUuid, ownerId string, db *gorm.DB) (fiber.Map, int, error)
 
 	err := authRepo.RevokeAccessToken(&accessToken, pdb)
 	if err != nil {
-		return responseData, http.StatusInternalServerError, fmt.Errorf("error revoking user session: " + err.Error())
+		return responseData, http.StatusInternalServerError, fmt.Errorf("error revoking user session: %w", err)
 	}
 
 	responseData = fiber.Map{}
@@ -283,12 +283,12 @@ func ToggleApllicationMode(db *gorm.DB, email string, isSandbox bool) (map[strin
 
 	userData, err := userRepo.GetUserByEmail(pdb, email)
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("unable to fetch user " + err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("unable to fetch user: %w", err)
 	}
 
 	tokenData, err := middleware.CreateToken(userData, isSandbox)
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: %w", err)
 	}
 	tokens := map[string]string{
 		"access_token": tokenData.AccessToken,
@@ -300,7 +300,7 @@ func ToggleApllicationMode(db *gorm.DB, email string, isSandbox bool) (map[strin
 	err = authRepo.CreateAccessToken(&accessToken, pdb, tokens)
 
 	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: " + err.Error())
+		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: %w", err)
 	}
 
 	responseData := map[string]interface{}{
@@ -329,7 +329,7 @@ func SynchronizeSandboxToProduction(prodDB, sandboxDB *database.Database, email 
 			userData, err := userRepo.GetUserByEmail(sDB, email)
 			if err != nil {
 				log.Println("unable to fetch user from sandbox: " + err.Error())
-				return fmt.Errorf("unable to fetch user from sandbox: " + err.Error())
+				return fmt.Errorf("unable to fetch user from sandbox: %w", err)
 			}
 
 			config := config.GetConfig()
