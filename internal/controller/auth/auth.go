@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type Controller struct {
@@ -17,6 +18,20 @@ type Controller struct {
 	TestDB    *database.Database
 	Validator *validator.Validate
 	Logger    *utility.Logger
+}
+
+func (base *Controller) forgotPasswordTargets() []*gorm.DB {
+	targets := make([]*gorm.DB, 0, 2)
+
+	if base.TestDB != nil && base.TestDB.Postgresql != nil {
+		targets = append(targets, base.TestDB.Postgresql.DB())
+	}
+
+	if base.Db != nil && base.Db.Postgresql != nil {
+		targets = append(targets, base.Db.Postgresql.DB())
+	}
+
+	return targets
 }
 
 // @Summary Register
@@ -224,7 +239,7 @@ func (base *Controller) CompleteForgotPassword(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	err = auth.CompleteForgotPassword(req, base.TestDB.Postgresql.DB())
+	err = auth.CompleteForgotPasswordAcrossEnvironments(req, base.forgotPasswordTargets()...)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)

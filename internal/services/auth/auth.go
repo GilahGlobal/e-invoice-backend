@@ -26,6 +26,10 @@ import (
 	"gorm.io/gorm"
 )
 
+func forgotPasswordKey(email string) string {
+	return "forgot_password_otp_" + strings.ToLower(strings.TrimSpace(email))
+}
+
 func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.RegisterDto, error) {
 
 	pdb := inst.InitDB(db, false)
@@ -210,13 +214,12 @@ func LogoutUser(accessUuid, ownerId string, db *gorm.DB) (fiber.Map, int, error)
 func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) error {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
+	email := strings.ToLower(strings.TrimSpace(req.Email))
 	pdb := inst.InitDB(db, false)
-	var (
-		user = models.Business{}
-	)
-	queryError, err := pdb.SelectOneFromDb(&user, "email = ?", req.Email)
+	user := models.Business{}
+	queryError, err := pdb.SelectOneFromDb(&user, "email = ?", email)
 	if err != nil {
-		return fmt.Errorf("Account details cannot be retrieved")
+		return fmt.Errorf("account details cannot be retrieved")
 	}
 
 	if queryError != nil {
@@ -229,7 +232,7 @@ func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) err
 	// }
 
 	otp := 123456 // For testing purposes only, replace with generated OTP
-	key := "forgot_password_otp_" + user.ID
+	key := forgotPasswordKey(email)
 	duration := 15 * time.Minute // 15 minutes expiration
 
 	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
@@ -238,23 +241,14 @@ func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) err
 }
 
 func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) error {
+	return CompleteForgotPasswordAcrossEnvironments(req, db)
+}
+
+func CompleteForgotPasswordAcrossEnvironments(req dtos.CompleteForgotPasswordDto, dbs ...*gorm.DB) error {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
-	pdb := inst.InitDB(db, false)
-	var (
-		user = models.Business{}
-	)
-
-	queryError, err := pdb.SelectOneFromDb(&user, "email = ?", req.Email)
-	if err != nil {
-		return fmt.Errorf("Account details cannot be retrieved")
-	}
-
-	if queryError != nil {
-		return queryError
-	}
-
-	key := "forgot_password_otp_" + user.ID
+	email := strings.ToLower(strings.TrimSpace(req.Email))
+	key := forgotPasswordKey(email)
 
 	otp, err := redisClient.Get(ctx, key).Result()
 
@@ -272,8 +266,37 @@ func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) err
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	user.Password = password
-	pdb.UpdateFields(user, user, user.ID)
+	updated := false
+	for _, db := range dbs {
+		if db == nil {
+			continue
+		}
+
+		pdb := inst.InitDB(db, false)
+		user := models.Business{}
+		queryError, err := pdb.SelectOneFromDb(&user, "email = ?", email)
+		if err != nil {
+			return fmt.Errorf("account details cannot be retrieved: %w", err)
+		}
+
+		if queryError != nil {
+			if errors.Is(queryError, gorm.ErrRecordNotFound) {
+				continue
+			}
+			return queryError
+		}
+
+		user.Password = password
+		if _, err := pdb.UpdateFields(user, user, user.ID); err != nil {
+			return fmt.Errorf("failed to update password: %w", err)
+		}
+		updated = true
+	}
+
+	if !updated {
+		return fmt.Errorf("account details cannot be retrieved")
+	}
+
 	redisClient.Del(ctx, key)
 	return nil
 }
