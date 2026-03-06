@@ -58,6 +58,47 @@ definitions:
     - otp
     - password
     type: object
+  dtos.CreateSubscriptionPlanDataDto:
+    properties:
+      is_sandbox:
+        example: true
+        type: boolean
+      plan:
+        $ref: '#/definitions/models.SubscriptionPlan'
+    type: object
+  dtos.CreateSubscriptionPlanDto:
+    properties:
+      amount:
+        type: number
+      billing_cycle:
+        type: integer
+      is_sandbox:
+        type: boolean
+      name:
+        type: string
+      total_invoices:
+        type: integer
+    required:
+    - amount
+    - billing_cycle
+    - is_sandbox
+    - name
+    - total_invoices
+    type: object
+  dtos.CreateSubscriptionPlanResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.CreateSubscriptionPlanDataDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   dtos.DocumentReference:
     properties:
       irn:
@@ -385,6 +426,185 @@ definitions:
     additionalProperties:
       $ref: '#/definitions/dtos.AccountingPlatformConfigAuth'
     type: object
+  dtos.PluginBusinessCheckDataDto:
+    properties:
+      active_subscription:
+        example: true
+        type: boolean
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      exists:
+        example: true
+        type: boolean
+      subscription:
+        $ref: '#/definitions/dtos.PluginBusinessSubscriptionDetailsDto'
+    type: object
+  dtos.PluginBusinessCheckResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.PluginBusinessCheckDataDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.PluginBusinessSubscriptionDetailsDto:
+    properties:
+      next_billing_date:
+        type: string
+      plan:
+        example: basic
+        type: string
+      remaining_invoices:
+        example: 80
+        type: integer
+      total_invoices:
+        example: 100
+        type: integer
+      used_invoices:
+        example: 20
+        type: integer
+    type: object
+  dtos.PluginPlansResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.SubscriptionPlan'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.PluginRegisterDataDto:
+    properties:
+      production:
+        $ref: '#/definitions/dtos.PluginRegisteredBusinessDto'
+      sandbox:
+        $ref: '#/definitions/dtos.PluginRegisteredBusinessDto'
+    type: object
+  dtos.PluginRegisterResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.PluginRegisterDataDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.PluginRegisteredBusinessDto:
+    properties:
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      is_sandbox:
+        example: true
+        type: boolean
+      name:
+        example: John Doe
+        type: string
+      service_id:
+        example: 6A2BC898
+        type: string
+      tin:
+        example: TIN-123456789
+        type: string
+    type: object
+  dtos.PluginSubscribeDataDto:
+    properties:
+      authorization_url:
+        example: https://checkout.paystack.com/3ni8kdavz62431k
+        type: string
+      provider:
+        example: paystack
+        type: string
+      transaction_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      transaction_ref:
+        example: txn_1736272012_abcd1234ef
+        type: string
+    type: object
+  dtos.PluginSubscribeRequestDto:
+    properties:
+      email:
+        type: string
+      is_sandbox:
+        type: boolean
+      plan_id:
+        type: string
+    required:
+    - email
+    - plan_id
+    type: object
+  dtos.PluginSubscribeResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.PluginSubscribeDataDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.PluginWebhookDataDto:
+    properties:
+      database:
+        example: sandbox
+        type: string
+      event:
+        example: charge.success
+        type: string
+      reference:
+        example: txn_1736272012_abcd1234ef
+        type: string
+      transaction_status:
+        example: success
+        type: string
+    type: object
+  dtos.PluginWebhookResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.PluginWebhookDataDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   dtos.PostalAddress:
     properties:
       city_name:
@@ -485,6 +705,22 @@ definitions:
             example: TIN-123456789
             type: string
         type: object
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.SubscriptionPlansResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.SubscriptionPlan'
+        type: array
       message:
         example: Action performed successfully
         type: string
@@ -854,6 +1090,25 @@ definitions:
         type: string
       status_code:
         type: integer
+    type: object
+  models.SubscriptionPlan:
+    properties:
+      amount:
+        type: number
+      billing_cycle:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      total_invoices:
+        type: integer
+      updated_at:
+        type: string
     type: object
 info:
   contact: {}
@@ -1882,6 +2137,10 @@ paths:
           description: Bad request
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: Subscription is inactive or invoice quota exhausted
+          schema:
+            $ref: '#/definitions/models.Response'
       security: []
       summary: Initializes invoice creation in one go
       tags:
@@ -1950,6 +2209,254 @@ paths:
       summary: Validate IRN
       tags:
       - Invoice
+  /plugin/business:
+    get:
+      consumes:
+      - application/json
+      description: Checks if a business exists and returns active subscription details
+        when available
+      parameters:
+      - description: Business email
+        in: query
+        name: email
+        required: true
+        type: string
+      - description: Use sandbox database (true/false)
+        in: query
+        name: is_sandbox
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business check completed successfully
+          schema:
+            $ref: '#/definitions/dtos.PluginBusinessCheckResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Check Business Subscription
+      tags:
+      - Plugin
+  /plugin/paystack/webhook:
+    post:
+      consumes:
+      - application/json
+      description: Verifies Paystack signature, acknowledges immediately, then processes
+        transaction/subscription updates asynchronously
+      parameters:
+      - description: Paystack signature
+        in: header
+        name: x-paystack-signature
+        required: true
+        type: string
+      - description: Webhook payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Webhook accepted for processing
+          schema:
+            $ref: '#/definitions/dtos.PluginWebhookResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Handle Paystack Webhook
+      tags:
+      - Plugin
+  /plugin/plans:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all available plans for plugin clients
+      parameters:
+      - description: Use sandbox database (true/false)
+        in: query
+        name: is_sandbox
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Plans fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.PluginPlansResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List Plugin Plans
+      tags:
+      - Plugin
+  /plugin/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a business account in sandbox first, then in production,
+        with default subscription rows
+      parameters:
+      - description: Register request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RegisterDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Business created successfully
+          schema:
+            $ref: '#/definitions/dtos.PluginRegisterResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Plugin Register
+      tags:
+      - Plugin
+  /plugin/subscribe:
+    post:
+      consumes:
+      - application/json
+      description: Initializes a Paystack transaction for a business subscription
+        plan
+      parameters:
+      - description: Subscribe request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.PluginSubscribeRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription initialized successfully
+          schema:
+            $ref: '#/definitions/dtos.PluginSubscribeResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "502":
+          description: Bad gateway
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Subscribe Business To Plan
+      tags:
+      - Plugin
+  /subscription/plans:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all available subscription plans
+      parameters:
+      - description: Use sandbox database (true/false)
+        in: query
+        name: is_sandbox
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Plans fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.SubscriptionPlansResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List Subscription Plans
+      tags:
+      - Subscription
+    post:
+      consumes:
+      - application/json
+      description: Creates a subscription plan in the specified environment database
+      parameters:
+      - description: Create plan request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateSubscriptionPlanDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Plan created successfully
+          schema:
+            $ref: '#/definitions/dtos.CreateSubscriptionPlanResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create Subscription Plan
+      tags:
+      - Subscription
   /webhook/firs:
     post:
       consumes:

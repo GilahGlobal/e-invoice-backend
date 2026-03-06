@@ -11,6 +11,7 @@ import (
 	"einvoice-access-point/pkg/utility"
 	"einvoice-access-point/pkg/workers"
 	"einvoice-access-point/pkg/workers/producer"
+	"errors"
 	"log"
 	"strings"
 
@@ -264,6 +265,7 @@ func (base *Controller) DeleteInvoice(c *fiber.Ctx) error {
 // @Param   payload  body  dtos.UploadInvoiceRequestDto  true  "Invoice Payload"
 // @Success 200 {object} dtos.UploadInvoiceResponseDto "Invoice created successfully"
 // @Failure 400 {object} models.Response "Bad request"
+// @Failure 403 {object} models.Response "Subscription is inactive or invoice quota exhausted"
 // @Router /invoice/upload [post]
 func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 
@@ -274,6 +276,20 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	isPluginUser, err := invoice.ValidatePluginInvoiceEligibility(db, userDetails.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, invoice.ErrPluginSubscriptionRequired):
+			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", err.Error(), nil, nil)
+			return c.Status(fiber.StatusForbidden).JSON(rd)
+		case errors.Is(err, invoice.ErrPluginInvoiceQuotaExceeded):
+			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", err.Error(), nil, nil)
+			return c.Status(fiber.StatusForbidden).JSON(rd)
+		default:
+			rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
+			return c.Status(fiber.StatusInternalServerError).JSON(rd)
+		}
+	}
 	var req dtos.UploadInvoiceRequestDto
 
 	err = c.BodyParser(&req)
@@ -341,6 +357,19 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		errorArray := strings.Split(err.Error(), "-")
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", errorArray[len(errorArray)-1], response, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	if isPluginUser && invoiceExists == nil {
+		if err := invoice.ConsumePluginInvoiceQuota(db, userDetails.ID); err != nil {
+			switch {
+			case errors.Is(err, invoice.ErrPluginSubscriptionRequired), errors.Is(err, invoice.ErrPluginInvoiceQuotaExceeded):
+				rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", err.Error(), nil, nil)
+				return c.Status(fiber.StatusForbidden).JSON(rd)
+			default:
+				rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
+				return c.Status(fiber.StatusInternalServerError).JSON(rd)
+			}
+		}
 	}
 
 	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice created successfully", response)

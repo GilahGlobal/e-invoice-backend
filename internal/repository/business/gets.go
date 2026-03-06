@@ -112,3 +112,15 @@ func FindBusinessByID(db database.DatabaseManager, id string) (*models.Business,
 
 	return &business, nil
 }
+
+func IsPluginUserByID(db database.DatabaseManager, id string) (bool, error) {
+	var business models.Business
+	if err := db.DB().
+		Select("is_plugin_user").
+		Where("id = ? AND acc_status = ?", id, 0).
+		First(&business).Error; err != nil {
+		return false, err
+	}
+
+	return business.IsPluginUser, nil
+}

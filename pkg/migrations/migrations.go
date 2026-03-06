@@ -11,6 +11,9 @@ func AuthMigrationModels() []interface{} {
 		&models.AccessToken{},
 		&models.TokenManager{},
 		&models.BulkUpload{},
+		&models.SubscriptionPlan{},
+		&models.Subscription{},
+		&models.Transaction{},
 	}
 
 }
