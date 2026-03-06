@@ -11,6 +11,11 @@ type ZOHO struct {
 	ZohoApiUrl string
 }
 
+type PAYSTACK struct {
+	SecretKey     string
+	InitializeURL string
+}
+
 type S3 struct {
 	AccessKeyID     string
 	SecretAccessKey string

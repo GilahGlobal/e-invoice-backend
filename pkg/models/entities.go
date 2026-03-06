@@ -18,6 +18,7 @@ type Business struct {
 	Name            string                 `gorm:"column:name;type:varchar(250);not null" json:"name"`
 	Email           string                 `gorm:"column:email;type:varchar(100);unique" json:"email"`
 	Password        string                 `gorm:"column:password;type:text;not null" json:"-"`
+	IsPluginUser    bool                   `gorm:"column:is_plugin_user;type:bool;not null;default:false" json:"is_plugin_user"`
 	AccStatus       int                    `gorm:"column:acc_status;type:int;default:0" json:"acc_status"`
 	APIKey          common.EncryptedString `gorm:"type:text" json:"api_key"`
 	APIKeyHash      string                 `gorm:"type:text;index" json:"-"`

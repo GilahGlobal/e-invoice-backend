@@ -13,6 +13,7 @@ type Configuration struct {
 	Firs         FIRS
 	FirsSandbox  FIRS
 	Zoho         ZOHO
+	Paystack     PAYSTACK
 	Mail         MAIL
 	Redis        Redis
 	S3           S3
@@ -76,7 +77,9 @@ type BaseConfig struct {
 	REDIS_DB   string `mapstructure:"REDIS_DB"`
 	REDIS_URL  string `mapstructure:"REDIS_URL"`
 
-	ZOHO_API_URL string `mapstructure:"ZOHO_API_URL"`
+	ZOHO_API_URL            string `mapstructure:"ZOHO_API_URL"`
+	PAYSTACK_SECRET_KEY     string `mapstructure:"PAYSTACK_SECRET_KEY"`
+	PAYSTACK_INITIALIZE_URL string `mapstructure:"PAYSTACK_INITIALIZE_URL"`
 
 	S3_ACCESS_KEY_ID     string `mapstructure:"S3_ACCESS_KEY_ID"`
 	S3_SECRET_ACCESS_KEY string `mapstructure:"S3_SECRET_ACCESS_KEY"`
@@ -152,6 +155,10 @@ func (config *BaseConfig) SetupConfigurationn() *Configuration {
 
 		Zoho: ZOHO{
 			ZohoApiUrl: config.ZOHO_API_URL,
+		},
+		Paystack: PAYSTACK{
+			SecretKey:     config.PAYSTACK_SECRET_KEY,
+			InitializeURL: config.PAYSTACK_INITIALIZE_URL,
 		},
 
 		Mail: MAIL{

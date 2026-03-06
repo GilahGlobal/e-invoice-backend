@@ -1529,6 +1529,12 @@
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
+                    },
+                    "403": {
+                        "description": "Subscription is inactive or invoice quota exhausted",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -1714,6 +1720,376 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/plugin/business": {
+            "get": {
+                "description": "Checks if a business exists and returns active subscription details when available",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plugin"
+                ],
+                "summary": "Check Business Subscription",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business email",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Use sandbox database (true/false)",
+                        "name": "is_sandbox",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business check completed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PluginBusinessCheckResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/plugin/paystack/webhook": {
+            "post": {
+                "description": "Verifies Paystack signature, acknowledges immediately, then processes transaction/subscription updates asynchronously",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plugin"
+                ],
+                "summary": "Handle Paystack Webhook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Paystack signature",
+                        "name": "x-paystack-signature",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Webhook payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Webhook accepted for processing",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PluginWebhookResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/plugin/plans": {
+            "get": {
+                "description": "Retrieves all available plans for plugin clients",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plugin"
+                ],
+                "summary": "List Plugin Plans",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Use sandbox database (true/false)",
+                        "name": "is_sandbox",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Plans fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PluginPlansResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/plugin/register": {
+            "post": {
+                "description": "Creates a business account in sandbox first, then in production, with default subscription rows",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plugin"
+                ],
+                "summary": "Plugin Register",
+                "parameters": [
+                    {
+                        "description": "Register request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.RegisterDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Business created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PluginRegisterResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/plugin/subscribe": {
+            "post": {
+                "description": "Initializes a Paystack transaction for a business subscription plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Plugin"
+                ],
+                "summary": "Subscribe Business To Plan",
+                "parameters": [
+                    {
+                        "description": "Subscribe request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PluginSubscribeRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription initialized successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PluginSubscribeResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad gateway",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscription/plans": {
+            "get": {
+                "description": "Retrieves all available subscription plans",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "List Subscription Plans",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Use sandbox database (true/false)",
+                        "name": "is_sandbox",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Plans fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.SubscriptionPlansResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a subscription plan in the specified environment database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Create Subscription Plan",
+                "parameters": [
+                    {
+                        "description": "Create plan request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateSubscriptionPlanDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Plan created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateSubscriptionPlanResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -1909,6 +2285,65 @@
                     "type": "string",
                     "minLength": 6,
                     "example": "password123"
+                }
+            }
+        },
+        "dtos.CreateSubscriptionPlanDataDto": {
+            "type": "object",
+            "properties": {
+                "is_sandbox": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "plan": {
+                    "$ref": "#/definitions/models.SubscriptionPlan"
+                }
+            }
+        },
+        "dtos.CreateSubscriptionPlanDto": {
+            "type": "object",
+            "required": [
+                "amount",
+                "billing_cycle",
+                "is_sandbox",
+                "name",
+                "total_invoices"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "billing_cycle": {
+                    "type": "integer"
+                },
+                "is_sandbox": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "total_invoices": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.CreateSubscriptionPlanResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.CreateSubscriptionPlanDataDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
                 }
             }
         },
@@ -2367,6 +2802,261 @@
                 "$ref": "#/definitions/dtos.AccountingPlatformConfigAuth"
             }
         },
+        "dtos.PluginBusinessCheckDataDto": {
+            "type": "object",
+            "properties": {
+                "active_subscription": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                },
+                "exists": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "subscription": {
+                    "$ref": "#/definitions/dtos.PluginBusinessSubscriptionDetailsDto"
+                }
+            }
+        },
+        "dtos.PluginBusinessCheckResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.PluginBusinessCheckDataDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.PluginBusinessSubscriptionDetailsDto": {
+            "type": "object",
+            "properties": {
+                "next_billing_date": {
+                    "type": "string"
+                },
+                "plan": {
+                    "type": "string",
+                    "example": "basic"
+                },
+                "remaining_invoices": {
+                    "type": "integer",
+                    "example": 80
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "used_invoices": {
+                    "type": "integer",
+                    "example": 20
+                }
+            }
+        },
+        "dtos.PluginPlansResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SubscriptionPlan"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.PluginRegisterDataDto": {
+            "type": "object",
+            "properties": {
+                "production": {
+                    "$ref": "#/definitions/dtos.PluginRegisteredBusinessDto"
+                },
+                "sandbox": {
+                    "$ref": "#/definitions/dtos.PluginRegisteredBusinessDto"
+                }
+            }
+        },
+        "dtos.PluginRegisterResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.PluginRegisterDataDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.PluginRegisteredBusinessDto": {
+            "type": "object",
+            "properties": {
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "is_sandbox": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "service_id": {
+                    "type": "string",
+                    "example": "6A2BC898"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "TIN-123456789"
+                }
+            }
+        },
+        "dtos.PluginSubscribeDataDto": {
+            "type": "object",
+            "properties": {
+                "authorization_url": {
+                    "type": "string",
+                    "example": "https://checkout.paystack.com/3ni8kdavz62431k"
+                },
+                "provider": {
+                    "type": "string",
+                    "example": "paystack"
+                },
+                "transaction_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "transaction_ref": {
+                    "type": "string",
+                    "example": "txn_1736272012_abcd1234ef"
+                }
+            }
+        },
+        "dtos.PluginSubscribeRequestDto": {
+            "type": "object",
+            "required": [
+                "email",
+                "plan_id"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "is_sandbox": {
+                    "type": "boolean"
+                },
+                "plan_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.PluginSubscribeResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.PluginSubscribeDataDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.PluginWebhookDataDto": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string",
+                    "example": "sandbox"
+                },
+                "event": {
+                    "type": "string",
+                    "example": "charge.success"
+                },
+                "reference": {
+                    "type": "string",
+                    "example": "txn_1736272012_abcd1234ef"
+                },
+                "transaction_status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "dtos.PluginWebhookResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.PluginWebhookDataDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
         "dtos.PostalAddress": {
             "type": "object",
             "required": [
@@ -2499,6 +3189,29 @@
                             "type": "string",
                             "example": "TIN-123456789"
                         }
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.SubscriptionPlansResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SubscriptionPlan"
                     }
                 },
                 "message": {
@@ -3008,6 +3721,35 @@
                 },
                 "status_code": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.SubscriptionPlan": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "billing_cycle": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "total_invoices": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         }

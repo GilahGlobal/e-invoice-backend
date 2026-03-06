@@ -385,6 +385,7 @@ func SynchronizeSandboxToProduction(prodDB, sandboxDB *database.Database, email 
 				Name:            userData.Name,
 				Email:           userData.Email,
 				Password:        userData.Password,
+				IsPluginUser:    userData.IsPluginUser,
 				ServiceID:       "6A2BC898", //userRepo.GenerateUniqueServiceID(pdb.Db)
 				APIKey:          common.EncryptedString(encryptedAPIKey),
 				APIKeyHash:      apiKeyHashStr,
