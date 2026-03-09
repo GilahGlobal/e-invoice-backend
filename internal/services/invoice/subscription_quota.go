@@ -1,7 +1,7 @@
 package invoice
 
 import (
-	userRepo "einvoice-access-point/internal/repository/business"
+	"einvoice-access-point/internal/repository/sme"
 	subscriptionRepo "einvoice-access-point/internal/repository/subscription"
 	inst "einvoice-access-point/pkg/dbinit"
 	"errors"
@@ -15,21 +15,21 @@ var (
 	ErrPluginInvoiceQuotaExceeded = errors.New("invoice quota exhausted for current subscription")
 )
 
-func ValidatePluginInvoiceEligibility(db *gorm.DB, businessID string) (bool, error) {
+func ValidatePluginInvoiceEligibility(db *gorm.DB, smeID string) (bool, error) {
 	if db == nil {
 		return false, fmt.Errorf("database connection is required")
 	}
 
 	pdb := inst.InitDB(db, false)
-	isPluginUser, err := userRepo.IsPluginUserByID(pdb, businessID)
+	smeBusiness, err := sme.FindSmeByID(pdb, smeID)
 	if err != nil {
 		return false, fmt.Errorf("failed to fetch business profile: %w", err)
 	}
-	if !isPluginUser {
+	if smeBusiness == nil {
 		return false, nil
 	}
 
-	subscription, err := subscriptionRepo.GetLatestSubscriptionByBusinessID(pdb, businessID)
+	subscription, err := subscriptionRepo.GetLatestSubscriptionByBusinessID(pdb, smeID)
 	if err != nil {
 		return true, fmt.Errorf("failed to fetch subscription: %w", err)
 	}
@@ -43,21 +43,21 @@ func ValidatePluginInvoiceEligibility(db *gorm.DB, businessID string) (bool, err
 	return true, nil
 }
 
-func ConsumePluginInvoiceQuota(db *gorm.DB, businessID string) error {
+func ConsumePluginInvoiceQuota(db *gorm.DB, smeID string) error {
 	if db == nil {
 		return fmt.Errorf("database connection is required")
 	}
 
 	pdb := inst.InitDB(db, false)
-	isPluginUser, err := userRepo.IsPluginUserByID(pdb, businessID)
+	smeBusiness, err := sme.FindSmeByID(pdb, smeID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch business profile: %w", err)
 	}
-	if !isPluginUser {
+	if smeBusiness == nil {
 		return nil
 	}
 
-	subscription, err := subscriptionRepo.GetLatestSubscriptionByBusinessID(pdb, businessID)
+	subscription, err := subscriptionRepo.GetLatestSubscriptionByBusinessID(pdb, smeID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch subscription: %w", err)
 	}

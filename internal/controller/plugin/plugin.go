@@ -1,17 +1,20 @@
 package plugin
 
 import (
+	"einvoice-access-point/external/firs_models"
 	"einvoice-access-point/external/paystack"
 	"einvoice-access-point/internal/dtos"
-	authService "einvoice-access-point/internal/services/auth"
+	"einvoice-access-point/internal/services/invoice"
 	pluginService "einvoice-access-point/internal/services/plugin"
 	"einvoice-access-point/pkg/database"
 	"einvoice-access-point/pkg/middleware"
+	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -31,6 +34,7 @@ type Controller struct {
 // @Accept json
 // @Produce json
 // @Param email query string true "Business email"
+// @Param aggregator_id query string true "Aggregator ID"
 // @Param is_sandbox query string true "Use sandbox database (true/false)"
 // @Success 200 {object} dtos.PluginBusinessCheckResponseDto "Business check completed successfully"
 // @Failure 400 {object} models.Response "Bad request"
@@ -57,7 +61,7 @@ func (base *Controller) CheckBusiness(c *fiber.Ctx) error {
 
 	db := middleware.GetDatabaseInstance(isSandbox, base.Db, base.TestDB)
 
-	respData, code, err := pluginService.CheckBusinessWithSubscription(req.Email, db)
+	respData, code, err := pluginService.CheckBusinessWithSubscription(req.Email, req.AggregatorID, db)
 	if err != nil {
 		rd := utility.BuildErrorResponse(code, "error", err.Error(), err, nil)
 		return c.Status(code).JSON(rd)
@@ -232,7 +236,7 @@ func (base *Controller) PaystackWebhook(c *fiber.Ctx) error {
 // @Failure 500 {object} models.Response "Internal server error"
 // @Router /plugin/register [post]
 func (base *Controller) Register(c *fiber.Ctx) error {
-	var req dtos.RegisterDto
+	var req dtos.SmeRegistrationDto
 
 	err := c.BodyParser(&req)
 	if err != nil {
@@ -246,17 +250,11 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	reqData, err := authService.ValidateCreateUserRequest(req, base.TestDB.Postgresql.DB())
+	reqData, err := pluginService.ValidateCreateUserRequest(req, base.TestDB.Postgresql.DB())
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
-
-	// _, err = authService.ValidateCreateUserRequest(reqData, base.Db.Postgresql.DB())
-	// if err != nil {
-	// 	rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
-	// 	return c.Status(fiber.StatusBadRequest).JSON(rd)
-	// }
 
 	sandboxRespData, code, err := pluginService.RegisterUserWithSubscription(reqData, base.TestDB.Postgresql.DB(), true)
 	if err != nil {
@@ -278,4 +276,125 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 		// "production": prodRespData,
 	})
 	return c.Status(code).JSON(rd)
+}
+
+// UploadInvoice godoc
+// @Summary Initializes invoice creation in one go
+// @Description Receives invoice data as a json
+// @Tags Internal Invoice
+// @Accept json
+// @Produce json
+// @Security
+// @Param   payload  body  dtos.UploadInvoiceRequestDto  true  "Invoice Payload"
+// @Success 200 {object} dtos.UploadInvoiceResponseDto "Invoice created successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 403 {object} models.Response "Subscription is inactive or invoice quota exhausted"
+// @Router /invoice/upload [post]
+func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
+
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	isPluginUser, err := invoice.ValidatePluginInvoiceEligibility(db, userDetails.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, invoice.ErrPluginSubscriptionRequired):
+			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", err.Error(), nil, nil)
+			return c.Status(fiber.StatusForbidden).JSON(rd)
+		case errors.Is(err, invoice.ErrPluginInvoiceQuotaExceeded):
+			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", err.Error(), nil, nil)
+			return c.Status(fiber.StatusForbidden).JSON(rd)
+		default:
+			rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
+			return c.Status(fiber.StatusInternalServerError).JSON(rd)
+		}
+	}
+	var req dtos.UploadInvoiceRequestDto
+
+	err = c.BodyParser(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	err = base.Validator.Struct(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(
+			fiber.StatusUnprocessableEntity,
+			"error", "Validation failed",
+			utility.ValidationErrorsToJSON(err, firs_models.InvoiceRequest{}),
+			nil,
+		)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	invoiceExists, err := invoice.GetInvoiceByInvoiceNumber(db, req.InvoiceNumber, userDetails.ID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	if invoiceExists != nil {
+		blockedStatuses := map[string]bool{
+			models.StatusSignedInvoice: true,
+			models.StatusTransmitted:   true,
+			models.StatusConfirmed:     true,
+		}
+		if blockedStatuses[invoiceExists.CurrentStatus] {
+			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "invoice with the same invoice number already exists and cannot be overwritten", nil, nil)
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
+	}
+
+	var irnPayload dtos.InvoiceData
+	if req.IRN == nil {
+		IRNData, err := invoice.IRNGeneration(req.InvoiceNumber, userDetails.ServiceID, req.BusinessID, userDetails.IsSandbox)
+		if err != nil {
+			rd := *err
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
+		irnPayload = *IRNData
+		req.IRN = &irnPayload.IRN
+	} else {
+		irnPayload = dtos.InvoiceData{
+			InvoiceNumber: req.InvoiceNumber,
+			IRN:           *req.IRN,
+			QRCode:        invoiceExists.QrCode,
+		}
+	}
+
+	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, invoiceExists, userDetails.IsSandbox)
+
+	response := map[string]interface{}{
+		"metadata": createdInvoice.StatusHistory,
+	}
+	if isInvoiceSigned {
+		response["data"] = irnPayload
+	}
+
+	if err != nil {
+		errorArray := strings.Split(err.Error(), "-")
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", errorArray[len(errorArray)-1], response, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	if isPluginUser && invoiceExists == nil {
+		if err := invoice.ConsumePluginInvoiceQuota(db, userDetails.ID); err != nil {
+			switch {
+			case errors.Is(err, invoice.ErrPluginSubscriptionRequired), errors.Is(err, invoice.ErrPluginInvoiceQuotaExceeded):
+				rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", err.Error(), nil, nil)
+				return c.Status(fiber.StatusForbidden).JSON(rd)
+			default:
+				rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
+				return c.Status(fiber.StatusInternalServerError).JSON(rd)
+			}
+		}
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice created successfully", response)
+	return c.Status(fiber.StatusCreated).JSON(rd)
 }

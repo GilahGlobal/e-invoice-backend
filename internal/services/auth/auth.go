@@ -33,7 +33,7 @@ func forgotPasswordKey(email string) string {
 func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.RegisterDto, error) {
 
 	pdb := inst.InitDB(db, false)
-	user := models.Business{}
+	business := models.Business{}
 
 	if req.Email != "" {
 		req.Email = strings.ToLower(req.Email)
@@ -42,12 +42,12 @@ func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.Register
 			return req, fmt.Errorf("email address is invalid")
 		}
 		req.Email = formattedMail
-		exists := pdb.CheckExists(&user, "email = ?", req.Email)
+		exists := pdb.CheckExists(&business, "email = ?", req.Email)
 		if exists {
 			return req, errors.New("user already exists with the given email")
 		}
 	}
-	if exists := pdb.CheckExists(&user, "company_name = ?", req.CompanyName); exists {
+	if exists := pdb.CheckExists(&business, "company_name = ?", req.CompanyName); exists {
 		return req, errors.New("Business already exists with the given company name")
 	}
 
@@ -120,6 +120,7 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (fiber.Map, int, error) {
 		TIN:             req.TIN,
 		PhoneNumber:     req.PhoneNumber,
 		CompanyName:     req.CompanyName,
+		IsAggregator:    *req.IsAggregator,
 	}
 
 	err = userRepo.CreateBusiness(&user, pdb)
@@ -408,7 +409,6 @@ func SynchronizeSandboxToProduction(prodDB, sandboxDB *database.Database, email 
 				Name:            userData.Name,
 				Email:           userData.Email,
 				Password:        userData.Password,
-				IsPluginUser:    userData.IsPluginUser,
 				ServiceID:       "6A2BC898", //userRepo.GenerateUniqueServiceID(pdb.Db)
 				APIKey:          common.EncryptedString(encryptedAPIKey),
 				APIKeyHash:      apiKeyHashStr,

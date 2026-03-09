@@ -14,6 +14,7 @@ func AuthMigrationModels() []interface{} {
 		&models.SubscriptionPlan{},
 		&models.Subscription{},
 		&models.Transaction{},
+		&models.SME{},
 	}
 
 }

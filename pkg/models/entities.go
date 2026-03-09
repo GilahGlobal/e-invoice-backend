@@ -18,7 +18,6 @@ type Business struct {
 	Name            string                 `gorm:"column:name;type:varchar(250);not null" json:"name"`
 	Email           string                 `gorm:"column:email;type:varchar(100);unique" json:"email"`
 	Password        string                 `gorm:"column:password;type:text;not null" json:"-"`
-	IsPluginUser    bool                   `gorm:"column:is_plugin_user;type:bool;not null;default:false" json:"is_plugin_user"`
 	AccStatus       int                    `gorm:"column:acc_status;type:int;default:0" json:"acc_status"`
 	APIKey          common.EncryptedString `gorm:"type:text" json:"api_key"`
 	APIKeyHash      string                 `gorm:"type:text;index" json:"-"`
@@ -29,6 +28,7 @@ type Business struct {
 	CompanyName     string                 `gorm:"column:company_name;type:varchar(250)" json:"company_name"`
 	PlatformConfigs PlatformConfigs        `gorm:"type:jsonb;not null;default:'{}'" json:"platform_configs"`
 	Invoices        []Invoice              `gorm:"foreignKey:BusinessID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"invoices"`
+	IsAggregator    bool                   `gorm:"column:is_aggregator;type:bool;default:false" json:"is_aggregator"`
 	CreatedAt       time.Time              `gorm:"column:created_at;not null;autoCreateTime" json:"created_at"`
 	UpdatedAt       time.Time              `gorm:"column:updated_at;null;autoUpdateTime" json:"updated_at"`
 	DeletedAt       gorm.DeletedAt         `gorm:"index" json:"-"`

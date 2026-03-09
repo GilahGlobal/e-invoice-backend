@@ -13,7 +13,19 @@ type RegisterDto struct {
 	CompanyName     string              `json:"company_name" example:"Acme Inc." validate:"required"`
 	TIN             string              `json:"tin" example:"TIN-123456789" validate:"required"`
 	PhoneNumber     string              `json:"phone_number" example:"+1234567890" validate:"required"`
+	IsAggregator    *bool               `json:"is_aggregator" example:"" validate:"required"`
+	IsSandbox       *bool               `json:"is_sandbox" example:"" validate:"required"`
 	PlatformConfigs PlatformConfigsAuth `json:"platform_configs" validate:"dive"`
+}
+
+type SmeRegistrationDto struct {
+	Name         string `json:"name" example:"John Doe" validate:"required,min=2,max=250"`
+	Email        string `json:"email" example:"john.doe@example.com" validate:"required,email"`
+	Password     string `json:"password" example:"password123" validate:"required,min=6"`
+	CompanyName  string `json:"company_name" example:"Acme Inc." validate:"required"`
+	TIN          string `json:"tin" example:"TIN-123456789" validate:"required"`
+	PhoneNumber  string `json:"phone_number" example:"+1234567890" validate:"required"`
+	AggregatorID string `json:"aggregator_id" example:"" validate:"required,uuid"`
 }
 
 type RegisterResponseDto struct {

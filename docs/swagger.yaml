@@ -552,14 +552,14 @@ definitions:
     type: object
   dtos.PluginSubscribeRequestDto:
     properties:
-      email:
+      id:
         type: string
       is_sandbox:
         type: boolean
       plan_id:
         type: string
     required:
-    - email
+    - id
     - plan_id
     type: object
   dtos.PluginSubscribeResponseDto:
@@ -650,37 +650,6 @@ definitions:
     - price_unit
     type: object
   dtos.RegisterDto:
-    properties:
-      company_name:
-        example: Acme Inc.
-        type: string
-      email:
-        example: john.doe@example.com
-        type: string
-      name:
-        example: John Doe
-        maxLength: 250
-        minLength: 2
-        type: string
-      password:
-        example: password123
-        minLength: 6
-        type: string
-      phone_number:
-        example: "+1234567890"
-        type: string
-      platform_configs:
-        $ref: '#/definitions/dtos.PlatformConfigsAuth'
-      tin:
-        example: TIN-123456789
-        type: string
-    required:
-    - company_name
-    - email
-    - name
-    - password
-    - phone_number
-    - tin
     type: object
   dtos.RegisterResponseDto:
     properties:
@@ -2219,6 +2188,11 @@ paths:
       - description: Business email
         in: query
         name: email
+        required: true
+        type: string
+      - description: Aggregator ID
+        in: query
+        name: aggregator_id
         required: true
         type: string
       - description: Use sandbox database (true/false)

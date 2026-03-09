@@ -7,8 +7,9 @@ import (
 )
 
 type PluginBusinessCheckQueryDto struct {
-	Email     string `query:"email" validate:"required,email"`
-	IsSandbox string `query:"is_sandbox" validate:"required,oneof=true false"`
+	AggregatorID string `query:"aggregator_id" validate:"required,uuid"`
+	Email        string `query:"email" validate:"required,email"`
+	IsSandbox    string `query:"is_sandbox" validate:"required,oneof=true false"`
 }
 
 type PluginPlansQueryDto struct {
@@ -16,7 +17,7 @@ type PluginPlansQueryDto struct {
 }
 
 type PluginSubscribeRequestDto struct {
-	Email     string `json:"email" validate:"required,email"`
+	ID        string `json:"id" validate:"required,uuid"`
 	PlanID    string `json:"plan_id" validate:"required"`
 	IsSandbox bool   `json:"is_sandbox"`
 }
@@ -72,13 +73,11 @@ type PluginWebhookResponseDto struct {
 }
 
 type PluginRegisteredBusinessDto struct {
-	ID         string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Email      string  `json:"email" example:"john.doe@example.com"`
-	Name       string  `json:"name" example:"John Doe"`
-	BusinessID *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	ServiceID  string  `json:"service_id" example:"6A2BC898"`
-	Tin        string  `json:"tin" example:"TIN-123456789"`
-	IsSandbox  bool    `json:"is_sandbox" example:"true"`
+	ID        string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Email     string `json:"email" example:"john.doe@example.com"`
+	Name      string `json:"name" example:"John Doe"`
+	Tin       string `json:"tin" example:"TIN-123456789"`
+	IsSandbox bool   `json:"is_sandbox" example:"true"`
 }
 
 type PluginRegisterDataDto struct {

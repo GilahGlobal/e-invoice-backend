@@ -1757,6 +1757,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Aggregator ID",
+                        "name": "aggregator_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Use sandbox database (true/false)",
                         "name": "is_sandbox",
                         "in": "query",
@@ -2988,11 +2995,11 @@ const docTemplate = `{
         "dtos.PluginSubscribeRequestDto": {
             "type": "object",
             "required": [
-                "email",
+                "id",
                 "plan_id"
             ],
             "properties": {
-                "email": {
+                "id": {
                     "type": "string"
                 },
                 "is_sandbox": {
@@ -3124,47 +3131,7 @@ const docTemplate = `{
             }
         },
         "dtos.RegisterDto": {
-            "type": "object",
-            "required": [
-                "company_name",
-                "email",
-                "name",
-                "password",
-                "phone_number",
-                "tin"
-            ],
-            "properties": {
-                "company_name": {
-                    "type": "string",
-                    "example": "Acme Inc."
-                },
-                "email": {
-                    "type": "string",
-                    "example": "john.doe@example.com"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 250,
-                    "minLength": 2,
-                    "example": "John Doe"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6,
-                    "example": "password123"
-                },
-                "phone_number": {
-                    "type": "string",
-                    "example": "+1234567890"
-                },
-                "platform_configs": {
-                    "$ref": "#/definitions/dtos.PlatformConfigsAuth"
-                },
-                "tin": {
-                    "type": "string",
-                    "example": "TIN-123456789"
-                }
-            }
+            "type": "object"
         },
         "dtos.RegisterResponseDto": {
             "type": "object",

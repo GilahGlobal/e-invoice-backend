@@ -110,7 +110,7 @@ func (base *Controller) UpdateBusinessProfile(c *fiber.Ctx) error {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(http.StatusBadRequest).JSON(rd)
 	}
-	business.UpdateBusinessDetails(base.Db.Postgresql.DB(), *businessData, req)
+	business.UpdateBusinessDetails(db, *businessData, req)
 
 	rd := utility.BuildSuccessResponse(http.StatusOK, "business profile updated successfully", nil)
 	return c.Status(http.StatusOK).JSON(rd)

@@ -6,6 +6,7 @@ import (
 	"einvoice-access-point/pkg/database"
 	"einvoice-access-point/pkg/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -13,11 +14,12 @@ func CreateSubscription(subscription *models.Subscription, db database.DatabaseM
 	return db.DB().Create(subscription).Error
 }
 
-func GetLatestSubscriptionByBusinessID(db database.DatabaseManager, businessID string) (*models.Subscription, error) {
+func GetLatestSubscriptionByBusinessID(db database.DatabaseManager, smeID string) (*models.Subscription, error) {
 	var subscription models.Subscription
 
+	smeUUID, _ := uuid.Parse(smeID)
 	err := db.DB().
-		Where("business_id = ?", businessID).
+		Where("sme_id = ? AND is_active = true", smeUUID).
 		Order("created_at desc").
 		First(&subscription).Error
 

@@ -2,7 +2,6 @@ package plugin
 
 import (
 	"crypto/hmac"
-	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
@@ -16,11 +15,10 @@ import (
 
 	"einvoice-access-point/external/paystack"
 	"einvoice-access-point/internal/dtos"
-	userRepo "einvoice-access-point/internal/repository/business"
+	smeRepo "einvoice-access-point/internal/repository/sme"
 	subscriptionRepo "einvoice-access-point/internal/repository/subscription"
 	transactionRepo "einvoice-access-point/internal/repository/transaction"
 	subscriptionService "einvoice-access-point/internal/services/subscription"
-	"einvoice-access-point/pkg/common"
 	"einvoice-access-point/pkg/config"
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/models"
@@ -51,7 +49,31 @@ func ValidatePaystackSignature(rawBody []byte, signature string) error {
 	return nil
 }
 
-func CheckBusinessWithSubscription(email string, db *gorm.DB) (fiber.Map, int, error) {
+func ValidateCreateUserRequest(req dtos.SmeRegistrationDto, db *gorm.DB) (dtos.SmeRegistrationDto, error) {
+
+	pdb := inst.InitDB(db, false)
+	sme := models.SME{}
+
+	if req.Email != "" {
+		req.Email = strings.ToLower(req.Email)
+		formattedMail, checkBool := utility.EmailValid(req.Email)
+		if !checkBool {
+			return req, fmt.Errorf("email address is invalid")
+		}
+		req.Email = formattedMail
+		exists := pdb.CheckExists(&sme, "email = ?", req.Email)
+		if exists {
+			return req, errors.New("user already exists with the given email")
+		}
+	}
+	if exists := pdb.CheckExists(&sme, "company_name = ?", req.CompanyName); exists {
+		return req, errors.New("Business already exists with the given company name")
+	}
+
+	return req, nil
+}
+
+func CheckBusinessWithSubscription(email, aggregatorId string, db *gorm.DB) (fiber.Map, int, error) {
 	pdb := inst.InitDB(db, false)
 
 	email = strings.ToLower(strings.TrimSpace(email))
@@ -60,25 +82,29 @@ func CheckBusinessWithSubscription(email string, db *gorm.DB) (fiber.Map, int, e
 		return nil, http.StatusBadRequest, fmt.Errorf("email address is invalid")
 	}
 
-	business, err := userRepo.GetUserByEmail(pdb, formattedEmail)
+	sme, err := smeRepo.FindSMEByAggregatorId(pdb, aggregatorId, formattedEmail)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fiber.Map{
-				"exists": false,
-				"email":  formattedEmail,
-			}, http.StatusOK, nil
-		}
 		return nil, http.StatusInternalServerError, fmt.Errorf("failed to fetch business: %w", err)
 	}
 
-	response := fiber.Map{
-		"exists":              true,
-		"email":               business.Email,
-		"business_id":         business.ID,
-		"active_subscription": false,
+	var response fiber.Map
+	if sme == nil {
+		response = fiber.Map{
+			"exists":              false,
+			"active_subscription": false,
+		}
+		return response, http.StatusOK, nil
 	}
 
-	subscription, err := subscriptionRepo.GetLatestSubscriptionByBusinessID(pdb, business.ID)
+	if sme != nil {
+		response = fiber.Map{
+			"exists":              true,
+			"email":               sme.Email,
+			"id":                  sme.ID,
+			"active_subscription": false,
+		}
+	}
+	subscription, err := subscriptionRepo.GetLatestSubscriptionByBusinessID(pdb, sme.ID)
 	if err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("failed to fetch subscription: %w", err)
 	}
@@ -108,12 +134,6 @@ func generateTransactionReference() string {
 func SubscribeBusinessToPlan(req dtos.PluginSubscribeRequestDto, db *gorm.DB) (fiber.Map, int, error) {
 	pdb := inst.InitDB(db, false)
 
-	email := strings.ToLower(strings.TrimSpace(req.Email))
-	formattedEmail, ok := utility.EmailValid(email)
-	if !ok {
-		return nil, http.StatusBadRequest, fmt.Errorf("email address is invalid")
-	}
-
 	plan, found, err := subscriptionService.GetActivePlanByID(strings.TrimSpace(req.PlanID), db)
 	if err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("failed to fetch plan: %w", err)
@@ -122,7 +142,7 @@ func SubscribeBusinessToPlan(req dtos.PluginSubscribeRequestDto, db *gorm.DB) (f
 		return nil, http.StatusBadRequest, fmt.Errorf("invalid or inactive plan id")
 	}
 
-	business, err := userRepo.GetUserByEmail(pdb, formattedEmail)
+	sme, err := smeRepo.FindSmeByID(pdb, req.ID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, http.StatusNotFound, fmt.Errorf("business not found")
@@ -132,14 +152,14 @@ func SubscribeBusinessToPlan(req dtos.PluginSubscribeRequestDto, db *gorm.DB) (f
 
 	reference := generateTransactionReference()
 	transactionRecord := &models.Transaction{
-		ID:         utility.GenerateUUID(),
-		BusinessID: business.ID,
-		Reference:  reference,
-		Provider:   "paystack",
-		Status:     "pending",
-		Amount:     plan.Amount,
-		Currency:   "NGN",
-		Plan:       plan.Name,
+		ID:        utility.GenerateUUID(),
+		SmeID:     sme.ID,
+		Reference: reference,
+		Provider:  "paystack",
+		Status:    "pending",
+		Amount:    plan.Amount,
+		Currency:  "NGN",
+		Plan:      plan.Name,
 	}
 
 	if err := transactionRepo.CreateTransaction(transactionRecord, pdb); err != nil {
@@ -147,7 +167,7 @@ func SubscribeBusinessToPlan(req dtos.PluginSubscribeRequestDto, db *gorm.DB) (f
 	}
 
 	providerResp, err := paystack.InitializeTransaction(paystack.InitializeTransactionRequest{
-		Email:     formattedEmail,
+		Email:     sme.Email,
 		Amount:    strconv.Itoa(int(math.Round(plan.Amount * 100))),
 		Reference: reference,
 		Metadata: &paystack.InitializeTransactionMetadata{
@@ -214,7 +234,7 @@ func HandlePaystackWebhook(rawBody []byte, signature string, db *gorm.DB) (fiber
 	}
 
 	transactionRecord.ProviderReference = payload.Data.Reference
-	transactionRecord.ProviderPayload = string(rawBody)
+	transactionRecord.ProviderPayload = rawBody
 	if payload.Data.Currency != "" {
 		transactionRecord.Currency = payload.Data.Currency
 	}
@@ -245,15 +265,15 @@ func HandlePaystackWebhook(rawBody []byte, signature string, db *gorm.DB) (fiber
 			return nil, http.StatusBadRequest, fmt.Errorf("invalid plan in transaction")
 		}
 
-		subscription, err := subscriptionRepo.GetLatestSubscriptionByBusinessID(pdb, transactionRecord.BusinessID)
+		subscription, err := subscriptionRepo.GetLatestSubscriptionByBusinessID(pdb, transactionRecord.SmeID)
 		if err != nil {
 			return nil, http.StatusInternalServerError, fmt.Errorf("failed to fetch subscription: %w", err)
 		}
 
 		if subscription == nil {
 			subscription = &models.Subscription{
-				ID:         utility.GenerateUUID(),
-				BusinessID: transactionRecord.BusinessID,
+				ID:    utility.GenerateUUID(),
+				SmeID: transactionRecord.SmeID,
 			}
 		}
 
@@ -277,7 +297,7 @@ func HandlePaystackWebhook(rawBody []byte, signature string, db *gorm.DB) (fiber
 	return response, http.StatusOK, nil
 }
 
-func RegisterUserWithSubscription(req dtos.RegisterDto, db *gorm.DB, isSandbox bool) (fiber.Map, int, error) {
+func RegisterUserWithSubscription(req dtos.SmeRegistrationDto, db *gorm.DB, isSandbox bool) (fiber.Map, int, error) {
 	tx := db.Begin()
 	if tx.Error != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("failed to initialize transaction: %w", tx.Error)
@@ -285,8 +305,6 @@ func RegisterUserWithSubscription(req dtos.RegisterDto, db *gorm.DB, isSandbox b
 
 	pdb := inst.InitDB(tx, false)
 
-	cfg := config.GetConfig()
-	serverSecret := cfg.Server.Secret
 	email := strings.ToLower(req.Email)
 	name := strings.Title(strings.ToLower(req.Name))
 
@@ -296,73 +314,18 @@ func RegisterUserWithSubscription(req dtos.RegisterDto, db *gorm.DB, isSandbox b
 		return nil, http.StatusBadRequest, fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	apiKey, err := utility.GenerateSecureToken(32, serverSecret)
-	if err != nil {
-		tx.Rollback()
-		return nil, http.StatusBadRequest, fmt.Errorf("failed to generate api key: %w", err)
+	sme := models.SME{
+		ID:           utility.GenerateUUID(),
+		Name:         name,
+		Email:        email,
+		Password:     password,
+		TIN:          req.TIN,
+		PhoneNumber:  req.PhoneNumber,
+		AggregatorID: req.AggregatorID,
+		CompanyName:  req.CompanyName,
 	}
 
-	encryptedAPIKey, err := common.EncryptAES(apiKey)
-	if err != nil {
-		tx.Rollback()
-		return nil, http.StatusBadRequest, fmt.Errorf("failed to encrypt API key: %w", err)
-	}
-
-	apiKeyHash := sha256.Sum256([]byte(apiKey))
-	apiKeyHashStr := hex.EncodeToString(apiKeyHash[:])
-
-	platformConfigs := models.PlatformConfigs{}
-	for platform, cfg := range req.PlatformConfigs {
-		encryptedHMACSecret, err := common.EncryptAES(string(cfg.HMACSecret))
-		if err != nil {
-			tx.Rollback()
-			return nil, http.StatusBadRequest, fmt.Errorf("failed to encrypt HMAC secret for %s: %w", platform, err)
-		}
-
-		encryptedPlatformAPIKey, err := common.EncryptAES(string(cfg.APIKey))
-		if err != nil {
-			tx.Rollback()
-			return nil, http.StatusBadRequest, fmt.Errorf("failed to encrypt API key for %s: %w", platform, err)
-		}
-
-		encryptedAPISecret, err := common.EncryptAES(string(cfg.APISecret))
-		if err != nil {
-			tx.Rollback()
-			return nil, http.StatusBadRequest, fmt.Errorf("failed to encrypt API secret for %s: %w", platform, err)
-		}
-
-		encryptedAuthToken, err := common.EncryptAES(string(cfg.AuthToken))
-		if err != nil {
-			tx.Rollback()
-			return nil, http.StatusBadRequest, fmt.Errorf("failed to encrypt Auth token for %s: %w", platform, err)
-		}
-
-		platformConfigs[platform] = models.AccountingPlatformConfig{
-			OrgID:      cfg.OrgID,
-			HMACSecret: common.EncryptedString(encryptedHMACSecret),
-			AuthToken:  common.EncryptedString(encryptedAuthToken),
-			APIKey:     common.EncryptedString(encryptedPlatformAPIKey),
-			APISecret:  common.EncryptedString(encryptedAPISecret),
-		}
-	}
-
-	user := models.Business{
-		ID:              utility.GenerateUUID(),
-		Name:            name,
-		Email:           email,
-		Password:        password,
-		IsPluginUser:    true,
-		ServiceID:       "6A2BC898", // userRepo.GenerateUniqueServiceID(pdb.Db)
-		APIKey:          common.EncryptedString(encryptedAPIKey),
-		APIKeyHash:      apiKeyHashStr,
-		PlatformConfigs: platformConfigs,
-		AccStatus:       0,
-		TIN:             req.TIN,
-		PhoneNumber:     req.PhoneNumber,
-		CompanyName:     req.CompanyName,
-	}
-
-	err = userRepo.CreateBusiness(&user, pdb)
+	err = smeRepo.CreateSme(&sme, pdb)
 	if err != nil {
 		tx.Rollback()
 		return nil, http.StatusBadRequest, fmt.Errorf("failed to create business: %w", err)
@@ -370,7 +333,7 @@ func RegisterUserWithSubscription(req dtos.RegisterDto, db *gorm.DB, isSandbox b
 
 	subscription := models.Subscription{
 		ID:                utility.GenerateUUID(),
-		BusinessID:        user.ID,
+		SmeID:             sme.ID,
 		IsActive:          false,
 		Plan:              "free",
 		TotalInvoices:     0,
@@ -391,13 +354,11 @@ func RegisterUserWithSubscription(req dtos.RegisterDto, db *gorm.DB, isSandbox b
 	}
 
 	responseData := fiber.Map{
-		"id":          user.ID,
-		"email":       user.Email,
-		"name":        user.Name,
-		"business_id": user.BusinessID,
-		"service_id":  user.ServiceID,
-		"tin":         user.TIN,
-		"is_sandbox":  isSandbox,
+		"id":         sme.ID,
+		"email":      sme.Email,
+		"name":       sme.Name,
+		"tin":        sme.TIN,
+		"is_sandbox": isSandbox,
 	}
 
 	return responseData, http.StatusCreated, nil

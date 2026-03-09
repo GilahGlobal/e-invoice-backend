@@ -6,7 +6,7 @@ import (
 
 type Subscription struct {
 	ID                string    `gorm:"column:id; type:uuid; not null; primaryKey; unique;" json:"id"`
-	BusinessID        string    `gorm:"column:business_id; type:uuid; not null" json:"business_id"`
+	SmeID             string    `gorm:"column:sme_id; type:uuid; not null" json:"sme_id"`
 	IsActive          bool      `gorm:"column:is_active; type:bool; default:false; not null" json:"is_active"`
 	Plan              string    `gorm:"column:plan; type:text" json:"plan"`
 	TotalInvoices     int       `gorm:"column:total_invoices; type:int" json:"total_invoices"`
