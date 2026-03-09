@@ -180,12 +180,13 @@ func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, i
 
 	responseData := map[string]interface{}{
 		"data": dtos.UserResponse{
-			ID:         userData.ID,
-			Email:      userData.Email,
-			Name:       userData.Name,
-			BusinessID: userData.BusinessID,
-			ServiceID:  userData.ServiceID,
-			IsSandbox:  req.IsSandbox,
+			ID:           userData.ID,
+			Email:        userData.Email,
+			Name:         userData.Name,
+			BusinessID:   userData.BusinessID,
+			ServiceID:    userData.ServiceID,
+			IsSandbox:    req.IsSandbox,
+			IsAggregator: user.IsAggregator,
 		},
 		"access_token": tokenData.AccessToken,
 	}

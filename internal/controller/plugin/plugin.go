@@ -229,7 +229,7 @@ func (base *Controller) PaystackWebhook(c *fiber.Ctx) error {
 // @Tags Plugin
 // @Accept json
 // @Produce json
-// @Param data body dtos.RegisterDto true "Register request payload"
+// @Param data body dtos.SmeRegistrationDto true "Register request payload"
 // @Success 201 {object} dtos.PluginRegisterResponseDto "Business created successfully"
 // @Failure 400 {object} models.Response "Bad request"
 // @Failure 422 {object} models.Response "Unprocessable entity"
@@ -289,7 +289,7 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 // @Success 200 {object} dtos.UploadInvoiceResponseDto "Invoice created successfully"
 // @Failure 400 {object} models.Response "Bad request"
 // @Failure 403 {object} models.Response "Subscription is inactive or invoice quota exhausted"
-// @Router /invoice/upload [post]
+// @Router /plugin/invoice-upload [post]
 func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 
 	userDetails, err := middleware.GetUserDetails(c)

@@ -20,6 +20,7 @@ func PluginRoute(app *fiber.App, ApiVersion string, validator *validator.Validat
 		pluginGroup.Post("/register", pluginController.Register)
 		pluginGroup.Post("/subscribe", pluginController.Subscribe)
 		pluginGroup.Post("/paystack/webhook", pluginController.PaystackWebhook)
+		pluginGroup.Post("/invoice-upload", pluginController.UploadInvoice)
 	}
 
 	return app

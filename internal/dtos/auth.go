@@ -13,8 +13,8 @@ type RegisterDto struct {
 	CompanyName     string              `json:"company_name" example:"Acme Inc." validate:"required"`
 	TIN             string              `json:"tin" example:"TIN-123456789" validate:"required"`
 	PhoneNumber     string              `json:"phone_number" example:"+1234567890" validate:"required"`
-	IsAggregator    *bool               `json:"is_aggregator" example:"" validate:"required"`
-	IsSandbox       *bool               `json:"is_sandbox" example:"" validate:"required"`
+	IsAggregator    *bool               `json:"is_aggregator" example:"true" validate:"required"`
+	IsSandbox       *bool               `json:"is_sandbox" example:"true" validate:"required"`
 	PlatformConfigs PlatformConfigsAuth `json:"platform_configs" validate:"dive"`
 }
 
@@ -50,12 +50,13 @@ type LoginRequestDto struct {
 	IsSandbox bool   `json:"is_sandbox" default:"true" validate:"omitempty"`
 }
 type UserResponse struct {
-	ID         string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Email      string  `json:"email" example:"john.doe@example.com"`
-	Name       string  `json:"name" example:"John Doe"`
-	BusinessID *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	ServiceID  string  `json:"service_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	IsSandbox  bool    `json:"is_sandbox" example:"true"`
+	ID           string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Email        string  `json:"email" example:"john.doe@example.com"`
+	Name         string  `json:"name" example:"John Doe"`
+	BusinessID   *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ServiceID    string  `json:"service_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	IsSandbox    bool    `json:"is_sandbox" example:"true"`
+	IsAggregator bool    `json:"is_aggregator" example:"true"`
 }
 type LoginResponseDto struct {
 	BaseResponseDto

@@ -513,9 +513,6 @@ definitions:
     type: object
   dtos.PluginRegisteredBusinessDto:
     properties:
-      business_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
       email:
         example: john.doe@example.com
         type: string
@@ -527,9 +524,6 @@ definitions:
         type: boolean
       name:
         example: John Doe
-        type: string
-      service_id:
-        example: 6A2BC898
         type: string
       tin:
         example: TIN-123456789
@@ -650,6 +644,45 @@ definitions:
     - price_unit
     type: object
   dtos.RegisterDto:
+    properties:
+      company_name:
+        example: Acme Inc.
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      is_aggregator:
+        example: true
+        type: boolean
+      is_sandbox:
+        example: true
+        type: boolean
+      name:
+        example: John Doe
+        maxLength: 250
+        minLength: 2
+        type: string
+      password:
+        example: password123
+        minLength: 6
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      platform_configs:
+        $ref: '#/definitions/dtos.PlatformConfigsAuth'
+      tin:
+        example: TIN-123456789
+        type: string
+    required:
+    - company_name
+    - email
+    - is_aggregator
+    - is_sandbox
+    - name
+    - password
+    - phone_number
+    - tin
     type: object
   dtos.RegisterResponseDto:
     properties:
@@ -683,6 +716,41 @@ definitions:
       status_code:
         example: 200
         type: integer
+    type: object
+  dtos.SmeRegistrationDto:
+    properties:
+      aggregator_id:
+        example: ""
+        type: string
+      company_name:
+        example: Acme Inc.
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      name:
+        example: John Doe
+        maxLength: 250
+        minLength: 2
+        type: string
+      password:
+        example: password123
+        minLength: 6
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      tin:
+        example: TIN-123456789
+        type: string
+    required:
+    - aggregator_id
+    - company_name
+    - email
+    - name
+    - password
+    - phone_number
+    - tin
     type: object
   dtos.SubscriptionPlansResponseDto:
     properties:
@@ -948,6 +1016,9 @@ definitions:
       id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
+      is_aggregator:
+        example: true
+        type: boolean
       is_sandbox:
         example: true
         type: boolean
@@ -1715,11 +1786,6 @@ paths:
         name: file
         required: true
         type: file
-      - description: Invoice Number
-        in: formData
-        name: invoice_number
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -2222,6 +2288,37 @@ paths:
       summary: Check Business Subscription
       tags:
       - Plugin
+  /plugin/invoice-upload:
+    post:
+      consumes:
+      - application/json
+      description: Receives invoice data as a json
+      parameters:
+      - description: Invoice Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice created successfully
+          schema:
+            $ref: '#/definitions/dtos.UploadInvoiceResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Subscription is inactive or invoice quota exhausted
+          schema:
+            $ref: '#/definitions/models.Response'
+      security: []
+      summary: Initializes invoice creation in one go
+      tags:
+      - Internal Invoice
   /plugin/paystack/webhook:
     post:
       consumes:
@@ -2307,7 +2404,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.RegisterDto'
+          $ref: '#/definitions/dtos.SmeRegistrationDto'
       produces:
       - application/json
       responses:

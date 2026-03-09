@@ -920,13 +920,6 @@ const docTemplate = `{
                         "name": "file",
                         "in": "formData",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Invoice Number",
-                        "name": "invoice_number",
-                        "in": "formData",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -1798,6 +1791,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/plugin/invoice-upload": {
+            "post": {
+                "security": [],
+                "description": "Receives invoice data as a json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Internal Invoice"
+                ],
+                "summary": "Initializes invoice creation in one go",
+                "parameters": [
+                    {
+                        "description": "Invoice Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadInvoiceResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Subscription is inactive or invoice quota exhausted",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/plugin/paystack/webhook": {
             "post": {
                 "description": "Verifies Paystack signature, acknowledges immediately, then processes transaction/subscription updates asynchronously",
@@ -1927,7 +1967,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.RegisterDto"
+                            "$ref": "#/definitions/dtos.SmeRegistrationDto"
                         }
                     }
                 ],
@@ -2941,10 +2981,6 @@ const docTemplate = `{
         "dtos.PluginRegisteredBusinessDto": {
             "type": "object",
             "properties": {
-                "business_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
                 "email": {
                     "type": "string",
                     "example": "john.doe@example.com"
@@ -2960,10 +2996,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "John Doe"
-                },
-                "service_id": {
-                    "type": "string",
-                    "example": "6A2BC898"
                 },
                 "tin": {
                     "type": "string",
@@ -3131,7 +3163,57 @@ const docTemplate = `{
             }
         },
         "dtos.RegisterDto": {
-            "type": "object"
+            "type": "object",
+            "required": [
+                "company_name",
+                "email",
+                "is_aggregator",
+                "is_sandbox",
+                "name",
+                "password",
+                "phone_number",
+                "tin"
+            ],
+            "properties": {
+                "company_name": {
+                    "type": "string",
+                    "example": "Acme Inc."
+                },
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                },
+                "is_aggregator": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "is_sandbox": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 2,
+                    "example": "John Doe"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "password123"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
+                "platform_configs": {
+                    "$ref": "#/definitions/dtos.PlatformConfigsAuth"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "TIN-123456789"
+                }
+            }
         },
         "dtos.RegisterResponseDto": {
             "type": "object",
@@ -3176,6 +3258,51 @@ const docTemplate = `{
                 "status_code": {
                     "type": "integer",
                     "example": 200
+                }
+            }
+        },
+        "dtos.SmeRegistrationDto": {
+            "type": "object",
+            "required": [
+                "aggregator_id",
+                "company_name",
+                "email",
+                "name",
+                "password",
+                "phone_number",
+                "tin"
+            ],
+            "properties": {
+                "aggregator_id": {
+                    "type": "string",
+                    "example": ""
+                },
+                "company_name": {
+                    "type": "string",
+                    "example": "Acme Inc."
+                },
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 2,
+                    "example": "John Doe"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "password123"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "TIN-123456789"
                 }
             }
         },
@@ -3530,6 +3657,10 @@ const docTemplate = `{
                 "id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "is_aggregator": {
+                    "type": "boolean",
+                    "example": true
                 },
                 "is_sandbox": {
                     "type": "boolean",
