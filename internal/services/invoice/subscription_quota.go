@@ -16,9 +16,6 @@ var (
 )
 
 func ValidatePluginInvoiceEligibility(db *gorm.DB, smeID string) (bool, error) {
-	if db == nil {
-		return false, fmt.Errorf("database connection is required")
-	}
 
 	pdb := inst.InitDB(db, false)
 	smeBusiness, err := sme.FindSmeByID(pdb, smeID)

@@ -18,6 +18,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type Controller struct {
@@ -299,20 +300,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
-	isPluginUser, err := invoice.ValidatePluginInvoiceEligibility(db, userDetails.ID)
-	if err != nil {
-		switch {
-		case errors.Is(err, invoice.ErrPluginSubscriptionRequired):
-			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", err.Error(), nil, nil)
-			return c.Status(fiber.StatusForbidden).JSON(rd)
-		case errors.Is(err, invoice.ErrPluginInvoiceQuotaExceeded):
-			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", err.Error(), nil, nil)
-			return c.Status(fiber.StatusForbidden).JSON(rd)
-		default:
-			rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
-			return c.Status(fiber.StatusInternalServerError).JSON(rd)
-		}
-	}
+
 	var req dtos.UploadInvoiceRequestDto
 
 	err = c.BodyParser(&req)
@@ -330,6 +318,34 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 			nil,
 		)
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	if req.SmeID == nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "sme_id is required", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	smeID := *req.SmeID
+
+	_, err = uuid.Parse(smeID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "sme_id is invalid", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	isPluginUser, err := invoice.ValidatePluginInvoiceEligibility(db, smeID)
+	if isPluginUser && err != nil {
+		switch {
+		case errors.Is(err, invoice.ErrPluginSubscriptionRequired):
+			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", err.Error(), nil, nil)
+			return c.Status(fiber.StatusForbidden).JSON(rd)
+		case errors.Is(err, invoice.ErrPluginInvoiceQuotaExceeded):
+			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", err.Error(), nil, nil)
+			return c.Status(fiber.StatusForbidden).JSON(rd)
+		default:
+			rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
+			return c.Status(fiber.StatusInternalServerError).JSON(rd)
+		}
 	}
 
 	invoiceExists, err := invoice.GetInvoiceByInvoiceNumber(db, req.InvoiceNumber, userDetails.ID)
@@ -352,7 +368,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 
 	var irnPayload dtos.InvoiceData
 	if req.IRN == nil {
-		IRNData, err := invoice.IRNGeneration(req.InvoiceNumber, userDetails.ServiceID, req.BusinessID, userDetails.IsSandbox)
+		IRNData, err := invoice.IRNGeneration(req.InvoiceNumber, userDetails.ServiceID, *userDetails.BusinessID, userDetails.IsSandbox)
 		if err != nil {
 			rd := *err
 			return c.Status(fiber.StatusBadRequest).JSON(rd)

@@ -3598,6 +3598,10 @@ const docTemplate = `{
                 "receipt_document_reference": {
                     "$ref": "#/definitions/dtos.DocumentReference"
                 },
+                "sme_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
                 "tax_currency_code": {
                     "type": "string",
                     "example": "NGN"

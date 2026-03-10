@@ -964,6 +964,9 @@ definitions:
         type: string
       receipt_document_reference:
         $ref: '#/definitions/dtos.DocumentReference'
+      sme_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       tax_currency_code:
         example: NGN
         type: string

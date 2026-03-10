@@ -34,6 +34,7 @@ type UploadInvoiceRequestDto struct {
 	TaxTotal                    []TaxTotal             `json:"tax_total" validate:"required,dive"`
 	LegalMonetaryTotal          LegalMonetaryTotal     `json:"legal_monetary_total" validate:"required"`
 	InvoiceLine                 []InvoiceLine          `json:"invoice_line" validate:"required,dive"`
+	SmeID                       *string                `json:"sme_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"omitempty,uuid"`
 }
 
 type InvoiceDeliveryPeriod struct {
