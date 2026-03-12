@@ -59,6 +59,8 @@ func ConvertZohoToFIRS(zoho zoho.Invoice, organizationID, organizationName, irn 
 				CityName:   "amac",
 				PostalZone: "19001",
 				Country:    "NG",
+				LGA:        "NG-LA-LIS",
+				State:      "NG-LA",
 			},
 		},
 		AccountingCustomerParty: &dtos.Party{
@@ -71,6 +73,8 @@ func ConvertZohoToFIRS(zoho zoho.Invoice, organizationID, organizationName, irn 
 				CityName:   zoho.BillingAddress.City,
 				PostalZone: zoho.BillingAddress.Zip,
 				Country:    zoho.BillingAddress.CountryCode,
+				LGA:        "NG-LA-LIS",
+				State:      "NG-LA",
 			},
 		},
 		PaymentTermsNote: &zoho.Terms,

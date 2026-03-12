@@ -65,7 +65,7 @@ func (base *Controller) ZohoGetAcessToken(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	tokens, err := token.GetValidAccessToken(base.Db.Postgresql.DB(), *config, platform, orgID, code)
+	tokens, err := token.GetValidAccessToken(base.TestDB.Postgresql.DB(), *config, platform, orgID, code)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
