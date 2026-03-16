@@ -17,7 +17,7 @@ func main() {
 	if !logger.IsInitialized() {
 		panic("Logger initialization failed: logger is nil")
 	}
-	configuration := config.Setup(logger, "../app")
+	configuration := config.Setup(logger, "./app")
 	postgresql.ConnectToDatabase(logger, configuration.Database, configuration.TestDatabase)
 
 	db, testDb := database.Connection()
