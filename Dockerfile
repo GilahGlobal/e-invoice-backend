@@ -11,4 +11,6 @@ COPY . .
 
 RUN go build -o main .
 
-CMD ["./main"]
+RUN go build -o worker ./cmd
+
+CMD sh -c "./worker & ./main"
