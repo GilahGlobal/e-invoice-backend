@@ -17,6 +17,7 @@ func AuthRoute(app *fiber.App, ApiVersion string, validator *validator.Validate,
 	authGroup := app.Group(fmt.Sprintf("%v/auth", ApiVersion))
 	authGroup.Post("/login", authController.Login)
 	authGroup.Post("/register", authController.Register)
+	authGroup.Post("/verify-email", authController.VerifyEmail)
 	authGroup.Post("/initiate-forgot-password", authController.InitiateForgotPassword)
 	authGroup.Post("/complete-forgot-password", authController.CompleteForgotPassword)
 

@@ -13,7 +13,6 @@ func UpdateZohoInvoice(accessToken, invoiceID, theIRN, theQrCodeValue string, ac
 	)
 
 	apiURL := fmt.Sprintf("%s/%s?organization_id=%s", configs.Zoho.ZohoApiUrl, invoiceID, accConfig.OrgID)
-	fmt.Println("Zoho Invoice Update URL:", apiURL)
 
 	updateData := ZohoUpdateInvoice{
 		CustomFields: []ZohoCustomField{

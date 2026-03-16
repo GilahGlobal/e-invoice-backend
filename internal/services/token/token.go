@@ -6,6 +6,7 @@ import (
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/models"
 	"errors"
+	"log"
 	"time"
 
 	"gorm.io/gorm"
@@ -37,6 +38,7 @@ func GetValidAccessToken(db *gorm.DB, accConfig models.AccountingPlatformConfig,
 	if time.Now().After(token.ExpiresAt.Add(-5 * time.Minute)) {
 		newToken, err := zoho.RefreshAccessToken(token.RefreshToken, string(accConfig.APIKey), string(accConfig.APISecret))
 		if err != nil {
+			log.Println("zoho error ", err)
 			return "", err
 		}
 

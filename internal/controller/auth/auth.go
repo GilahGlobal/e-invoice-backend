@@ -68,21 +68,21 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 	}
 
 	// create test account
-	respData, code, err := auth.CreateUser(reqData, base.TestDB.Postgresql.DB())
+	code, err := auth.CreateUser(reqData, base.TestDB.Postgresql.DB())
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
 	// create prod account
-	// _, _, err = auth.CreateUser(reqData, base.Db.Postgresql.DB())
+	//  _, err = auth.CreateUser(reqData, base.Db.Postgresql.DB())
 	// if err != nil {
 	// 	rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 	// 	return c.Status(fiber.StatusBadRequest).JSON(rd)
 	// }
 
 	base.Logger.Info("user created successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "user created successfully", respData)
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "An otp has been sent to your mail, use it to verify your account", nil)
 	return c.Status(code).JSON(rd)
 }
 
@@ -290,4 +290,49 @@ func (base *Controller) ToggleApplicationMode(c *fiber.Ctx) error {
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "application mode switched successfully", respData)
 	return c.Status(code).JSON(rd)
+}
+
+// @Summary Verify Email of Business Accounts
+// @Description Verify email of business accounts
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param data body dtos.VerifyEmailDto true "Verify Email request payload"
+// @Success 200 {object} dtos.LoginResponseDto "Verified successfully"
+// @Failure 400 {object} models.Response "Bad request, validation failed"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 422 {object} models.Response "Unprocessable entity"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /auth/verify-email [post]
+func (base *Controller) VerifyEmail(c *fiber.Ctx) error {
+	var req dtos.VerifyEmailDto
+
+	err := c.BodyParser(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err.Error(), nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	err = base.Validator.Struct(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, base.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	respData, err := auth.VerifyBusinessAccount(base.TestDB.Postgresql.DB(), req, true)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	// verify prod account
+	// err = auth.VerifyProdBuisnessAccount(base.Db.Postgresql.DB(), req)
+	// if err != nil {
+	// 	rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	// 	return c.Status(fiber.StatusBadRequest).JSON(rd)
+	// }
+
+	base.Logger.Info("user verified successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "user verified successfully", respData)
+	return c.Status(http.StatusOK).JSON(rd)
 }

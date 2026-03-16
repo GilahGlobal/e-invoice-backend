@@ -654,9 +654,6 @@ definitions:
       is_aggregator:
         example: true
         type: boolean
-      is_sandbox:
-        example: true
-        type: boolean
       name:
         example: John Doe
         maxLength: 250
@@ -678,7 +675,6 @@ definitions:
     - company_name
     - email
     - is_aggregator
-    - is_sandbox
     - name
     - password
     - phone_number
@@ -686,29 +682,8 @@ definitions:
     type: object
   dtos.RegisterResponseDto:
     properties:
-      data:
-        properties:
-          business_id:
-            example: 123e4567-e89b-12d3-a456-426614174000
-            type: string
-          email:
-            example: john.doe@example.com
-            type: string
-          id:
-            example: 123e4567-e89b-12d3-a456-426614174000
-            type: string
-          name:
-            example: John Doe
-            type: string
-          service_id:
-            example: 123e4567-e89b-12d3-a456-426614174000
-            type: string
-          tin:
-            example: TIN-123456789
-            type: string
-        type: object
       message:
-        example: Action performed successfully
+        example: An otp has been sent to your mail, use it to verify your account
         type: string
       status:
         example: success
@@ -1031,6 +1006,18 @@ definitions:
       service_id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
+    type: object
+  dtos.VerifyEmailDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      otp:
+        example: "123456"
+        type: string
+    required:
+    - email
+    - otp
     type: object
   firs_models.FirsTransactionVatPayload:
     properties:
@@ -1374,6 +1361,44 @@ paths:
       security:
       - BearerAuth: []
       summary: Toggle Application mode
+      tags:
+      - Auth
+  /auth/verify-email:
+    post:
+      consumes:
+      - application/json
+      description: Verify email of business accounts
+      parameters:
+      - description: Verify Email request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.VerifyEmailDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Verified successfully
+          schema:
+            $ref: '#/definitions/dtos.LoginResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Verify Email of Business Accounts
       tags:
       - Auth
   /business:

@@ -14,7 +14,6 @@ type RegisterDto struct {
 	TIN             string              `json:"tin" example:"TIN-123456789" validate:"required"`
 	PhoneNumber     string              `json:"phone_number" example:"+1234567890" validate:"required"`
 	IsAggregator    *bool               `json:"is_aggregator" example:"true" validate:"required"`
-	IsSandbox       *bool               `json:"is_sandbox" example:"true" validate:"required"`
 	PlatformConfigs PlatformConfigsAuth `json:"platform_configs" validate:"dive"`
 }
 
@@ -29,15 +28,9 @@ type SmeRegistrationDto struct {
 }
 
 type RegisterResponseDto struct {
-	BaseResponseDto
-	Data struct {
-		ID         string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-		Name       string  `json:"name" example:"John Doe"`
-		Email      string  `json:"email" example:"john.doe@example.com"`
-		BusinessID *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-		ServiceID  string  `json:"service_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-		Tin        string  `json:"tin" example:"TIN-123456789"`
-	} `json:"data"`
+	Status     string `json:"status" example:"success"`
+	StatusCode int    `json:"status_code" example:"200"`
+	Message    string `json:"message" example:"An otp has been sent to your mail, use it to verify your account"`
 }
 
 type UpdateUserRequestModel struct {
@@ -81,4 +74,9 @@ type AccountingPlatformConfigAuth struct {
 	HMACSecret string `json:"hmac_secret" example:"hmac-secret-123456789"`
 	APIKey     string `json:"api_key" example:"api-key-123456789"`
 	APISecret  string `json:"api_secret" example:"api-secret-123456789"`
+}
+
+type VerifyEmailDto struct {
+	Email string `json:"email" example:"john.doe@example.com" validate:"required,email"`
+	OTP   string `json:"otp" example:"123456" validate:"required,numeric"`
 }

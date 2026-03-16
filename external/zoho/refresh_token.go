@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -12,7 +13,7 @@ import (
 func RefreshAccessToken(refreshToken, clientID, clientSecret string) (*TokenResponse, error) {
 	tokenURL := "https://accounts.zoho.com/oauth/v2/token"
 
-	fmt.Printf("token is: %s, id is: %s, secret is: %s", refreshToken, clientID, clientSecret)
+	log.Printf("token is: %s, id is: %s, secret is: %s \n", refreshToken, clientID, clientSecret)
 	params := url.Values{}
 	params.Add("refresh_token", refreshToken)
 	params.Add("client_id", clientID)
@@ -37,6 +38,8 @@ func RefreshAccessToken(refreshToken, clientID, clientSecret string) (*TokenResp
 		return nil, err
 	}
 
+	tokenBytes, _ := json.MarshalIndent(tokenResp, "", " ")
+	log.Print("zoho response for token request", string(tokenBytes))
 	if tokenResp.Error != "" {
 		return nil, fmt.Errorf("error from Zoho: %s", tokenResp.Error)
 	}

@@ -349,6 +349,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/verify-email": {
+            "post": {
+                "description": "Verify email of business accounts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify Email of Business Accounts",
+                "parameters": [
+                    {
+                        "description": "Verify Email request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.VerifyEmailDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Verified successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.LoginResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/business": {
             "get": {
                 "security": [
@@ -3168,7 +3226,6 @@ const docTemplate = `{
                 "company_name",
                 "email",
                 "is_aggregator",
-                "is_sandbox",
                 "name",
                 "password",
                 "phone_number",
@@ -3184,10 +3241,6 @@ const docTemplate = `{
                     "example": "john.doe@example.com"
                 },
                 "is_aggregator": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "is_sandbox": {
                     "type": "boolean",
                     "example": true
                 },
@@ -3218,38 +3271,9 @@ const docTemplate = `{
         "dtos.RegisterResponseDto": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "business_id": {
-                            "type": "string",
-                            "example": "123e4567-e89b-12d3-a456-426614174000"
-                        },
-                        "email": {
-                            "type": "string",
-                            "example": "john.doe@example.com"
-                        },
-                        "id": {
-                            "type": "string",
-                            "example": "123e4567-e89b-12d3-a456-426614174000"
-                        },
-                        "name": {
-                            "type": "string",
-                            "example": "John Doe"
-                        },
-                        "service_id": {
-                            "type": "string",
-                            "example": "123e4567-e89b-12d3-a456-426614174000"
-                        },
-                        "tin": {
-                            "type": "string",
-                            "example": "TIN-123456789"
-                        }
-                    }
-                },
                 "message": {
                     "type": "string",
-                    "example": "Action performed successfully"
+                    "example": "An otp has been sent to your mail, use it to verify your account"
                 },
                 "status": {
                     "type": "string",
@@ -3677,6 +3701,23 @@ const docTemplate = `{
                 "service_id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "dtos.VerifyEmailDto": {
+            "type": "object",
+            "required": [
+                "email",
+                "otp"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                },
+                "otp": {
+                    "type": "string",
+                    "example": "123456"
                 }
             }
         },

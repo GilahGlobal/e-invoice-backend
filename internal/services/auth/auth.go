@@ -30,6 +30,10 @@ func forgotPasswordKey(email string) string {
 	return "forgot_password_otp_" + strings.ToLower(strings.TrimSpace(email))
 }
 
+func VerifyEmailKey(email string) string {
+	return "verify_email_otp_" + email
+}
+
 func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.RegisterDto, error) {
 
 	pdb := inst.InitDB(db, false)
@@ -47,16 +51,19 @@ func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.Register
 			return req, errors.New("user already exists with the given email")
 		}
 	}
-	if exists := pdb.CheckExists(&business, "company_name = ?", req.CompanyName); exists {
+
+	if exists := pdb.CheckExists(&business, "LOWER(company_name) = LOWER(?)", req.CompanyName); exists {
 		return req, errors.New("Business already exists with the given company name")
 	}
 
 	return req, nil
 }
 
-func CreateUser(req dtos.RegisterDto, db *gorm.DB) (fiber.Map, int, error) {
+func CreateUser(req dtos.RegisterDto, db *gorm.DB) (int, error) {
 
 	pdb := inst.InitDB(db, false)
+	redisClient := redis.NewClient()
+	ctx := redisClient.Context()
 
 	config := config.GetConfig()
 	serverSecret := config.Server.Secret
@@ -65,16 +72,16 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (fiber.Map, int, error) {
 
 	password, err := utility.HashPassword(req.Password)
 	if err != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("failed to hash password: %w", err)
+		return http.StatusBadRequest, fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	apiKey, err := utility.GenerateSecureToken(32, serverSecret)
 	if err != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("failed to generate api key: %w", err)
+		return http.StatusBadRequest, fmt.Errorf("failed to generate api key: %w", err)
 	}
 	encryptedAPIKey, err := common.EncryptAES(apiKey)
 	if err != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("failed to encrypt API key: %w", err)
+		return http.StatusBadRequest, fmt.Errorf("failed to encrypt API key: %w", err)
 	}
 	apiKeyHash := sha256.Sum256([]byte(apiKey))
 	apiKeyHashStr := hex.EncodeToString(apiKeyHash[:])
@@ -83,19 +90,19 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (fiber.Map, int, error) {
 	for platform, cfg := range req.PlatformConfigs {
 		encryptedHMACSecret, err := common.EncryptAES(string(cfg.HMACSecret))
 		if err != nil {
-			return nil, http.StatusBadRequest, fmt.Errorf("failed to encrypt HMAC secret for %s: %w", platform, err)
+			return http.StatusBadRequest, fmt.Errorf("failed to encrypt HMAC secret for %s: %w", platform, err)
 		}
 		encryptedAPIKey, err := common.EncryptAES(string(cfg.APIKey))
 		if err != nil {
-			return nil, http.StatusBadRequest, fmt.Errorf("failed to encrypt API key for %s: %w", platform, err)
+			return http.StatusBadRequest, fmt.Errorf("failed to encrypt API key for %s: %w", platform, err)
 		}
 		encryptedAPISecret, err := common.EncryptAES(string(cfg.APISecret))
 		if err != nil {
-			return nil, http.StatusBadRequest, fmt.Errorf("failed to encrypt API secret for %s: %w", platform, err)
+			return http.StatusBadRequest, fmt.Errorf("failed to encrypt API secret for %s: %w", platform, err)
 		}
 		encryptedAuthToken, err := common.EncryptAES(string(cfg.AuthToken))
 		if err != nil {
-			return nil, http.StatusBadRequest, fmt.Errorf("failed to encrypt Auth token for %s: %w", platform, err)
+			return http.StatusBadRequest, fmt.Errorf("failed to encrypt Auth token for %s: %w", platform, err)
 		}
 
 		platformConfigs[platform] = models.AccountingPlatformConfig{
@@ -121,27 +128,32 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (fiber.Map, int, error) {
 		PhoneNumber:     req.PhoneNumber,
 		CompanyName:     req.CompanyName,
 		IsAggregator:    *req.IsAggregator,
+		EmailVerified:   false,
 	}
 
 	err = userRepo.CreateBusiness(&user, pdb)
 	if err != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("failed to create business: %w", err)
+		return http.StatusBadRequest, fmt.Errorf("failed to create business: %w", err)
 	}
 
-	responseData := fiber.Map{
-		"id":          user.ID,
-		"email":       user.Email,
-		"name":        user.Name,
-		"business_id": user.BusinessID,
-		"service_id":  user.ServiceID,
-		"tin":         user.TIN,
-		"is_sandbox":  true,
-	}
+	// otp, err := utility.GenerateOTP(6)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to generate OTP: %w", err)
+	// }
 
-	return responseData, http.StatusCreated, nil
+	otp := 123456 // For testing purposes only, replace with generated OTP
+	key := VerifyEmailKey(email)
+	duration := 15 * time.Minute // 15 minutes expiration
+
+	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
+	// Send otp to user's email - to be implemented
+
+	return http.StatusCreated, nil
 }
-func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, int, error) {
 
+func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, int, error) {
+	redisClient := redis.NewClient()
+	ctx := redisClient.Context()
 	pdb := inst.InitDB(db, false)
 	var (
 		user = models.Business{}
@@ -161,6 +173,19 @@ func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, i
 		return nil, http.StatusInternalServerError, fmt.Errorf("unable to fetch user: %w", err)
 	}
 
+	if !userData.EmailVerified {
+		// otp, err := utility.GenerateOTP(6)
+		// if err != nil {
+		// 	return fmt.Errorf("failed to generate OTP: %w", err)
+		// }
+
+		otp := 123456 // For testing purposes only, replace with generated OTP
+		key := VerifyEmailKey(userData.Email)
+		duration := 15 * time.Minute // 15 minutes expiration
+
+		redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
+		return nil, http.StatusExpectationFailed, fmt.Errorf("Email has not been verified, an otp has been sent to your mail, use it to verify your email")
+	}
 	tokenData, err := middleware.CreateToken(user, req.IsSandbox)
 	if err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("error saving token: %w", err)
@@ -429,6 +454,95 @@ func SynchronizeSandboxToProduction(prodDB, sandboxDB *database.Database, email 
 		}
 	} else {
 		return nil
+	}
+
+	return nil
+}
+
+func VerifyBusinessAccount(db *gorm.DB, req dtos.VerifyEmailDto, isSandbox bool) (map[string]interface{}, error) {
+	pdb := inst.InitDB(db, false)
+	redisClient := redis.NewClient()
+	ctx := redisClient.Context()
+
+	email := strings.ToLower(strings.TrimSpace(req.Email))
+	user := models.Business{}
+	queryError, err := pdb.SelectOneFromDb(&user, "email = ?", email)
+	if err != nil {
+		return nil, fmt.Errorf("account details cannot be retrieved")
+	}
+
+	if queryError != nil {
+		return nil, fmt.Errorf("account details cannot be retrieved")
+	}
+
+	key := VerifyEmailKey(email)
+
+	otp, err := redisClient.Get(ctx, key).Result()
+
+	if err != nil {
+		return nil, errors.New("unable to verify token")
+	}
+
+	if otp != req.OTP {
+		return nil, errors.New("invalid OTP provided")
+	}
+
+	user.EmailVerified = true
+	if _, err := pdb.UpdateFields(user, user, user.ID); err != nil {
+		return nil, fmt.Errorf("failed to update password: %w", err)
+	}
+	redisClient.Del(ctx, key)
+
+	tokenData, err := middleware.CreateToken(user, isSandbox)
+	if err != nil {
+		return nil, fmt.Errorf("error saving token: %w", err)
+	}
+	tokens := map[string]string{
+		"access_token": tokenData.AccessToken,
+		"exp":          strconv.Itoa(int(tokenData.ExpiresAt.Unix())),
+	}
+
+	accessToken := models.AccessToken{ID: tokenData.AccessUuid, OwnerID: user.ID}
+
+	err = authRepo.CreateAccessToken(&accessToken, pdb, tokens)
+
+	if err != nil {
+		return nil, fmt.Errorf("error saving token: %w", err)
+	}
+
+	responseData := map[string]interface{}{
+		"data": dtos.UserResponse{
+			ID:           user.ID,
+			Email:        user.Email,
+			Name:         user.Name,
+			BusinessID:   user.BusinessID,
+			ServiceID:    user.ServiceID,
+			IsSandbox:    isSandbox,
+			IsAggregator: user.IsAggregator,
+		},
+		"access_token": tokenData.AccessToken,
+	}
+
+	return responseData, nil
+}
+
+func VerifyProdBuisnessAccount(db *gorm.DB, req dtos.VerifyEmailDto) error {
+	pdb := inst.InitDB(db, false)
+
+	email := strings.ToLower(strings.TrimSpace(req.Email))
+	user := models.Business{}
+	queryError, err := pdb.SelectOneFromDb(&user, "email = ?", email)
+	if err != nil {
+		return fmt.Errorf("account details cannot be retrieved")
+	}
+
+	if queryError != nil {
+		return fmt.Errorf("account details cannot be retrieved")
+	}
+
+	user.EmailVerified = true
+	if _, err := pdb.UpdateFields(user, user, user.ID); err != nil {
+		return fmt.Errorf("failed to update password: %w", err)
 	}
 
 	return nil
