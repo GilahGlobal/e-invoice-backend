@@ -222,6 +222,9 @@ definitions:
     type: object
   dtos.InvoiceData:
     properties:
+      encrypted_irn:
+        example: eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51...
+        type: string
       invoice_number:
         example: INV-1001
         type: string
