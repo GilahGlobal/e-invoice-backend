@@ -19,11 +19,16 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetAllInvoicesByBusinessID(db *gorm.DB, businessID string) ([]models.MinimalInvoiceDTO, error) {
+func GetAllInvoicesByBusinessID(db *gorm.DB, businessID string, page, size int) ([]models.MinimalInvoiceDTO, database.PaginationResponse, error) {
 
 	pdb := inst.InitDB(db, false)
 
-	return repository.FindMinimalInvoicesByBusinessID(pdb, businessID)
+	pagination := database.Pagination{
+		Page:  page,
+		Limit: size,
+	}
+
+	return repository.FindMinimalInvoicesByBusinessID(pdb, businessID, pagination)
 }
 
 func GetInvoiceDetails(db *gorm.DB, businessID, invoiceID string) (*models.Invoice, error) {

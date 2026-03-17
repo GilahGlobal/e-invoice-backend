@@ -94,6 +94,7 @@ func (base *Controller) DownloadInvoice(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
+// @Param query query models.PaginationQuery false "Pagination (page, size)"
 // @Success 200 {object} dtos.GetAllInvoicesResponseDto "invoices fetched successfully"
 // @Failure 400 {object} models.Response
 // @Router /invoice [get]
@@ -106,13 +107,25 @@ func (base *Controller) GetAllInvoices(c *fiber.Ctx) error {
 
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
 
-	invoices, err := invoice.GetAllInvoicesByBusinessID(db, userDetails.ID)
+	var query models.PaginationQuery
+	if err := c.QueryParser(&query); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Invalid query parameters", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+	if query.Size <= 0 {
+		query.Size = 20
+	}
+	if query.Page <= 0 {
+		query.Page = 1
+	}
+
+	invoices, pagination, err := invoice.GetAllInvoicesByBusinessID(db, userDetails.ID, query.Page, query.Size)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoices fetched successfully", invoices)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoices fetched successfully", invoices, pagination)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 

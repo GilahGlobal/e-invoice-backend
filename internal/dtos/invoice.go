@@ -1,5 +1,7 @@
 package dtos
 
+import "einvoice-access-point/pkg/database"
+
 type UploadInvoiceRequestDto struct {
 	InvoiceNumber               string                 `json:"invoice_number" example:"INV-001" validate:"min=1"`
 	BusinessID                  string                 `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"required,uuid"`
@@ -154,7 +156,8 @@ type MinimalInvoiceDTO struct {
 
 type GetAllInvoicesResponseDto struct {
 	BaseResponseDto
-	Data []MinimalInvoiceDTO `json:"data"`
+	Data       []MinimalInvoiceDTO         `json:"data"`
+	Pagination database.PaginationResponse `json:"pagination"`
 }
 
 type Invoice struct {

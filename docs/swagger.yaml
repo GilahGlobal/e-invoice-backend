@@ -1,5 +1,14 @@
 basePath: /api/v1
 definitions:
+  database.PaginationResponse:
+    properties:
+      current_page:
+        type: integer
+      page_count:
+        type: integer
+      total_pages_count:
+        type: integer
+    type: object
   dtos.AccountingPlatformConfigAuth:
     properties:
       api_key:
@@ -120,6 +129,8 @@ definitions:
       message:
         example: Action performed successfully
         type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
       status:
         example: success
         type: string
@@ -1708,6 +1719,22 @@ paths:
       consumes:
       - application/json
       description: Returns a list of invoices with minimal details for a business
+      parameters:
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: reference
+        type: string
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: sortBy
+        type: string
+      - in: query
+        name: sortDirectionDesc
+        type: boolean
       produces:
       - application/json
       responses:

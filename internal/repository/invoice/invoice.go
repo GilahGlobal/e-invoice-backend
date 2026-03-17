@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"time"
 
@@ -85,8 +86,27 @@ func UpdateInvoiceIRN(db database.DatabaseManager, invoice *models.Invoice, irn 
 	return db.DB().Save(invoice).Error
 }
 
-func FindMinimalInvoicesByBusinessID(db database.DatabaseManager, businessID string) ([]models.MinimalInvoiceDTO, error) {
+func FindMinimalInvoicesByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]models.MinimalInvoiceDTO, database.PaginationResponse, error) {
 	var result []models.MinimalInvoiceDTO
+
+	if pagination.Page <= 0 {
+		pagination.Page = 1
+	}
+	if pagination.Limit <= 0 {
+		pagination.Limit = 20
+	}
+
+	var totalCount int64
+	if err := db.DB().Model(&models.Invoice{}).Where("business_id = ? AND deleted_at IS NULL", businessID).Count(&totalCount).Error; err != nil {
+		return nil, database.PaginationResponse{
+			CurrentPage:     pagination.Page,
+			PageCount:       0,
+			TotalPagesCount: 0,
+		}, err
+	}
+
+	totalPages := int(math.Ceil(float64(totalCount) / float64(pagination.Limit)))
+	offset := (pagination.Page - 1) * pagination.Limit
 
 	query := `
 	SELECT 
@@ -109,14 +129,23 @@ func FindMinimalInvoicesByBusinessID(db database.DatabaseManager, businessID str
 		created_at
 	FROM invoices
 	WHERE business_id = ? AND deleted_at IS NULL
-	ORDER BY created_at DESC;
+	ORDER BY created_at DESC
+	LIMIT ? OFFSET ?;
 	`
 
-	if err := db.DB().Raw(query, businessID).Scan(&result).Error; err != nil {
-		return nil, err
+	if err := db.DB().Raw(query, businessID, pagination.Limit, offset).Scan(&result).Error; err != nil {
+		return nil, database.PaginationResponse{
+			CurrentPage:     pagination.Page,
+			PageCount:       0,
+			TotalPagesCount: totalPages,
+		}, err
 	}
 
-	return result, nil
+	return result, database.PaginationResponse{
+		CurrentPage:     pagination.Page,
+		PageCount:       len(result),
+		TotalPagesCount: totalPages,
+	}, nil
 }
 
 func FindInvoiceByBusinessAndID(db database.DatabaseManager, businessID, invoiceID string) (*models.Invoice, error) {

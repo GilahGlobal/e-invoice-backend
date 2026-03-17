@@ -894,6 +894,33 @@ const docTemplate = `{
                     "Internal Invoice"
                 ],
                 "summary": "Get all invoices",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "reference",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "sortDirectionDesc",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "invoices fetched successfully",
@@ -2319,6 +2346,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "database.PaginationResponse": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "page_count": {
+                    "type": "integer"
+                },
+                "total_pages_count": {
+                    "type": "integer"
+                }
+            }
+        },
         "dtos.AccountingPlatformConfigAuth": {
             "type": "object",
             "properties": {
@@ -2488,6 +2529,9 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "Action performed successfully"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/database.PaginationResponse"
                 },
                 "status": {
                     "type": "string",
