@@ -137,6 +137,6 @@ func IRNGeneration(invoiceNumber, serviceId, businessID string, isSandbox bool) 
 		InvoiceNumber: invoiceNumber,
 		IRN:           *generatedIRN,
 		QRCode:        signedIRNResponse.QrCodeImage,
-		EncryptedIRN:  signedIRNResponse.EncryptedIRN,
+		QRCode2:       signedIRNResponse.EncryptedIRN,
 	}, nil
 }

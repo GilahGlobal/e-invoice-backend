@@ -325,11 +325,11 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 			InvoiceNumber: req.InvoiceNumber,
 			IRN:           *req.IRN,
 			QRCode:        invoiceExists.QrCode,
-			EncryptedIRN:  invoiceExists.EncryptedIRN,
+			QRCode2:       invoiceExists.EncryptedIRN,
 		}
 	}
 
-	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.EncryptedIRN, invoiceExists, userDetails.IsSandbox)
+	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox)
 
 	response := map[string]interface{}{
 		"metadata": createdInvoice.StatusHistory,

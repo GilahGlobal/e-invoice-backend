@@ -2632,10 +2632,6 @@ const docTemplate = `{
         "dtos.InvoiceData": {
             "type": "object",
             "properties": {
-                "encrypted_irn": {
-                    "type": "string",
-                    "example": "eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."
-                },
                 "invoice_number": {
                     "type": "string",
                     "example": "INV-1001"
@@ -2647,6 +2643,10 @@ const docTemplate = `{
                 "qr_code": {
                     "type": "string",
                     "example": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."
+                },
+                "qr_code_2": {
+                    "type": "string",
+                    "example": "eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."
                 }
             }
         },
