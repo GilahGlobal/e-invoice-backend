@@ -139,8 +139,8 @@ type IRNSigningData struct {
 }
 
 type IRNSigningResponse struct {
-	EncryptedMessage string `json:"encrypted_message"`
-	QrCodeImage      string `json:"qr_code_image"`
+	EncryptedIRN string `json:"encrypted_irn"`
+	QrCodeImage  string `json:"qr_code_image"`
 }
 
 type IRNSigningRequestData struct {

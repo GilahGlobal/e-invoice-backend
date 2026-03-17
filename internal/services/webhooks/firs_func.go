@@ -54,7 +54,7 @@ func FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys *utility.Cryp
 		}
 	}(payload, business, invoiceModel, db, *theIRN)
 
-	return theIRN, &signIRNResp.EncryptedMessage, nil
+	return theIRN, &signIRNResp.EncryptedIRN, nil
 
 }
 

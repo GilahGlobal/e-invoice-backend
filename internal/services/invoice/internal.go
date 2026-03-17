@@ -31,7 +31,7 @@ func GetInvoiceDetails(db *gorm.DB, businessID, invoiceID string) (*models.Invoi
 	return repository.FindInvoiceByBusinessAndID(pdb, businessID, invoiceID)
 }
 
-func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode string, invoiceExists *models.Invoice, isSandbox bool) (*models.Invoice, *string, error, bool) {
+func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode, encryptedIRN string, invoiceExists *models.Invoice, isSandbox bool) (*models.Invoice, *string, error, bool) {
 
 	pdb := inst.InitDB(db, false)
 	isInvoiceSigned := false
@@ -75,6 +75,7 @@ func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNum
 			CurrentStatus:    currentStatus,
 			StatusHistory:    statusHistory,
 			Timestamp:        time.Now(),
+			EncryptedIRN:     encryptedIRN,
 		}
 
 		if err := repository.CreateInvoice(pdb, invoice); err != nil {
@@ -136,5 +137,6 @@ func IRNGeneration(invoiceNumber, serviceId, businessID string, isSandbox bool) 
 		InvoiceNumber: invoiceNumber,
 		IRN:           *generatedIRN,
 		QRCode:        signedIRNResponse.QrCodeImage,
+		EncryptedIRN:  signedIRNResponse.EncryptedIRN,
 	}, nil
 }

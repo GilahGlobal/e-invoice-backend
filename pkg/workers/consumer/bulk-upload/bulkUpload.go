@@ -249,11 +249,12 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		invoicePayload.IRN = &irnPayload.IRN
 	} else {
 		irnPayload = dtos.InvoiceData{
-			QRCode: invoiceExists.QrCode,
+			QRCode:       invoiceExists.QrCode,
+			EncryptedIRN: invoiceExists.EncryptedIRN,
 		}
 		invoicePayload.IRN = &invoiceExists.IRN
 	}
-	_, _, err, invoiceSigned := invoice.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, invoiceExists, isSandbox)
+	_, _, err, invoiceSigned := invoice.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, irnPayload.EncryptedIRN, invoiceExists, isSandbox)
 	if err != nil && !invoiceSigned {
 		errorArray := strings.Split(err.Error(), "-")
 		return fmt.Errorf("invoice creation failed: %s", strings.TrimSpace(errorArray[len(errorArray)-1]))

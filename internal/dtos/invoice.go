@@ -127,6 +127,7 @@ type InvoiceData struct {
 	InvoiceNumber string `json:"invoice_number" example:"INV-1001"`
 	IRN           string `json:"irn" example:"123e4567-e89b-12d3-a456-426614174000"`
 	QRCode        string `json:"qr_code" example:"iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."`
+	EncryptedIRN  string `json:"encrypted_irn" example:"eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."`
 }
 
 type InvoiceStepMetadata struct {

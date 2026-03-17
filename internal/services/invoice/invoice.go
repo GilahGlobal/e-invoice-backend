@@ -111,8 +111,8 @@ func SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IRNSigningRespo
 	base64QRImage := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	theResp := &firs_models.IRNSigningResponse{
-		EncryptedMessage: base64Encrypted,
-		QrCodeImage:      base64QRImage,
+		EncryptedIRN: base64Encrypted,
+		QrCodeImage:  base64QRImage,
 	}
 
 	//fmt.Printf("signed irn: %v", theResp)

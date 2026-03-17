@@ -33,6 +33,7 @@ type Invoice struct {
 	InvoiceNumber    string         `gorm:"column:invoice_number;type:varchar(50);not null;index" json:"invoice_number"`
 	IRN              string         `gorm:"column:irn;type:varchar(50);null" json:"irn"`
 	QrCode           string         `gorm:"column:qr_code;type:text;null" json:"qr_code"`
+	EncryptedIRN     string         `gorm:"column:encrypted_irn;type:text;null" json:"encrypted_irn"`
 	BusinessID       string         `gorm:"column:business_id;type:uuid;not null" json:"business_id"`
 	Platform         string         `gorm:"column:platform;type:varchar(20);not null" json:"platform"` // e.g., zoho, quickbooks
 	PlatformMetadata string         `gorm:"type:jsonb;not null;default:'{}'" json:"platform_metadata"`
