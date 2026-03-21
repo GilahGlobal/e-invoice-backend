@@ -80,3 +80,7 @@ type VerifyEmailDto struct {
 	Email string `json:"email" example:"john.doe@example.com" validate:"required,email"`
 	OTP   string `json:"otp" example:"123456" validate:"required,numeric"`
 }
+
+type ResendVerificationOtpDto struct {
+	Email string `json:"email" example:"john.doe@example.com" validate:"required,email"`
+}

@@ -46,10 +46,10 @@ func main() {
 	}
 
 	// Run migrations if enabled
-	// if configuration.Database.Migrate {
-	// 	migrations.RunAllMigrations(db)
-	// 	// seed.SeedDatabase(db)
-	// }
+	if configuration.Database.Migrate {
+		migrations.RunAllMigrations(db)
+		// seed.SeedDatabase(db)
+	}
 
 	if configuration.TestDatabase.Migrate {
 		migrations.RunAllMigrations(testDb)

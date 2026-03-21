@@ -14,8 +14,8 @@ import (
 func BusinessRoute(app *fiber.App, ApiVersion string, validator *validator.Validate, db, testDb *database.Database, logger *utility.Logger) *fiber.App {
 	businessController := business.Controller{Db: db, TestDb: testDb, Validator: validator, Logger: logger}
 
-	// businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(db.Postgresql.DB(), testDb.Postgresql.DB()))
-	businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(nil, testDb.Postgresql.DB()))
+	businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(db.Postgresql.DB(), testDb.Postgresql.DB()))
+	// businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(nil, testDb.Postgresql.DB()))
 	{
 		// businessUrlSec.Get("", businessController.GetAllBusiness)
 		businessUrlSec.Get("", businessController.GetBusiness)

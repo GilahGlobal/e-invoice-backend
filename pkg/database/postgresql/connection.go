@@ -15,13 +15,13 @@ import (
 )
 
 func ConnectToDatabase(logger *utility.Logger, configDatabases, testDatabase config.Database) (*gorm.DB, *gorm.DB) {
-	// dbsCV := configDatabases
+	dbsCV := configDatabases
 
-	// utility.LogAndPrint(logger, "connecting to prod database")
-	// connectedDB := connectToDb(dbsCV.DB_HOST, dbsCV.USERNAME, dbsCV.PASSWORD, dbsCV.DB_NAME, dbsCV.DB_PORT, dbsCV.SSLMODE, dbsCV.TIMEZONE, logger)
+	utility.LogAndPrint(logger, "connecting to prod database")
+	connectedDB := connectToDb(dbsCV.DB_HOST, dbsCV.USERNAME, dbsCV.PASSWORD, dbsCV.DB_NAME, dbsCV.DB_PORT, dbsCV.SSLMODE, dbsCV.TIMEZONE, logger)
 
-	// utility.LogAndPrint(logger, "connected to prod database")
-	// database.DB.Postgresql = NewPostgresqlConnection(connectedDB)
+	utility.LogAndPrint(logger, "connected to prod database")
+	database.DB.Postgresql = NewPostgresqlConnection(connectedDB)
 
 	testDB := testDatabase
 	utility.LogAndPrint(logger, "connecting to test database")
@@ -29,8 +29,8 @@ func ConnectToDatabase(logger *utility.Logger, configDatabases, testDatabase con
 	utility.LogAndPrint(logger, "connected to test database")
 
 	database.TestDB.Postgresql = NewPostgresqlConnection(testConnectedDB)
-	// return connectedDB, testConnectedDB
-	return nil, testConnectedDB
+	return connectedDB, testConnectedDB
+	// return nil, testConnectedDB
 }
 
 func connectToDb(host, user, password, dbname, port, sslmode, timezone string, logger *utility.Logger) *gorm.DB {

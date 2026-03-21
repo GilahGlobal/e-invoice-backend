@@ -34,6 +34,39 @@ func VerifyEmailKey(email string) string {
 	return "verify_email_otp_" + email
 }
 
+func ResendVerificationOTP(db *gorm.DB, email string) error {
+	pdb := inst.InitDB(db, false)
+	redisClient := redis.NewClient()
+	ctx := redisClient.Context()
+
+	normalizedEmail := strings.ToLower(strings.TrimSpace(email))
+	user := models.Business{}
+	queryError, err := pdb.SelectOneFromDb(&user, "email = ?", normalizedEmail)
+	if err != nil {
+		return fmt.Errorf("account details cannot be retrieved")
+	}
+	if queryError != nil {
+		return queryError
+	}
+	log.Println(user.EmailVerified, user.Email)
+	if user.EmailVerified {
+		return errors.New("email already verified")
+	}
+
+	// otp, err := utility.GenerateOTP(6)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to generate OTP: %w", err)
+	// }
+	otp := 123456 // For testing purposes only, replace with generated OTP
+	key := VerifyEmailKey(normalizedEmail)
+	duration := 15 * time.Minute // 15 minutes expiration
+
+	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
+	// ses.SendEmail(normalizedEmail, strconv.Itoa(otp))
+
+	return nil
+}
+
 func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.RegisterDto, error) {
 
 	pdb := inst.InitDB(db, false)
@@ -128,7 +161,6 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (int, error) {
 		PhoneNumber:     req.PhoneNumber,
 		CompanyName:     req.CompanyName,
 		IsAggregator:    *req.IsAggregator,
-		EmailVerified:   false,
 	}
 
 	err = userRepo.CreateBusiness(&user, pdb)
@@ -147,6 +179,7 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (int, error) {
 
 	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
 	// Send otp to user's email - to be implemented
+	// ses.SendEmail(email, strconv.Itoa(otp))
 
 	return http.StatusCreated, nil
 }
@@ -443,6 +476,8 @@ func SynchronizeSandboxToProduction(prodDB, sandboxDB *database.Database, email 
 				TIN:             userData.TIN,
 				PhoneNumber:     userData.PhoneNumber,
 				CompanyName:     userData.CompanyName,
+				EmailVerified:   userData.EmailVerified,
+				IsAggregator:    userData.IsAggregator,
 			}
 
 			err = userRepo.CreateBusiness(&user, pDB)

@@ -75,15 +75,52 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 	}
 
 	// create prod account
-	//  _, err = auth.CreateUser(reqData, base.Db.Postgresql.DB())
-	// if err != nil {
-	// 	rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
-	// 	return c.Status(fiber.StatusBadRequest).JSON(rd)
-	// }
+	_, err = auth.CreateUser(reqData, base.Db.Postgresql.DB())
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
 
 	base.Logger.Info("user created successfully")
 	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "An otp has been sent to your mail, use it to verify your account", nil)
 	return c.Status(code).JSON(rd)
+}
+
+// @Summary Resend verification OTP
+// @Description Resend email verification OTP
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param data body dtos.ResendVerificationOtpDto true "Resend verification OTP payload"
+// @Success 200 {object} dtos.BaseResponseDto "OTP sent successfully"
+// @Failure 400 {object} models.Response "Bad request, validation failed"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 422 {object} models.Response "Unprocessable entity"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /auth/resend-verification-otp [post]
+func (base *Controller) ResendVerificationOTP(c *fiber.Ctx) error {
+	var req dtos.ResendVerificationOtpDto
+
+	err := c.BodyParser(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err.Error(), nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	err = base.Validator.Struct(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, base.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	if err := auth.ResendVerificationOTP(base.TestDB.Postgresql.DB(), req.Email); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	base.Logger.Info("verification otp resent successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "An otp has been sent to your mail, use it to verify your account", nil)
+	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
 // @Summary Login
@@ -270,13 +307,13 @@ func (base *Controller) ToggleApplicationMode(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 	if !userDetails.IsSandbox {
-		// err := auth.SynchronizeSandboxToProduction(base.Db, base.TestDB, userDetails.Email)
-		// if err != nil {
-		// 	rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
-		// 	return c.Status(fiber.StatusBadRequest).JSON(rd)
-		// }
-		rd := utility.BuildErrorResponse(400, "error", "live environment not available at the moment", err, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
+		err := auth.SynchronizeSandboxToProduction(base.Db, base.TestDB, userDetails.Email)
+		if err != nil {
+			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
+		// rd := utility.BuildErrorResponse(400, "error", "live environment not available at the moment", err, nil)
+		// return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 	db := middleware.GetDatabaseInstance(!userDetails.IsSandbox, base.Db, base.TestDB)
 
@@ -326,11 +363,11 @@ func (base *Controller) VerifyEmail(c *fiber.Ctx) error {
 	}
 
 	// verify prod account
-	// err = auth.VerifyProdBuisnessAccount(base.Db.Postgresql.DB(), req)
-	// if err != nil {
-	// 	rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
-	// 	return c.Status(fiber.StatusBadRequest).JSON(rd)
-	// }
+	err = auth.VerifyProdBuisnessAccount(base.Db.Postgresql.DB(), req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
 
 	base.Logger.Info("user verified successfully")
 	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "user verified successfully", respData)

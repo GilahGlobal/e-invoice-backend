@@ -14,8 +14,8 @@ import (
 func InvoiceRoute(app *fiber.App, ApiVersion string, validator *validator.Validate, db, testDb *database.Database, logger *utility.Logger, keys *utility.CryptoKeys) *fiber.App {
 	invoiceController := invoice.Controller{Db: db, TestDB: testDb, Validator: validator, Logger: logger, Keys: keys}
 
-	// invoiceUrlSec := app.Group(fmt.Sprintf("%v/invoice", ApiVersion), middleware.Authorize(db.Postgresql.DB(), testDb.Postgresql.DB()))
-	invoiceUrlSec := app.Group(fmt.Sprintf("%v/invoice", ApiVersion), middleware.Authorize(nil, testDb.Postgresql.DB()))
+	invoiceUrlSec := app.Group(fmt.Sprintf("%v/invoice", ApiVersion), middleware.Authorize(db.Postgresql.DB(), testDb.Postgresql.DB()))
+	// invoiceUrlSec := app.Group(fmt.Sprintf("%v/invoice", ApiVersion), middleware.Authorize(nil, testDb.Postgresql.DB()))
 
 	{
 		invoiceUrlUnSec := app.Group(fmt.Sprintf("%v/zoho", ApiVersion))
