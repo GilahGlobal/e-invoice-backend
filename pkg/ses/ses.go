@@ -14,32 +14,15 @@ import (
 )
 
 func SendEmail(email, otp string) {
-	// creds := aws.NewCredentialsCache(
-	// 	credentials.NewStaticCredentialsProvider(
-	// 		internalConfig.Config.S3.AccessKeyID,
-	// 		internalConfig.Config.S3.SecretAccessKey,
-	// 		"",
-	// 	),
-	// )
-
-	// // Build AWS config
-	// cfg := aws.Config{
-	// 	Region:      internalConfig.Config.S3.Region,
-	// 	Credentials: creds,
-	// }
 	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
 		config.WithRegion(internalConfig.Config.S3.Region),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 			internalConfig.Config.S3.AccessKeyID,
 			internalConfig.Config.S3.SecretAccessKey,
-			"optional",
+			"",
 		)),
 	)
-
-	// cfg, err := config.LoadDefaultConfig(context.TODO(),
-	// 	config.WithRegion("us-east-1"),
-	// )
 
 	if err != nil {
 		panic(err)
@@ -48,7 +31,7 @@ func SendEmail(email, otp string) {
 	client := ses.NewFromConfig(cfg)
 
 	input := &ses.SendEmailInput{
-		Source: aws.String("joel@gention.tech"),
+		Source: aws.String("devops@nexar.ng"),
 		Destination: &types.Destination{
 			ToAddresses: []string{"devops@nexar.ng"},
 		},

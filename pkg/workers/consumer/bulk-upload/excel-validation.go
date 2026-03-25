@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -124,10 +125,21 @@ func (ep *ExcelProcessor) validateRequiredHeaders(headerIndex map[string]int) er
 		"invoice_type_code",
 		"document_currency_code",
 		"tax_currency_code",
-		"accounting_supplier_party",
 		"tax_total",
-		"legal_monetary_total",
+		"legal_monetary_total.line_extension_amount",
+		"legal_monetary_total.tax_exclusive_amount",
+		"legal_monetary_total.tax_inclusive_amount",
+		"legal_monetary_total.payable_amount",
 		"invoice_line",
+		"supplier_party.party_name",
+		"supplier_party.tin",
+		"supplier_party.email",
+		"supplier_party.street_name",
+		"supplier_party.city_name",
+		"supplier_party.postal_zone",
+		"supplier_party.lga",
+		"supplier_party.state",
+		"supplier_party.country",
 	}
 
 	missingHeaders := make([]string, 0)
@@ -317,38 +329,49 @@ func (ep *ExcelProcessor) parseExcelRow(headerIndex map[string]int, row []string
 // getFieldDefinitions returns field definitions (field name -> required)
 func (ep *ExcelProcessor) getFieldDefinitions() map[string]bool {
 	return map[string]bool{
-		"invoice_number":                true,
-		"issue_date":                    true,
-		"invoice_type_code":             true,
-		"document_currency_code":        true,
-		"tax_currency_code":             true,
-		"accounting_supplier_party":     true,
-		"tax_total":                     true,
-		"legal_monetary_total":          true,
-		"invoice_line":                  true,
-		"payment_status":                false,
-		"irn":                           false,
-		"due_date":                      false,
-		"issue_time":                    false,
-		"note":                          false,
-		"tax_point_date":                false,
-		"accounting_cost":               false,
-		"buyer_reference":               false,
-		"order_reference":               false,
-		"actual_delivery_date":          false,
-		"payment_terms_note":            false,
-		"accounting_customer_party":     false,
-		"payee_party":                   false,
-		"tax_representative_party":      false,
-		"invoice_delivery_period":       false,
-		"billing_reference":             false,
-		"dispatch_document_reference":   false,
-		"receipt_document_reference":    false,
-		"originator_document_reference": false,
-		"contract_document_reference":   false,
-		"additional_document_reference": false,
-		"payment_means":                 false,
-		"allowance_charge":              false,
+		"invoice_number":         true,
+		"issue_date":             true,
+		"invoice_type_code":      true,
+		"document_currency_code": true,
+		"tax_currency_code":      true,
+		"tax_total":              true,
+		"legal_monetary_total.line_extension_amount": true,
+		"legal_monetary_total.tax_exclusive_amount":  true,
+		"legal_monetary_total.tax_inclusive_amount":  true,
+		"legal_monetary_total.payable_amount":        true,
+		"invoice_line":                               true,
+		"supplier_party.party_name":                  true,
+		"supplier_party.tin":                         true,
+		"supplier_party.email":                       true,
+		"supplier_party.street_name":                 true,
+		"supplier_party.city_name":                   true,
+		"supplier_party.postal_zone":                 true,
+		"supplier_party.lga":                         true,
+		"supplier_party.state":                       true,
+		"supplier_party.country":                     true,
+		"payment_status":                             false,
+		"irn":                                        false,
+		"due_date":                                   false,
+		"issue_time":                                 false,
+		"note":                                       false,
+		"tax_point_date":                             false,
+		"accounting_cost":                            false,
+		"buyer_reference":                            false,
+		"order_reference":                            false,
+		"actual_delivery_date":                       false,
+		"payment_terms_note":                         false,
+		"payee_party":                                false,
+		"tax_representative_party":                   false,
+		"invoice_delivery_period":                    false,
+		"billing_reference":                          false,
+		"dispatch_document_reference":                false,
+		"receipt_document_reference":                 false,
+		"originator_document_reference":              false,
+		"contract_document_reference":                false,
+		"additional_document_reference":              false,
+		"payment_means":                              false,
+		"allowance_charge":                           false,
+		"accounting_customer_party":                  false,
 	}
 }
 
@@ -412,13 +435,55 @@ func (ep *ExcelProcessor) parseField(fieldName, value string, invoice *dtos.Uplo
 	case "payment_terms_note":
 		invoice.PaymentTermsNote = stringPtr(value)
 
-	// JSON fields
-	case "accounting_supplier_party":
-		var supplier dtos.Party
-		if err := json.Unmarshal([]byte(value), &supplier); err != nil {
-			return fmt.Errorf("failed to parse JSON: %w", err)
+	// Accounting supplier Json flattened
+	case "supplier_party.party_name":
+		invoice.AccountingSupplierParty.PartyName = value
+	case "supplier_party.tin":
+		invoice.AccountingSupplierParty.TIN = value
+	case "supplier_party.email":
+		invoice.AccountingSupplierParty.Email = value
+	case "supplier_party.telephone":
+		invoice.AccountingSupplierParty.Telephone = stringPtr(value)
+	case "supplier_party.business_description":
+		invoice.AccountingSupplierParty.BusinessDescription = stringPtr(value)
+	case "supplier_party.street_name":
+		invoice.AccountingSupplierParty.PostalAddress.StreetName = value
+	case "supplier_party.city_name":
+		invoice.AccountingSupplierParty.PostalAddress.CityName = value
+	case "supplier_party.postal_zone":
+		invoice.AccountingSupplierParty.PostalAddress.PostalZone = value
+	case "supplier_party.lga":
+		invoice.AccountingSupplierParty.PostalAddress.LGA = value
+	case "supplier_party.state":
+		invoice.AccountingSupplierParty.PostalAddress.State = value
+	case "supplier_party.country":
+		invoice.AccountingSupplierParty.PostalAddress.Country = value
+
+	// legal_monetary_total json flattened
+	case "legal_monetary_total.line_extension_amount":
+		floatValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return fmt.Errorf("legal_monetary_total.line_extension_amount: invalid numeric value, expected a valid number")
 		}
-		invoice.AccountingSupplierParty = supplier
+		invoice.LegalMonetaryTotal.LineExtensionAmount = floatValue
+	case "legal_monetary_total.tax_exclusive_amount":
+		floatValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return fmt.Errorf("legal_monetary_total.tax_exclusive_amount: invalid numeric value, expected a valid number")
+		}
+		invoice.LegalMonetaryTotal.TaxExclusiveAmount = floatValue
+	case "legal_monetary_total.tax_inclusive_amount":
+		floatValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return fmt.Errorf("legal_monetary_total.tax_inclusive_amount: invalid numeric value, expected a valid number")
+		}
+		invoice.LegalMonetaryTotal.TaxInclusiveAmount = floatValue
+	case "legal_monetary_total.payable_amount":
+		floatValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return fmt.Errorf("legal_monetary_total.payable_amount: invalid numeric value, expected a valid number")
+		}
+		invoice.LegalMonetaryTotal.PayableAmount = floatValue
 
 	case "tax_total":
 		var taxTotals []dtos.TaxTotal
@@ -426,13 +491,6 @@ func (ep *ExcelProcessor) parseField(fieldName, value string, invoice *dtos.Uplo
 			return fmt.Errorf("failed to parse JSON: %w", err)
 		}
 		invoice.TaxTotal = taxTotals
-
-	case "legal_monetary_total":
-		var legalTotal dtos.LegalMonetaryTotal
-		if err := json.Unmarshal([]byte(value), &legalTotal); err != nil {
-			return fmt.Errorf("failed to parse JSON: %w", err)
-		}
-		invoice.LegalMonetaryTotal = legalTotal
 
 	case "invoice_line":
 		var invoiceLines []dtos.InvoiceLine
@@ -638,7 +696,20 @@ func GenerateExcelTemplate() (*bytes.Buffer, error) {
 	headers := []string{
 		"invoice_number", "business_id", "issue_date", "invoice_type_code",
 		"document_currency_code", "tax_currency_code", "payment_status",
-		"accounting_supplier_party", "tax_total", "legal_monetary_total", "invoice_line",
+		"legal_monetary_total.line_extension_amount",
+		"legal_monetary_total.tax_exclusive_amount",
+		"legal_monetary_total.tax_inclusive_amount",
+		"legal_monetary_total.payable_amount",
+		"invoice_line",
+		"supplier_party.party_name",
+		"supplier_party.tin",
+		"supplier_party.email",
+		"supplier_party.street_name",
+		"supplier_party.city_name",
+		"supplier_party.postal_zone",
+		"supplier_party.lga",
+		"supplier_party.state",
+		"supplier_party.country", "tax_total", "invoice_line",
 		"irn", "due_date", "issue_time", "note", "tax_point_date", "accounting_cost",
 		"buyer_reference", "order_reference", "actual_delivery_date", "payment_terms_note",
 		"accounting_customer_party", "payee_party", "tax_representative_party",

@@ -54,7 +54,7 @@ func ConvertZohoToFIRS(zoho zoho.Invoice, organizationID, organizationName, irn 
 			PartyName: organizationName,
 			TIN:       "TIN-UNKNOWN",          // Placeholder, as TIN is not provided in Zoho data
 			Email:     "supplier@example.com", // Placeholder, as supplier email is not provided                  // Optional, not provided in Zoho data
-			PostalAddress: &dtos.PostalAddress{
+			PostalAddress: dtos.PostalAddress{
 				StreetName: "test adress", // Not provided in Zoho data
 				CityName:   "amac",
 				PostalZone: "19001",
@@ -68,7 +68,7 @@ func ConvertZohoToFIRS(zoho zoho.Invoice, organizationID, organizationName, irn 
 			TIN:       "TIN-" + zoho.CustomerID, // Using customer_id as part of TIN
 			Email:     zoho.Email,
 			Telephone: &contactPhone,
-			PostalAddress: &dtos.PostalAddress{
+			PostalAddress: dtos.PostalAddress{
 				StreetName: zoho.BillingAddress.Address,
 				CityName:   zoho.BillingAddress.City,
 				PostalZone: zoho.BillingAddress.Zip,

@@ -12,6 +12,7 @@ import (
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
+	"einvoice-access-point/pkg/ses"
 	"einvoice-access-point/pkg/utility"
 	"encoding/hex"
 	"errors"
@@ -36,8 +37,6 @@ func VerifyEmailKey(email string) string {
 
 func ResendVerificationOTP(db *gorm.DB, email string) error {
 	pdb := inst.InitDB(db, false)
-	redisClient := redis.NewClient()
-	ctx := redisClient.Context()
 
 	normalizedEmail := strings.ToLower(strings.TrimSpace(email))
 	user := models.Business{}
@@ -53,16 +52,7 @@ func ResendVerificationOTP(db *gorm.DB, email string) error {
 		return errors.New("email already verified")
 	}
 
-	// otp, err := utility.GenerateOTP(6)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to generate OTP: %w", err)
-	// }
-	otp := 123456 // For testing purposes only, replace with generated OTP
-	key := VerifyEmailKey(normalizedEmail)
-	duration := 15 * time.Minute // 15 minutes expiration
-
-	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
-	// ses.SendEmail(normalizedEmail, strconv.Itoa(otp))
+	SendOtp(user.Email)
 
 	return nil
 }
@@ -95,8 +85,6 @@ func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.Register
 func CreateUser(req dtos.RegisterDto, db *gorm.DB) (int, error) {
 
 	pdb := inst.InitDB(db, false)
-	redisClient := redis.NewClient()
-	ctx := redisClient.Context()
 
 	config := config.GetConfig()
 	serverSecret := config.Server.Secret
@@ -167,19 +155,6 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (int, error) {
 	if err != nil {
 		return http.StatusBadRequest, fmt.Errorf("failed to create business: %w", err)
 	}
-
-	// otp, err := utility.GenerateOTP(6)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to generate OTP: %w", err)
-	// }
-
-	otp := 123456 // For testing purposes only, replace with generated OTP
-	key := VerifyEmailKey(email)
-	duration := 15 * time.Minute // 15 minutes expiration
-
-	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
-	// Send otp to user's email - to be implemented
-	// ses.SendEmail(email, strconv.Itoa(otp))
 
 	return http.StatusCreated, nil
 }
@@ -272,8 +247,6 @@ func LogoutUser(accessUuid, ownerId string, db *gorm.DB) (fiber.Map, int, error)
 }
 
 func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) error {
-	redisClient := redis.NewClient()
-	ctx := redisClient.Context()
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	pdb := inst.InitDB(db, false)
 	user := models.Business{}
@@ -286,17 +259,7 @@ func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) err
 		return queryError
 	}
 
-	// otp, err := utility.GenerateOTP(6)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to generate OTP: %w", err)
-	// }
-
-	otp := 123456 // For testing purposes only, replace with generated OTP
-	key := forgotPasswordKey(email)
-	duration := 15 * time.Minute // 15 minutes expiration
-
-	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
-	// Send otp to user's email - to be implemented
+	SendOtp(user.Email)
 	return nil
 }
 
@@ -581,4 +544,21 @@ func VerifyProdBuisnessAccount(db *gorm.DB, req dtos.VerifyEmailDto) error {
 	}
 
 	return nil
+}
+
+func SendOtp(email string) {
+	redisClient := redis.NewClient()
+	ctx := redisClient.Context()
+	// otp, err := utility.GenerateOTP(6)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to generate OTP: %w", err)
+	// }
+
+	otp := 123456 // For testing purposes only, replace with generated OTP
+	key := VerifyEmailKey(email)
+	duration := 15 * time.Minute // 15 minutes expiration
+
+	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
+	ses.SendEmail(email, strconv.Itoa(otp))
+	return
 }

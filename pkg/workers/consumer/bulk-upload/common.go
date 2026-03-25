@@ -117,14 +117,6 @@ func isCSVContent(data []byte) bool {
 	return validLines >= 2 // Need at least 2 non-empty lines with consistent delimiters
 }
 
-// Helper function
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func normalizeHeader(header string) string {
 	header = strings.ToLower(strings.TrimSpace(header))
 	header = strings.ReplaceAll(header, " ", "_")

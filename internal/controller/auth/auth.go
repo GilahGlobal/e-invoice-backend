@@ -7,6 +7,7 @@ import (
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/utility"
 	"net/http"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -80,6 +81,8 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
+
+	auth.SendOtp(strings.ToLower(reqData.Email))
 
 	base.Logger.Info("user created successfully")
 	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "An otp has been sent to your mail, use it to verify your account", nil)

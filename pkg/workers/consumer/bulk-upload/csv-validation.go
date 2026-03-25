@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -416,10 +417,21 @@ func (cp *CSVProcessor) validateRequiredHeaders(headerIndex map[string]int) erro
 		"invoice_type_code",
 		"document_currency_code",
 		"tax_currency_code",
-		"accounting_supplier_party",
 		"tax_total",
-		"legal_monetary_total",
+		"legal_monetary_total.line_extension_amount",
+		"legal_monetary_total.tax_exclusive_amount",
+		"legal_monetary_total.tax_inclusive_amount",
+		"legal_monetary_total.payable_amount",
 		"invoice_line",
+		"supplier_party.party_name",
+		"supplier_party.tin",
+		"supplier_party.email",
+		"supplier_party.street_name",
+		"supplier_party.city_name",
+		"supplier_party.postal_zone",
+		"supplier_party.lga",
+		"supplier_party.state",
+		"supplier_party.country",
 	}
 
 	missingHeaders := make([]string, 0)
@@ -596,27 +608,63 @@ func (cp *CSVProcessor) parseField(fieldName, value string, invoice *dtos.Upload
 	case "payment_terms_note":
 		invoice.PaymentTermsNote = stringPtr(value)
 
-	// JSON fields
-	case "accounting_supplier_party":
-		var supplier dtos.Party
-		if err := json.Unmarshal([]byte(value), &supplier); err != nil {
-			return fmt.Errorf("failed to parse JSON: %w", err)
-		}
-		invoice.AccountingSupplierParty = supplier
+	// Accounting supplier Json flattened
+	case "supplier_party.party_name":
+		invoice.AccountingSupplierParty.PartyName = value
+	case "supplier_party.tin":
+		invoice.AccountingSupplierParty.TIN = value
+	case "supplier_party.email":
+		invoice.AccountingSupplierParty.Email = value
+	case "supplier_party.telephone":
+		invoice.AccountingSupplierParty.Telephone = stringPtr(value)
+	case "supplier_party.business_description":
+		invoice.AccountingSupplierParty.BusinessDescription = stringPtr(value)
+	case "supplier_party.street_name":
+		invoice.AccountingSupplierParty.PostalAddress.StreetName = value
+	case "supplier_party.city_name":
+		invoice.AccountingSupplierParty.PostalAddress.CityName = value
+	case "supplier_party.postal_zone":
+		invoice.AccountingSupplierParty.PostalAddress.PostalZone = value
+	case "supplier_party.lga":
+		invoice.AccountingSupplierParty.PostalAddress.LGA = value
+	case "supplier_party.state":
+		invoice.AccountingSupplierParty.PostalAddress.State = value
+	case "supplier_party.country":
+		invoice.AccountingSupplierParty.PostalAddress.Country = value
 
+	// legal_monetary_total json flattened
+	case "legal_monetary_total.line_extension_amount":
+		floatValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return fmt.Errorf("legal_monetary_total.line_extension_amount: invalid numeric value, expected a valid number")
+		}
+		invoice.LegalMonetaryTotal.LineExtensionAmount = floatValue
+	case "legal_monetary_total.tax_exclusive_amount":
+		floatValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return fmt.Errorf("legal_monetary_total.tax_exclusive_amount: invalid numeric value, expected a valid number")
+		}
+		invoice.LegalMonetaryTotal.TaxExclusiveAmount = floatValue
+	case "legal_monetary_total.tax_inclusive_amount":
+		floatValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return fmt.Errorf("legal_monetary_total.tax_inclusive_amount: invalid numeric value, expected a valid number")
+		}
+		invoice.LegalMonetaryTotal.TaxInclusiveAmount = floatValue
+	case "legal_monetary_total.payable_amount":
+		floatValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return fmt.Errorf("legal_monetary_total.payable_amount: invalid numeric value, expected a valid number")
+		}
+		invoice.LegalMonetaryTotal.PayableAmount = floatValue
+
+	// JSON fields
 	case "tax_total":
 		var taxTotals []dtos.TaxTotal
 		if err := json.Unmarshal([]byte(value), &taxTotals); err != nil {
 			return fmt.Errorf("failed to parse JSON: %w", err)
 		}
 		invoice.TaxTotal = taxTotals
-
-	case "legal_monetary_total":
-		var legalTotal dtos.LegalMonetaryTotal
-		if err := json.Unmarshal([]byte(value), &legalTotal); err != nil {
-			return fmt.Errorf("failed to parse JSON: %w", err)
-		}
-		invoice.LegalMonetaryTotal = legalTotal
 
 	case "invoice_line":
 		var invoiceLines []dtos.InvoiceLine

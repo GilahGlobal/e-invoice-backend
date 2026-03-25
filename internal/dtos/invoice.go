@@ -50,12 +50,12 @@ type DocumentReference struct {
 }
 
 type Party struct {
-	PartyName           string         `json:"party_name" example:"Acme Inc." validate:"required,min=2"`
-	TIN                 string         `json:"tin" example:"123456789012345" validate:"required"`
-	Email               string         `json:"email" example:"business@example.com" validate:"required,email"`
-	Telephone           *string        `json:"telephone" example:"+234804567890" validate:"omitempty,startswith=+,numeric,min=7"`
-	BusinessDescription *string        `json:"business_description" example:"Acme Inc. is a leading technology company." validate:"omitempty,min=5"`
-	PostalAddress       *PostalAddress `json:"postal_address" validate:"required"`
+	PartyName           string        `json:"party_name" example:"Acme Inc." validate:"required,min=2"`
+	TIN                 string        `json:"tin" example:"123456789012345" validate:"required"`
+	Email               string        `json:"email" example:"business@example.com" validate:"required,email"`
+	Telephone           *string       `json:"telephone" example:"+234804567890" validate:"omitempty,startswith=+,numeric,min=7"`
+	BusinessDescription *string       `json:"business_description" example:"Acme Inc. is a leading technology company." validate:"omitempty,min=5"`
+	PostalAddress       PostalAddress `json:"postal_address" validate:"required"`
 }
 
 type PostalAddress struct {
