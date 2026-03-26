@@ -13,4 +13,5 @@ RUN go build -o main .
 
 RUN go build -o worker ./cmd
 
-CMD sh -c "./worker & ./main"
+#CMD sh -c "./worker & ./main"
+CMD ["sh", "start.sh"]

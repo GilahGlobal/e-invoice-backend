@@ -3,6 +3,7 @@ services:
   postgres:
     image: postgres:15
     container_name: postgres
+    restart: unless-stopped
     restart: always
     ports:
       - "5433:5432"  # expose PostgreSQL on 5433 externally
@@ -24,6 +25,7 @@ services:
   redis:
     image: redis:alpine
     container_name: redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     networks:
@@ -42,6 +44,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: go-app1
+    restart: unless-stopped
     environment:
       ENV_FILE: apptest.env
     volumes:
@@ -59,6 +62,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: go-app2
+    restart: unless-stopped
     environment:
       ENV_FILE: apptest.env
     volumes:
@@ -76,6 +80,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: go-app3
+    restart: unless-stopped
     environment:
       ENV_FILE: apptest.env
     volumes:
@@ -92,6 +97,7 @@ services:
   nginx:
     image: nginx:alpine
     container_name: nginx
+    restart: unless-stopped
     ports:
       - "80:80"
     volumes:
@@ -112,6 +118,7 @@ services:
   prometheus:
     image: prom/prometheus
     container_name: prometheus
+    restart: unless-stopped
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -123,6 +130,7 @@ services:
   grafana:
     image: grafana/grafana
     container_name: grafana
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
