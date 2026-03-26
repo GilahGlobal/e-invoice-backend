@@ -50,6 +50,68 @@ definitions:
         example: 200
         type: integer
     type: object
+  dtos.BulkUploadLogDto:
+    properties:
+      business_id:
+        example: ac0d4848-c898-49ce-8fc7-46f529a9354a
+        type: string
+      completed_at:
+        example: "2026-03-26T07:47:21.591765+01:00"
+        type: string
+      created_at:
+        example: "2026-03-26T07:47:19.286025+01:00"
+        type: string
+      duration:
+        example: 6920833
+        type: integer
+      file_key:
+        example: invoices/sample.xlsx
+        type: string
+      file_url:
+        example: https://nexar-file-uploads.s3.amazonaws.com/invoices/sample.xlsx
+        type: string
+      id:
+        example: 019d28e5-bfad-7211-a56f-4e3376a67cf9
+        type: string
+      started_at:
+        example: "2026-03-26T07:47:21.584844+01:00"
+        type: string
+      status:
+        example: completed
+        type: string
+      successful_invoices:
+        example: 0
+        type: integer
+      total_records:
+        example: 4
+        type: integer
+      unsuccessful_invoices:
+        example: 3
+        type: integer
+      valid_records:
+        example: 3
+        type: integer
+      validation_error_count:
+        example: 1
+        type: integer
+      validation_errors:
+        items:
+          $ref: '#/definitions/dtos.BulkUploadValidationErrorDto'
+        type: array
+    type: object
+  dtos.BulkUploadValidationErrorDto:
+    properties:
+      error:
+        example: 'invoice VA12239: validation failed: Key: ''UploadInvoiceRequestDto.InvoiceTypeCode''
+          Error:Field validation for ''InvoiceTypeCode'' failed on the ''oneof'' tag'
+        type: string
+      invoice_index:
+        example: 1
+        type: integer
+      invoice_number:
+        example: VA12239
+        type: string
+    type: object
   dtos.CompleteForgotPasswordDto:
     properties:
       email:
@@ -131,6 +193,26 @@ definitions:
         type: string
       pagination:
         $ref: '#/definitions/database.PaginationResponse'
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.GetBulkUploadLogsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dtos.BulkUploadLogDto'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      pagination:
+        items:
+          $ref: '#/definitions/database.PaginationResponse'
+        type: array
       status:
         example: success
         type: string
@@ -705,6 +787,14 @@ definitions:
       status_code:
         example: 200
         type: integer
+    type: object
+  dtos.ResendVerificationOtpDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+    required:
+    - email
     type: object
   dtos.SmeRegistrationDto:
     properties:
@@ -1346,6 +1436,44 @@ paths:
       summary: Register
       tags:
       - Auth
+  /auth/resend-verification-otp:
+    post:
+      consumes:
+      - application/json
+      description: Resend email verification OTP
+      parameters:
+      - description: Resend verification OTP payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ResendVerificationOtpDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP sent successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Resend verification OTP
+      tags:
+      - Auth
   /auth/toggle-mode:
     get:
       description: Toggle Application mode from either sandox to prod or vice cers
@@ -1806,6 +1934,47 @@ paths:
       summary: Get one invoice details
       tags:
       - Internal Invoice
+  /invoice/bulk-upload:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve paginated bulk upload logs for a business
+      parameters:
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: reference
+        type: string
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: sortBy
+        type: string
+      - in: query
+        name: sortDirectionDesc
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk upload logs fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.GetBulkUploadLogsResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Get bulk upload logs
+      tags:
+      - Invoice
   /invoice/confirm/{irn}:
     get:
       consumes:

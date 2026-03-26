@@ -27,6 +27,7 @@ type ProcessResults struct {
 type ProcessResult struct {
 	Invoice *dtos.UploadInvoiceRequestDto
 	Error   error
+	Posted  bool
 }
 
 type ProcessError struct {

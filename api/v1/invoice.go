@@ -28,6 +28,7 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, validator *validator.Valida
 	}
 	{
 		invoiceUrlSec.Get("", invoiceController.GetAllInvoices)
+		invoiceUrlSec.Get("/bulk-upload", invoiceController.GetBulkUploadLogs)
 		invoiceUrlSec.Get("/:invoice_id", invoiceController.GetInvoiceDetails)
 		invoiceUrlSec.Post("/create", invoiceController.CreateInvoice)
 		invoiceUrlSec.Delete("/:invoice_id", invoiceController.DeleteInvoice)

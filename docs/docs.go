@@ -300,6 +300,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/resend-verification-otp": {
+            "post": {
+                "description": "Resend email verification OTP",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Resend verification OTP",
+                "parameters": [
+                    {
+                        "description": "Resend verification OTP payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ResendVerificationOtpDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/toggle-mode": {
             "get": {
                 "security": [
@@ -930,6 +988,73 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/invoice/bulk-upload": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve paginated bulk upload logs for a business",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invoice"
+                ],
+                "summary": "Get bulk upload logs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "reference",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "sortDirectionDesc",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bulk upload logs fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.GetBulkUploadLogsResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -2418,6 +2543,90 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.BulkUploadLogDto": {
+            "type": "object",
+            "properties": {
+                "business_id": {
+                    "type": "string",
+                    "example": "ac0d4848-c898-49ce-8fc7-46f529a9354a"
+                },
+                "completed_at": {
+                    "type": "string",
+                    "example": "2026-03-26T07:47:21.591765+01:00"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-03-26T07:47:19.286025+01:00"
+                },
+                "duration": {
+                    "type": "integer",
+                    "example": 6920833
+                },
+                "file_key": {
+                    "type": "string",
+                    "example": "invoices/sample.xlsx"
+                },
+                "file_url": {
+                    "type": "string",
+                    "example": "https://nexar-file-uploads.s3.amazonaws.com/invoices/sample.xlsx"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "019d28e5-bfad-7211-a56f-4e3376a67cf9"
+                },
+                "started_at": {
+                    "type": "string",
+                    "example": "2026-03-26T07:47:21.584844+01:00"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "completed"
+                },
+                "successful_invoices": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "total_records": {
+                    "type": "integer",
+                    "example": 4
+                },
+                "unsuccessful_invoices": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "valid_records": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "validation_error_count": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "validation_errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.BulkUploadValidationErrorDto"
+                    }
+                }
+            }
+        },
+        "dtos.BulkUploadValidationErrorDto": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "invoice VA12239: validation failed: Key: 'UploadInvoiceRequestDto.InvoiceTypeCode' Error:Field validation for 'InvoiceTypeCode' failed on the 'oneof' tag"
+                },
+                "invoice_index": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "invoice_number": {
+                    "type": "string",
+                    "example": "VA12239"
+                }
+            }
+        },
         "dtos.CompleteForgotPasswordDto": {
             "type": "object",
             "required": [
@@ -2532,6 +2741,35 @@ const docTemplate = `{
                 },
                 "pagination": {
                     "$ref": "#/definitions/database.PaginationResponse"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.GetBulkUploadLogsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.BulkUploadLogDto"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "pagination": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.PaginationResponse"
+                    }
                 },
                 "status": {
                     "type": "string",
@@ -3330,6 +3568,18 @@ const docTemplate = `{
                 "status_code": {
                     "type": "integer",
                     "example": 200
+                }
+            }
+        },
+        "dtos.ResendVerificationOtpDto": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
                 }
             }
         },

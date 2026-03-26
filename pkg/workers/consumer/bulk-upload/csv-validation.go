@@ -457,11 +457,17 @@ func (cp *CSVProcessor) parseAndValidateRow(headerIndex map[string]int, row []st
 		for _, err := range parseErrors {
 			errorStrs = append(errorStrs, err.Error())
 		}
+		if invoice.InvoiceNumber != "" {
+			return invoice, fmt.Errorf("invoice %s: parse errors: %s", invoice.InvoiceNumber, strings.Join(errorStrs, "; "))
+		}
 		return invoice, fmt.Errorf("parse errors: %s", strings.Join(errorStrs, "; "))
 	}
 
 	// Validate the struct
 	if err := cp.validator.Struct(invoice); err != nil {
+		if invoice.InvoiceNumber != "" {
+			return invoice, fmt.Errorf("invoice %s: validation failed: %w", invoice.InvoiceNumber, err)
+		}
 		return invoice, fmt.Errorf("validation failed: %w", err)
 	}
 
