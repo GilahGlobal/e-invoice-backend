@@ -27,7 +27,9 @@ jobs:
             echo '📥 Pulling latest code...' && \
             git pull origin master && \
             echo '🐳 Updating Go apps only...' && \
-            docker-compose up -d --build --no-deps go-app1 go-app2 go-app3 && \
+            docker-compose stop go-app1 go-app2 go-app3
+            docker-compose up -d --build --no-deps go-app1 go-app2 go-app3
+            docker image prune -f
             echo '🧹 Cleaning unused images...' && \
             docker image prune -f && \
             echo '✅ Deployment complete' \
