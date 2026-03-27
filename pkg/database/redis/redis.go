@@ -1,4 +1,4 @@
-package redis
+/*package redis
 
 import (
 	"einvoice-access-point/pkg/config"
@@ -32,5 +32,30 @@ func NewClient() *redis.Client {
 
 	client := redis.NewClient(opt)
 
+	return client
+}*/
+
+package redis
+
+import (
+	"log"
+	"os"
+
+	"github.com/go-redis/redis/v8"
+)
+
+func NewClient() *redis.Client {
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis://redis:6379/0"
+	}
+
+	opt, err := redis.ParseURL(redisURL)
+	if err != nil {
+		log.Fatal("Failed to parse Redis URL:", err)
+	}
+
+	client := redis.NewClient(opt)
+	log.Println("Connected to Redis at", redisURL)
 	return client
 }
