@@ -1,4 +1,3 @@
-see my docker-compose.yml, fix what has to be fixed and write the complete working one:
 version: "3.9"
 
 services:
