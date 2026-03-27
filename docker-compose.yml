@@ -1,6 +1,7 @@
 version: "3.9"
 
 services:
+  # --- DATABASE ---
   postgres:
     image: postgres:15
     container_name: postgres
@@ -15,18 +16,30 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - appnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # --- REDIS ---
   redis:
     image: redis:alpine
     container_name: redis
     restart: unless-stopped
     ports:
       - "6379:6379"
-    volumes:
-      - redisdata:/data
     networks:
       - appnet
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # --- GO APP INSTANCES ---
   go-app1:
     build:
       context: .
@@ -37,6 +50,7 @@ services:
       - ./apptest.env
     volumes:
       - ./logs:/app/logs
+      - ./apptest.env:/app/apptest.env
     networks:
       - appnet
     depends_on:
@@ -58,6 +72,7 @@ services:
       - ./apptest.env
     volumes:
       - ./logs:/app/logs
+      - ./apptest.env:/app/apptest.env
     networks:
       - appnet
     depends_on:
@@ -79,6 +94,7 @@ services:
       - ./apptest.env
     volumes:
       - ./logs:/app/logs
+      - ./apptest.env:/app/apptest.env
     networks:
       - appnet
     depends_on:
@@ -90,6 +106,7 @@ services:
       timeout: 5s
       retries: 3
 
+  # --- NGINX (Load balancer) ---
   nginx:
     image: nginx:alpine
     container_name: nginx
@@ -105,6 +122,41 @@ services:
       - go-app3
     networks:
       - appnet
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://go-app1:8091/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # --- PROMETHEUS ---
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - appnet
+
+  # --- GRAFANA ---
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - appnet
+      - monitoring
 
 volumes:
   pgdata:
@@ -113,4 +165,6 @@ volumes:
 
 networks:
   appnet:
+    driver: bridge
+  monitoring:
     driver: bridge
