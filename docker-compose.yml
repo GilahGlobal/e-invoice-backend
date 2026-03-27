@@ -1,13 +1,12 @@
 version: "3.9"
 
 services:
-  # --- DATABASE ---
   postgres:
     image: postgres:15
     container_name: postgres
     restart: unless-stopped
     ports:
-      - "5433:5432"  # expose PostgreSQL on 5433 externally
+      - "5433:5432"
     environment:
       POSTGRES_DB: tbl_einvoice_access
       POSTGRES_USER: postgres
@@ -16,41 +15,28 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - appnet
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  # --- REDIS ---
   redis:
     image: redis:alpine
     container_name: redis
     restart: unless-stopped
     ports:
       - "6379:6379"
-    networks:
-      - appnet
     volumes:
       - redisdata:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    networks:
+      - appnet
 
-  # --- GO APP INSTANCES ---
   go-app1:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: go-app1
     restart: unless-stopped
-    environment:
-      ENV_FILE: /app/apptest.env
+    env_file:
+      - ./apptest.env
     volumes:
       - ./logs:/app/logs
-      - ./apptest.env:/app/apptest.env
     networks:
       - appnet
     depends_on:
@@ -68,11 +54,10 @@ services:
       dockerfile: Dockerfile
     container_name: go-app2
     restart: unless-stopped
-    environment:
-      ENV_FILE: /app/apptest.env
+    env_file:
+      - ./apptest.env
     volumes:
       - ./logs:/app/logs
-      - ./apptest.env:/app/apptest.env
     networks:
       - appnet
     depends_on:
@@ -90,11 +75,10 @@ services:
       dockerfile: Dockerfile
     container_name: go-app3
     restart: unless-stopped
-    environment:
-      ENV_FILE: /app/apptest.env
+    env_file:
+      - ./apptest.env
     volumes:
       - ./logs:/app/logs
-      - ./apptest.env:/app/apptest.env
     networks:
       - appnet
     depends_on:
@@ -106,13 +90,13 @@ services:
       timeout: 5s
       retries: 3
 
-  # --- NGINX (Load balancer) ---
   nginx:
     image: nginx:alpine
     container_name: nginx
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
@@ -121,41 +105,6 @@ services:
       - go-app3
     networks:
       - appnet
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://go-app1:8091/api/v1/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  # --- PROMETHEUS ---
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    restart: unless-stopped
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-    networks:
-      - appnet
-
-  # --- GRAFANA ---
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana-storage:/var/lib/grafana
-    depends_on:
-      - prometheus
-    networks:
-      - appnet
-      - monitoring
 
 volumes:
   pgdata:
@@ -164,6 +113,4 @@ volumes:
 
 networks:
   appnet:
-    driver: bridge
-  monitoring:
     driver: bridge
