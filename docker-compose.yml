@@ -47,12 +47,12 @@ services:
     container_name: go-app1
     restart: unless-stopped
     env_file:
-      - ./apptest.env
+      - ./.env
     environment:
       REDIS_URL: redis://redis:6379/0
     volumes:
       - ./logs:/app/logs
-      - ./apptest.env:/app/apptest.env
+      - ./.env:/app/.env
     networks:
       - appnet
     depends_on:
@@ -66,12 +66,12 @@ services:
     container_name: go-app2
     restart: unless-stopped
     env_file:
-      - ./apptest.env
+      - ./.env
     environment:
       REDIS_URL: redis://redis:6379/0
     volumes:
       - ./logs:/app/logs
-      - ./apptest.env:/app/apptest.env
+      - ./.env:/app/.env
     networks:
       - appnet
     depends_on:
@@ -85,12 +85,12 @@ services:
     container_name: go-app3
     restart: unless-stopped
     env_file:
-      - ./apptest.env
+      - ./.env
     environment:
       REDIS_URL: redis://redis:6379/0
     volumes:
       - ./logs:/app/logs
-      - ./apptest.env:/app/apptest.env
+      - ./.env:/app/.env
     networks:
       - appnet
     depends_on:
