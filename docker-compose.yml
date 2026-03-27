@@ -1,10 +1,11 @@
+version: "3.9"
+
 services:
   # --- DATABASE ---
   postgres:
     image: postgres:15
     container_name: postgres
     restart: unless-stopped
-    restart: always
     ports:
       - "5433:5432"  # expose PostgreSQL on 5433 externally
     environment:
@@ -46,13 +47,17 @@ services:
     container_name: go-app1
     restart: unless-stopped
     environment:
-      ENV_FILE: apptest.env
+      ENV_FILE: /app/apptest.env
     volumes:
       - ./logs:/app/logs
+      - ./apptest.env:/app/apptest.env
     networks:
       - appnet
+    depends_on:
+      - postgres
+      - redis
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8091/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://go-app1:8091/api/v1/health"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -64,13 +69,17 @@ services:
     container_name: go-app2
     restart: unless-stopped
     environment:
-      ENV_FILE: apptest.env
+      ENV_FILE: /app/apptest.env
     volumes:
       - ./logs:/app/logs
+      - ./apptest.env:/app/apptest.env
     networks:
       - appnet
+    depends_on:
+      - postgres
+      - redis
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8091/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://go-app2:8091/api/v1/health"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -82,13 +91,17 @@ services:
     container_name: go-app3
     restart: unless-stopped
     environment:
-      ENV_FILE: apptest.env
+      ENV_FILE: /app/apptest.env
     volumes:
       - ./logs:/app/logs
+      - ./apptest.env:/app/apptest.env
     networks:
       - appnet
+    depends_on:
+      - postgres
+      - redis
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8091/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://go-app3:8091/api/v1/health"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -109,7 +122,7 @@ services:
     networks:
       - appnet
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://go-app1:8091/api/v1/health"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -143,7 +156,6 @@ services:
     networks:
       - appnet
       - monitoring
-
 
 volumes:
   pgdata:
