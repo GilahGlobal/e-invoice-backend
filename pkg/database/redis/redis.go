@@ -21,11 +21,16 @@ func (rdb *Redis) RedisDb() *redis.Client {
 
 func NewClient() *redis.Client {
 	redisConfig := config.GetConfig().Redis
-	log.Println(redisConfig.REDIS_URL)
-	client := redis.NewClient(&redis.Options{
-		Addr:     redisConfig.REDIS_URL,
-		Password: "",
-		DB:       0,
-	})
+
+	log.Println("Connecting to Redis:", redisConfig.REDIS_URL)
+
+	// ✅ Proper parsing (handles TLS, auth, etc)
+	opt, err := redis.ParseURL(redisConfig.REDIS_URL)
+	if err != nil {
+		log.Fatalf("Failed to parse Redis URL: %v", err)
+	}
+
+	client := redis.NewClient(opt)
+
 	return client
 }
