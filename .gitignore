@@ -28,5 +28,4 @@ app.env
 
 # Ignore certificates
 certs/
-*.pem
-*.key
+certs-data
