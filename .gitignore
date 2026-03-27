@@ -25,3 +25,8 @@ go.work.sum
 .env
 tmp/
 app.env
+
+# Ignore certificates
+certs/
+*.pem
+*.key
