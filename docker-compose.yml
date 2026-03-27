@@ -22,13 +22,13 @@ services:
       timeout: 5s
       retries: 5
 
-  # --- REDIS ---
+  # --- LOCAL REDIS FOR DEVELOPMENT ---
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     container_name: redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6379:6379"      # expose locally
     networks:
       - appnet
     volumes:
@@ -48,6 +48,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./apptest.env
+    environment:
+      REDIS_URL: redis://redis:6379/0   # use local redis
     volumes:
       - ./logs:/app/logs
       - ./apptest.env:/app/apptest.env
@@ -70,6 +72,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./apptest.env
+    environment:
+      REDIS_URL: redis://redis:6379/0
     volumes:
       - ./logs:/app/logs
       - ./apptest.env:/app/apptest.env
@@ -92,6 +96,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./apptest.env
+    environment:
+      REDIS_URL: redis://redis:6379/0
     volumes:
       - ./logs:/app/logs
       - ./apptest.env:/app/apptest.env
