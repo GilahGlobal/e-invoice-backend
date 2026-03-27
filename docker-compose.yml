@@ -123,7 +123,9 @@ services:
     volumes:
       - ./certs:/etc/letsencrypt
       - ./certs-data:/data/letsencrypt
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 12h & wait $${!}; certbot renew; done;'"
+    entrypoint: >
+      /bin/sh -c 'trap exit TERM; while :; do sleep 12h & wait $${!};
+      certbot renew --webroot -w /data/letsencrypt; done;'
 
   # --- PROMETHEUS ---
   prometheus:
