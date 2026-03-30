@@ -166,6 +166,53 @@ func (base *Controller) GetInvoiceDetails(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// GetBulkUploadLogs godoc
+// @Summary Get bulk upload logs
+// @Description Retrieve paginated bulk upload logs for a business
+// @Tags Invoice
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param query query models.PaginationQuery false "Pagination (page, size)"
+// @Success 200 {object} dtos.GetBulkUploadLogsResponseDto "Bulk upload logs fetched successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Router /invoice/bulk-upload [get]
+func (base *Controller) GetBulkUploadLogs(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	if userDetails.BusinessID == nil || *userDetails.BusinessID == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business_id is required", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	var query models.PaginationQuery
+	if err := c.QueryParser(&query); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Invalid query parameters", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+	if query.Size <= 0 {
+		query.Size = 20
+	}
+	if query.Page <= 0 {
+		query.Page = 1
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	logs, pagination, err := invoice.GetBulkUploadLogsByBusinessID(db, *userDetails.BusinessID, query.Page, query.Size)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Bulk upload logs fetched successfully", logs, pagination)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
 // CreateInvoice godoc
 // @Summary Create a new Invoice
 // @Description Upload a JSON invoice file and store it in DB
@@ -207,7 +254,7 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "upload failed"})
 	}
 
-	err = invoice.AddBulkUploadLog(db, fileURL, fileKey)
+	err = invoice.AddBulkUploadLog(db, fileURL, fileKey, *userDetails.BusinessID)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", "failed to log bulk upload", nil, nil)
 		return c.Status(fiber.StatusInternalServerError).JSON(rd)

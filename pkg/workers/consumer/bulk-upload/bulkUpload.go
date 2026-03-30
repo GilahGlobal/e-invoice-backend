@@ -13,6 +13,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -55,9 +58,8 @@ func NewBulkUploadConsumer(db, testDB *database.Database, logger *utility.Logger
 func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq.Task) error {
 	// return nil
 	const (
-		maxWorkers       = 10
-		maxRetries       = 3
-		validationBuffer = 100
+		maxWorkers = 10
+		maxRetries = 3
 	)
 
 	// 1. Validate payload
@@ -85,20 +87,20 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 
 	var invoices []dtos.UploadInvoiceRequestDto
 	var stats *ProcessingStats
-	var err []error
+	var validationErrors []error
 
 	switch fileType {
 	case "excel":
-		invoices, stats, err = qc.excelProcessor.ProcessExcel(fileBytes, payload.BusinessID)
+		invoices, stats, validationErrors = qc.excelProcessor.ProcessExcel(fileBytes, payload.BusinessID)
 	case "csv":
-		invoices, stats, err = qc.csvProcessor.ProcessCSV(fileBytes, payload.BusinessID)
+		invoices, stats, validationErrors = qc.csvProcessor.ProcessCSV(fileBytes, payload.BusinessID)
 	default:
 		return fmt.Errorf("unsupported file type: %s", fileType)
 	}
 
-	if err != nil {
-		log.Println(err)
-		return nil
+	if len(validationErrors) > 0 {
+		log.Println(validationErrors)
+		qc.storeValidationErrors(payload.FileKey, payload.BusinessID, validationErrors, payload.IsSandbox)
 	}
 
 	log.Println("Processing bulk upload",
@@ -112,8 +114,7 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 		log.Println("No valid invoices found after validation",
 			"total_invoices", stats.TotalRows,
 			"validation_errors", stats.TotalErrors)
-		// Optionally store validation errors for reporting
-		// qc.storeValidationErrors(payload.FileKey, validationResults.Errors)
+		// Validation errors (if any) already persisted above.
 		return nil
 	}
 
@@ -135,7 +136,7 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 	ststsBytes, _ := json.MarshalIndent(stats, "", "  ")
 	log.Println("Bulk upload stats:", string(ststsBytes))
 	// 6. Summarize results
-	qc.logResults(payload.FileKey, processedResults)
+	qc.logResults(payload.FileKey, payload.BusinessID, stats, processedResults, payload.IsSandbox)
 
 	return nil
 }
@@ -182,8 +183,14 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 				InvoiceNumber: result.Invoice.InvoiceNumber,
 				Error:         result.Error.Error(),
 			})
-		} else {
+		} else if result.Posted {
 			results.SuccessCount++
+		} else {
+			results.ErrorCount++
+			results.Errors = append(results.Errors, ProcessError{
+				InvoiceNumber: result.Invoice.InvoiceNumber,
+				Error:         "invoice was not posted to FIRS",
+			})
 		}
 		mu.Unlock()
 	}
@@ -201,7 +208,8 @@ func (qc *BulkUploadConsumer) invoiceWorker(ctx context.Context, workerID int, w
 			result := ProcessResult{Invoice: invoice}
 
 			// processing logic here
-			err := qc.processSingleInvoice(ctx, invoice, id, businessId, serviceID, isSandbox)
+			posted, err := qc.processSingleInvoice(ctx, invoice, id, businessId, serviceID, isSandbox)
+			result.Posted = posted
 			if err != nil {
 				result.Error = err
 				log.Println("Failed to process invoice",
@@ -215,7 +223,7 @@ func (qc *BulkUploadConsumer) invoiceWorker(ctx context.Context, workerID int, w
 	}
 }
 
-func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoicePayload *dtos.UploadInvoiceRequestDto, id, businessId, serviceID string, isSandbox bool) error {
+func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoicePayload *dtos.UploadInvoiceRequestDto, id, businessId, serviceID string, isSandbox bool) (bool, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
@@ -223,7 +231,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 	invoiceExists, err := invoice.GetInvoiceByInvoiceNumber(db, invoicePayload.InvoiceNumber, id)
 
 	if err != nil {
-		return fmt.Errorf("database error: %w", err)
+		return false, fmt.Errorf("database error: %w", err)
 	}
 
 	if invoiceExists != nil {
@@ -233,8 +241,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 			models.StatusConfirmed:     true,
 		}
 		if blockedStatuses[invoiceExists.CurrentStatus] {
-			log.Println("invoice cannot be overwritten", invoicePayload.InvoiceNumber)
-			return nil
+			return false, fmt.Errorf("invoice cannot be overwritten: %s", invoicePayload.InvoiceNumber)
 		}
 	}
 
@@ -243,7 +250,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		IRNData, err := invoice.IRNGeneration(invoicePayload.InvoiceNumber, serviceID, businessId, isSandbox)
 		if err != nil {
 			rd := *err
-			return fmt.Errorf("IRN generation failed: %s", rd.Message)
+			return false, fmt.Errorf("IRN generation failed: %s", rd.Message)
 		}
 		irnPayload = *IRNData
 		invoicePayload.IRN = &irnPayload.IRN
@@ -257,17 +264,33 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 	_, _, err, invoiceSigned := invoice.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, isSandbox)
 	if err != nil && !invoiceSigned {
 		errorArray := strings.Split(err.Error(), "-")
-		return fmt.Errorf("invoice creation failed: %s", strings.TrimSpace(errorArray[len(errorArray)-1]))
+		return false, fmt.Errorf("invoice creation failed: %s", strings.TrimSpace(errorArray[len(errorArray)-1]))
 	}
 
-	return nil
+	if err != nil && invoiceSigned {
+		log.Println("invoice processing completed with non-blocking error",
+			"invoice_id", invoicePayload.InvoiceNumber,
+			"error", err)
+	}
+
+	return err == nil && invoiceSigned, nil
 }
 
-func (qc *BulkUploadConsumer) logResults(fileKey string, results *ProcessResults) {
-	// err := invoice.UpdateBulkUploadLog(qc.db.Postgresql.DB(), fileKey, results)
-	// if err != nil {
-	// 	qc.logger.Error("Failed to update bulk upload log", "error", err)
-	// }
+func (qc *BulkUploadConsumer) logResults(fileKey, businessID string, stats *ProcessingStats, results *ProcessResults, isSanbox bool) {
+	db := middleware.GetDatabaseInstance(isSanbox, qc.db, qc.testDb)
+	payload := map[string]interface{}{
+		"TotalRows":            stats.TotalRows,
+		"ValidRows":            stats.ValidRows,
+		"SuccessfulInvoices":   stats.SuccessfulInvoices,
+		"UnsuccessfulInvoices": stats.UnsuccessfulInvoices,
+		"Duration":             stats.Duration,
+		"StartTime":            &stats.StartTime,
+		"EndTime":              &stats.EndTime,
+	}
+	err := invoice.UpdateBulkUploadLog(db, fileKey, businessID, payload)
+	if err != nil {
+		qc.logger.Error("Failed to update bulk upload log", "error", err)
+	}
 	qc.logger.Info("Bulk upload processing completed",
 		"file_key", fileKey,
 		"successful", results.SuccessCount,
@@ -279,4 +302,99 @@ func (qc *BulkUploadConsumer) logResults(fileKey string, results *ProcessResults
 			"error_count", results.ErrorCount,
 			"first_errors", results.Errors[:min(5, len(results.Errors))])
 	}
+}
+
+func (qc *BulkUploadConsumer) storeValidationErrors(fileKey, businessID string, errs []error, isSandbox bool) {
+	if len(errs) == 0 {
+		return
+	}
+
+	validationErrors := make([]ValidationError, 0, len(errs))
+	for i, err := range errs {
+		msg := err.Error()
+		invoiceNumber := ""
+		if idx := strings.Index(msg, "invoice "); idx != -1 {
+			start := idx + len("invoice ")
+			end := start
+			for end < len(msg) {
+				c := msg[end]
+				if c == ':' || c == ' ' || c == ',' || c == ';' {
+					break
+				}
+				end++
+			}
+			if end > start {
+				invoiceNumber = msg[start:end]
+			}
+		}
+		rowNumber := 0
+		if idx := strings.Index(msg, "row "); idx != -1 {
+			start := idx + len("row ")
+			for start < len(msg) && msg[start] == ' ' {
+				start++
+			}
+			end := start
+			for end < len(msg) && msg[end] >= '0' && msg[end] <= '9' {
+				end++
+			}
+			if end > start {
+				if n, parseErr := strconv.Atoi(msg[start:end]); parseErr == nil {
+					rowNumber = n
+				}
+			}
+		}
+		if rowNumber == 0 {
+			rowNumber = i + 1
+		}
+
+		validationErrors = append(validationErrors, ValidationError{
+			InvoiceIndex:  rowNumber,
+			InvoiceNumber: invoiceNumber,
+			Error:         msg,
+		})
+	}
+
+	payload := map[string]interface{}{
+		"file_key":    fileKey,
+		"error_count": len(validationErrors),
+		"errors":      validationErrors,
+		"stored_at":   time.Now().UTC(),
+	}
+
+	errorsJSON, err := json.Marshal(validationErrors)
+	if err != nil {
+		qc.logger.Error("Failed to marshal validation errors for db", "error", err)
+		return
+	}
+
+	db := middleware.GetDatabaseInstance(isSandbox, qc.db, qc.testDb)
+	if err := invoice.StoreBulkUploadValidationErrors(db, fileKey, businessID, errorsJSON, len(validationErrors)); err != nil {
+		qc.logger.Error("Failed to store validation errors in db", "error", err)
+	}
+
+	data, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		qc.logger.Error("Failed to marshal validation errors", "error", err)
+		return
+	}
+
+	dir := filepath.Join("tmp", "bulk_upload_errors")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		qc.logger.Error("Failed to create validation error directory", "error", err)
+		return
+	}
+
+	sanitizedKey := strings.NewReplacer("/", "_", "\\", "_", " ", "_").Replace(fileKey)
+	if sanitizedKey == "" {
+		sanitizedKey = fmt.Sprintf("bulk_upload_%s", time.Now().UTC().Format("20060102T150405Z"))
+	}
+	filename := fmt.Sprintf("%s_validation_errors.json", sanitizedKey)
+	path := filepath.Join(dir, filename)
+
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		qc.logger.Error("Failed to store validation errors", "error", err)
+		return
+	}
+
+	qc.logger.Info("Stored validation errors", "file_key", fileKey, "path", path, "error_count", len(validationErrors))
 }

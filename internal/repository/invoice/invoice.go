@@ -183,9 +183,9 @@ func CreateBulkUploadLog(db database.DatabaseManager, payload *models.BulkUpload
 	return db.DB().Create(payload).Error
 }
 
-func GetBulkUploadLogByFileKey(db database.DatabaseManager, fileKey string) (*models.BulkUpload, error) {
+func GetBulkUploadLogByFileKey(db database.DatabaseManager, fileKey, businessID string) (*models.BulkUpload, error) {
 	var bulkUpload models.BulkUpload
-	err := db.DB().Where("file_key = ?", fileKey).First(&bulkUpload).Error
+	err := db.DB().Where("file_key = ? AND business_id = ?", fileKey, businessID).First(&bulkUpload).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -195,8 +195,50 @@ func GetBulkUploadLogByFileKey(db database.DatabaseManager, fileKey string) (*mo
 	return &bulkUpload, nil
 }
 
-func UpdateBulkUploadLog(db database.DatabaseManager, fileKey string, payload *models.BulkUpload) error {
+func UpdateBulkUploadLog(db database.DatabaseManager, fileKey, businessID string, payload *models.BulkUpload) error {
 
-	result := db.DB().Model(&models.BulkUpload{}).Where("file_key = ?", fileKey).Updates(payload)
+	result := db.DB().Model(&models.BulkUpload{}).Where("file_key = ? AND business_id = ?", fileKey, businessID).Updates(payload)
 	return result.Error
+}
+
+func FindBulkUploadLogsByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]models.BulkUpload, database.PaginationResponse, error) {
+	var result []models.BulkUpload
+
+	if pagination.Page <= 0 {
+		pagination.Page = 1
+	}
+	if pagination.Limit <= 0 {
+		pagination.Limit = 20
+	}
+
+	var totalCount int64
+	if err := db.DB().Model(&models.BulkUpload{}).Where("business_id = ?", businessID).Count(&totalCount).Error; err != nil {
+		return nil, database.PaginationResponse{
+			CurrentPage:     pagination.Page,
+			PageCount:       0,
+			TotalPagesCount: 0,
+		}, err
+	}
+
+	totalPages := int(math.Ceil(float64(totalCount) / float64(pagination.Limit)))
+	offset := (pagination.Page - 1) * pagination.Limit
+
+	if err := db.DB().
+		Where("business_id = ?", businessID).
+		Order("created_at DESC").
+		Limit(pagination.Limit).
+		Offset(offset).
+		Find(&result).Error; err != nil {
+		return nil, database.PaginationResponse{
+			CurrentPage:     pagination.Page,
+			PageCount:       0,
+			TotalPagesCount: totalPages,
+		}, err
+	}
+
+	return result, database.PaginationResponse{
+		CurrentPage:     pagination.Page,
+		PageCount:       len(result),
+		TotalPagesCount: totalPages,
+	}, nil
 }
