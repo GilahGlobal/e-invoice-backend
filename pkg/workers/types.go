@@ -1,6 +1,7 @@
 package workers
 
 type BulkUploadInput struct {
+	BulkID     string
 	ID         string
 	FileKey    string
 	BusinessID string

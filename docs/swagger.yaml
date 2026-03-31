@@ -82,6 +82,9 @@ definitions:
       successful_invoices:
         example: 0
         type: integer
+      partially_successful_invoices:
+        example: 1
+        type: integer
       total_records:
         example: 4
         type: integer

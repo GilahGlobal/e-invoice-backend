@@ -2586,6 +2586,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 0
                 },
+                "partially_successful_invoices": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "total_records": {
                     "type": "integer",
                     "example": 4

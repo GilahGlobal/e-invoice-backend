@@ -146,7 +146,7 @@ func GenerateIRN(invoiceNumber, serviceId string) (*string, error) {
 	return &irn, nil
 }
 
-func AddBulkUploadLog(db *gorm.DB, fileUrl, fileKey, businessID string) error {
+func AddBulkUploadLog(db *gorm.DB, fileUrl, fileKey, businessID string) (string, error) {
 	pdb := inst.InitDB(db, false)
 
 	payload := &models.BulkUpload{
@@ -158,15 +158,15 @@ func AddBulkUploadLog(db *gorm.DB, fileUrl, fileKey, businessID string) error {
 
 	if err := repository.CreateBulkUploadLog(pdb, payload); err != nil {
 		errDetails := "failed to save bulk upload log"
-		return fmt.Errorf("%s: %w", errDetails, err)
+		return "", fmt.Errorf("%s: %w", errDetails, err)
 	}
-	return nil
+	return payload.ID, nil
 }
 
-func UpdateBulkUploadLog(db *gorm.DB, fileKey, businessID string, payload interface{}) error {
+func UpdateBulkUploadLog(db *gorm.DB, bulkID, fileKey, businessID string, payload interface{}) error {
 	pdb := inst.InitDB(db, false)
 
-	repositoryLog, err := repository.GetBulkUploadLogByFileKey(pdb, fileKey, businessID)
+	repositoryLog, err := repository.GetBulkUploadLogByID(pdb, bulkID, businessID)
 	if err != nil {
 		errDetails := "failed to retrieve bulk upload log"
 		return fmt.Errorf("%s: %w", errDetails, err)
@@ -184,13 +184,14 @@ func UpdateBulkUploadLog(db *gorm.DB, fileKey, businessID string, payload interf
 	repositoryLog.TotalRecords = data["TotalRows"].(int)
 	repositoryLog.ValidRecords = data["ValidRows"].(int)
 	repositoryLog.SuccessfulInvoices = data["SuccessfulInvoices"].(int)
+	repositoryLog.PartiallySuccessfulInvoices = data["PartiallySuccessfulInvoices"].(int)
 	repositoryLog.UnsuccessfulInvoices = data["UnsuccessfulInvoices"].(int)
 	repositoryLog.Duration = data["Duration"].(time.Duration)
 	repositoryLog.StartedAt = data["StartTime"].(*time.Time)
 	repositoryLog.CompletedAt = data["EndTime"].(*time.Time)
 	repositoryLog.Status = "completed"
 
-	if err := repository.UpdateBulkUploadLog(pdb, fileKey, businessID, repositoryLog); err != nil {
+	if err := repository.UpdateBulkUploadLog(pdb, bulkID, businessID, repositoryLog); err != nil {
 
 		errDetails := "failed to update bulk upload log"
 		return fmt.Errorf("%s: %w", errDetails, err)
@@ -198,10 +199,10 @@ func UpdateBulkUploadLog(db *gorm.DB, fileKey, businessID string, payload interf
 	return nil
 }
 
-func StoreBulkUploadValidationErrors(db *gorm.DB, fileKey, businessID string, validationErrorsJSON []byte, errorCount int) error {
+func StoreBulkUploadValidationErrors(db *gorm.DB, bulkID, fileKey, businessID string, validationErrorsJSON []byte, errorCount int) error {
 	pdb := inst.InitDB(db, false)
 
-	repositoryLog, err := repository.GetBulkUploadLogByFileKey(pdb, fileKey, businessID)
+	repositoryLog, err := repository.GetBulkUploadLogByID(pdb, bulkID, businessID)
 	if err != nil {
 		errDetails := "failed to retrieve bulk upload log"
 		return fmt.Errorf("%s: %w", errDetails, err)
@@ -214,7 +215,7 @@ func StoreBulkUploadValidationErrors(db *gorm.DB, fileKey, businessID string, va
 	repositoryLog.ValidationErrors = datatypes.JSON(validationErrorsJSON)
 	repositoryLog.ValidationErrorCount = errorCount
 
-	if err := repository.UpdateBulkUploadLog(pdb, fileKey, businessID, repositoryLog); err != nil {
+	if err := repository.UpdateBulkUploadLog(pdb, bulkID, businessID, repositoryLog); err != nil {
 		errDetails := "failed to store bulk upload validation errors"
 		return fmt.Errorf("%s: %w", errDetails, err)
 	}
@@ -222,9 +223,9 @@ func StoreBulkUploadValidationErrors(db *gorm.DB, fileKey, businessID string, va
 	return nil
 }
 
-func GetBulkUploadLogByFileKey(db *gorm.DB, fileKey, businessID string) (*models.BulkUpload, error) {
+func GetBulkUploadLogByID(db *gorm.DB, id, businessID string) (*models.BulkUpload, error) {
 	pdb := inst.InitDB(db, false)
-	return repository.GetBulkUploadLogByFileKey(pdb, fileKey, businessID)
+	return repository.GetBulkUploadLogByID(pdb, id, businessID)
 }
 
 func GetBulkUploadLogsByBusinessID(db *gorm.DB, businessID string, page, size int) ([]models.BulkUpload, database.PaginationResponse, error) {

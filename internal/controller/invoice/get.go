@@ -259,13 +259,14 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	err = invoice.AddBulkUploadLog(db, fileURL, fileKey, *userDetails.BusinessID)
+	bulkID, err := invoice.AddBulkUploadLog(db, fileURL, fileKey, *userDetails.BusinessID)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", "failed to log bulk upload", nil, nil)
 		return c.Status(fiber.StatusInternalServerError).JSON(rd)
 	}
 
 	err = producer.NewProducer().EnqueueTask(workers.BulkUploadTask, workers.BulkUploadInput{
+		BulkID:     bulkID,
 		ID:         userDetails.ID,
 		FileKey:    fileKey,
 		ServiceID:  userDetails.ServiceID,

@@ -20,6 +20,7 @@ type ValidationError struct {
 
 type ProcessResults struct {
 	SuccessCount int
+	PartialCount int
 	ErrorCount   int
 	Errors       []ProcessError
 }
@@ -27,6 +28,7 @@ type ProcessResults struct {
 type ProcessResult struct {
 	Invoice *dtos.UploadInvoiceRequestDto
 	Error   error
+	Status  string
 	Posted  bool
 }
 
@@ -36,13 +38,14 @@ type ProcessError struct {
 }
 
 type ProcessingStats struct {
-	TotalRows            int           `json:"total_rows"`
-	ValidRows            int           `json:"valid_rows"`
-	InvalidRows          int           `json:"invalid_rows"`
-	SuccessfulInvoices   int           `json:"successful_invoices"`
-	UnsuccessfulInvoices int           `json:"unsuccessful_invoices"`
-	TotalErrors          int           `json:"total_errors"`
-	StartTime            time.Time     `json:"start_time"`
-	EndTime              time.Time     `json:"end_time"`
-	Duration             time.Duration `json:"duration"`
+	TotalRows                   int           `json:"total_rows"`
+	ValidRows                   int           `json:"valid_rows"`
+	InvalidRows                 int           `json:"invalid_rows"`
+	SuccessfulInvoices          int           `json:"successful_invoices"`
+	PartiallySuccessfulInvoices int           `json:"partially_successful_invoices"`
+	UnsuccessfulInvoices        int           `json:"unsuccessful_invoices"`
+	TotalErrors                 int           `json:"total_errors"`
+	StartTime                   time.Time     `json:"start_time"`
+	EndTime                     time.Time     `json:"end_time"`
+	Duration                    time.Duration `json:"duration"`
 }

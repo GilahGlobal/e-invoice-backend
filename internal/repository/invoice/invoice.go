@@ -183,9 +183,9 @@ func CreateBulkUploadLog(db database.DatabaseManager, payload *models.BulkUpload
 	return db.DB().Create(payload).Error
 }
 
-func GetBulkUploadLogByFileKey(db database.DatabaseManager, fileKey, businessID string) (*models.BulkUpload, error) {
+func GetBulkUploadLogByID(db database.DatabaseManager, id, businessID string) (*models.BulkUpload, error) {
 	var bulkUpload models.BulkUpload
-	err := db.DB().Where("file_key = ? AND business_id = ?", fileKey, businessID).First(&bulkUpload).Error
+	err := db.DB().Where("id = ? AND business_id = ?", id, businessID).First(&bulkUpload).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -195,9 +195,9 @@ func GetBulkUploadLogByFileKey(db database.DatabaseManager, fileKey, businessID 
 	return &bulkUpload, nil
 }
 
-func UpdateBulkUploadLog(db database.DatabaseManager, fileKey, businessID string, payload *models.BulkUpload) error {
+func UpdateBulkUploadLog(db database.DatabaseManager, bulkID, businessID string, payload *models.BulkUpload) error {
 
-	result := db.DB().Model(&models.BulkUpload{}).Where("file_key = ? AND business_id = ?", fileKey, businessID).Updates(payload)
+	result := db.DB().Model(&models.BulkUpload{}).Where("id = ? AND business_id = ?", bulkID, businessID).Updates(payload)
 	return result.Error
 }
 
