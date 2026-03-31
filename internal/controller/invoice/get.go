@@ -254,6 +254,11 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "upload failed"})
 	}
 
+	if userDetails.BusinessID == nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "NRS business id has not been set", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
 	err = invoice.AddBulkUploadLog(db, fileURL, fileKey, *userDetails.BusinessID)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", "failed to log bulk upload", nil, nil)
