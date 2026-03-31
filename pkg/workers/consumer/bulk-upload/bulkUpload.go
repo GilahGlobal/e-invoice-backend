@@ -136,6 +136,20 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 
 	ststsBytes, _ := json.MarshalIndent(stats, "", "  ")
 	log.Println("Bulk upload stats:", string(ststsBytes))
+
+	var firsValidationErrs []error
+	for _, processErr := range processedResults.Errors {
+		if strings.HasPrefix(processErr.Error, "FIRS validation failed:") {
+			errMsg := strings.TrimPrefix(processErr.Error, "FIRS validation failed: ")
+			firsValidationErrs = append(firsValidationErrs, fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, errMsg))
+		}
+	}
+
+	if len(firsValidationErrs) > 0 {
+		validationErrors = append(validationErrors, firsValidationErrs...)
+		qc.storeValidationErrors(payload.BulkID, payload.FileKey, payload.BusinessID, validationErrors, payload.IsSandbox)
+	}
+
 	// 6. Summarize results
 	qc.logResults(payload.BulkID, payload.FileKey, payload.BusinessID, stats, processedResults, payload.IsSandbox)
 
@@ -272,7 +286,12 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		currentStatus = createdInvoice.CurrentStatus
 	}
 	if err != nil && !invoiceSigned {
-		errorArray := strings.Split(err.Error(), "-")
+		errStr := err.Error()
+		if strings.Contains(errStr, "failed to validate invoice:") {
+			errStr = strings.Replace(errStr, "failed to process invoice through all steps: ", "", 1)
+			return false, currentStatus, fmt.Errorf("FIRS validation failed: %s", errStr)
+		}
+		errorArray := strings.Split(errStr, "-")
 		return false, currentStatus, fmt.Errorf("invoice creation failed: %s", strings.TrimSpace(errorArray[len(errorArray)-1]))
 	}
 

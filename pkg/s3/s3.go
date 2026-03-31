@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	internalConfig "einvoice-access-point/pkg/config"
+	"einvoice-access-point/pkg/utility"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -39,7 +40,8 @@ func UploadFileToS3(ctx context.Context, file multipart.File, fileHeader *multip
 	}
 	client := s3.NewFromConfig(cfg)
 
-	fileKey := fmt.Sprintf("%s/%s", folder, filepath.Base(strings.ReplaceAll(fileHeader.Filename, " ", "_")))
+	baseFilename := filepath.Base(strings.ReplaceAll(fileHeader.Filename, " ", "_"))
+	fileKey := fmt.Sprintf("%s/%s_%s", folder, utility.GenerateUUID(), baseFilename)
 
 	// Upload the file
 	_, err = client.PutObject(ctx, &s3.PutObjectInput{
