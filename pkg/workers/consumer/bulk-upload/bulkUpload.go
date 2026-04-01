@@ -137,16 +137,22 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 	ststsBytes, _ := json.MarshalIndent(stats, "", "  ")
 	log.Println("Bulk upload stats:", string(ststsBytes))
 
-	var firsValidationErrs []error
+	var errorsToStore []error
 	for _, processErr := range processedResults.Errors {
 		if strings.HasPrefix(processErr.Error, "FIRS validation failed:") {
 			errMsg := strings.TrimPrefix(processErr.Error, "FIRS validation failed: ")
-			firsValidationErrs = append(firsValidationErrs, fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, errMsg))
+			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, errMsg))
+		} else if strings.HasPrefix(processErr.Error, "invoice cannot be overwritten:") {
+			log.Printf("Duplicate invoice detected: %s (same invoice number)\n", processErr.InvoiceNumber)
+			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: duplicate invoice sent (same invoice number)", processErr.InvoiceNumber))
+		} else if strings.Contains(strings.ToLower(processErr.Error), "duplicate") {
+			log.Printf("Duplicate invoice detected: %s - %s\n", processErr.InvoiceNumber, processErr.Error)
+			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: duplicate invoice sent - %s", processErr.InvoiceNumber, processErr.Error))
 		}
 	}
 
-	if len(firsValidationErrs) > 0 {
-		validationErrors = append(validationErrors, firsValidationErrs...)
+	if len(errorsToStore) > 0 {
+		validationErrors = append(validationErrors, errorsToStore...)
 		qc.storeValidationErrors(payload.BulkID, payload.FileKey, payload.BusinessID, validationErrors, payload.IsSandbox)
 	}
 
@@ -377,10 +383,21 @@ func (qc *BulkUploadConsumer) storeValidationErrors(bulkID, fileKey, businessID 
 			rowNumber = i + 1
 		}
 
+		var parsedErr any = msg
+		if jsonStart := strings.Index(msg, "{"); jsonStart != -1 {
+			jsonStr := strings.TrimSpace(msg[jsonStart:])
+			if strings.HasSuffix(jsonStr, "}") {
+				var jsonObj map[string]interface{}
+				if err := json.Unmarshal([]byte(jsonStr), &jsonObj); err == nil {
+					parsedErr = jsonObj
+				}
+			}
+		}
+
 		validationErrors = append(validationErrors, ValidationError{
 			InvoiceIndex:  rowNumber,
 			InvoiceNumber: invoiceNumber,
-			Error:         msg,
+			Error:         parsedErr,
 		})
 	}
 

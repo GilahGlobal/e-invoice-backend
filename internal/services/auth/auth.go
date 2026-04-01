@@ -57,9 +57,10 @@ func ResendVerificationOTP(db *gorm.DB, email string) error {
 	return nil
 }
 
-func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.RegisterDto, error) {
+func ValidateCreateUserRequest(req dtos.RegisterDto, testDb, prodDb *gorm.DB) (dtos.RegisterDto, error) {
 
-	pdb := inst.InitDB(db, false)
+	devDb := inst.InitDB(testDb, false)
+	productionDb := inst.InitDB(prodDb, false)
 	business := models.Business{}
 
 	if req.Email != "" {
@@ -69,13 +70,21 @@ func ValidateCreateUserRequest(req dtos.RegisterDto, db *gorm.DB) (dtos.Register
 			return req, fmt.Errorf("email address is invalid")
 		}
 		req.Email = formattedMail
-		exists := pdb.CheckExists(&business, "email = ?", req.Email)
+		exists := devDb.CheckExists(&business, "email = ?", req.Email)
 		if exists {
 			return req, errors.New("user already exists with the given email")
 		}
+		exists = productionDb.CheckExists(&business, "email = ?", req.Email)
+		if exists {
+			return req, errors.New("user already exists with the given email in production")
+		}
 	}
 
-	if exists := pdb.CheckExists(&business, "LOWER(company_name) = LOWER(?)", req.CompanyName); exists {
+	if exists := devDb.CheckExists(&business, "LOWER(company_name) = LOWER(?)", req.CompanyName); exists {
+		return req, errors.New("Business already exists with the given company name")
+	}
+	exists := productionDb.CheckExists(&business, "LOWER(company_name) = LOWER(?)", req.CompanyName)
+	if exists {
 		return req, errors.New("Business already exists with the given company name")
 	}
 
@@ -478,7 +487,7 @@ func VerifyBusinessAccount(db *gorm.DB, req dtos.VerifyEmailDto, isSandbox bool)
 	otp, err := redisClient.Get(ctx, key).Result()
 
 	if err != nil {
-		return nil, errors.New("unable to verify token")
+		return nil, errors.New("unable to verify token, error from redis: " + err.Error())
 	}
 
 	if otp != req.OTP {
@@ -560,5 +569,4 @@ func SendOtp(email string) {
 
 	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
 	ses.SendEmail(email, strconv.Itoa(otp))
-	return
 }
