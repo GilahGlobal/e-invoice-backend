@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"einvoice-access-point/internal/dtos"
+	"einvoice-access-point/pkg/utility"
 	"encoding/json"
+
 	"fmt"
 	"log"
 	"strconv"
@@ -278,9 +280,13 @@ func (ep *ExcelProcessor) parseAndValidateRow(headerIndex map[string]int, row []
 	// Validate the struct
 	if err := ep.validator.Struct(invoice); err != nil {
 		if invoice.InvoiceNumber != "" {
-			return invoice, fmt.Errorf("invoice %s: validation failed: %w", invoice.InvoiceNumber, err)
+			errMap := utility.ValidationErrorsToJSON(err, dtos.UploadInvoiceRequestDto{})
+			jsonBytes, _ := json.Marshal(errMap)
+			return invoice, fmt.Errorf("invoice %s: validation failed: %s", invoice.InvoiceNumber, string(jsonBytes))
 		}
-		return invoice, fmt.Errorf("validation failed: %w", err)
+		errMap := utility.ValidationErrorsToJSON(err, dtos.UploadInvoiceRequestDto{})
+		jsonBytes, _ := json.Marshal(errMap)
+		return invoice, fmt.Errorf("validation failed: %s", string(jsonBytes))
 	}
 
 	return invoice, nil
