@@ -62,7 +62,7 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	reqData, err := auth.ValidateCreateUserRequest(req, base.TestDB.Postgresql.DB())
+	reqData, err := auth.ValidateCreateUserRequest(req, base.TestDB.Postgresql.DB(), base.Db.Postgresql.DB())
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)

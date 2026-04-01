@@ -15,7 +15,7 @@ type ValidationResults struct {
 type ValidationError struct {
 	InvoiceIndex  int    `json:"invoice_index"`
 	InvoiceNumber string `json:"invoice_number,omitempty"`
-	Error         string `json:"error"`
+	Error         any    `json:"error"`
 }
 
 type ProcessResults struct {
