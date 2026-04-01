@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -78,6 +79,7 @@ func PostRequest(client HTTPClient, config RequestConfig, response interface{}) 
 		return nil, err
 	}
 
+	log.Println("firs url: ", config.URL)
 	req, err := http.NewRequest(http.MethodPost, config.URL, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
