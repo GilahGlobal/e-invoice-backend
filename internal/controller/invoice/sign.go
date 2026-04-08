@@ -3,6 +3,7 @@ package invoice
 import (
 	"einvoice-access-point/external/firs_models"
 	"einvoice-access-point/internal/dtos"
+	businessservice "einvoice-access-point/internal/services/business"
 	"einvoice-access-point/internal/services/invoice"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/utility"
@@ -23,9 +24,17 @@ import (
 // @Failure 422 {object} models.Response "Validation failed"
 // @Router /invoice/sign-irn [post]
 func (base *Controller) SignIRN(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+
 	var req firs_models.IRNSigningRequestData
 
-	err := c.BodyParser(&req)
+	err = c.BodyParser(&req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -37,7 +46,13 @@ func (base *Controller) SignIRN(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	respData, err := invoice.SignIRN(req.IRN, base.Keys)
+	keys, err := businessservice.ResolveBusinessIRNSigningKeys(db, userDetails.ID, userDetails.IsSandbox, base.Keys)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	respData, err := invoice.SignIRN(req.IRN, keys)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)

@@ -4,6 +4,7 @@ import (
 	"einvoice-access-point/external/firs_models"
 	"einvoice-access-point/internal/dtos"
 	repository "einvoice-access-point/internal/repository/invoice"
+	businessservice "einvoice-access-point/internal/services/business"
 	"strings"
 
 	"einvoice-access-point/pkg/database"
@@ -110,7 +111,7 @@ func UpdateInvoiceData(db database.DatabaseManager, invoiceNumber string, invoic
 	return repository.UpdateInvoice(db, invoiceNumber, invoiceData)
 }
 
-func IRNGeneration(invoiceNumber, serviceId, businessID string, isSandbox bool) (*dtos.InvoiceData, *models.Response) {
+func IRNGeneration(db *gorm.DB, ownerID, invoiceNumber, serviceId, businessID string, isSandbox bool) (*dtos.InvoiceData, *models.Response) {
 	generatedIRN, err := GenerateIRN(strings.ToUpper(invoiceNumber), serviceId)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
@@ -127,7 +128,7 @@ func IRNGeneration(invoiceNumber, serviceId, businessID string, isSandbox bool) 
 		return nil, &rd
 	}
 
-	keys, err := utility.LoadCryptoKeys("crypto_keys.txt")
+	keys, err := businessservice.ResolveBusinessIRNSigningKeys(db, ownerID, isSandbox, nil)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return nil, &rd

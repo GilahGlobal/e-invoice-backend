@@ -272,7 +272,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 
 	var irnPayload dtos.InvoiceData
 	if invoicePayload.IRN == nil {
-		IRNData, err := invoice.IRNGeneration(invoicePayload.InvoiceNumber, serviceID, businessId, isSandbox)
+		IRNData, err := invoice.IRNGeneration(db, id, invoicePayload.InvoiceNumber, serviceID, businessId, isSandbox)
 		if err != nil {
 			rd := *err
 			return false, "", fmt.Errorf("IRN generation failed: %s", rd.Message)

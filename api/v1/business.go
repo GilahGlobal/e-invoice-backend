@@ -20,6 +20,7 @@ func BusinessRoute(app *fiber.App, ApiVersion string, validator *validator.Valid
 		// businessUrlSec.Get("", businessController.GetAllBusiness)
 		businessUrlSec.Get("", businessController.GetBusiness)
 		businessUrlSec.Patch("", businessController.UpdateBusinessProfile)
+		businessUrlSec.Post("/crypto-keys", businessController.UploadIRNSigningKeys)
 	}
 
 	return app

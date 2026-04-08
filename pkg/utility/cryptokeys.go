@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type CryptoKeys struct {
@@ -15,23 +16,32 @@ type CryptoKeys struct {
 	Certificate string
 }
 
-func LoadCryptoKeys(filename string) (*CryptoKeys, error) {
-	content, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read %s: %v", filename, err)
-	}
+type CryptoKeyDocument struct {
+	PublicKey   string `json:"public_key"`
+	Certificate string `json:"certificate"`
+}
 
-	type keyData struct {
-		PublicKey   string `json:"public_key"`
-		Certificate string `json:"certificate"`
-	}
-
-	var kd keyData
+func ParseCryptoKeyDocument(content []byte) (*CryptoKeyDocument, error) {
+	var kd CryptoKeyDocument
 	if err := json.Unmarshal(content, &kd); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON: %v", err)
 	}
 
-	pemData, err := base64.StdEncoding.DecodeString(kd.PublicKey)
+	kd.PublicKey = strings.TrimSpace(kd.PublicKey)
+	kd.Certificate = strings.TrimSpace(kd.Certificate)
+
+	if kd.PublicKey == "" {
+		return nil, fmt.Errorf("public_key is required")
+	}
+	if kd.Certificate == "" {
+		return nil, fmt.Errorf("certificate is required")
+	}
+
+	return &kd, nil
+}
+
+func NewCryptoKeys(publicKey, certificate string) (*CryptoKeys, error) {
+	pemData, err := base64.StdEncoding.DecodeString(strings.TrimSpace(publicKey))
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode base64 public_key: %v", err)
 	}
@@ -53,6 +63,20 @@ func LoadCryptoKeys(filename string) (*CryptoKeys, error) {
 
 	return &CryptoKeys{
 		PublicKey:   rsaPub,
-		Certificate: kd.Certificate,
+		Certificate: strings.TrimSpace(certificate),
 	}, nil
+}
+
+func LoadCryptoKeys(filename string) (*CryptoKeys, error) {
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read %s: %v", filename, err)
+	}
+
+	doc, err := ParseCryptoKeyDocument(content)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewCryptoKeys(doc.PublicKey, doc.Certificate)
 }
