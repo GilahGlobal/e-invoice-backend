@@ -73,6 +73,9 @@ definitions:
       id:
         example: 019d28e5-bfad-7211-a56f-4e3376a67cf9
         type: string
+      partially_successful_invoices:
+        example: 1
+        type: integer
       started_at:
         example: "2026-03-26T07:47:21.584844+01:00"
         type: string
@@ -81,9 +84,6 @@ definitions:
         type: string
       successful_invoices:
         example: 0
-        type: integer
-      partially_successful_invoices:
-        example: 1
         type: integer
       total_records:
         example: 4
@@ -243,6 +243,9 @@ definitions:
       id:
         example: b2c8f0e7-9b6a-4d1e-bd2a-2d0d6f9f93c7
         type: string
+      irn_signing_configured:
+        example: true
+        type: boolean
       name:
         example: Acme Inc.
         type: string
@@ -935,6 +938,32 @@ definitions:
         example: "+1234567890"
         type: string
     type: object
+  dtos.UploadBusinessIRNSigningKeysDataDto:
+    properties:
+      environment:
+        example: production
+        type: string
+      file_name:
+        example: crypto_keys.txt
+        type: string
+      irn_signing_configured:
+        example: true
+        type: boolean
+    type: object
+  dtos.UploadBusinessIRNSigningKeysResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.UploadBusinessIRNSigningKeysDataDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   dtos.UploadInvoiceRequestDto:
     properties:
       _document_reference:
@@ -1616,6 +1645,42 @@ paths:
       security:
       - BearerAuth: []
       summary: Update Business Details
+      tags:
+      - Business
+  /business/crypto-keys:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads the crypto keys document for a business and stores the
+        public_key and certificate values
+      parameters:
+      - description: Crypto keys document
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business IRN signing keys uploaded successfully
+          schema:
+            $ref: '#/definitions/dtos.UploadBusinessIRNSigningKeysResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Upload Business IRN Signing Keys
       tags:
       - Business
   /entity:
