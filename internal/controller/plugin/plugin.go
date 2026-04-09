@@ -384,7 +384,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox)
+	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil)
 
 	response := map[string]interface{}{
 		"metadata": createdInvoice.StatusHistory,

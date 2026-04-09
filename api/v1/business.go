@@ -21,6 +21,11 @@ func BusinessRoute(app *fiber.App, ApiVersion string, validator *validator.Valid
 		businessUrlSec.Get("", businessController.GetBusiness)
 		businessUrlSec.Patch("", businessController.UpdateBusinessProfile)
 		businessUrlSec.Post("/crypto-keys", businessController.UploadIRNSigningKeys)
+		// Aggregator routing
+		businessUrlSec.Get("/aggregators", businessController.ListAvailableAggregators)
+		businessUrlSec.Post("/aggregators/invite", businessController.SendAggregatorInvitation)
+		businessUrlSec.Get("/aggregators/invitations", businessController.ListSentInvitations)
+		businessUrlSec.Delete("/aggregators/invitations/:id", businessController.RevokeAggregatorInvitation)
 	}
 
 	return app

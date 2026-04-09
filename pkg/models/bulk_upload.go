@@ -11,6 +11,7 @@ type BulkUpload struct {
 	FileURL                     string         `gorm:"column:file_url;not null" json:"file_url"`
 	FileKey                     string         `gorm:"column:file_key;not null" json:"file_key"`
 	BusinessID                  string         `gorm:"column:business_id;type:uuid;index" json:"business_id"`
+	AggregatorID                *string        `gorm:"column:aggregator_id;type:uuid;index" json:"aggregator_id,omitempty"`
 	Status                      string         `gorm:"column:status;default:'pending'" json:"status"`
 	TotalRecords                int            `gorm:"column:total_records;default:0" json:"total_records"`
 	ValidRecords                int            `gorm:"column:valid_records;default:0" json:"valid_records"`

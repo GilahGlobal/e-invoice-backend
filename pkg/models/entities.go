@@ -31,6 +31,7 @@ type Business struct {
 	PlatformConfigs PlatformConfigs        `gorm:"type:jsonb;not null;default:'{}'" json:"platform_configs"`
 	Invoices        []Invoice              `gorm:"foreignKey:BusinessID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"invoices"`
 	IsAggregator    bool                   `gorm:"column:is_aggregator;type:bool;default:false" json:"is_aggregator"`
+	AggregatorID    *string                `gorm:"column:aggregator_id;type:uuid;index" json:"aggregator_id,omitempty"`
 	EmailVerified   bool                   `gorm:"column:email_verified;type:bool;default:false" json:"email_verified"`
 	CreatedAt       time.Time              `gorm:"column:created_at;not null;autoCreateTime" json:"created_at"`
 	UpdatedAt       time.Time              `gorm:"column:updated_at;null;autoUpdateTime" json:"updated_at"`

@@ -15,6 +15,9 @@ func AuthMigrationModels() []interface{} {
 		&models.Subscription{},
 		&models.Transaction{},
 		&models.SME{},
+		&models.Aggregator{},
+		&models.AggregatorInvitation{},
+		&models.AggregatorActivityLog{},
 	}
 
 }

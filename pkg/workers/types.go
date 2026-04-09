@@ -1,12 +1,13 @@
 package workers
 
 type BulkUploadInput struct {
-	BulkID     string
-	ID         string
-	FileKey    string
-	BusinessID string
-	ServiceID  string
-	IsSandbox  bool
+	BulkID       string
+	ID           string
+	FileKey      string
+	BusinessID   string
+	AggregatorID *string
+	ServiceID    string
+	IsSandbox    bool
 }
 
 const (

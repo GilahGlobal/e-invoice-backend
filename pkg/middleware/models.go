@@ -18,6 +18,7 @@ type UserDataClaims struct {
 	ServiceID  string  `json:"service_id"`
 	AccessUuid string  `json:"access_uuid"`
 	IsSandbox  bool    `json:"is_sandbox"`
+	UserType   string  `json:"user_type"` // "business" or "aggregator"
 	jwt.RegisteredClaims
 }
 

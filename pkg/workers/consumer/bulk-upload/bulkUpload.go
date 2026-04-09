@@ -286,7 +286,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		}
 		invoicePayload.IRN = &invoiceExists.IRN
 	}
-	createdInvoice, _, err, invoiceSigned := invoice.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, isSandbox)
+	createdInvoice, _, err, invoiceSigned := invoice.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, isSandbox, nil)
 	currentStatus := ""
 	if createdInvoice != nil {
 		currentStatus = createdInvoice.CurrentStatus
