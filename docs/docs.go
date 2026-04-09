@@ -578,6 +578,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/business/crypto-keys": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Uploads the crypto keys document for a business and stores the public_key and certificate values",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Upload Business IRN Signing Keys",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Crypto keys document",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business IRN signing keys uploaded successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadBusinessIRNSigningKeysResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/entity": {
             "get": {
                 "security": [
@@ -2574,6 +2629,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "019d28e5-bfad-7211-a56f-4e3376a67cf9"
                 },
+                "partially_successful_invoices": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "started_at": {
                     "type": "string",
                     "example": "2026-03-26T07:47:21.584844+01:00"
@@ -2585,10 +2644,6 @@ const docTemplate = `{
                 "successful_invoices": {
                     "type": "integer",
                     "example": 0
-                },
-                "partially_successful_invoices": {
-                    "type": "integer",
-                    "example": 1
                 },
                 "total_records": {
                     "type": "integer",
@@ -2811,6 +2866,10 @@ const docTemplate = `{
                 "id": {
                     "type": "string",
                     "example": "b2c8f0e7-9b6a-4d1e-bd2a-2d0d6f9f93c7"
+                },
+                "irn_signing_configured": {
+                    "type": "boolean",
+                    "example": true
                 },
                 "name": {
                     "type": "string",
@@ -3762,6 +3821,43 @@ const docTemplate = `{
                 "phone_number": {
                     "type": "string",
                     "example": "+1234567890"
+                }
+            }
+        },
+        "dtos.UploadBusinessIRNSigningKeysDataDto": {
+            "type": "object",
+            "properties": {
+                "environment": {
+                    "type": "string",
+                    "example": "production"
+                },
+                "file_name": {
+                    "type": "string",
+                    "example": "crypto_keys.txt"
+                },
+                "irn_signing_configured": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "dtos.UploadBusinessIRNSigningKeysResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.UploadBusinessIRNSigningKeysDataDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
                 }
             }
         },

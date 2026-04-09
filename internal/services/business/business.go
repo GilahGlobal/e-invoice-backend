@@ -6,6 +6,7 @@ import (
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/models"
 	"errors"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -29,17 +30,18 @@ func GetAllBusinesses(db *gorm.DB) ([]fiber.Map, error) {
 		}
 
 		response[i] = fiber.Map{
-			"id":               business.ID,
-			"email":            business.Email,
-			"name":             business.Name,
-			"business_id":      business.BusinessID,
-			"service_id":       business.ServiceID,
-			"platform_configs": cleanConfigs,
-			"api_key":          string(business.APIKey),
-			"invoices":         business.Invoices,
-			"acc_status":       business.AccStatus,
-			"created_at":       business.CreatedAt,
-			"updated_at":       business.UpdatedAt,
+			"id":                     business.ID,
+			"email":                  business.Email,
+			"name":                   business.Name,
+			"business_id":            business.BusinessID,
+			"service_id":             business.ServiceID,
+			"platform_configs":       cleanConfigs,
+			"api_key":                string(business.APIKey),
+			"invoices":               business.Invoices,
+			"acc_status":             business.AccStatus,
+			"irn_signing_configured": strings.TrimSpace(string(business.IRNPublicKey)) != "" && strings.TrimSpace(string(business.IRNCertificate)) != "",
+			"created_at":             business.CreatedAt,
+			"updated_at":             business.UpdatedAt,
 		}
 	}
 
@@ -60,17 +62,18 @@ func GetBusinessByID(db *gorm.DB, id string) (fiber.Map, error) {
 	}
 
 	response := fiber.Map{
-		"id":               business.ID,
-		"email":            business.Email,
-		"name":             business.Name,
-		"business_id":      business.BusinessID,
-		"service_id":       business.ServiceID,
-		"platform_configs": cleanConfigs,
-		"api_key":          string(business.APIKey),
-		"invoices":         business.Invoices,
-		"acc_status":       business.AccStatus,
-		"created_at":       business.CreatedAt,
-		"updated_at":       business.UpdatedAt,
+		"id":                     business.ID,
+		"email":                  business.Email,
+		"name":                   business.Name,
+		"business_id":            business.BusinessID,
+		"service_id":             business.ServiceID,
+		"platform_configs":       cleanConfigs,
+		"api_key":                string(business.APIKey),
+		"invoices":               business.Invoices,
+		"acc_status":             business.AccStatus,
+		"irn_signing_configured": strings.TrimSpace(string(business.IRNPublicKey)) != "" && strings.TrimSpace(string(business.IRNCertificate)) != "",
+		"created_at":             business.CreatedAt,
+		"updated_at":             business.UpdatedAt,
 	}
 
 	return response, nil
