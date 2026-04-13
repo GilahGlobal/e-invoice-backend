@@ -11,13 +11,14 @@ type Authorization struct {
 }
 
 type UserDataClaims struct {
-	ID         string  `json:"id"`
-	Name       string  `json:"name"`
-	Email      string  `json:"email"`
-	BusinessID *string `json:"business_id"`
-	ServiceID  string  `json:"service_id"`
-	AccessUuid string  `json:"access_uuid"`
-	IsSandbox  bool    `json:"is_sandbox"`
+	ID           string  `json:"id"`
+	Name         string  `json:"name"`
+	Email        string  `json:"email"`
+	BusinessID   *string `json:"business_id"`
+	ServiceID    string  `json:"service_id"`
+	AccessUuid   string  `json:"access_uuid"`
+	IsSandbox    bool    `json:"is_sandbox"`
+	IsAggregator bool    `json:"is_aggregator"`
 	jwt.RegisteredClaims
 }
 

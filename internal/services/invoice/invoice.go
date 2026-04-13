@@ -146,14 +146,15 @@ func GenerateIRN(invoiceNumber, serviceId string) (*string, error) {
 	return &irn, nil
 }
 
-func AddBulkUploadLog(db *gorm.DB, fileUrl, fileKey, businessID string) (string, error) {
+func AddBulkUploadLog(db *gorm.DB, fileUrl, fileKey, businessID string, aggregatorID *string) (string, error) {
 	pdb := inst.InitDB(db, false)
 
 	payload := &models.BulkUpload{
 		ID:         utility.GenerateUUID(),
-		FileURL:    fileUrl,
-		FileKey:    fileKey,
-		BusinessID: businessID,
+		FileURL:      fileUrl,
+		FileKey:      fileKey,
+		BusinessID:   businessID,
+		AggregatorID: aggregatorID,
 	}
 
 	if err := repository.CreateBulkUploadLog(pdb, payload); err != nil {

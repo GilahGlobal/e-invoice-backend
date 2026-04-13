@@ -21,14 +21,15 @@ func CreateToken(user models.Business, isSandbox bool) (*TokenDetailDTO, error) 
 	tokenData.ExpiresAt = time.Now().Add(time.Duration(expireDuration) * time.Hour)
 
 	theClaims := UserDataClaims{
-		user.ID,
-		user.Name,
-		user.Email,
-		user.BusinessID,
-		user.ServiceID,
-		tokenData.AccessUuid,
-		isSandbox,
-		jwt.RegisteredClaims{
+		ID:           user.ID,
+		Name:         user.Name,
+		Email:        user.Email,
+		BusinessID:   user.BusinessID,
+		ServiceID:    user.ServiceID,
+		AccessUuid:   tokenData.AccessUuid,
+		IsSandbox:    isSandbox,
+		IsAggregator: user.IsAggregator,
+		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    user.Email,
 			ExpiresAt: jwt.NewNumericDate(tokenData.ExpiresAt),
 		},
@@ -40,5 +41,4 @@ func CreateToken(user models.Business, isSandbox bool) (*TokenDetailDTO, error) 
 	}
 
 	return tokenData, err
-
 }

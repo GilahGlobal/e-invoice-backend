@@ -27,6 +27,195 @@ definitions:
         example: org-123456789
         type: string
     type: object
+  dtos.AggregatorActivityLogDto:
+    properties:
+      action:
+        example: single_invoice_upload
+        type: string
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      business_name:
+        example: Business Corp
+        type: string
+      created_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      details:
+        example: Uploaded invoice INV-001
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  dtos.AggregatorActivityLogListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dtos.AggregatorActivityLogDto'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.AggregatorBulkUploadListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.BulkUpload'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.AggregatorBusinessDetailDto:
+    properties:
+      accepted_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      company_name:
+        example: Business Corp
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Business Owner
+        type: string
+      phone_number:
+        example: "+2348012345678"
+        type: string
+      service_id:
+        example: 6A2BC898
+        type: string
+      tin:
+        example: TIN-123456789
+        type: string
+    type: object
+  dtos.AggregatorBusinessListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dtos.AggregatorBusinessDetailDto'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.AggregatorDashboardDto:
+    properties:
+      pending_invitations:
+        example: 3
+        type: integer
+      total_bulk_uploads:
+        example: 25
+        type: integer
+      total_businesses:
+        example: 10
+        type: integer
+      total_invoices:
+        example: 500
+        type: integer
+    type: object
+  dtos.AggregatorDashboardResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.AggregatorDashboardDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.AggregatorInvitationDto:
+    properties:
+      business_email:
+        example: business@example.com
+        type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      business_name:
+        example: Business Corp
+        type: string
+      created_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      status:
+        example: pending
+        type: string
+    type: object
+  dtos.AggregatorInvitationListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dtos.AggregatorInvitationDto'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.AggregatorInvoiceListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.MinimalInvoiceDTO'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   dtos.AllowanceCharge:
     properties:
       amount:
@@ -115,6 +304,43 @@ definitions:
         example: VA12239
         type: string
     type: object
+  dtos.BusinessInvitationDto:
+    properties:
+      aggregator_email:
+        example: aggregator@example.com
+        type: string
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      aggregator_name:
+        example: Aggregator Corp
+        type: string
+      created_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      status:
+        example: pending
+        type: string
+    type: object
+  dtos.BusinessInvitationListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dtos.BusinessInvitationDto'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   dtos.CompleteForgotPasswordDto:
     properties:
       email:
@@ -131,47 +357,6 @@ definitions:
     - email
     - otp
     - password
-    type: object
-  dtos.CreateSubscriptionPlanDataDto:
-    properties:
-      is_sandbox:
-        example: true
-        type: boolean
-      plan:
-        $ref: '#/definitions/models.SubscriptionPlan'
-    type: object
-  dtos.CreateSubscriptionPlanDto:
-    properties:
-      amount:
-        type: number
-      billing_cycle:
-        type: integer
-      is_sandbox:
-        type: boolean
-      name:
-        type: string
-      total_invoices:
-        type: integer
-    required:
-    - amount
-    - billing_cycle
-    - is_sandbox
-    - name
-    - total_invoices
-    type: object
-  dtos.CreateSubscriptionPlanResponseDto:
-    properties:
-      data:
-        $ref: '#/definitions/dtos.CreateSubscriptionPlanDataDto'
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
     type: object
   dtos.DocumentReference:
     properties:
@@ -528,179 +713,6 @@ definitions:
     additionalProperties:
       $ref: '#/definitions/dtos.AccountingPlatformConfigAuth'
     type: object
-  dtos.PluginBusinessCheckDataDto:
-    properties:
-      active_subscription:
-        example: true
-        type: boolean
-      business_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      email:
-        example: john.doe@example.com
-        type: string
-      exists:
-        example: true
-        type: boolean
-      subscription:
-        $ref: '#/definitions/dtos.PluginBusinessSubscriptionDetailsDto'
-    type: object
-  dtos.PluginBusinessCheckResponseDto:
-    properties:
-      data:
-        $ref: '#/definitions/dtos.PluginBusinessCheckDataDto'
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.PluginBusinessSubscriptionDetailsDto:
-    properties:
-      next_billing_date:
-        type: string
-      plan:
-        example: basic
-        type: string
-      remaining_invoices:
-        example: 80
-        type: integer
-      total_invoices:
-        example: 100
-        type: integer
-      used_invoices:
-        example: 20
-        type: integer
-    type: object
-  dtos.PluginPlansResponseDto:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/models.SubscriptionPlan'
-        type: array
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.PluginRegisterDataDto:
-    properties:
-      production:
-        $ref: '#/definitions/dtos.PluginRegisteredBusinessDto'
-      sandbox:
-        $ref: '#/definitions/dtos.PluginRegisteredBusinessDto'
-    type: object
-  dtos.PluginRegisterResponseDto:
-    properties:
-      data:
-        $ref: '#/definitions/dtos.PluginRegisterDataDto'
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.PluginRegisteredBusinessDto:
-    properties:
-      email:
-        example: john.doe@example.com
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      is_sandbox:
-        example: true
-        type: boolean
-      name:
-        example: John Doe
-        type: string
-      tin:
-        example: TIN-123456789
-        type: string
-    type: object
-  dtos.PluginSubscribeDataDto:
-    properties:
-      authorization_url:
-        example: https://checkout.paystack.com/3ni8kdavz62431k
-        type: string
-      provider:
-        example: paystack
-        type: string
-      transaction_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      transaction_ref:
-        example: txn_1736272012_abcd1234ef
-        type: string
-    type: object
-  dtos.PluginSubscribeRequestDto:
-    properties:
-      id:
-        type: string
-      is_sandbox:
-        type: boolean
-      plan_id:
-        type: string
-    required:
-    - id
-    - plan_id
-    type: object
-  dtos.PluginSubscribeResponseDto:
-    properties:
-      data:
-        $ref: '#/definitions/dtos.PluginSubscribeDataDto'
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.PluginWebhookDataDto:
-    properties:
-      database:
-        example: sandbox
-        type: string
-      event:
-        example: charge.success
-        type: string
-      reference:
-        example: txn_1736272012_abcd1234ef
-        type: string
-      transaction_status:
-        example: success
-        type: string
-    type: object
-  dtos.PluginWebhookResponseDto:
-    properties:
-      data:
-        $ref: '#/definitions/dtos.PluginWebhookDataDto'
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
   dtos.PostalAddress:
     properties:
       city_name:
@@ -802,56 +814,16 @@ definitions:
     required:
     - email
     type: object
-  dtos.SmeRegistrationDto:
+  dtos.RespondToInvitationDto:
     properties:
-      aggregator_id:
-        example: ""
-        type: string
-      company_name:
-        example: Acme Inc.
-        type: string
-      email:
-        example: john.doe@example.com
-        type: string
-      name:
-        example: John Doe
-        maxLength: 250
-        minLength: 2
-        type: string
-      password:
-        example: password123
-        minLength: 6
-        type: string
-      phone_number:
-        example: "+1234567890"
-        type: string
-      tin:
-        example: TIN-123456789
+      accept:
+        example: true
+        type: boolean
+      invitation_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
         type: string
     required:
-    - aggregator_id
-    - company_name
-    - email
-    - name
-    - password
-    - phone_number
-    - tin
-    type: object
-  dtos.SubscriptionPlansResponseDto:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/models.SubscriptionPlan'
-        type: array
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
+    - invitation_id
     type: object
   dtos.TaxCategory:
     properties:
@@ -1237,6 +1209,60 @@ definitions:
     required:
     - tin
     type: object
+  models.BulkUpload:
+    properties:
+      aggregator_id:
+        type: string
+      business_id:
+        type: string
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      duration:
+        type: string
+      file_key:
+        type: string
+      file_url:
+        type: string
+      id:
+        type: string
+      partially_successful_invoices:
+        type: integer
+      started_at:
+        type: string
+      status:
+        type: string
+      successful_invoices:
+        type: integer
+      total_records:
+        type: integer
+      unsuccessful_invoices:
+        type: integer
+      valid_records:
+        type: integer
+      validation_error_count:
+        type: integer
+      validation_errors:
+        type: object
+    type: object
+  models.MinimalInvoiceDTO:
+    properties:
+      created_at:
+        type: string
+      current_status:
+        type: string
+      id:
+        type: string
+      invoice_number:
+        type: string
+      irn:
+        type: string
+      platform:
+        type: string
+      status_text:
+        type: string
+    type: object
   models.Ping:
     properties:
       message:
@@ -1257,25 +1283,6 @@ definitions:
       status_code:
         type: integer
     type: object
-  models.SubscriptionPlan:
-    properties:
-      amount:
-        type: number
-      billing_cycle:
-        type: integer
-      created_at:
-        type: string
-      id:
-        type: string
-      is_active:
-        type: boolean
-      name:
-        type: string
-      total_invoices:
-        type: integer
-      updated_at:
-        type: string
-    type: object
 info:
   contact: {}
   description: This is the e-invoicing service API documentation.
@@ -1283,6 +1290,454 @@ info:
   title: Gention E-invoicing Service API
   version: "1.0"
 paths:
+  /aggregator/activity-log:
+    get:
+      description: Fetch the activity logs sequence for the aggregator
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Activity logs fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorActivityLogListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Activity Log
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads:
+    get:
+      description: Gets all bulk uploads across all businesses uploaded by this aggregator
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk uploads fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorBulkUploadListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: List All Bulk Uploads
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads/{id}:
+    get:
+      description: Gets bulk uploads uploaded by aggregator for a specific business
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk uploads fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorBulkUploadListResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: List Bulk Uploads by Business
+      tags:
+      - Aggregator Portal
+    post:
+      consumes:
+      - multipart/form-data
+      description: Bulk invoices upload for a managed business
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invoice JSON file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Invoice uploaded successfully
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Bulk Upload Initializer
+      tags:
+      - Aggregator Portal
+  /aggregator/businesses:
+    get:
+      description: List accepted businesses for an aggregator
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Businesses fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorBusinessListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: List Businesses
+      tags:
+      - Aggregator Portal
+  /aggregator/businesses/{id}:
+    delete:
+      description: Remove an accepted business from the aggregator
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business removed successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove Business
+      tags:
+      - Aggregator Portal
+    get:
+      description: Get details for a single accepted business
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorBusinessListResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Business Detail
+      tags:
+      - Aggregator Portal
+  /aggregator/dashboard:
+    get:
+      description: Fetch high level stats for aggregator dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard stats fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorDashboardResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Dashboard Stats
+      tags:
+      - Aggregator Portal
+  /aggregator/invitations:
+    get:
+      description: Fetch all pending invitations for the aggregator
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitations fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorInvitationListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: List Invitations
+      tags:
+      - Aggregator Portal
+  /aggregator/invitations/respond:
+    post:
+      consumes:
+      - application/json
+      description: Accept or reject an invitation
+      parameters:
+      - description: Invitation Response payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RespondToInvitationDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Responded to invitation successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Respond to Invitation
+      tags:
+      - Aggregator Portal
+  /aggregator/invoices:
+    get:
+      description: Gets all invoices across all businesses uploaded by this aggregator
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoices fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorInvoiceListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: List All Invoices
+      tags:
+      - Aggregator Portal
+  /aggregator/invoices/{id}:
+    get:
+      description: Gets invoices uploaded by aggregator for a specific business
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoices fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorInvoiceListResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: List Business Invoices
+      tags:
+      - Aggregator Portal
+    post:
+      consumes:
+      - application/json
+      description: Upload a single invoice for a managed business
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invoice payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Invoice generated successfully
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Upload Invoice
+      tags:
+      - Aggregator Portal
   /auth/complete-forgot-password:
     post:
       consumes:
@@ -1647,6 +2102,98 @@ paths:
       summary: Update Business Details
       tags:
       - Business
+  /business/aggregators:
+    get:
+      description: Fetch all available aggregators
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Aggregators fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorInvitationListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: List Available Aggregators
+      tags:
+      - Business Aggregator Portal
+  /business/aggregators/invitations:
+    get:
+      description: Fetch all sent invitations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitations fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.BusinessInvitationListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: List Sent Invitations
+      tags:
+      - Business Aggregator Portal
+  /business/aggregators/invitations/{id}:
+    delete:
+      description: Revoke an invitation
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitation revoked successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Revoke Invitation
+      tags:
+      - Business Aggregator Portal
+  /business/aggregators/invite:
+    post:
+      description: Send an invitation to an aggregator
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitation sent successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Send Invitation
+      tags:
+      - Business Aggregator Portal
   /business/crypto-keys:
     post:
       consumes:
@@ -2467,10 +3014,6 @@ paths:
           description: Bad request
           schema:
             $ref: '#/definitions/models.Response'
-        "403":
-          description: Subscription is inactive or invoice quota exhausted
-          schema:
-            $ref: '#/definitions/models.Response'
       security: []
       summary: Initializes invoice creation in one go
       tags:
@@ -2539,290 +3082,6 @@ paths:
       summary: Validate IRN
       tags:
       - Invoice
-  /plugin/business:
-    get:
-      consumes:
-      - application/json
-      description: Checks if a business exists and returns active subscription details
-        when available
-      parameters:
-      - description: Business email
-        in: query
-        name: email
-        required: true
-        type: string
-      - description: Aggregator ID
-        in: query
-        name: aggregator_id
-        required: true
-        type: string
-      - description: Use sandbox database (true/false)
-        in: query
-        name: is_sandbox
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Business check completed successfully
-          schema:
-            $ref: '#/definitions/dtos.PluginBusinessCheckResponseDto'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: Check Business Subscription
-      tags:
-      - Plugin
-  /plugin/invoice-upload:
-    post:
-      consumes:
-      - application/json
-      description: Receives invoice data as a json
-      parameters:
-      - description: Invoice Payload
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Invoice created successfully
-          schema:
-            $ref: '#/definitions/dtos.UploadInvoiceResponseDto'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "403":
-          description: Subscription is inactive or invoice quota exhausted
-          schema:
-            $ref: '#/definitions/models.Response'
-      security: []
-      summary: Initializes invoice creation in one go
-      tags:
-      - Internal Invoice
-  /plugin/paystack/webhook:
-    post:
-      consumes:
-      - application/json
-      description: Verifies Paystack signature, acknowledges immediately, then processes
-        transaction/subscription updates asynchronously
-      parameters:
-      - description: Paystack signature
-        in: header
-        name: x-paystack-signature
-        required: true
-        type: string
-      - description: Webhook payload
-        in: body
-        name: payload
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Webhook accepted for processing
-          schema:
-            $ref: '#/definitions/dtos.PluginWebhookResponseDto'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: Handle Paystack Webhook
-      tags:
-      - Plugin
-  /plugin/plans:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves all available plans for plugin clients
-      parameters:
-      - description: Use sandbox database (true/false)
-        in: query
-        name: is_sandbox
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Plans fetched successfully
-          schema:
-            $ref: '#/definitions/dtos.PluginPlansResponseDto'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: List Plugin Plans
-      tags:
-      - Plugin
-  /plugin/register:
-    post:
-      consumes:
-      - application/json
-      description: Creates a business account in sandbox first, then in production,
-        with default subscription rows
-      parameters:
-      - description: Register request payload
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.SmeRegistrationDto'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Business created successfully
-          schema:
-            $ref: '#/definitions/dtos.PluginRegisterResponseDto'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: Plugin Register
-      tags:
-      - Plugin
-  /plugin/subscribe:
-    post:
-      consumes:
-      - application/json
-      description: Initializes a Paystack transaction for a business subscription
-        plan
-      parameters:
-      - description: Subscribe request payload
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.PluginSubscribeRequestDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Subscription initialized successfully
-          schema:
-            $ref: '#/definitions/dtos.PluginSubscribeResponseDto'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/models.Response'
-        "502":
-          description: Bad gateway
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: Subscribe Business To Plan
-      tags:
-      - Plugin
-  /subscription/plans:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves all available subscription plans
-      parameters:
-      - description: Use sandbox database (true/false)
-        in: query
-        name: is_sandbox
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Plans fetched successfully
-          schema:
-            $ref: '#/definitions/dtos.SubscriptionPlansResponseDto'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: List Subscription Plans
-      tags:
-      - Subscription
-    post:
-      consumes:
-      - application/json
-      description: Creates a subscription plan in the specified environment database
-      parameters:
-      - description: Create plan request payload
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.CreateSubscriptionPlanDto'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Plan created successfully
-          schema:
-            $ref: '#/definitions/dtos.CreateSubscriptionPlanResponseDto'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: Create Subscription Plan
-      tags:
-      - Subscription
   /webhook/firs:
     post:
       consumes:

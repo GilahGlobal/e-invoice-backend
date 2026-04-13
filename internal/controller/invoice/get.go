@@ -259,7 +259,7 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	bulkID, err := invoice.AddBulkUploadLog(db, fileURL, fileKey, *userDetails.BusinessID)
+	bulkID, err := invoice.AddBulkUploadLog(db, fileURL, fileKey, *userDetails.BusinessID, nil)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", "failed to log bulk upload", nil, nil)
 		return c.Status(fiber.StatusInternalServerError).JSON(rd)
@@ -329,7 +329,6 @@ func (base *Controller) DeleteInvoice(c *fiber.Ctx) error {
 // @Param   payload  body  dtos.UploadInvoiceRequestDto  true  "Invoice Payload"
 // @Success 200 {object} dtos.UploadInvoiceResponseDto "Invoice created successfully"
 // @Failure 400 {object} models.Response "Bad request"
-// @Failure 403 {object} models.Response "Subscription is inactive or invoice quota exhausted"
 // @Router /invoice/upload [post]
 func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 
@@ -395,7 +394,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox)
+	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil)
 
 	response := map[string]interface{}{
 		"metadata": createdInvoice.StatusHistory,
