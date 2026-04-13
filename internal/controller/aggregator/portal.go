@@ -5,6 +5,7 @@ import (
 	"einvoice-access-point/internal/dtos"
 	aggregatorSvc "einvoice-access-point/internal/services/aggregator"
 	invoiceSvc "einvoice-access-point/internal/services/invoice"
+	"einvoice-access-point/pkg/database"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/s3"
@@ -13,10 +14,26 @@ import (
 	"einvoice-access-point/pkg/workers/producer"
 	"log"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
-// ListInvitations fetches all pending invitations for the aggregator
+type Controller struct {
+	Db        *database.Database
+	TestDB    *database.Database
+	Validator *validator.Validate
+	Logger    *utility.Logger
+}
+
+// @Summary List Invitations
+// @Description Fetch all pending invitations for the aggregator
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dtos.AggregatorInvitationListResponseDto "Invitations fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/invitations [get]
 func (base *Controller) ListInvitations(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -32,11 +49,23 @@ func (base *Controller) ListInvitations(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invitations fetched successfully", dtos.AggregatorInvitationListResponseDto{Data: invitations})
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invitations fetched successfully", invitations)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// RespondToInvitation handles accepting or rejecting an invitation
+// @Summary Respond to Invitation
+// @Description Accept or reject an invitation
+// @Tags Aggregator Portal
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param data body dtos.RespondToInvitationDto true "Invitation Response payload"
+// @Success 200 {object} dtos.BaseResponseDto "Responded to invitation successfully"
+// @Failure 400 {object} models.Response "Bad request, validation failed"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 422 {object} models.Response "Unprocessable entity"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/invitations/respond [post]
 func (base *Controller) RespondToInvitation(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -67,7 +96,15 @@ func (base *Controller) RespondToInvitation(c *fiber.Ctx) error {
 	return c.Status(status).JSON(rd)
 }
 
-// Dashboard fetches high level stats
+// @Summary Dashboard Stats
+// @Description Fetch high level stats for aggregator dashboard
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dtos.AggregatorDashboardResponseDto "Dashboard stats fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/dashboard [get]
 func (base *Controller) Dashboard(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -87,7 +124,18 @@ func (base *Controller) Dashboard(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// ListBusinesses lists accepted businesses for an aggregator
+// @Summary List Businesses
+// @Description List accepted businesses for an aggregator
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number"
+// @Param size query int false "Page size"
+// @Param search query string false "Search term"
+// @Success 200 {object} dtos.AggregatorBusinessListResponseDto "Businesses fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/businesses [get]
 func (base *Controller) ListBusinesses(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -120,7 +168,17 @@ func (base *Controller) ListBusinesses(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// GetBusinessDetail gets details for a single accepted business
+// @Summary Get Business Detail
+// @Description Get details for a single accepted business
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Business ID"
+// @Success 200 {object} dtos.AggregatorBusinessListResponseDto "Business fetched successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/businesses/{id} [get]
 func (base *Controller) GetBusinessDetail(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -146,7 +204,17 @@ func (base *Controller) GetBusinessDetail(c *fiber.Ctx) error {
 	return c.Status(status).JSON(rd)
 }
 
-// RemoveBusiness removes an accepted business from the aggregator
+// @Summary Remove Business
+// @Description Remove an accepted business from the aggregator
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Business ID"
+// @Success 200 {object} dtos.BaseResponseDto "Business removed successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/businesses/{id} [delete]
 func (base *Controller) RemoveBusiness(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -172,7 +240,17 @@ func (base *Controller) RemoveBusiness(c *fiber.Ctx) error {
 	return c.Status(status).JSON(rd)
 }
 
-// ListAllInvoices gets all invoices across all businesses uploaded by this aggregator
+// @Summary List All Invoices
+// @Description Gets all invoices across all businesses uploaded by this aggregator
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number"
+// @Param size query int false "Page size"
+// @Success 200 {object} dtos.AggregatorInvoiceListResponseDto "Invoices fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/invoices [get]
 func (base *Controller) ListAllInvoices(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -204,7 +282,19 @@ func (base *Controller) ListAllInvoices(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// ListBusinessInvoices gets invoices uploaded by aggregator for a specific business
+// @Summary List Business Invoices
+// @Description Gets invoices uploaded by aggregator for a specific business
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Business ID"
+// @Param page query int false "Page number"
+// @Param size query int false "Page size"
+// @Success 200 {object} dtos.AggregatorInvoiceListResponseDto "Invoices fetched successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/invoices/{id} [get]
 func (base *Controller) ListBusinessInvoices(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -242,7 +332,17 @@ func (base *Controller) ListBusinessInvoices(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// ListAllBulkUploads gets all bulk uploads across all businesses uploaded by this aggregator
+// @Summary List All Bulk Uploads
+// @Description Gets all bulk uploads across all businesses uploaded by this aggregator
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number"
+// @Param size query int false "Page size"
+// @Success 200 {object} dtos.AggregatorBulkUploadListResponseDto "Bulk uploads fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/bulk-uploads [get]
 func (base *Controller) ListAllBulkUploads(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -274,7 +374,19 @@ func (base *Controller) ListAllBulkUploads(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// ListBulkUploadLogs gets bulk uploads uploaded by aggregator for a specific business
+// @Summary List Bulk Uploads by Business
+// @Description Gets bulk uploads uploaded by aggregator for a specific business
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Business ID"
+// @Param page query int false "Page number"
+// @Param size query int false "Page size"
+// @Success 200 {object} dtos.AggregatorBulkUploadListResponseDto "Bulk uploads fetched successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/bulk-uploads/{id} [get]
 func (base *Controller) ListBulkUploadLogs(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -312,7 +424,17 @@ func (base *Controller) ListBulkUploadLogs(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// ActivityLog fetches the activity logs sequence for the aggregator
+// @Summary Activity Log
+// @Description Fetch the activity logs sequence for the aggregator
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number"
+// @Param size query int false "Page size"
+// @Success 200 {object} dtos.AggregatorActivityLogListResponseDto "Activity logs fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/activity-log [get]
 func (base *Controller) ActivityLog(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -344,7 +466,20 @@ func (base *Controller) ActivityLog(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// UploadInvoice single invoice for a managed business
+// @Summary Upload Invoice
+// @Description Upload a single invoice for a managed business
+// @Tags Aggregator Portal
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Business ID"
+// @Param data body dtos.UploadInvoiceRequestDto true "Invoice payload"
+// @Success 201 {object} models.Response "Invoice generated successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 422 {object} models.Response "Unprocessable entity"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/invoices/{id} [post]
 func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -424,7 +559,19 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(rd)
 }
 
-// BulkUpload bulk invoices for a managed business
+// @Summary Bulk Upload Initializer
+// @Description Bulk invoices upload for a managed business
+// @Tags Aggregator Portal
+// @Accept multipart/form-data
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Business ID"
+// @Param file formData file true "Invoice JSON file"
+// @Success 201 {object} models.Response "Invoice uploaded successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/bulk-uploads/{id} [post]
 func (base *Controller) BulkUpload(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {

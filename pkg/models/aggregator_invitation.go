@@ -26,10 +26,6 @@ type AggregatorInvitation struct {
 	CreatedAt    time.Time      `gorm:"column:created_at;not null;autoCreateTime" json:"created_at"`
 	UpdatedAt    time.Time      `gorm:"column:updated_at;null;autoUpdateTime" json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
-
-	// Relations (loaded via Preload when needed)
-	Business   Business   `gorm:"foreignKey:BusinessID" json:"business,omitempty"`
-	Aggregator Aggregator `gorm:"foreignKey:AggregatorID" json:"aggregator,omitempty"`
 }
 
 // BeforeCreate sets the ID if not provided

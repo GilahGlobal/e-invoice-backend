@@ -10,12 +10,25 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// ListAvailableAggregators lets a business browse registered aggregators
+// @Summary List Available Aggregators
+// @Description Fetch all available aggregators
+// @Tags Business Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dtos.AggregatorInvitationListResponseDto "Aggregators fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /business/aggregators [get]
 func (base *Controller) ListAvailableAggregators(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
 		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	if userDetails.IsAggregator {
+		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Aggregator account cannot view other aggregators", nil, nil)
+		return c.Status(fiber.StatusForbidden).JSON(rd)
 	}
 
 	var query models.PaginationQuery
@@ -49,13 +62,28 @@ func (base *Controller) ListAvailableAggregators(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// SendAggregatorInvitation sends an invitation to an aggregator
+// @Summary Send Invitation
+// @Description Send an invitation to an aggregator
+// @Tags Business Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dtos.BaseResponseDto "Invitation sent successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /business/aggregators/invite [post]
 func (base *Controller) SendAggregatorInvitation(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
+
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
 		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
+
+	if userDetails.IsAggregator {
+		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Aggregator account cannot send invitations", nil, nil)
+		return c.Status(fiber.StatusForbidden).JSON(rd)
+	}
+
 	if userDetails.BusinessID == nil {
 		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Business ID missing", nil, nil)
 		return c.Status(fiber.StatusForbidden).JSON(rd)
@@ -74,7 +102,7 @@ func (base *Controller) SendAggregatorInvitation(c *fiber.Ctx) error {
 
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDb)
 
-	status, err := aggregatorSvc.SendInvitation(*userDetails.BusinessID, req.AggregatorID, db)
+	status, err := aggregatorSvc.SendInvitation(userDetails.ID, req.AggregatorID, db)
 	if err != nil {
 		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
 		return c.Status(status).JSON(rd)
@@ -84,13 +112,27 @@ func (base *Controller) SendAggregatorInvitation(c *fiber.Ctx) error {
 	return c.Status(status).JSON(rd)
 }
 
-// ListSentInvitations fetches all invitations sent by the business
+// @Summary List Sent Invitations
+// @Description Fetch all sent invitations
+// @Tags Business Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dtos.BusinessInvitationListResponseDto "Invitations fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /business/aggregators/invitations [get]
 func (base *Controller) ListSentInvitations(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
 		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
+
+	if userDetails.IsAggregator {
+		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Aggregator account cannot list sent invitations", nil, nil)
+		return c.Status(fiber.StatusForbidden).JSON(rd)
+	}
+
 	if userDetails.BusinessID == nil {
 		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Business ID missing", nil, nil)
 		return c.Status(fiber.StatusForbidden).JSON(rd)
@@ -98,23 +140,37 @@ func (base *Controller) ListSentInvitations(c *fiber.Ctx) error {
 
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDb)
 
-	invitations, err := aggregatorSvc.ListBusinessInvitations(*userDetails.BusinessID, db)
+	invitations, err := aggregatorSvc.ListBusinessInvitations(userDetails.ID, db)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusInternalServerError).JSON(rd)
 	}
 
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invitations fetched successfully", dtos.AggregatorInvitationListResponseDto{Data: mapToGeneric(invitations)})
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invitations fetched successfully", invitations)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// RevokeAggregatorInvitation revokes a pending or accepted invitation
+// @Summary Revoke Invitation
+// @Description Revoke an invitation
+// @Tags Business Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dtos.BaseResponseDto "Invitation revoked successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /business/aggregators/invitations/{id} [delete]
 func (base *Controller) RevokeAggregatorInvitation(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
 		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
+
+	if userDetails.IsAggregator {
+		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Aggregator account cannot revoke invitations", nil, nil)
+		return c.Status(fiber.StatusForbidden).JSON(rd)
+	}
+
 	if userDetails.BusinessID == nil {
 		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Business ID missing", nil, nil)
 		return c.Status(fiber.StatusForbidden).JSON(rd)
@@ -145,9 +201,9 @@ func mapToGeneric(invitations []dtos.BusinessInvitationDto) []dtos.AggregatorInv
 	for i, v := range invitations {
 		result[i] = dtos.AggregatorInvitationDto{
 			ID:            v.ID,
-			BusinessID:    v.AggregatorID,     // putting aggregator id here for frontend convenience list
-			BusinessName:  v.AggregatorName,   // mapping name
-			BusinessEmail: v.AggregatorEmail,  // mapping email
+			BusinessID:    v.AggregatorID,    // putting aggregator id here for frontend convenience list
+			BusinessName:  v.AggregatorName,  // mapping name
+			BusinessEmail: v.AggregatorEmail, // mapping email
 			Status:        v.Status,
 			CreatedAt:     v.CreatedAt,
 		}

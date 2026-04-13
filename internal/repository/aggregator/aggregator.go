@@ -8,28 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// =====================
-// Aggregator CRUD
-// =====================
-
-func CreateAggregator(aggregator *models.Aggregator, db *gorm.DB) error {
-	return db.Create(aggregator).Error
-}
-
-func GetAggregatorByEmail(db *gorm.DB, email string) (*models.Aggregator, error) {
-	var aggregator models.Aggregator
-	err := db.Where("email = ?", strings.ToLower(email)).First(&aggregator).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return &aggregator, nil
-}
-
-func GetAggregatorByID(db *gorm.DB, id string) (*models.Aggregator, error) {
-	var aggregator models.Aggregator
+func GetAggregatorByID(db *gorm.DB, id string) (*models.Business, error) {
+	var aggregator models.Business
 	err := db.Where("id = ?", id).First(&aggregator).Error
 	if err != nil {
 		return nil, err
@@ -37,28 +17,12 @@ func GetAggregatorByID(db *gorm.DB, id string) (*models.Aggregator, error) {
 	return &aggregator, nil
 }
 
-func UpdateAggregator(aggregator *models.Aggregator, db *gorm.DB) error {
-	return db.Save(aggregator).Error
-}
-
-func CheckAggregatorEmailExists(db *gorm.DB, email string) bool {
-	var count int64
-	db.Model(&models.Aggregator{}).Where("email = ?", strings.ToLower(email)).Count(&count)
-	return count > 0
-}
-
-func CheckAggregatorCompanyExists(db *gorm.DB, companyName string) bool {
-	var count int64
-	db.Model(&models.Aggregator{}).Where("LOWER(company_name) = LOWER(?)", companyName).Count(&count)
-	return count > 0
-}
-
 // ListAllAggregators returns a paginated list of active aggregators for business browsing
-func ListAllAggregators(db *gorm.DB, search string, page, size int) ([]models.Aggregator, int64, error) {
-	var aggregators []models.Aggregator
+func ListAllAggregators(db *gorm.DB, search string, page, size int) ([]models.Business, int64, error) {
+	var aggregators []models.Business
 	var total int64
 
-	query := db.Model(&models.Aggregator{}).Where("is_active = ? AND email_verified = ?", true, true)
+	query := db.Model(&models.Business{}).Where("is_aggregator = ? AND email_verified = ?", true, true)
 
 	if search != "" {
 		searchPattern := "%" + strings.ToLower(search) + "%"
@@ -87,7 +51,7 @@ func CreateInvitation(invitation *models.AggregatorInvitation, db *gorm.DB) erro
 
 func GetInvitationByID(db *gorm.DB, id string) (*models.AggregatorInvitation, error) {
 	var invitation models.AggregatorInvitation
-	err := db.Preload("Business").Preload("Aggregator").Where("id = ?", id).First(&invitation).Error
+	err := db.Where("id = ?", id).First(&invitation).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -99,7 +63,7 @@ func GetInvitationByID(db *gorm.DB, id string) (*models.AggregatorInvitation, er
 
 func GetInvitationByToken(db *gorm.DB, token string) (*models.AggregatorInvitation, error) {
 	var invitation models.AggregatorInvitation
-	err := db.Preload("Business").Preload("Aggregator").Where("invite_token = ?", token).First(&invitation).Error
+	err := db.Preload("Business").Where("invite_token = ?", token).First(&invitation).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -116,8 +80,7 @@ func UpdateInvitation(invitation *models.AggregatorInvitation, db *gorm.DB) erro
 // ListPendingInvitationsByAggregator returns all pending invitations for an aggregator
 func ListPendingInvitationsByAggregator(db *gorm.DB, aggregatorID string) ([]models.AggregatorInvitation, error) {
 	var invitations []models.AggregatorInvitation
-	err := db.Preload("Business").
-		Where("aggregator_id = ? AND status = ?", aggregatorID, models.InvitationStatusPending).
+	err := db.Where("aggregator_id = ? AND status = ?", aggregatorID, models.InvitationStatusPending).
 		Order("created_at DESC").
 		Find(&invitations).Error
 	return invitations, err
@@ -126,8 +89,7 @@ func ListPendingInvitationsByAggregator(db *gorm.DB, aggregatorID string) ([]mod
 // ListInvitationsByBusiness returns all invitations sent by a business
 func ListInvitationsByBusiness(db *gorm.DB, businessID string) ([]models.AggregatorInvitation, error) {
 	var invitations []models.AggregatorInvitation
-	err := db.Preload("Aggregator").
-		Where("business_id = ?", businessID).
+	err := db.Where("business_id = ?", businessID).
 		Order("created_at DESC").
 		Find(&invitations).Error
 	return invitations, err

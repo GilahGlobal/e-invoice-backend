@@ -19,9 +19,9 @@ type BulkUpload struct {
 	PartiallySuccessfulInvoices int            `gorm:"column:partially_successful_invoices;default:0" json:"partially_successful_invoices"`
 	UnsuccessfulInvoices        int            `gorm:"column:unsuccessful_invoices;default:0" json:"unsuccessful_invoices"`
 	ValidationErrorCount        int            `gorm:"column:validation_error_count;default:0" json:"validation_error_count"`
-	ValidationErrors            datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'" json:"validation_errors"`
+	ValidationErrors            datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'" json:"validation_errors" swaggertype:"object"`
 	StartedAt                   *time.Time     `gorm:"column:started_at" json:"started_at"`
 	CompletedAt                 *time.Time     `gorm:"column:completed_at" json:"completed_at"`
 	CreatedAt                   time.Time      `gorm:"column:created_at;default:CURRENT_TIMESTAMP" json:"created_at"`
-	Duration                    time.Duration  `gorm:"column:duration;default:0" json:"duration"`
+	Duration                    time.Duration  `gorm:"column:duration;default:0" json:"duration" swaggertype:"string"`
 }

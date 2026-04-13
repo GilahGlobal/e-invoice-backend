@@ -16,7 +16,7 @@ func AggregatorGuard() fiber.Handler {
 			return c.Status(fiber.StatusUnauthorized).JSON(rd)
 		}
 
-		if claims.UserType != "aggregator" {
+		if !claims.IsAggregator {
 			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Access denied: aggregator account required", nil, nil)
 			return c.Status(fiber.StatusForbidden).JSON(rd)
 		}

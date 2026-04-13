@@ -21,50 +21,16 @@ func CreateToken(user models.Business, isSandbox bool) (*TokenDetailDTO, error) 
 	tokenData.ExpiresAt = time.Now().Add(time.Duration(expireDuration) * time.Hour)
 
 	theClaims := UserDataClaims{
-		ID:         user.ID,
-		Name:       user.Name,
-		Email:      user.Email,
-		BusinessID: user.BusinessID,
-		ServiceID:  user.ServiceID,
-		AccessUuid: tokenData.AccessUuid,
-		IsSandbox:  isSandbox,
-		UserType:   "business",
+		ID:           user.ID,
+		Name:         user.Name,
+		Email:        user.Email,
+		BusinessID:   user.BusinessID,
+		ServiceID:    user.ServiceID,
+		AccessUuid:   tokenData.AccessUuid,
+		IsSandbox:    isSandbox,
+		IsAggregator: user.IsAggregator,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    user.Email,
-			ExpiresAt: jwt.NewNumericDate(tokenData.ExpiresAt),
-		},
-	}
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS512, theClaims)
-	tokenData.AccessToken, err = claims.SignedString([]byte(configs.Server.Secret))
-	if err != nil {
-		return tokenData, err
-	}
-
-	return tokenData, err
-}
-
-func CreateAggregatorToken(aggregator models.Aggregator, isSandbox bool) (*TokenDetailDTO, error) {
-	var (
-		configs   = config.GetConfig()
-		tokenData = &TokenDetailDTO{}
-		err       error
-	)
-
-	tokenData.AccessUuid = utility.GenerateUUID()
-	expireDuration := configs.Server.AccessTokenExpireDuration
-	tokenData.ExpiresAt = time.Now().Add(time.Duration(expireDuration) * time.Hour)
-
-	theClaims := UserDataClaims{
-		ID:         aggregator.ID,
-		Name:       aggregator.Name,
-		Email:      aggregator.Email,
-		BusinessID: nil,
-		ServiceID:  "",
-		AccessUuid: tokenData.AccessUuid,
-		IsSandbox:  isSandbox,
-		UserType:   "aggregator",
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    aggregator.Email,
 			ExpiresAt: jwt.NewNumericDate(tokenData.ExpiresAt),
 		},
 	}

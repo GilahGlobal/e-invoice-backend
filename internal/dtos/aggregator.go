@@ -1,32 +1,9 @@
 package dtos
 
-import "einvoice-access-point/pkg/database"
-
-// --- Registration ---
-type AggregatorRegisterDto struct {
-	Name        string `json:"name" example:"John Doe" validate:"required,min=2,max=250"`
-	Email       string `json:"email" example:"aggregator@example.com" validate:"required,email"`
-	Password    string `json:"password" example:"password123" validate:"required,min=6"`
-	CompanyName string `json:"company_name" example:"Aggregator Corp" validate:"required"`
-	PhoneNumber string `json:"phone_number" example:"+2348012345678" validate:"required"`
-}
-
-// --- Login ---
-type AggregatorLoginDto struct {
-	Email     string `json:"email" example:"aggregator@example.com" validate:"required,email"`
-	Password  string `json:"password" example:"password123" validate:"required"`
-	IsSandbox bool   `json:"is_sandbox" default:"true"`
-}
-
-// --- Email Verification ---
-type AggregatorVerifyEmailDto struct {
-	Email string `json:"email" example:"aggregator@example.com" validate:"required,email"`
-	OTP   string `json:"otp" example:"123456" validate:"required,numeric"`
-}
-
-type AggregatorResendOtpDto struct {
-	Email string `json:"email" example:"aggregator@example.com" validate:"required,email"`
-}
+import (
+	"einvoice-access-point/pkg/database"
+	"einvoice-access-point/pkg/models"
+)
 
 // --- Invitation (Business sends to Aggregator) ---
 type SendAggregatorInvitationDto struct {
@@ -78,22 +55,22 @@ type AggregatorDashboardDto struct {
 
 // --- Invitation List Item ---
 type AggregatorInvitationDto struct {
-	ID           string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	BusinessID   string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	BusinessName string `json:"business_name" example:"Business Corp"`
+	ID            string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	BusinessID    string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	BusinessName  string `json:"business_name" example:"Business Corp"`
 	BusinessEmail string `json:"business_email" example:"business@example.com"`
-	Status       string `json:"status" example:"pending"`
-	CreatedAt    string `json:"created_at" example:"2026-01-01T12:00:00Z"`
+	Status        string `json:"status" example:"pending"`
+	CreatedAt     string `json:"created_at" example:"2026-01-01T12:00:00Z"`
 }
 
 // --- Business Invitation List Item ---
 type BusinessInvitationDto struct {
-	ID             string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	AggregatorID   string `json:"aggregator_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	AggregatorName string `json:"aggregator_name" example:"Aggregator Corp"`
+	ID              string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	AggregatorID    string `json:"aggregator_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	AggregatorName  string `json:"aggregator_name" example:"Aggregator Corp"`
 	AggregatorEmail string `json:"aggregator_email" example:"aggregator@example.com"`
-	Status         string `json:"status" example:"pending"`
-	CreatedAt      string `json:"created_at" example:"2026-01-01T12:00:00Z"`
+	Status          string `json:"status" example:"pending"`
+	CreatedAt       string `json:"created_at" example:"2026-01-01T12:00:00Z"`
 }
 
 // --- Activity Log ---
@@ -105,13 +82,6 @@ type AggregatorActivityLogDto struct {
 	Action       string `json:"action" example:"single_invoice_upload"`
 	Details      string `json:"details" example:"Uploaded invoice INV-001"`
 	CreatedAt    string `json:"created_at" example:"2026-01-01T12:00:00Z"`
-}
-
-// --- Response DTOs ---
-type AggregatorLoginResponseDto struct {
-	BaseResponseDto
-	Data        AggregatorUserResponse `json:"data"`
-	AccessToken string                 `json:"access_token"`
 }
 
 type AggregatorBusinessListResponseDto struct {
@@ -129,4 +99,32 @@ type AvailableAggregatorsResponseDto struct {
 	BaseResponseDto
 	Data       []AvailableAggregatorDto    `json:"data"`
 	Pagination database.PaginationResponse `json:"pagination"`
+}
+
+type AggregatorDashboardResponseDto struct {
+	BaseResponseDto
+	Data AggregatorDashboardDto `json:"data"`
+}
+
+type AggregatorInvoiceListResponseDto struct {
+	BaseResponseDto
+	Data       []models.MinimalInvoiceDTO  `json:"data"`
+	Pagination database.PaginationResponse `json:"pagination"`
+}
+
+type AggregatorBulkUploadListResponseDto struct {
+	BaseResponseDto
+	Data       []models.BulkUpload         `json:"data"`
+	Pagination database.PaginationResponse `json:"pagination"`
+}
+
+type AggregatorActivityLogListResponseDto struct {
+	BaseResponseDto
+	Data       []AggregatorActivityLogDto  `json:"data"`
+	Pagination database.PaginationResponse `json:"pagination"`
+}
+
+type BusinessInvitationListResponseDto struct {
+	BaseResponseDto
+	Data []BusinessInvitationDto `json:"data"`
 }

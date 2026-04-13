@@ -62,7 +62,7 @@ func Setup(logger *utility.Logger, validator *validator.Validate, db, testDb *da
 
 	HealthRoute(r, ApiVersion, validator, db, testDb, logger)
 	AuthRoute(r, ApiVersion, validator, db, testDb, logger)
-	SubscriptionRoute(r, ApiVersion, validator, db, testDb, logger)
+	// Subscription models were deleted
 	AggregatorRoute(r, ApiVersion, db, testDb, logger, validator)
 	EntityRoute(r, ApiVersion, validator, db, testDb, logger)
 	BusinessRoute(r, ApiVersion, validator, db, testDb, logger)

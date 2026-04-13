@@ -329,7 +329,6 @@ func (base *Controller) DeleteInvoice(c *fiber.Ctx) error {
 // @Param   payload  body  dtos.UploadInvoiceRequestDto  true  "Invoice Payload"
 // @Success 200 {object} dtos.UploadInvoiceResponseDto "Invoice created successfully"
 // @Failure 400 {object} models.Response "Bad request"
-// @Failure 403 {object} models.Response "Subscription is inactive or invoice quota exhausted"
 // @Router /invoice/upload [post]
 func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 

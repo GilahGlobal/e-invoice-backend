@@ -6,18 +6,13 @@ import (
 
 func AuthMigrationModels() []interface{} {
 	return []interface{}{
+		&models.AggregatorInvitation{},
+		&models.AggregatorActivityLog{},
 		&models.Business{},
 		&models.Invoice{},
 		&models.AccessToken{},
 		&models.TokenManager{},
 		&models.BulkUpload{},
-		&models.SubscriptionPlan{},
-		&models.Subscription{},
-		&models.Transaction{},
-		&models.SME{},
-		&models.Aggregator{},
-		&models.AggregatorInvitation{},
-		&models.AggregatorActivityLog{},
 	}
 
 }

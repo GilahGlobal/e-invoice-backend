@@ -3,6 +3,8 @@ package aggregator
 import (
 	"einvoice-access-point/internal/dtos"
 	aggregatorRepo "einvoice-access-point/internal/repository/aggregator"
+	businessRepo "einvoice-access-point/internal/repository/business"
+	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/ses"
 	"einvoice-access-point/pkg/utility"
@@ -104,11 +106,11 @@ func RespondToInvitation(invitationID, aggregatorID string, accept bool, db *gor
 			AggregatorID: aggregatorID,
 			BusinessID:   invitation.BusinessID,
 			Action:       models.ActivityInvitationAccepted,
-			Details:      fmt.Sprintf("Accepted invitation from %s", invitation.Business.CompanyName),
+			// Details:      fmt.Sprintf("Accepted invitation from %s", invitation.Business.CompanyName),
 		}, db)
 
 		// Notify business
-		ses.SendInvitationAcceptedEmail(invitation.Business.Email, invitation.Aggregator.CompanyName)
+		// ses.SendInvitationAcceptedEmail(invitation.Business.Email, invitation.Aggregator.CompanyName)
 	} else {
 		invitation.Status = models.InvitationStatusRejected
 		invitation.RejectedAt = &now
@@ -119,11 +121,11 @@ func RespondToInvitation(invitationID, aggregatorID string, accept bool, db *gor
 			AggregatorID: aggregatorID,
 			BusinessID:   invitation.BusinessID,
 			Action:       models.ActivityInvitationRejected,
-			Details:      fmt.Sprintf("Rejected invitation from %s", invitation.Business.CompanyName),
+			// Details:      fmt.Sprintf("Rejected invitation from %s", invitation.Business.CompanyName),
 		}, db)
 
 		// Notify business
-		ses.SendInvitationRejectedEmail(invitation.Business.Email, invitation.Aggregator.CompanyName)
+		// ses.SendInvitationRejectedEmail(invitation.Business.Email, invitation.Aggregator.CompanyName)
 	}
 
 	if err := aggregatorRepo.UpdateInvitation(invitation, db); err != nil {
@@ -165,6 +167,7 @@ func RevokeInvitation(invitationID, businessID string, db *gorm.DB) (int, error)
 }
 
 func ListAggregatorInvitations(aggregatorID string, db *gorm.DB) ([]dtos.AggregatorInvitationDto, error) {
+	pdb := inst.InitDB(db, false)
 	invitations, err := aggregatorRepo.ListPendingInvitationsByAggregator(db, aggregatorID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch invitations: %w", err)
@@ -172,11 +175,12 @@ func ListAggregatorInvitations(aggregatorID string, db *gorm.DB) ([]dtos.Aggrega
 
 	result := make([]dtos.AggregatorInvitationDto, 0, len(invitations))
 	for _, inv := range invitations {
+		business, _ := businessRepo.FindUserByID(pdb, inv.BusinessID)
 		result = append(result, dtos.AggregatorInvitationDto{
 			ID:            inv.ID,
 			BusinessID:    inv.BusinessID,
-			BusinessName:  inv.Business.CompanyName,
-			BusinessEmail: inv.Business.Email,
+			BusinessName:  business.CompanyName,
+			BusinessEmail: business.Email,
 			Status:        inv.Status,
 			CreatedAt:     inv.CreatedAt.Format(time.RFC3339),
 		})
@@ -186,6 +190,7 @@ func ListAggregatorInvitations(aggregatorID string, db *gorm.DB) ([]dtos.Aggrega
 }
 
 func ListBusinessInvitations(businessID string, db *gorm.DB) ([]dtos.BusinessInvitationDto, error) {
+	pdb := inst.InitDB(db, false)
 	invitations, err := aggregatorRepo.ListInvitationsByBusiness(db, businessID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch invitations: %w", err)
@@ -193,11 +198,12 @@ func ListBusinessInvitations(businessID string, db *gorm.DB) ([]dtos.BusinessInv
 
 	result := make([]dtos.BusinessInvitationDto, 0, len(invitations))
 	for _, inv := range invitations {
+		aggregator, _ := businessRepo.FindUserByID(pdb, inv.AggregatorID)
 		result = append(result, dtos.BusinessInvitationDto{
 			ID:              inv.ID,
 			AggregatorID:    inv.AggregatorID,
-			AggregatorName:  inv.Aggregator.CompanyName,
-			AggregatorEmail: inv.Aggregator.Email,
+			AggregatorName:  aggregator.CompanyName,
+			AggregatorEmail: aggregator.Email,
 			Status:          inv.Status,
 			CreatedAt:       inv.CreatedAt.Format(time.RFC3339),
 		})

@@ -20,19 +20,11 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, db, testDB *database.Dat
 
 	aggregatorRoute := r.Group(ApiVersion + "/aggregator")
 
-	// Public Auth Routes
-	aggregatorRoute.Post("/register", controller.Register)
-	aggregatorRoute.Post("/login", controller.Login)
-	aggregatorRoute.Post("/verify-email", controller.VerifyEmail)
-	aggregatorRoute.Post("/resend-otp", controller.ResendOTP)
-
 	// Protected Routes (Must be Authenticated and be an Aggregator)
 	protected := aggregatorRoute.Group("/")
-	protected.Use(middleware.Authorize)
+	protected.Use(middleware.Authorize(db.Postgresql.DB(), testDB.Postgresql.DB()))
 	protected.Use(middleware.AggregatorGuard())
 
-	protected.Post("/logout", controller.Logout)
-	
 	// Portal - Dashboard & Invitations
 	protected.Get("/dashboard", controller.Dashboard)
 	protected.Get("/invitations", controller.ListInvitations)
@@ -45,12 +37,12 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, db, testDB *database.Dat
 
 	// Portal - Log Views
 	protected.Get("/invoices", controller.ListAllInvoices)
-	protected.Get("/businesses/:id/invoices", controller.ListBusinessInvoices)
+	protected.Get("/invoices/:id", controller.ListBusinessInvoices)
 	protected.Get("/bulk-uploads", controller.ListAllBulkUploads)
-	protected.Get("/businesses/:id/bulk-uploads", controller.ListBulkUploadLogs)
+	protected.Get("/bulk-uploads/:id", controller.ListBulkUploadLogs)
 	protected.Get("/activity-log", controller.ActivityLog)
 
 	// Portal - Invoice Uploading
-	protected.Post("/businesses/:id/invoice", controller.UploadInvoice)
-	protected.Post("/businesses/:id/upload", controller.BulkUpload)
+	protected.Post("/invoices/:id", controller.UploadInvoice)
+	protected.Post("/bulk-uploads/:id", controller.BulkUpload)
 }
