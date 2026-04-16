@@ -184,7 +184,7 @@ func (base *Controller) RevokeAggregatorInvitation(c *fiber.Ctx) error {
 
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDb)
 
-	status, err := aggregatorSvc.RevokeInvitation(invitationID, *userDetails.BusinessID, db)
+	status, err := aggregatorSvc.RevokeInvitation(invitationID, userDetails.ID, db)
 	if err != nil {
 		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
 		return c.Status(status).JSON(rd)
