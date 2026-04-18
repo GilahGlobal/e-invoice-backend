@@ -20,6 +20,8 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, db, testDB *database.Dat
 
 	aggregatorRoute := r.Group(ApiVersion + "/aggregator")
 
+	aggregatorRoute.Post("/subscription/paystack/webhook", controller.PaystackWebhook)
+
 	// Protected Routes (Must be Authenticated and be an Aggregator)
 	protected := aggregatorRoute.Group("/")
 	protected.Use(middleware.Authorize(db.Postgresql.DB(), testDB.Postgresql.DB()))
@@ -41,6 +43,10 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, db, testDB *database.Dat
 	protected.Get("/bulk-uploads", controller.ListAllBulkUploads)
 	protected.Get("/bulk-uploads/:id", controller.ListBulkUploadLogs)
 	protected.Get("/activity-log", controller.ActivityLog)
+
+	// Subscription
+	protected.Get("/subscription/plans", controller.GetPlans)
+	protected.Post("/subscription/subscribe", controller.Subscribe)
 
 	// Portal - Invoice Uploading
 	protected.Post("/invoices/:id", controller.UploadInvoice)

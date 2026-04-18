@@ -5,6 +5,7 @@ import (
 	"einvoice-access-point/internal/dtos"
 	aggregatorSvc "einvoice-access-point/internal/services/aggregator"
 	invoiceSvc "einvoice-access-point/internal/services/invoice"
+	subscriptionSvc "einvoice-access-point/internal/services/subscription"
 	"einvoice-access-point/pkg/database"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
@@ -513,6 +514,11 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		return c.Status(status).JSON(rd)
 	}
 
+	if _, status, err = subscriptionSvc.RequireAggregatorBusinessSubscription(db, userDetails.ID, businessID); err != nil {
+		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
+		return c.Status(status).JSON(rd)
+	}
+
 	invoiceExists, _ := invoiceSvc.GetInvoiceByInvoiceNumber(db, req.InvoiceNumber, businessID)
 	if invoiceExists != nil {
 		blockedStatuses := map[string]bool{
@@ -526,10 +532,22 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
+	reservedSubscriptionID := ""
+	if invoiceExists == nil {
+		reservedSubscriptionID, status, err = subscriptionSvc.ReserveAggregatorInvoiceQuota(db, userDetails.ID, businessID, 1)
+		if err != nil {
+			rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
+			return c.Status(status).JSON(rd)
+		}
+	}
+
 	var irnPayload dtos.InvoiceData
 	if req.IRN == nil {
 		IRNData, irnErr := invoiceSvc.IRNGeneration(db, businessID, req.InvoiceNumber, business.ServiceID, req.BusinessID, userDetails.IsSandbox)
 		if irnErr != nil {
+			if reservedSubscriptionID != "" {
+				_ = subscriptionSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
+			}
 			return c.Status(fiber.StatusBadRequest).JSON(*irnErr)
 		}
 		irnPayload = *IRNData
@@ -544,10 +562,13 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	createdInvoice, _, err, isInvoiceSigned := invoiceSvc.CreateInvoice(db, req, req.InvoiceNumber, businessID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, &userDetails.ID)
+	if reservedSubscriptionID != "" && createdInvoice == nil {
+		_ = subscriptionSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
+	}
 
-	response := map[string]interface{}{
-		"metadata": createdInvoice.StatusHistory,
-		"irn":      irnPayload,
+	response := map[string]interface{}{"irn": irnPayload}
+	if createdInvoice != nil {
+		response["metadata"] = createdInvoice.StatusHistory
 	}
 
 	if isInvoiceSigned {
@@ -591,6 +612,16 @@ func (base *Controller) BulkUpload(c *fiber.Ctx) error {
 	if err != nil {
 		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
 		return c.Status(status).JSON(rd)
+	}
+
+	subscriptionRecord, status, err := subscriptionSvc.RequireAggregatorBusinessSubscription(db, userDetails.ID, businessID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
+		return c.Status(status).JSON(rd)
+	}
+	if subscriptionRecord.RemainingInvoices <= 0 {
+		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "subscription invoice limit exhausted for this business", nil, nil)
+		return c.Status(fiber.StatusForbidden).JSON(rd)
 	}
 
 	file, err := c.FormFile("file")
