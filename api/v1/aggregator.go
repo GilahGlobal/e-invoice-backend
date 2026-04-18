@@ -20,8 +20,6 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, db, testDB *database.Dat
 
 	aggregatorRoute := r.Group(ApiVersion + "/aggregator")
 
-	aggregatorRoute.Post("/subscription/paystack/webhook", controller.PaystackWebhook)
-
 	// Protected Routes (Must be Authenticated and be an Aggregator)
 	protected := aggregatorRoute.Group("/")
 	protected.Use(middleware.Authorize(db.Postgresql.DB(), testDB.Postgresql.DB()))

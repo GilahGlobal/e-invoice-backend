@@ -216,6 +216,51 @@ definitions:
         example: 200
         type: integer
     type: object
+  dtos.AggregatorSubscribeDataDto:
+    properties:
+      authorization_url:
+        example: https://checkout.paystack.com/...
+        type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      plan_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      provider:
+        example: paystack
+        type: string
+      transaction_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      transaction_ref:
+        example: aggsub_1712345678_abcdef
+        type: string
+    type: object
+  dtos.AggregatorSubscribeRequestDto:
+    properties:
+      business_id:
+        type: string
+      plan_id:
+        type: string
+    required:
+    - business_id
+    - plan_id
+    type: object
+  dtos.AggregatorSubscribeResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.AggregatorSubscribeDataDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   dtos.AllowanceCharge:
     properties:
       amount:
@@ -357,6 +402,47 @@ definitions:
     - email
     - otp
     - password
+    type: object
+  dtos.CreateSubscriptionPlanDataDto:
+    properties:
+      is_sandbox:
+        example: true
+        type: boolean
+      plan:
+        $ref: '#/definitions/models.SubscriptionPlan'
+    type: object
+  dtos.CreateSubscriptionPlanDto:
+    properties:
+      amount:
+        type: number
+      billing_cycle:
+        type: integer
+      is_sandbox:
+        type: boolean
+      name:
+        type: string
+      total_invoices:
+        type: integer
+    required:
+    - amount
+    - billing_cycle
+    - is_sandbox
+    - name
+    - total_invoices
+    type: object
+  dtos.CreateSubscriptionPlanResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.CreateSubscriptionPlanDataDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
     type: object
   dtos.DocumentReference:
     properties:
@@ -825,6 +911,22 @@ definitions:
     required:
     - invitation_id
     type: object
+  dtos.SubscriptionPlansResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.SubscriptionPlan'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   dtos.TaxCategory:
     properties:
       id:
@@ -1283,6 +1385,25 @@ definitions:
       status_code:
         type: integer
     type: object
+  models.SubscriptionPlan:
+    properties:
+      amount:
+        type: number
+      billing_cycle:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      total_invoices:
+        type: integer
+      updated_at:
+        type: string
+    type: object
 info:
   contact: {}
   description: This is the e-invoicing service API documentation.
@@ -1738,6 +1859,72 @@ paths:
       summary: Upload Invoice
       tags:
       - Aggregator Portal
+  /aggregator/subscription/plans:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves active plans available for aggregator subscriptions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Plans fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.SubscriptionPlansResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: List Aggregator Subscription Plans
+      tags:
+      - Aggregator Subscription
+  /aggregator/subscription/subscribe:
+    post:
+      consumes:
+      - application/json
+      description: Initializes a Paystack transaction for an aggregator-managed business
+        subscription plan
+      parameters:
+      - description: Subscribe request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AggregatorSubscribeRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription initialized successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorSubscribeResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "502":
+          description: Bad gateway
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Subscribe A Managed Business To A Plan
+      tags:
+      - Aggregator Subscription
   /auth/complete-forgot-password:
     post:
       consumes:
@@ -3082,6 +3269,72 @@ paths:
       summary: Validate IRN
       tags:
       - Invoice
+  /subscription/plans:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all available subscription plans
+      parameters:
+      - description: Use sandbox database (true/false)
+        in: query
+        name: is_sandbox
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Plans fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.SubscriptionPlansResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List Subscription Plans
+      tags:
+      - Subscription
+    post:
+      consumes:
+      - application/json
+      description: Creates a subscription plan in the specified environment database
+      parameters:
+      - description: Create plan request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateSubscriptionPlanDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Plan created successfully
+          schema:
+            $ref: '#/definitions/dtos.CreateSubscriptionPlanResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create Subscription Plan
+      tags:
+      - Subscription
   /webhook/firs:
     post:
       consumes:

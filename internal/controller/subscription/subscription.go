@@ -1,11 +1,15 @@
 package subscription
 
 import (
+	"einvoice-access-point/external/paystack"
 	"einvoice-access-point/internal/dtos"
+	"einvoice-access-point/internal/services/subscription"
 	subscriptionService "einvoice-access-point/internal/services/subscription"
 	"einvoice-access-point/pkg/database"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/utility"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -98,4 +102,66 @@ func (base *Controller) CreatePlan(c *fiber.Ctx) error {
 		"plan":       createdPlan,
 	})
 	return c.Status(fiber.StatusCreated).JSON(rd)
+}
+
+func (base *Controller) PaystackWebhook(c *fiber.Ctx) error {
+	signature := c.Get("x-paystack-signature")
+	if signature == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "missing paystack signature", nil, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+	rawBody := append([]byte(nil), c.Body()...)
+
+	if err := subscription.ValidatePaystackSignature(rawBody, signature); err != nil {
+		statusCode := fiber.StatusInternalServerError
+		if errors.Is(err, subscription.ErrInvalidPaystackSignature) {
+			statusCode = fiber.StatusUnauthorized
+		}
+
+		rd := utility.BuildErrorResponse(statusCode, "error", err.Error(), nil, nil)
+		return c.Status(statusCode).JSON(rd)
+	}
+
+	var payload paystack.WebhookPayload
+	if err := json.Unmarshal(rawBody, &payload); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "invalid webhook payload", err.Error(), nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	metadataSandbox, hasMetadataSandbox := payload.MetadataIsSandbox()
+	if !hasMetadataSandbox {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "metadata.is_sandbox is required in webhook payload", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	targetDb := base.Db
+	databaseName := "production"
+	if metadataSandbox {
+		targetDb = base.TestDb
+		databaseName = "sandbox"
+	}
+
+	go func(body []byte, receivedSignature string, selectedDB *database.Database, environment string, reference string) {
+		defer func() {
+			if recovered := recover(); recovered != nil {
+				base.Logger.Error("paystack webhook async panic (env=%s, ref=%s): %v", environment, reference, recovered)
+			}
+		}()
+
+		_, code, err := subscription.HandlePaystackWebhook(body, receivedSignature, selectedDB.Postgresql.DB())
+		if err != nil {
+			base.Logger.Error("paystack webhook async processing failed (env=%s, ref=%s, code=%d): %v", environment, reference, code, err)
+			return
+		}
+
+		base.Logger.Info("paystack webhook async processing completed (env=%s, ref=%s)", environment, reference)
+	}(rawBody, signature, targetDb, databaseName, payload.Data.Reference)
+
+	rd := utility.BuildSuccessResponse(http.StatusOK, "webhook accepted for processing", fiber.Map{
+		"event":              payload.Event,
+		"reference":          payload.Data.Reference,
+		"transaction_status": "queued",
+		"database":           databaseName,
+	})
+	return c.Status(http.StatusOK).JSON(rd)
 }
