@@ -3,7 +3,10 @@ package aggregator
 import (
 	"einvoice-access-point/internal/dtos"
 	aggregatorRepo "einvoice-access-point/internal/repository/aggregator"
+	planRepo "einvoice-access-point/internal/repository/plan"
+	subscriptionRepo "einvoice-access-point/internal/repository/subscription"
 	"einvoice-access-point/pkg/database"
+	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
 	"fmt"
@@ -44,7 +47,7 @@ func ListBusinesses(aggregatorID string, page, size int, search string, db *gorm
 	return result, buildPagination(page, size, total), nil
 }
 
-func GetBusinessDetail(aggregatorID, businessID string, db *gorm.DB) (*dtos.AggregatorBusinessDetailDto, int, error) {
+func GetBusinessDetail(aggregatorID, businessID string, db *gorm.DB) (*dtos.AggregatorBusinessFullDetailDto, int, error) {
 	business, err := aggregatorRepo.GetBusinessByIDForAggregator(db, aggregatorID, businessID)
 	if err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("failed to fetch business: %w", err)
@@ -53,7 +56,7 @@ func GetBusinessDetail(aggregatorID, businessID string, db *gorm.DB) (*dtos.Aggr
 		return nil, http.StatusNotFound, fmt.Errorf("business not found or not managed by this aggregator")
 	}
 
-	result := &dtos.AggregatorBusinessDetailDto{
+	result := &dtos.AggregatorBusinessFullDetailDto{
 		ID:          business.ID,
 		Name:        business.Name,
 		Email:       business.Email,
@@ -62,6 +65,37 @@ func GetBusinessDetail(aggregatorID, businessID string, db *gorm.DB) (*dtos.Aggr
 		PhoneNumber: business.PhoneNumber,
 		ServiceID:   business.ServiceID,
 	}
+
+	// Fetch subscription info (best-effort, won't fail the request)
+	pdb := inst.InitDB(db, false)
+	subscription, _ := subscriptionRepo.GetLatestSubscriptionByBusinessAndAggregator(pdb, businessID, aggregatorID)
+	if subscription != nil {
+		subInfo := &dtos.BusinessSubscriptionInfoDto{
+			IsActive:          subscription.IsActive,
+			PlanID:            subscription.PlanID,
+			PlanName:          subscription.Plan,
+			TotalInvoices:     subscription.TotalInvoices,
+			UsedInvoices:      subscription.UsedInvoices,
+			RemainingInvoices: subscription.RemainingInvoices,
+			NextBillingDate:   subscription.NextBillingDate.Format(time.RFC3339),
+		}
+
+		// Enrich with plan details
+		if subscription.PlanID != "" {
+			plan, _ := planRepo.GetPlanByID(subscription.PlanID, pdb)
+			if plan != nil {
+				subInfo.PlanAmount = plan.Amount
+				subInfo.BillingCycleDays = plan.BillingCycle
+			}
+		}
+
+		result.Subscription = subInfo
+	}
+
+	// Fetch usage stats (best-effort)
+	totalInvoices, totalBulkUploads, _ := aggregatorRepo.GetBusinessStatsForAggregator(db, aggregatorID, businessID)
+	result.TotalInvoicesUploaded = totalInvoices
+	result.TotalBulkUploads = totalBulkUploads
 
 	return result, http.StatusOK, nil
 }

@@ -193,7 +193,7 @@ func SubscribeBusinessToPlan(req dtos.AggregatorSubscribeRequestDto, aggregatorI
 		AggregatorID: aggregatorID,
 		Reference:    reference,
 		Provider:     "paystack",
-		Status:       "pending",
+		Status:       models.TransactionStatusInitialized,
 		Amount:       plan.Amount,
 		Currency:     "NGN",
 		PlanID:       plan.ID,
@@ -216,23 +216,21 @@ func SubscribeBusinessToPlan(req dtos.AggregatorSubscribeRequestDto, aggregatorI
 		},
 	})
 	if err != nil {
-		transactionRecord.Status = "failed"
+		transactionRecord.Status = models.TransactionStatusFailed
 		transactionRecord.GatewayResponse = err.Error()
 		_ = transactionRepo.SaveTransaction(transactionRecord, pdb)
 		return nil, http.StatusBadGateway, fmt.Errorf("failed to initialize paystack transaction: %w", err)
 	}
 
 	if !providerResp.Status {
-		transactionRecord.Status = "failed"
+		transactionRecord.Status = models.TransactionStatusFailed
 		transactionRecord.GatewayResponse = providerResp.Message
 		_ = transactionRepo.SaveTransaction(transactionRecord, pdb)
 		return nil, http.StatusBadGateway, fmt.Errorf("paystack initialization failed: %s", providerResp.Message)
 	}
 
-	transactionRecord.Status = "initialized"
+	transactionRecord.Status = models.TransactionStatusProcessing
 	transactionRecord.ProviderReference = providerResp.Data.Reference
-	transactionRecord.AuthorizationURL = providerResp.Data.AuthorizationURL
-	transactionRecord.AccessCode = providerResp.Data.AccessCode
 	transactionRecord.GatewayResponse = providerResp.Message
 
 	if err := transactionRepo.SaveTransaction(transactionRecord, pdb); err != nil {
@@ -306,11 +304,11 @@ func HandlePaystackWebhook(rawBody []byte, signature string, db *gorm.DB) (fiber
 
 	switch {
 	case payload.Event == "charge.success" && strings.EqualFold(payload.Data.Status, "success"):
-		transactionRecord.Status = "success"
+		transactionRecord.Status = models.TransactionStatusSuccess
 	case strings.Contains(strings.ToLower(payload.Event), "failed") || strings.EqualFold(payload.Data.Status, "failed"):
-		transactionRecord.Status = "failed"
+		transactionRecord.Status = models.TransactionStatusFailed
 	default:
-		transactionRecord.Status = "processing"
+		transactionRecord.Status = models.TransactionStatusProcessing
 	}
 
 	if err := transactionRepo.SaveTransaction(transactionRecord, pdb); err != nil {

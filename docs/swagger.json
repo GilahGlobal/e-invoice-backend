@@ -320,7 +320,7 @@
                     "200": {
                         "description": "Business fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorBusinessListResponseDto"
+                            "$ref": "#/definitions/dtos.AggregatorBusinessFullDetailDto"
                         }
                     },
                     "400": {
@@ -3306,6 +3306,60 @@
                 }
             }
         },
+        "dtos.AggregatorBusinessFullDetailDto": {
+            "type": "object",
+            "properties": {
+                "accepted_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                },
+                "company_name": {
+                    "type": "string",
+                    "example": "Business Corp"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Business Owner"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+2348012345678"
+                },
+                "service_id": {
+                    "type": "string",
+                    "example": "6A2BC898"
+                },
+                "subscription": {
+                    "description": "Subscription",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dtos.BusinessSubscriptionInfoDto"
+                        }
+                    ]
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "TIN-123456789"
+                },
+                "total_bulk_uploads": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "total_invoices_uploaded": {
+                    "description": "Stats",
+                    "type": "integer",
+                    "example": 120
+                }
+            }
+        },
         "dtos.AggregatorBusinessListResponseDto": {
             "type": "object",
             "properties": {
@@ -3685,6 +3739,47 @@
                 "status_code": {
                     "type": "integer",
                     "example": 200
+                }
+            }
+        },
+        "dtos.BusinessSubscriptionInfoDto": {
+            "type": "object",
+            "properties": {
+                "billing_cycle_days": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "next_billing_date": {
+                    "type": "string",
+                    "example": "2026-05-01T00:00:00Z"
+                },
+                "plan_amount": {
+                    "type": "number",
+                    "example": 5000
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "plan_name": {
+                    "type": "string",
+                    "example": "Starter"
+                },
+                "remaining_invoices": {
+                    "type": "integer",
+                    "example": 380
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "used_invoices": {
+                    "type": "integer",
+                    "example": 120
                 }
             }
         },

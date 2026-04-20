@@ -114,6 +114,44 @@ definitions:
         example: TIN-123456789
         type: string
     type: object
+  dtos.AggregatorBusinessFullDetailDto:
+    properties:
+      accepted_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      company_name:
+        example: Business Corp
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Business Owner
+        type: string
+      phone_number:
+        example: "+2348012345678"
+        type: string
+      service_id:
+        example: 6A2BC898
+        type: string
+      subscription:
+        allOf:
+        - $ref: '#/definitions/dtos.BusinessSubscriptionInfoDto'
+        description: Subscription
+      tin:
+        example: TIN-123456789
+        type: string
+      total_bulk_uploads:
+        example: 5
+        type: integer
+      total_invoices_uploaded:
+        description: Stats
+        example: 120
+        type: integer
+    type: object
   dtos.AggregatorBusinessListResponseDto:
     properties:
       data:
@@ -384,6 +422,36 @@ definitions:
         type: string
       status_code:
         example: 200
+        type: integer
+    type: object
+  dtos.BusinessSubscriptionInfoDto:
+    properties:
+      billing_cycle_days:
+        example: 30
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      next_billing_date:
+        example: "2026-05-01T00:00:00Z"
+        type: string
+      plan_amount:
+        example: 5000
+        type: number
+      plan_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      plan_name:
+        example: Starter
+        type: string
+      remaining_invoices:
+        example: 380
+        type: integer
+      total_invoices:
+        example: 500
+        type: integer
+      used_invoices:
+        example: 120
         type: integer
     type: object
   dtos.CompleteForgotPasswordDto:
@@ -1638,7 +1706,7 @@ paths:
         "200":
           description: Business fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorBusinessListResponseDto'
+            $ref: '#/definitions/dtos.AggregatorBusinessFullDetailDto'
         "400":
           description: Bad request
           schema:
