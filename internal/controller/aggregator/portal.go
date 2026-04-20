@@ -175,7 +175,7 @@ func (base *Controller) ListBusinesses(c *fiber.Ctx) error {
 // @Produce json
 // @Security BearerAuth
 // @Param id path string true "Business ID"
-// @Success 200 {object} dtos.AggregatorBusinessListResponseDto "Business fetched successfully"
+// @Success 200 {object} dtos.AggregatorBusinessFullDetailDto "Business fetched successfully"
 // @Failure 400 {object} models.Response "Bad request"
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 500 {object} models.Response "Internal server error"

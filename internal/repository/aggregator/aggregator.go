@@ -160,6 +160,31 @@ func GetBusinessByIDForAggregator(db *gorm.DB, aggregatorID, businessID string) 
 	return &business, nil
 }
 
+// GetBusinessStatsForAggregator returns invoice and bulk upload counts for a specific business under an aggregator
+// Restricts counts to records created after the start of the current subscription (determined by last successful transaction).
+func GetBusinessStatsForAggregator(db *gorm.DB, aggregatorID, businessID string) (totalInvoices, totalBulkUploads int64, err error) {
+	invoiceQuery := db.Model(&models.Invoice{}).Where("aggregator_id = ? AND business_id = ?", aggregatorID, businessID)
+	bulkUploadQuery := db.Model(&models.BulkUpload{}).Where("aggregator_id = ? AND business_id = ?", aggregatorID, businessID)
+
+	var lastTx models.Transaction
+	txErr := db.Where("sme_id = ? AND aggregator_id = ? AND status = ?", businessID, aggregatorID, "success").
+		Order("updated_at desc").
+		First(&lastTx).Error
+
+	if txErr == nil {
+		invoiceQuery = invoiceQuery.Where("created_at >= ?", lastTx.UpdatedAt)
+		bulkUploadQuery = bulkUploadQuery.Where("created_at >= ?", lastTx.UpdatedAt)
+	}
+
+	if err = invoiceQuery.Count(&totalInvoices).Error; err != nil {
+		return
+	}
+	if err = bulkUploadQuery.Count(&totalBulkUploads).Error; err != nil {
+		return
+	}
+	return
+}
+
 // =====================
 // Invoices & Bulk Uploads for Aggregator
 // =====================
