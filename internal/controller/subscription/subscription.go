@@ -10,6 +10,7 @@ import (
 	"einvoice-access-point/pkg/utility"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -112,6 +113,7 @@ func (base *Controller) PaystackWebhook(c *fiber.Ctx) error {
 	}
 	rawBody := append([]byte(nil), c.Body()...)
 
+	log.Println("paystack webhook: ", string(rawBody))
 	if err := subscription.ValidatePaystackSignature(rawBody, signature); err != nil {
 		statusCode := fiber.StatusInternalServerError
 		if errors.Is(err, subscription.ErrInvalidPaystackSignature) {
