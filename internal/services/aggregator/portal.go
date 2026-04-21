@@ -236,3 +236,47 @@ func GetActivityLog(aggregatorID string, page, size int, db *gorm.DB) ([]dtos.Ag
 
 	return result, buildPagination(page, size, total), nil
 }
+
+func ListAllTransactions(aggregatorID string, page, size int, db *gorm.DB) ([]dtos.TransactionDto, *database.PaginationResponse, error) {
+	transactions, total, err := aggregatorRepo.GetTransactionsByAggregator(db, aggregatorID, page, size)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch transactions: %w", err)
+	}
+
+	result := make([]dtos.TransactionDto, 0, len(transactions))
+	businessNameCache := make(map[string]string)
+
+	for _, t := range transactions {
+		businessName := businessNameCache[t.BusinessID]
+		if businessName == "" {
+			business, err := aggregatorRepo.GetBusinessByIDForAggregator(db, aggregatorID, t.BusinessID)
+			if err == nil && business != nil {
+				businessName = business.CompanyName
+				if businessName == "" {
+					businessName = business.Name
+				}
+				businessNameCache[t.BusinessID] = businessName
+			}
+		}
+
+		result = append(result, dtos.TransactionDto{
+			ID:                t.ID,
+			BusinessID:        t.BusinessID,
+			BusinessName:      businessName,
+			AggregatorID:      t.AggregatorID,
+			Reference:         t.Reference,
+			Provider:          t.Provider,
+			ProviderReference: t.ProviderReference,
+			Status:            string(t.Status),
+			Amount:            t.Amount,
+			Currency:          t.Currency,
+			PlanID:            t.PlanID,
+			Plan:              t.Plan,
+			GatewayResponse:   t.GatewayResponse,
+			CreatedAt:         t.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:         t.UpdatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return result, buildPagination(page, size, total), nil
+}

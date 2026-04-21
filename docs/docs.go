@@ -824,6 +824,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/aggregator/transactions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Gets all transaction history for the aggregator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "List All Transactions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transactions fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorTransactionListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/complete-forgot-password": {
             "post": {
                 "description": "Complete forgot password process",
@@ -3576,6 +3627,32 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.AggregatorTransactionListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.TransactionDto"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/database.PaginationResponse"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
         "dtos.AllowanceCharge": {
             "type": "object",
             "required": [
@@ -4621,6 +4698,71 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dtos.TaxSubtotal"
                     }
+                }
+            }
+        },
+        "dtos.TransactionDto": {
+            "type": "object",
+            "properties": {
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "amount": {
+                    "type": "number",
+                    "example": 5000
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "business_name": {
+                    "type": "string",
+                    "example": "Business Corp"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "NGN"
+                },
+                "gateway_response": {
+                    "type": "string",
+                    "example": "Approved"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "plan": {
+                    "type": "string",
+                    "example": "Starter"
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "plan_123"
+                },
+                "provider": {
+                    "type": "string",
+                    "example": "paystack"
+                },
+                "provider_reference": {
+                    "type": "string",
+                    "example": "ref_123456789"
+                },
+                "reference": {
+                    "type": "string",
+                    "example": "txn_123456789"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
                 }
             }
         },

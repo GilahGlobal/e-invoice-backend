@@ -299,6 +299,24 @@ definitions:
         example: 200
         type: integer
     type: object
+  dtos.AggregatorTransactionListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dtos.TransactionDto'
+        type: array
+      message:
+        example: Action performed successfully
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   dtos.AllowanceCharge:
     properties:
       amount:
@@ -1058,6 +1076,54 @@ definitions:
         type: array
     required:
     - tax_amount
+    type: object
+  dtos.TransactionDto:
+    properties:
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      amount:
+        example: 5000
+        type: number
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      business_name:
+        example: Business Corp
+        type: string
+      created_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      currency:
+        example: NGN
+        type: string
+      gateway_response:
+        example: Approved
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      plan:
+        example: Starter
+        type: string
+      plan_id:
+        example: plan_123
+        type: string
+      provider:
+        example: paystack
+        type: string
+      provider_reference:
+        example: ref_123456789
+        type: string
+      reference:
+        example: txn_123456789
+        type: string
+      status:
+        example: success
+        type: string
+      updated_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
     type: object
   dtos.UpdateBusinessDto:
     properties:
@@ -1993,6 +2059,38 @@ paths:
       summary: Subscribe A Managed Business To A Plan
       tags:
       - Aggregator Subscription
+  /aggregator/transactions:
+    get:
+      description: Gets all transaction history for the aggregator
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transactions fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.AggregatorTransactionListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: List All Transactions
+      tags:
+      - Aggregator Portal
   /auth/complete-forgot-password:
     post:
       consumes:

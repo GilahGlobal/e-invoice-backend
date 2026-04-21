@@ -310,3 +310,25 @@ func GetDashboardStats(db *gorm.DB, aggregatorID string) (totalBiz, pendingInvit
 	}
 	return
 }
+
+// =====================
+// Transactions
+// =====================
+
+func GetTransactionsByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]models.Transaction, int64, error) {
+	var transactions []models.Transaction
+	var total int64
+
+	query := db.Model(&models.Transaction{}).Where("aggregator_id = ? AND status = ?", aggregatorID, models.TransactionStatusSuccess)
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * size
+	if err := query.Offset(offset).Limit(size).Order("created_at DESC").Find(&transactions).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return transactions, total, nil
+}
