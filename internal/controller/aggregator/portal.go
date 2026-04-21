@@ -667,3 +667,45 @@ func (base *Controller) BulkUpload(c *fiber.Ctx) error {
 	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice uploaded successfully", fileURL)
 	return c.Status(fiber.StatusCreated).JSON(rd)
 }
+
+// @Summary List All Transactions
+// @Description Gets all transaction history for the aggregator
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number"
+// @Param size query int false "Page size"
+// @Success 200 {object} dtos.AggregatorTransactionListResponseDto "Transactions fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/transactions [get]
+func (base *Controller) ListAllTransactions(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	var query models.PaginationQuery
+	if err := c.QueryParser(&query); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Invalid query parameters", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+	if query.Size <= 0 {
+		query.Size = 20
+	}
+	if query.Page <= 0 {
+		query.Page = 1
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+
+	transactions, pagination, err := aggregatorSvc.ListAllTransactions(userDetails.ID, query.Page, query.Size, db)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusInternalServerError).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Transactions fetched successfully", transactions, pagination)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
