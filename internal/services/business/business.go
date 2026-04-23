@@ -115,6 +115,10 @@ func UpdateBusinessDetails(db *gorm.DB, business models.Business, payload dtos.U
 		updates["business_id"] = *payload.BusinessID
 	}
 
+	if payload.ServiceID != nil {
+		updates["service_id"] = *payload.ServiceID
+	}
+
 	_, err := pdb.UpdateFields(business, updates, business.ID)
 
 	if err != nil {
