@@ -1347,6 +1347,9 @@ definitions:
       is_sandbox:
         example: true
         type: boolean
+      keys_set:
+        example: true
+        type: boolean
       name:
         example: John Doe
         type: string

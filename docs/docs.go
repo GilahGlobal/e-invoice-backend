@@ -5066,6 +5066,10 @@ const docTemplate = `{
                     "type": "boolean",
                     "example": true
                 },
+                "keys_set": {
+                    "type": "boolean",
+                    "example": true
+                },
                 "name": {
                     "type": "string",
                     "example": "John Doe"

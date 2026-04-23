@@ -543,7 +543,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 
 	var irnPayload dtos.InvoiceData
 	if req.IRN == nil {
-		IRNData, irnErr := invoiceSvc.IRNGeneration(db, businessID, req.InvoiceNumber, business.ServiceID, req.BusinessID, userDetails.IsSandbox)
+		IRNData, irnErr := invoiceSvc.IRNGeneration(db, businessID, req.InvoiceNumber, *business.ServiceID, req.BusinessID, userDetails.IsSandbox)
 		if irnErr != nil {
 			if reservedSubscriptionID != "" {
 				_ = subscriptionSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
@@ -654,7 +654,7 @@ func (base *Controller) BulkUpload(c *fiber.Ctx) error {
 		BulkID:       bulkID,
 		ID:           businessID, // Owner ID of the business for signing etc
 		FileKey:      fileKey,
-		ServiceID:    business.ServiceID,
+		ServiceID:    *business.ServiceID,
 		BusinessID:   businessID,
 		IsSandbox:    userDetails.IsSandbox,
 		AggregatorID: &userDetails.ID,

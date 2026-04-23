@@ -35,14 +35,14 @@ type AvailableAggregatorDto struct {
 
 // --- Aggregator Business List ---
 type AggregatorBusinessDetailDto struct {
-	ID          string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Name        string `json:"name" example:"Business Owner"`
-	Email       string `json:"email" example:"business@example.com"`
-	CompanyName string `json:"company_name" example:"Business Corp"`
-	TIN         string `json:"tin" example:"TIN-123456789"`
-	PhoneNumber string `json:"phone_number" example:"+2348012345678"`
-	ServiceID   string `json:"service_id" example:"6A2BC898"`
-	AcceptedAt  string `json:"accepted_at,omitempty" example:"2026-01-01T12:00:00Z"`
+	ID          string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Name        string  `json:"name" example:"Business Owner"`
+	Email       string  `json:"email" example:"business@example.com"`
+	CompanyName string  `json:"company_name" example:"Business Corp"`
+	TIN         string  `json:"tin" example:"TIN-123456789"`
+	PhoneNumber string  `json:"phone_number" example:"+2348012345678"`
+	ServiceID   *string `json:"service_id" example:"6A2BC898"`
+	AcceptedAt  string  `json:"accepted_at,omitempty" example:"2026-01-01T12:00:00Z"`
 }
 
 // --- Subscription Info for a business under an aggregator ---
@@ -60,14 +60,14 @@ type BusinessSubscriptionInfoDto struct {
 
 // --- Full Business Detail (with subscription + stats) ---
 type AggregatorBusinessFullDetailDto struct {
-	ID          string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Name        string `json:"name" example:"Business Owner"`
-	Email       string `json:"email" example:"business@example.com"`
-	CompanyName string `json:"company_name" example:"Business Corp"`
-	TIN         string `json:"tin" example:"TIN-123456789"`
-	PhoneNumber string `json:"phone_number" example:"+2348012345678"`
-	ServiceID   string `json:"service_id" example:"6A2BC898"`
-	AcceptedAt  string `json:"accepted_at,omitempty" example:"2026-01-01T12:00:00Z"`
+	ID          string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Name        string  `json:"name" example:"Business Owner"`
+	Email       string  `json:"email" example:"business@example.com"`
+	CompanyName string  `json:"company_name" example:"Business Corp"`
+	TIN         string  `json:"tin" example:"TIN-123456789"`
+	PhoneNumber string  `json:"phone_number" example:"+2348012345678"`
+	ServiceID   *string `json:"service_id" example:"6A2BC898"`
+	AcceptedAt  string  `json:"accepted_at,omitempty" example:"2026-01-01T12:00:00Z"`
 
 	// Subscription
 	Subscription *BusinessSubscriptionInfoDto `json:"subscription"`
@@ -189,4 +189,3 @@ type AggregatorTransactionListResponseDto struct {
 	Data       []TransactionDto            `json:"data"`
 	Pagination database.PaginationResponse `json:"pagination"`
 }
-
