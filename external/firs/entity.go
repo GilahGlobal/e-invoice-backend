@@ -8,20 +8,36 @@ import (
 	"fmt"
 )
 
-func GetEntities(query models.PaginationQuery) (*utility.Response, error) {
+func GetEntities(query models.PaginationQuery, isSandbox bool) (*utility.Response, error) {
 
 	var (
 		configs = config.GetConfig()
-		apiURL  = fmt.Sprintf("%v/entity", configs.Firs.FirsApiUrl)
 	)
 
-	config := utility.RequestConfig{
-		URL: apiURL,
-		Headers: map[string]string{
-			"x-api-key":    configs.Firs.FirsApiKey,
-			"x-api-secret": configs.Firs.FirsClientKey,
-		},
-		Body: nil,
+	var config utility.RequestConfig
+	var apiURL string
+	if isSandbox {
+		apiURL = fmt.Sprintf("%v/entity", configs.FirsSandbox.FirsApiUrl)
+		config = utility.RequestConfig{
+			URL: apiURL,
+			Headers: map[string]string{
+				"x-api-key":    configs.FirsSandbox.FirsApiKey,
+				"x-api-secret": configs.FirsSandbox.FirsClientKey,
+			},
+			Body: nil,
+		}
+
+	} else {
+		apiURL = fmt.Sprintf("%v/entity", configs.Firs.FirsApiUrl)
+		config = utility.RequestConfig{
+			URL: apiURL,
+			Headers: map[string]string{
+				"x-api-key":    configs.Firs.FirsApiKey,
+				"x-api-secret": configs.Firs.FirsClientKey,
+			},
+			Body: nil,
+		}
+
 	}
 
 	theResp := &firs_models.FirsResponse{}
@@ -29,20 +45,36 @@ func GetEntities(query models.PaginationQuery) (*utility.Response, error) {
 	return utility.GetQueryRequest(utility.DefaultHTTPClient, config, theResp, query)
 }
 
-func GetEntity(entityId string) (*utility.Response, error) {
+func GetEntity(entityId string, isSandbox bool) (*utility.Response, error) {
 
 	var (
 		configs = config.GetConfig()
-		apiURL  = fmt.Sprintf("%v/entity/%s", configs.Firs.FirsApiUrl, entityId)
 	)
 
-	config := utility.RequestConfig{
-		URL: apiURL,
-		Headers: map[string]string{
-			"x-api-key":    configs.Firs.FirsApiKey,
-			"x-api-secret": configs.Firs.FirsClientKey,
-		},
-		Body: nil,
+	var config utility.RequestConfig
+	var apiURL string
+	if isSandbox {
+		apiURL = fmt.Sprintf("%v/entity/%s", configs.FirsSandbox.FirsApiUrl, entityId)
+		config = utility.RequestConfig{
+			URL: apiURL,
+			Headers: map[string]string{
+				"x-api-key":    configs.FirsSandbox.FirsApiKey,
+				"x-api-secret": configs.FirsSandbox.FirsClientKey,
+			},
+			Body: nil,
+		}
+
+	} else {
+		apiURL = fmt.Sprintf("%v/entity/%s", configs.Firs.FirsApiUrl, entityId)
+		config = utility.RequestConfig{
+			URL: apiURL,
+			Headers: map[string]string{
+				"x-api-key":    configs.Firs.FirsApiKey,
+				"x-api-secret": configs.Firs.FirsClientKey,
+			},
+			Body: nil,
+		}
+
 	}
 
 	theResp := &firs_models.FirsResponse{}
