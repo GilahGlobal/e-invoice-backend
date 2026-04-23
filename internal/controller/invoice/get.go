@@ -269,7 +269,7 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 		BulkID:     bulkID,
 		ID:         userDetails.ID,
 		FileKey:    fileKey,
-		ServiceID:  userDetails.ServiceID,
+		ServiceID:  *userDetails.ServiceID,
 		BusinessID: *userDetails.BusinessID,
 		IsSandbox:  userDetails.IsSandbox,
 	})
@@ -378,7 +378,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 
 	var irnPayload dtos.InvoiceData
 	if req.IRN == nil {
-		IRNData, err := invoice.IRNGeneration(db, userDetails.ID, req.InvoiceNumber, userDetails.ServiceID, req.BusinessID, userDetails.IsSandbox)
+		IRNData, err := invoice.IRNGeneration(db, userDetails.ID, req.InvoiceNumber, *userDetails.ServiceID, req.BusinessID, userDetails.IsSandbox)
 		if err != nil {
 			rd := *err
 			return c.Status(fiber.StatusBadRequest).JSON(rd)
