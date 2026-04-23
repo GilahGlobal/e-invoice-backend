@@ -5,6 +5,7 @@ import (
 	"einvoice-access-point/internal/dtos"
 	repository "einvoice-access-point/internal/repository/invoice"
 	businessservice "einvoice-access-point/internal/services/business"
+	"log"
 	"strings"
 
 	"einvoice-access-point/pkg/database"
@@ -119,6 +120,7 @@ func IRNGeneration(db *gorm.DB, ownerID, invoiceNumber, serviceId, businessID st
 		return nil, &rd
 	}
 
+	log.Println("Generated IRN: ", *generatedIRN)
 	_, _, err = ValidateIRN(firs_models.IRNValidationRequest{
 		InvoiceReference: invoiceNumber,
 		BusinessID:       businessID,

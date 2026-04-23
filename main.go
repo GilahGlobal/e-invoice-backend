@@ -53,7 +53,7 @@ func main() {
 	}
 
 	if configuration.Database.Migrate {
-		// migrations.RunAllMigrations(db)
+		migrations.RunAllMigrations(db)
 		// seed.SeedDatabase(db)
 	}
 

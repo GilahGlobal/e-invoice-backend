@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/png"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -49,6 +50,9 @@ func GenerateIRNumber(invoiceNumber, serviceID string, timestamp time.Time) (str
 
 func ValidateIRN(invoiceReq firs_models.IRNValidationRequest, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
 
+	payload, _ := json.Marshal(invoiceReq)
+	log.Printf("Validating IRN with payload: %s", string(payload))
+
 	resp, err := firs.ValidateIRN(invoiceReq, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to validate irn: %w", err)
@@ -59,7 +63,7 @@ func ValidateIRN(invoiceReq firs_models.IRNValidationRequest, isSandbox bool) (*
 		return nil, errDetails, fmt.Errorf("failed to parse FIRS API response: %w", err)
 	}
 
-	//fmt.Println("IRN validation successful: ", theResp)
+	fmt.Println("IRN validation successful: ", theResp)
 	return theResp, nil, nil
 }
 
@@ -91,6 +95,8 @@ func SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IRNSigningRespo
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal JSON: %v", err)
 	}
+
+	log.Println("sign irn payload: ", string(jsonData))
 
 	//encrypted, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, keys.PublicKey, jsonData, nil)
 	encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, keys.PublicKey, jsonData)
@@ -150,7 +156,7 @@ func AddBulkUploadLog(db *gorm.DB, fileUrl, fileKey, businessID string, aggregat
 	pdb := inst.InitDB(db, false)
 
 	payload := &models.BulkUpload{
-		ID:         utility.GenerateUUID(),
+		ID:           utility.GenerateUUID(),
 		FileURL:      fileUrl,
 		FileKey:      fileKey,
 		BusinessID:   businessID,
