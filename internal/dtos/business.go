@@ -6,6 +6,7 @@ type UpdateBusinessDto struct {
 	PhoneNumber *string `json:"phone_number" example:"+1234567890" validate:"omitempty,numeric"`
 	CompanyName *string `json:"company_name" example:"Acme Inc." validate:"omitempty,max=250"`
 	BusinessID  *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"omitempty,uuid"`
+	ServiceID   *string `json:"service_id" example:"6A2BC898" validate:"omitempty"`
 }
 type GetBusinessResponseDto struct {
 	ID                   string              `json:"id" example:"b2c8f0e7-9b6a-4d1e-bd2a-2d0d6f9f93c7"`

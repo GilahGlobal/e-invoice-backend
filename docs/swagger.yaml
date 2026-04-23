@@ -1145,6 +1145,9 @@ definitions:
       phone_number:
         example: "+1234567890"
         type: string
+      service_id:
+        example: 6A2BC898
+        type: string
     type: object
   dtos.UploadBusinessIRNSigningKeysDataDto:
     properties:

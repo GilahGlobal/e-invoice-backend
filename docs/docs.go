@@ -4791,6 +4791,10 @@ const docTemplate = `{
                 "phone_number": {
                     "type": "string",
                     "example": "+1234567890"
+                },
+                "service_id": {
+                    "type": "string",
+                    "example": "6A2BC898"
                 }
             }
         },
