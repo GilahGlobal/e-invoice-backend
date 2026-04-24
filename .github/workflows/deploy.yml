@@ -24,9 +24,11 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} " \
             set -e && \
             cd ~/e-invoice-backend && \
-            echo '📥 Pulling latest code...' && \
-            git pull origin master && \
-            echo '🐳 Updating Go apps only...' && \
+            echo '📥 Syncing code to origin/master (discarding local changes)...' && \
+            git fetch origin master && \
+            git reset --hard origin/master && \
+            git clean -fd && \
+            echo '🐳 Rebuilding and restarting containers...' && \
             docker-compose down && \
             docker-compose up -d --build && \
             echo '🧹 Cleaning unused images...' && \
