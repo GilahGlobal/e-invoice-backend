@@ -5,6 +5,7 @@ import (
 	"einvoice-access-point/internal/dtos"
 	repository "einvoice-access-point/internal/repository/invoice"
 	businessservice "einvoice-access-point/internal/services/business"
+	"log"
 	"strings"
 
 	"einvoice-access-point/pkg/database"
@@ -37,7 +38,7 @@ func GetInvoiceDetails(db *gorm.DB, businessID, invoiceID string) (*models.Invoi
 	return repository.FindInvoiceByBusinessAndID(pdb, businessID, invoiceID)
 }
 
-func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode, encryptedIRN string, invoiceExists *models.Invoice, isSandbox bool) (*models.Invoice, *string, error, bool) {
+func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode, encryptedIRN string, invoiceExists *models.Invoice, isSandbox bool, aggregatorID *string) (*models.Invoice, *string, error, bool) {
 
 	pdb := inst.InitDB(db, false)
 	isInvoiceSigned := false
@@ -82,6 +83,7 @@ func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNum
 			StatusHistory:    statusHistory,
 			Timestamp:        time.Now(),
 			EncryptedIRN:     encryptedIRN,
+			AggregatorID:     aggregatorID,
 		}
 
 		if err := repository.CreateInvoice(pdb, invoice); err != nil {
@@ -118,6 +120,7 @@ func IRNGeneration(db *gorm.DB, ownerID, invoiceNumber, serviceId, businessID st
 		return nil, &rd
 	}
 
+	log.Println("Generated IRN: ", *generatedIRN)
 	_, _, err = ValidateIRN(firs_models.IRNValidationRequest{
 		InvoiceReference: invoiceNumber,
 		BusinessID:       businessID,

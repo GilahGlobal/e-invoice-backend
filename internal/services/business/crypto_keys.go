@@ -28,6 +28,7 @@ func SaveBusinessIRNSigningKeys(db *gorm.DB, id string, fileContent []byte) erro
 
 	business.IRNPublicKey = common.EncryptedString(document.PublicKey)
 	business.IRNCertificate = common.EncryptedString(document.Certificate)
+	business.KeysSet = true
 
 	pdb := inst.InitDB(db, false)
 	if _, err := pdb.SaveAllFields(business); err != nil {

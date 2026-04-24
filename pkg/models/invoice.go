@@ -35,6 +35,7 @@ type Invoice struct {
 	QrCode           string         `gorm:"column:qr_code;type:text;null" json:"qr_code"`
 	EncryptedIRN     string         `gorm:"column:encrypted_irn;type:text;null" json:"encrypted_irn"`
 	BusinessID       string         `gorm:"column:business_id;type:uuid;not null" json:"business_id"`
+	AggregatorID     *string        `gorm:"column:aggregator_id;type:uuid;index" json:"aggregator_id,omitempty"`
 	Platform         string         `gorm:"column:platform;type:varchar(20);not null" json:"platform"` // e.g., zoho, quickbooks
 	PlatformMetadata string         `gorm:"type:jsonb;not null;default:'{}'" json:"platform_metadata"`
 	InvoiceData      datatypes.JSON `gorm:"type:jsonb;not null;default:'{}'" json:"invoice_data"`

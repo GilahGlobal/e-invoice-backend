@@ -18,9 +18,9 @@ func FetchQueryItems(query models.PaginationQuery) models.PaginationQuery {
 	return query
 }
 
-func GetEntities(query models.PaginationQuery) (*firs_models.FirsResponse, *string, error) {
+func GetEntities(query models.PaginationQuery, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
 
-	resp, err := firs.GetEntities(query)
+	resp, err := firs.GetEntities(query, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get entities: %w", err)
 	}
@@ -33,9 +33,9 @@ func GetEntities(query models.PaginationQuery) (*firs_models.FirsResponse, *stri
 	return theResp, nil, nil
 }
 
-func GetEntity(entityId string) (*firs_models.FirsResponse, *string, error) {
+func GetEntity(entityId string, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
 
-	resp, err := firs.GetEntity(entityId)
+	resp, err := firs.GetEntity(entityId, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get entity: %w", err)
 	}

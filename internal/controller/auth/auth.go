@@ -82,7 +82,7 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	auth.SendOtp(strings.ToLower(reqData.Email))
+	go auth.SendOtp(strings.ToLower(reqData.Email))
 
 	base.Logger.Info("user created successfully")
 	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "An otp has been sent to your mail, use it to verify your account", nil)

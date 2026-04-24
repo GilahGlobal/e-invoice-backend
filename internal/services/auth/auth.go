@@ -149,7 +149,6 @@ func CreateUser(req dtos.RegisterDto, db *gorm.DB) (int, error) {
 		Name:            name,
 		Email:           email,
 		Password:        password,
-		ServiceID:       "6A2BC898", //userRepo.GenerateUniqueServiceID(pdb.Db)
 		APIKey:          common.EncryptedString(encryptedAPIKey),
 		APIKeyHash:      apiKeyHashStr,
 		PlatformConfigs: platformConfigs,
@@ -228,7 +227,8 @@ func LoginUser(req dtos.LoginRequestDto, db *gorm.DB) (map[string]interface{}, i
 			BusinessID:   userData.BusinessID,
 			ServiceID:    userData.ServiceID,
 			IsSandbox:    req.IsSandbox,
-			IsAggregator: user.IsAggregator,
+			IsAggregator: userData.IsAggregator,
+			KeysSet:      userData.KeysSet,
 		},
 		"access_token": tokenData.AccessToken,
 	}
@@ -360,12 +360,14 @@ func ToggleApllicationMode(db *gorm.DB, email string, isSandbox bool) (map[strin
 
 	responseData := map[string]interface{}{
 		"data": dtos.UserResponse{
-			ID:         userData.ID,
-			Email:      userData.Email,
-			Name:       userData.Name,
-			BusinessID: userData.BusinessID,
-			ServiceID:  userData.ServiceID,
-			IsSandbox:  isSandbox,
+			ID:           userData.ID,
+			Email:        userData.Email,
+			Name:         userData.Name,
+			BusinessID:   userData.BusinessID,
+			ServiceID:    userData.ServiceID,
+			IsSandbox:    isSandbox,
+			IsAggregator: userData.IsAggregator,
+			KeysSet:      userData.KeysSet,
 		},
 		"access_token": tokenData.AccessToken,
 	}
@@ -440,7 +442,6 @@ func SynchronizeSandboxToProduction(prodDB, sandboxDB *database.Database, email 
 				Name:            userData.Name,
 				Email:           userData.Email,
 				Password:        userData.Password,
-				ServiceID:       "6A2BC898", //userRepo.GenerateUniqueServiceID(pdb.Db)
 				APIKey:          common.EncryptedString(encryptedAPIKey),
 				APIKeyHash:      apiKeyHashStr,
 				PlatformConfigs: platformConfigs,
@@ -526,6 +527,7 @@ func VerifyBusinessAccount(db *gorm.DB, req dtos.VerifyEmailDto, isSandbox bool)
 			ServiceID:    user.ServiceID,
 			IsSandbox:    isSandbox,
 			IsAggregator: user.IsAggregator,
+			KeysSet:      user.KeysSet,
 		},
 		"access_token": tokenData.AccessToken,
 	}

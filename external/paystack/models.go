@@ -6,7 +6,10 @@ import (
 )
 
 type InitializeTransactionMetadata struct {
-	IsSandbox bool `json:"is_sandbox"`
+	IsSandbox    bool   `json:"is_sandbox"`
+	BusinessID   string `json:"business_id,omitempty"`
+	AggregatorID string `json:"aggregator_id,omitempty"`
+	PlanID       string `json:"plan_id,omitempty"`
 }
 
 type InitializeTransactionRequest struct {
