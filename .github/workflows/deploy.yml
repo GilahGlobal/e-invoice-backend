@@ -27,9 +27,8 @@ jobs:
             echo '📥 Pulling latest code...' && \
             git pull origin master && \
             echo '🐳 Updating Go apps only...' && \
-            docker-compose down
-            docker-compose up -d --build
-            docker image prune -f
+            docker-compose down && \
+            docker-compose up -d --build && \
             echo '🧹 Cleaning unused images...' && \
             docker image prune -f && \
             echo '✅ Deployment complete' \
