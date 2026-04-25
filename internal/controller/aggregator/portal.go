@@ -4,6 +4,7 @@ import (
 	"context"
 	"einvoice-access-point/internal/dtos"
 	aggregatorSvc "einvoice-access-point/internal/services/aggregator"
+	businessSvc "einvoice-access-point/internal/services/business"
 	invoiceSvc "einvoice-access-point/internal/services/invoice"
 	subscriptionSvc "einvoice-access-point/internal/services/subscription"
 	"einvoice-access-point/pkg/database"
@@ -508,10 +509,16 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
 
 	// Verify management
-	business, status, err := aggregatorSvc.GetBusinessDetail(userDetails.ID, businessID, db)
+	_, status, err := aggregatorSvc.GetBusinessDetail(userDetails.ID, businessID, db)
 	if err != nil {
 		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
 		return c.Status(status).JSON(rd)
+	}
+
+	setup, err := businessSvc.ValidateInvoiceUploadSetup(db, businessID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
 	if _, status, err = subscriptionSvc.RequireAggregatorBusinessSubscription(db, userDetails.ID, businessID); err != nil {
@@ -543,7 +550,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 
 	var irnPayload dtos.InvoiceData
 	if req.IRN == nil {
-		IRNData, irnErr := invoiceSvc.IRNGeneration(db, businessID, req.InvoiceNumber, *business.ServiceID, req.BusinessID, userDetails.IsSandbox)
+		IRNData, irnErr := invoiceSvc.IRNGeneration(db, businessID, req.InvoiceNumber, setup.ServiceID, req.BusinessID, userDetails.IsSandbox)
 		if irnErr != nil {
 			if reservedSubscriptionID != "" {
 				_ = subscriptionSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
@@ -608,10 +615,16 @@ func (base *Controller) BulkUpload(c *fiber.Ctx) error {
 
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
 
-	business, status, err := aggregatorSvc.GetBusinessDetail(userDetails.ID, businessID, db)
+	_, status, err := aggregatorSvc.GetBusinessDetail(userDetails.ID, businessID, db)
 	if err != nil {
 		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
 		return c.Status(status).JSON(rd)
+	}
+
+	setup, err := businessSvc.ValidateInvoiceUploadSetup(db, businessID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
 	subscriptionRecord, status, err := subscriptionSvc.RequireAggregatorBusinessSubscription(db, userDetails.ID, businessID)
@@ -654,7 +667,7 @@ func (base *Controller) BulkUpload(c *fiber.Ctx) error {
 		BulkID:       bulkID,
 		ID:           businessID, // Owner ID of the business for signing etc
 		FileKey:      fileKey,
-		ServiceID:    *business.ServiceID,
+		ServiceID:    setup.ServiceID,
 		BusinessID:   businessID,
 		IsSandbox:    userDetails.IsSandbox,
 		AggregatorID: &userDetails.ID,

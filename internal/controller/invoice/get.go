@@ -4,6 +4,7 @@ import (
 	"context"
 	"einvoice-access-point/external/firs_models"
 	"einvoice-access-point/internal/dtos"
+	businessservice "einvoice-access-point/internal/services/business"
 	"einvoice-access-point/internal/services/invoice"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
@@ -234,6 +235,12 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
 
+	setup, err := businessservice.ValidateInvoiceUploadSetup(db, userDetails.ID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "invoice JSON file is required", nil, nil)
@@ -254,12 +261,7 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "upload failed"})
 	}
 
-	if userDetails.BusinessID == nil {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "NRS business id has not been set", nil, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
-	}
-
-	bulkID, err := invoice.AddBulkUploadLog(db, fileURL, fileKey, *userDetails.BusinessID, nil)
+	bulkID, err := invoice.AddBulkUploadLog(db, fileURL, fileKey, setup.BusinessID, nil)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", "failed to log bulk upload", nil, nil)
 		return c.Status(fiber.StatusInternalServerError).JSON(rd)
@@ -269,8 +271,8 @@ func (base *Controller) CreateInvoice(c *fiber.Ctx) error {
 		BulkID:     bulkID,
 		ID:         userDetails.ID,
 		FileKey:    fileKey,
-		ServiceID:  *userDetails.ServiceID,
-		BusinessID: *userDetails.BusinessID,
+		ServiceID:  setup.ServiceID,
+		BusinessID: setup.BusinessID,
 		IsSandbox:  userDetails.IsSandbox,
 	})
 	if err != nil {
@@ -339,6 +341,11 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	setup, err := businessservice.ValidateInvoiceUploadSetup(db, userDetails.ID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
 	var req dtos.UploadInvoiceRequestDto
 
 	err = c.BodyParser(&req)
@@ -378,7 +385,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 
 	var irnPayload dtos.InvoiceData
 	if req.IRN == nil {
-		IRNData, err := invoice.IRNGeneration(db, userDetails.ID, req.InvoiceNumber, *userDetails.ServiceID, req.BusinessID, userDetails.IsSandbox)
+		IRNData, err := invoice.IRNGeneration(db, userDetails.ID, req.InvoiceNumber, setup.ServiceID, req.BusinessID, userDetails.IsSandbox)
 		if err != nil {
 			rd := *err
 			return c.Status(fiber.StatusBadRequest).JSON(rd)
