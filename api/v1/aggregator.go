@@ -34,6 +34,7 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, db, testDB *database.Dat
 	protected.Get("/businesses", controller.ListBusinesses)
 	protected.Get("/businesses/:id", controller.GetBusinessDetail)
 	protected.Delete("/businesses/:id", controller.RemoveBusiness)
+	protected.Patch("/businesses/:id", controller.UpdateBusinessSetup)
 
 	// Portal - Log Views
 	protected.Get("/invoices", controller.ListAllInvoices)
