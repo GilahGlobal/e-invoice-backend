@@ -13,6 +13,8 @@ const (
 	ActivityInvitationAccepted  = "invitation_accepted"
 	ActivityInvitationRejected  = "invitation_rejected"
 	ActivityBusinessRemoved     = "business_removed"
+	ActivityCryptoKeysUploaded  = "crypto_keys_uploaded"
+	ActivityBusinessSetupUpdate = "business_setup_updated"
 )
 
 // AggregatorActivityLog is an audit trail for aggregator actions

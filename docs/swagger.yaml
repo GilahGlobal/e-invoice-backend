@@ -92,6 +92,9 @@ definitions:
       accepted_at:
         example: "2026-01-01T12:00:00Z"
         type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       company_name:
         example: Business Corp
         type: string
@@ -101,6 +104,9 @@ definitions:
       id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
+      keys_set:
+        example: true
+        type: boolean
       name:
         example: Business Owner
         type: string
@@ -119,6 +125,9 @@ definitions:
       accepted_at:
         example: "2026-01-01T12:00:00Z"
         type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       company_name:
         example: Business Corp
         type: string
@@ -128,6 +137,9 @@ definitions:
       id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
+      keys_set:
+        example: true
+        type: boolean
       name:
         example: Business Owner
         type: string
@@ -1794,6 +1806,57 @@ paths:
       security:
       - BearerAuth: []
       summary: Get Business Detail
+      tags:
+      - Aggregator Portal
+    patch:
+      consumes:
+      - multipart/form-data
+      description: Upload crypto keys and/or set service ID and business ID for a
+        managed business. At least one field must be provided.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Crypto keys document (optional)
+        in: formData
+        name: file
+        type: file
+      - description: Service ID (optional)
+        in: formData
+        name: service_id
+        type: string
+      - description: Business ID / FIRS identifier (optional)
+        in: formData
+        name: business_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business setup updated successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Business not found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Update Business Setup
       tags:
       - Aggregator Portal
   /aggregator/dashboard:

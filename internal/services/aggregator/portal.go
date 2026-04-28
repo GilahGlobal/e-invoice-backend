@@ -41,6 +41,8 @@ func ListBusinesses(aggregatorID string, page, size int, search string, db *gorm
 			TIN:         b.TIN,
 			PhoneNumber: b.PhoneNumber,
 			ServiceID:   b.ServiceID,
+			BusinessID:  b.BusinessID,
+			KeysSet:     b.KeysSet,
 		})
 	}
 
@@ -64,6 +66,8 @@ func GetBusinessDetail(aggregatorID, businessID string, db *gorm.DB) (*dtos.Aggr
 		TIN:         business.TIN,
 		PhoneNumber: business.PhoneNumber,
 		ServiceID:   business.ServiceID,
+		BusinessID:  business.BusinessID,
+		KeysSet:     business.KeysSet,
 	}
 
 	// Fetch subscription info (best-effort, won't fail the request)
@@ -279,4 +283,35 @@ func ListAllTransactions(aggregatorID string, page, size int, db *gorm.DB) ([]dt
 	}
 
 	return result, buildPagination(page, size, total), nil
+}
+
+func UpdateBusinessSetup(db *gorm.DB, businessID string, req dtos.AggregatorUpdateBusinessSetupDto) error {
+	updates := make(map[string]interface{})
+
+	if req.ServiceID != nil {
+		updates["service_id"] = *req.ServiceID
+	}
+	if req.BusinessID != nil {
+		updates["business_id"] = *req.BusinessID
+	}
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	if err := db.Model(&models.Business{}).Where("id = ?", businessID).Updates(updates).Error; err != nil {
+		return fmt.Errorf("failed to update business setup: %w", err)
+	}
+
+	return nil
+}
+
+func LogActivity(db *gorm.DB, aggregatorID, businessID, action, details string) {
+	aggregatorRepo.CreateActivityLog(&models.AggregatorActivityLog{
+		ID:           utility.GenerateUUID(),
+		AggregatorID: aggregatorID,
+		BusinessID:   businessID,
+		Action:       action,
+		Details:      details,
+	}, db)
 }

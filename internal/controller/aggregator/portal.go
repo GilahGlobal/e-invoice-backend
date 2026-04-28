@@ -14,6 +14,7 @@ import (
 	"einvoice-access-point/pkg/utility"
 	"einvoice-access-point/pkg/workers"
 	"einvoice-access-point/pkg/workers/producer"
+	"io"
 	"log"
 
 	"github.com/go-playground/validator/v10"
@@ -720,5 +721,107 @@ func (base *Controller) ListAllTransactions(c *fiber.Ctx) error {
 	}
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Transactions fetched successfully", transactions, pagination)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Update Business Setup
+// @Description Upload crypto keys and/or set service ID and business ID for a managed business. At least one field must be provided.
+// @Tags Aggregator Portal
+// @Accept multipart/form-data
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Business ID"
+// @Param file formData file false "Crypto keys document (optional)"
+// @Param service_id formData string false "Service ID (optional)"
+// @Param business_id formData string false "Business ID / FIRS identifier (optional)"
+// @Success 200 {object} dtos.BaseResponseDto "Business setup updated successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 404 {object} models.Response "Business not found"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/businesses/{id} [patch]
+func (base *Controller) UpdateBusinessSetup(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	businessID := c.Params("id")
+	if businessID == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	// Parse optional form fields
+	serviceID := c.FormValue("service_id")
+	fBusinessID := c.FormValue("business_id")
+	file, fileErr := c.FormFile("file")
+
+	hasFile := fileErr == nil && file != nil
+	hasServiceID := serviceID != ""
+	hasBusinessID := fBusinessID != ""
+
+	if !hasFile && !hasServiceID && !hasBusinessID {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "at least one of file, service_id, or business_id must be provided", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+
+	// Verify that this business belongs to the aggregator
+	business, status, err := aggregatorSvc.GetBusinessDetail(userDetails.ID, businessID, db)
+	if err != nil {
+		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
+		return c.Status(status).JSON(rd)
+	}
+
+	activityDetails := "Updated setup for business " + business.CompanyName + ":"
+
+	// Handle crypto keys upload
+	if hasFile {
+		openedFile, err := file.Open()
+		if err != nil {
+			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "failed to open crypto keys file", err, nil)
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
+		defer openedFile.Close()
+
+		fileContent, err := io.ReadAll(openedFile)
+		if err != nil {
+			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "failed to read crypto keys file", err, nil)
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
+
+		if err := businessSvc.SaveBusinessIRNSigningKeys(db, businessID, fileContent); err != nil {
+			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
+
+		activityDetails += " crypto_keys=uploaded"
+	}
+
+	// Handle service_id and business_id updates
+	if hasServiceID || hasBusinessID {
+		var req dtos.AggregatorUpdateBusinessSetupDto
+		if hasServiceID {
+			req.ServiceID = &serviceID
+			activityDetails += " service_id=" + serviceID
+		}
+		if hasBusinessID {
+			req.BusinessID = &fBusinessID
+			activityDetails += " business_id=" + fBusinessID
+		}
+
+		if err := aggregatorSvc.UpdateBusinessSetup(db, businessID, req); err != nil {
+			rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+			return c.Status(fiber.StatusInternalServerError).JSON(rd)
+		}
+	}
+
+	// Log activity
+	aggregatorSvc.LogActivity(db, userDetails.ID, businessID, models.ActivityBusinessSetupUpdate, activityDetails)
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business setup updated successfully", nil)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
