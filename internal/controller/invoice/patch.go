@@ -29,6 +29,8 @@ func (base *Controller) UpdateInvoice(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
 
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+
 	irn := c.Params("irn")
 	if irn == "" {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
@@ -53,6 +55,17 @@ func (base *Controller) UpdateInvoice(c *fiber.Ctx) error {
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	if err := invoice.UpdateStoredInvoicePaymentStatus(db, userDetails.ID, irn, req.PaymentStatus); err != nil {
+		rd := utility.BuildErrorResponse(
+			fiber.StatusInternalServerError,
+			"error",
+			"invoice updated on FIRS but failed to update local invoice record",
+			err.Error(),
+			nil,
+		)
+		return c.Status(fiber.StatusInternalServerError).JSON(rd)
 	}
 
 	base.Logger.Info("Invoice updated successfully")

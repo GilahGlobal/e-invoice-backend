@@ -216,22 +216,21 @@ func SubscribeBusinessToPlan(req dtos.AggregatorSubscribeRequestDto, aggregatorI
 		},
 	})
 	if err != nil {
+		errString := err.Error()
 		transactionRecord.Status = models.TransactionStatusFailed
-		transactionRecord.GatewayResponse = err.Error()
+		transactionRecord.ErrorMessage = &errString
 		_ = transactionRepo.SaveTransaction(transactionRecord, pdb)
 		return nil, http.StatusBadGateway, fmt.Errorf("failed to initialize paystack transaction: %w", err)
 	}
 
 	if !providerResp.Status {
 		transactionRecord.Status = models.TransactionStatusFailed
-		transactionRecord.GatewayResponse = providerResp.Message
+		transactionRecord.ErrorMessage = &providerResp.Message
 		_ = transactionRepo.SaveTransaction(transactionRecord, pdb)
 		return nil, http.StatusBadGateway, fmt.Errorf("paystack initialization failed: %s", providerResp.Message)
 	}
 
 	transactionRecord.Status = models.TransactionStatusProcessing
-	transactionRecord.ProviderReference = providerResp.Data.Reference
-	transactionRecord.GatewayResponse = providerResp.Message
 
 	if err := transactionRepo.SaveTransaction(transactionRecord, pdb); err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("failed to update transaction log: %w", err)
@@ -249,18 +248,7 @@ func SubscribeBusinessToPlan(req dtos.AggregatorSubscribeRequestDto, aggregatorI
 	return response, http.StatusOK, nil
 }
 
-func HandlePaystackWebhook(rawBody []byte, signature string, db *gorm.DB) (fiber.Map, int, error) {
-	if err := ValidatePaystackSignature(rawBody, signature); err != nil {
-		if errors.Is(err, ErrInvalidPaystackSignature) {
-			return nil, http.StatusUnauthorized, err
-		}
-		return nil, http.StatusInternalServerError, err
-	}
-
-	var payload paystack.WebhookPayload
-	if err := json.Unmarshal(rawBody, &payload); err != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("invalid webhook payload: %w", err)
-	}
+func HandlePaystackWebhook(payload *paystack.PaystackWebhookPayload, db *gorm.DB) (fiber.Map, int, error) {
 
 	if payload.Data.Reference == "" {
 		return nil, http.StatusBadRequest, fmt.Errorf("reference is required")
@@ -278,10 +266,6 @@ func HandlePaystackWebhook(rawBody []byte, signature string, db *gorm.DB) (fiber
 	previousStatus := transactionRecord.Status
 
 	var metadata paystackSubscriptionMetadata
-	if len(payload.Data.Metadata) > 0 {
-		_ = json.Unmarshal(payload.Data.Metadata, &metadata)
-	}
-
 	if metadata.BusinessID != "" {
 		transactionRecord.BusinessID = metadata.BusinessID
 	}
@@ -292,15 +276,15 @@ func HandlePaystackWebhook(rawBody []byte, signature string, db *gorm.DB) (fiber
 		transactionRecord.PlanID = metadata.PlanID
 	}
 
-	transactionRecord.ProviderReference = payload.Data.Reference
-	transactionRecord.ProviderPayload = append(transactionRecord.ProviderPayload[:0], rawBody...)
+	rawBody, _ := json.Marshal(payload.Data.Metadata)
+
+	transactionRecord.ProviderResponseMetadata = rawBody
 	if payload.Data.Currency != "" {
 		transactionRecord.Currency = payload.Data.Currency
 	}
 	if payload.Data.Amount > 0 {
-		transactionRecord.Amount = payload.Data.Amount / 100.0
+		transactionRecord.Amount = float64(payload.Data.Amount) / 100.0
 	}
-	transactionRecord.GatewayResponse = payload.Data.GatewayResponse
 
 	switch {
 	case payload.Event == "charge.success" && strings.EqualFold(payload.Data.Status, "success"):

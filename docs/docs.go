@@ -399,6 +399,83 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Upload crypto keys and/or set service ID and business ID for a managed business. At least one field must be provided.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Update Business Setup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Crypto keys document (optional)",
+                        "name": "file",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Service ID (optional)",
+                        "name": "service_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Business ID / FIRS identifier (optional)",
+                        "name": "business_id",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business setup updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Business not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
             }
         },
         "/aggregator/dashboard": {
@@ -3334,6 +3411,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2026-01-01T12:00:00Z"
                 },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
                 "company_name": {
                     "type": "string",
                     "example": "Business Corp"
@@ -3345,6 +3426,10 @@ const docTemplate = `{
                 "id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "keys_set": {
+                    "type": "boolean",
+                    "example": true
                 },
                 "name": {
                     "type": "string",
@@ -3371,6 +3456,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2026-01-01T12:00:00Z"
                 },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
                 "company_name": {
                     "type": "string",
                     "example": "Business Corp"
@@ -3382,6 +3471,10 @@ const docTemplate = `{
                 "id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "keys_set": {
+                    "type": "boolean",
+                    "example": true
                 },
                 "name": {
                     "type": "string",

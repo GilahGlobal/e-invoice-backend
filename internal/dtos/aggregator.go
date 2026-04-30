@@ -42,6 +42,8 @@ type AggregatorBusinessDetailDto struct {
 	TIN         string  `json:"tin" example:"TIN-123456789"`
 	PhoneNumber string  `json:"phone_number" example:"+2348012345678"`
 	ServiceID   *string `json:"service_id" example:"6A2BC898"`
+	BusinessID  *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	KeysSet     bool    `json:"keys_set" example:"true"`
 	AcceptedAt  string  `json:"accepted_at,omitempty" example:"2026-01-01T12:00:00Z"`
 }
 
@@ -67,6 +69,8 @@ type AggregatorBusinessFullDetailDto struct {
 	TIN         string  `json:"tin" example:"TIN-123456789"`
 	PhoneNumber string  `json:"phone_number" example:"+2348012345678"`
 	ServiceID   *string `json:"service_id" example:"6A2BC898"`
+	BusinessID  *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	KeysSet     bool    `json:"keys_set" example:"true"`
 	AcceptedAt  string  `json:"accepted_at,omitempty" example:"2026-01-01T12:00:00Z"`
 
 	// Subscription
@@ -167,25 +171,30 @@ type BusinessInvitationListResponseDto struct {
 }
 
 type TransactionDto struct {
-	ID                string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	BusinessID        string  `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	BusinessName      string  `json:"business_name" example:"Business Corp"`
-	AggregatorID      string  `json:"aggregator_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Reference         string  `json:"reference" example:"txn_123456789"`
-	Provider          string  `json:"provider" example:"paystack"`
-	ProviderReference string  `json:"provider_reference" example:"ref_123456789"`
-	Status            string  `json:"status" example:"success"`
-	Amount            float64 `json:"amount" example:"5000"`
-	Currency          string  `json:"currency" example:"NGN"`
-	PlanID            string  `json:"plan_id" example:"plan_123"`
-	Plan              string  `json:"plan" example:"Starter"`
-	GatewayResponse   string  `json:"gateway_response" example:"Approved"`
-	CreatedAt         string  `json:"created_at" example:"2026-01-01T12:00:00Z"`
-	UpdatedAt         string  `json:"updated_at" example:"2026-01-01T12:00:00Z"`
+	ID              string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	BusinessID      string  `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	BusinessName    string  `json:"business_name" example:"Business Corp"`
+	AggregatorID    string  `json:"aggregator_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Reference       string  `json:"reference" example:"txn_123456789"`
+	Provider        string  `json:"provider" example:"paystack"`
+	Status          string  `json:"status" example:"success"`
+	Amount          float64 `json:"amount" example:"5000"`
+	Currency        string  `json:"currency" example:"NGN"`
+	PlanID          string  `json:"plan_id" example:"plan_123"`
+	Plan            string  `json:"plan" example:"Starter"`
+	GatewayResponse string  `json:"gateway_response" example:"Approved"`
+	CreatedAt       string  `json:"created_at" example:"2026-01-01T12:00:00Z"`
+	UpdatedAt       string  `json:"updated_at" example:"2026-01-01T12:00:00Z"`
 }
 
 type AggregatorTransactionListResponseDto struct {
 	BaseResponseDto
 	Data       []TransactionDto            `json:"data"`
 	Pagination database.PaginationResponse `json:"pagination"`
+}
+
+// --- Aggregator: Update Business Setup ---
+type AggregatorUpdateBusinessSetupDto struct {
+	ServiceID  *string `json:"service_id" example:"6A2BC898" validate:"omitempty"`
+	BusinessID *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"omitempty,uuid"`
 }

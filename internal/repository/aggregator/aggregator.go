@@ -167,7 +167,7 @@ func GetBusinessStatsForAggregator(db *gorm.DB, aggregatorID, businessID string)
 	bulkUploadQuery := db.Model(&models.BulkUpload{}).Where("aggregator_id = ? AND business_id = ?", aggregatorID, businessID)
 
 	var lastTx models.Transaction
-	txErr := db.Where("sme_id = ? AND aggregator_id = ? AND status = ?", businessID, aggregatorID, "success").
+	txErr := db.Where("business_id = ? AND aggregator_id = ? AND status = ?", businessID, aggregatorID, "success").
 		Order("updated_at desc").
 		First(&lastTx).Error
 
