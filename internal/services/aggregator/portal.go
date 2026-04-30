@@ -264,21 +264,19 @@ func ListAllTransactions(aggregatorID string, page, size int, db *gorm.DB) ([]dt
 		}
 
 		result = append(result, dtos.TransactionDto{
-			ID:                t.ID,
-			BusinessID:        t.BusinessID,
-			BusinessName:      businessName,
-			AggregatorID:      t.AggregatorID,
-			Reference:         t.Reference,
-			Provider:          t.Provider,
-			ProviderReference: t.ProviderReference,
-			Status:            string(t.Status),
-			Amount:            t.Amount,
-			Currency:          t.Currency,
-			PlanID:            t.PlanID,
-			Plan:              t.Plan,
-			GatewayResponse:   t.GatewayResponse,
-			CreatedAt:         t.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:         t.UpdatedAt.Format(time.RFC3339),
+			ID:           t.ID,
+			BusinessID:   t.BusinessID,
+			BusinessName: businessName,
+			AggregatorID: t.AggregatorID,
+			Reference:    t.Reference,
+			Provider:     t.Provider,
+			Status:       string(t.Status),
+			Amount:       t.Amount,
+			Currency:     t.Currency,
+			PlanID:       t.PlanID,
+			Plan:         t.Plan,
+			CreatedAt:    t.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:    t.UpdatedAt.Format(time.RFC3339),
 		})
 	}
 
