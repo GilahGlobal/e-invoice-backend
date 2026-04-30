@@ -47,9 +47,10 @@ type UserResponse struct {
 	Email        string  `json:"email" example:"john.doe@example.com"`
 	Name         string  `json:"name" example:"John Doe"`
 	BusinessID   *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	ServiceID    string  `json:"service_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ServiceID    *string `json:"service_id" example:"123e4567-e89b-12d3-a456-426614174000"`
 	IsSandbox    bool    `json:"is_sandbox" example:"true"`
 	IsAggregator bool    `json:"is_aggregator" example:"true"`
+	KeysSet      bool    `json:"keys_set" example:"true"`
 }
 type LoginResponseDto struct {
 	BaseResponseDto

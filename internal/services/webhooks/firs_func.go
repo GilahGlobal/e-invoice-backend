@@ -19,7 +19,7 @@ func FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys *utility.Cryp
 
 	pdb := inst.InitDB(db, false)
 
-	theIRN, err := invoice.GenerateIRN(payload.Invoice.InvoiceNumber, business.ServiceID)
+	theIRN, err := invoice.GenerateIRN(payload.Invoice.InvoiceNumber, *business.ServiceID)
 	if err != nil {
 		_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusGeneratedIRN, "failed")
 		return nil, nil, err

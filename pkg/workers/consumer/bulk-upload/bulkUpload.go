@@ -4,6 +4,7 @@ import (
 	"context"
 	"einvoice-access-point/internal/dtos"
 	"einvoice-access-point/internal/services/invoice"
+	subscriptionSvc "einvoice-access-point/internal/services/subscription"
 	"einvoice-access-point/pkg/database"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
@@ -125,6 +126,7 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 		maxWorkers,
 		payload.ID,
 		payload.BusinessID,
+		payload.AggregatorID,
 		payload.ServiceID,
 		payload.IsSandbox,
 	)
@@ -148,6 +150,8 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 		} else if strings.Contains(strings.ToLower(processErr.Error), "duplicate") {
 			log.Printf("Duplicate invoice detected: %s - %s\n", processErr.InvoiceNumber, processErr.Error)
 			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: duplicate invoice sent - %s", processErr.InvoiceNumber, processErr.Error))
+		} else {
+			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, processErr.Error))
 		}
 	}
 
@@ -161,7 +165,7 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 
 	return nil
 }
-func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invoices []dtos.UploadInvoiceRequestDto, maxWorkers int, id, businessId, serviceID string, isSandbox bool) *ProcessResults {
+func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invoices []dtos.UploadInvoiceRequestDto, maxWorkers int, id, businessId string, aggregatorID *string, serviceID string, isSandbox bool) *ProcessResults {
 	results := &ProcessResults{
 		SuccessCount: 0,
 		PartialCount: 0,
@@ -180,7 +184,7 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 		wg.Add(1)
 		go func(workerID int) {
 			defer wg.Done()
-			qc.invoiceWorker(ctx, workerID, workChan, resultsChan, id, businessId, serviceID, isSandbox)
+			qc.invoiceWorker(ctx, workerID, workChan, resultsChan, id, businessId, aggregatorID, serviceID, isSandbox)
 		}(i)
 	}
 
@@ -222,7 +226,7 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 	return results
 }
 
-func (qc *BulkUploadConsumer) invoiceWorker(ctx context.Context, workerID int, workChan <-chan *dtos.UploadInvoiceRequestDto, resultsChan chan<- ProcessResult, id, businessId, serviceID string, isSandbox bool) {
+func (qc *BulkUploadConsumer) invoiceWorker(ctx context.Context, workerID int, workChan <-chan *dtos.UploadInvoiceRequestDto, resultsChan chan<- ProcessResult, id, businessId string, aggregatorID *string, serviceID string, isSandbox bool) {
 	for invoice := range workChan {
 		select {
 		case <-ctx.Done():
@@ -232,7 +236,7 @@ func (qc *BulkUploadConsumer) invoiceWorker(ctx context.Context, workerID int, w
 			result := ProcessResult{Invoice: invoice}
 
 			// processing logic here
-			posted, status, err := qc.processSingleInvoice(ctx, invoice, id, businessId, serviceID, isSandbox)
+			posted, status, err := qc.processSingleInvoice(ctx, invoice, id, businessId, aggregatorID, serviceID, isSandbox)
 			result.Posted = posted
 			result.Status = status
 			if err != nil {
@@ -248,7 +252,7 @@ func (qc *BulkUploadConsumer) invoiceWorker(ctx context.Context, workerID int, w
 	}
 }
 
-func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoicePayload *dtos.UploadInvoiceRequestDto, id, businessId, serviceID string, isSandbox bool) (bool, string, error) {
+func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoicePayload *dtos.UploadInvoiceRequestDto, id, businessId string, aggregatorID *string, serviceID string, isSandbox bool) (bool, string, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
@@ -270,10 +274,28 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		}
 	}
 
+	reservedSubscriptionID := ""
+	if aggregatorID != nil {
+		if _, _, err := subscriptionSvc.RequireAggregatorBusinessSubscription(db, *aggregatorID, businessId); err != nil {
+			return false, "", err
+		}
+
+		if invoiceExists == nil {
+			var status int
+			reservedSubscriptionID, status, err = subscriptionSvc.ReserveAggregatorInvoiceQuota(db, *aggregatorID, businessId, 1)
+			if err != nil {
+				return false, "", fmt.Errorf("subscription guard failed (%d): %w", status, err)
+			}
+		}
+	}
+
 	var irnPayload dtos.InvoiceData
 	if invoicePayload.IRN == nil {
 		IRNData, err := invoice.IRNGeneration(db, id, invoicePayload.InvoiceNumber, serviceID, businessId, isSandbox)
 		if err != nil {
+			if reservedSubscriptionID != "" {
+				_ = subscriptionSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
+			}
 			rd := *err
 			return false, "", fmt.Errorf("IRN generation failed: %s", rd.Message)
 		}
@@ -286,7 +308,10 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		}
 		invoicePayload.IRN = &invoiceExists.IRN
 	}
-	createdInvoice, _, err, invoiceSigned := invoice.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, isSandbox)
+	createdInvoice, _, err, invoiceSigned := invoice.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, isSandbox, aggregatorID)
+	if reservedSubscriptionID != "" && createdInvoice == nil {
+		_ = subscriptionSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
+	}
 	currentStatus := ""
 	if createdInvoice != nil {
 		currentStatus = createdInvoice.CurrentStatus

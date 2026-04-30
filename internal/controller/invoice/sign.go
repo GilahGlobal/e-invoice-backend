@@ -139,7 +139,7 @@ func (base *Controller) GenerateIRN(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	respData, err := invoice.GenerateIRN(req.InvoiceNumber, userDetails.ServiceID)
+	respData, err := invoice.GenerateIRN(req.InvoiceNumber, *userDetails.ServiceID)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)

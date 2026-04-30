@@ -16,6 +16,942 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/aggregator/activity-log": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetch the activity logs sequence for the aggregator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Activity Log",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Activity logs fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorActivityLogListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/bulk-uploads": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Gets all bulk uploads across all businesses uploaded by this aggregator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "List All Bulk Uploads",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bulk uploads fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorBulkUploadListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/bulk-uploads/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Gets bulk uploads uploaded by aggregator for a specific business",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "List Bulk Uploads by Business",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bulk uploads fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorBulkUploadListResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Bulk invoices upload for a managed business",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Bulk Upload Initializer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Invoice JSON file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Invoice uploaded successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/businesses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "List accepted businesses for an aggregator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "List Businesses",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Businesses fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorBusinessListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/businesses/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get details for a single accepted business",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Get Business Detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorBusinessFullDetailDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Remove an accepted business from the aggregator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Remove Business",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business removed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Upload crypto keys and/or set service ID and business ID for a managed business. At least one field must be provided.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Update Business Setup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Crypto keys document (optional)",
+                        "name": "file",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Service ID (optional)",
+                        "name": "service_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Business ID / FIRS identifier (optional)",
+                        "name": "business_id",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business setup updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Business not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/dashboard": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetch high level stats for aggregator dashboard",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Dashboard Stats",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard stats fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorDashboardResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/invitations": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetch all pending invitations for the aggregator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "List Invitations",
+                "responses": {
+                    "200": {
+                        "description": "Invitations fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorInvitationListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/invitations/respond": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Accept or reject an invitation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Respond to Invitation",
+                "parameters": [
+                    {
+                        "description": "Invitation Response payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.RespondToInvitationDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Responded to invitation successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/invoices": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Gets all invoices across all businesses uploaded by this aggregator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "List All Invoices",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoices fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorInvoiceListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/invoices/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Gets invoices uploaded by aggregator for a specific business",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "List Business Invoices",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoices fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorInvoiceListResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Upload a single invoice for a managed business",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Upload Invoice",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Invoice payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Invoice generated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/subscription/plans": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves active plans available for aggregator subscriptions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Subscription"
+                ],
+                "summary": "List Aggregator Subscription Plans",
+                "responses": {
+                    "200": {
+                        "description": "Plans fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.SubscriptionPlansResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/subscription/subscribe": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Initializes a Paystack transaction for an aggregator-managed business subscription plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Subscription"
+                ],
+                "summary": "Subscribe A Managed Business To A Plan",
+                "parameters": [
+                    {
+                        "description": "Subscribe request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorSubscribeRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription initialized successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorSubscribeResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad gateway",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/transactions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Gets all transaction history for the aggregator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "List All Transactions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transactions fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorTransactionListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/complete-forgot-password": {
             "post": {
                 "description": "Complete forgot password process",
@@ -565,6 +1501,154 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Business not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/business/aggregators": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetch all available aggregators",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business Aggregator Portal"
+                ],
+                "summary": "List Available Aggregators",
+                "responses": {
+                    "200": {
+                        "description": "Aggregators fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AggregatorInvitationListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/business/aggregators/invitations": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetch all sent invitations",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business Aggregator Portal"
+                ],
+                "summary": "List Sent Invitations",
+                "responses": {
+                    "200": {
+                        "description": "Invitations fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BusinessInvitationListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/business/aggregators/invitations/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Revoke an invitation",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business Aggregator Portal"
+                ],
+                "summary": "Revoke Invitation",
+                "responses": {
+                    "200": {
+                        "description": "Invitation revoked successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/business/aggregators/invite": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send an invitation to an aggregator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business Aggregator Portal"
+                ],
+                "summary": "Send Invitation",
+                "responses": {
+                    "200": {
+                        "description": "Invitation sent successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -1794,12 +2878,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
-                    },
-                    "403": {
-                        "description": "Subscription is inactive or invoice quota exhausted",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
                     }
                 }
             }
@@ -1985,330 +3063,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/plugin/business": {
-            "get": {
-                "description": "Checks if a business exists and returns active subscription details when available",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Plugin"
-                ],
-                "summary": "Check Business Subscription",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Business email",
-                        "name": "email",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Aggregator ID",
-                        "name": "aggregator_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Use sandbox database (true/false)",
-                        "name": "is_sandbox",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Business check completed successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.PluginBusinessCheckResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/plugin/invoice-upload": {
-            "post": {
-                "security": [],
-                "description": "Receives invoice data as a json",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Internal Invoice"
-                ],
-                "summary": "Initializes invoice creation in one go",
-                "parameters": [
-                    {
-                        "description": "Invoice Payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Invoice created successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.UploadInvoiceResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "403": {
-                        "description": "Subscription is inactive or invoice quota exhausted",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/plugin/paystack/webhook": {
-            "post": {
-                "description": "Verifies Paystack signature, acknowledges immediately, then processes transaction/subscription updates asynchronously",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Plugin"
-                ],
-                "summary": "Handle Paystack Webhook",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Paystack signature",
-                        "name": "x-paystack-signature",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "Webhook payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Webhook accepted for processing",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.PluginWebhookResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/plugin/plans": {
-            "get": {
-                "description": "Retrieves all available plans for plugin clients",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Plugin"
-                ],
-                "summary": "List Plugin Plans",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Use sandbox database (true/false)",
-                        "name": "is_sandbox",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Plans fetched successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.PluginPlansResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/plugin/register": {
-            "post": {
-                "description": "Creates a business account in sandbox first, then in production, with default subscription rows",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Plugin"
-                ],
-                "summary": "Plugin Register",
-                "parameters": [
-                    {
-                        "description": "Register request payload",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.SmeRegistrationDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Business created successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.PluginRegisterResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/plugin/subscribe": {
-            "post": {
-                "description": "Initializes a Paystack transaction for a business subscription plan",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Plugin"
-                ],
-                "summary": "Subscribe Business To Plan",
-                "parameters": [
-                    {
-                        "description": "Subscribe request payload",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.PluginSubscribeRequestDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Subscription initialized successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.PluginSubscribeResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "502": {
-                        "description": "Bad gateway",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -2565,6 +3319,433 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.AggregatorActivityLogDto": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "example": "single_invoice_upload"
+                },
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "business_name": {
+                    "type": "string",
+                    "example": "Business Corp"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                },
+                "details": {
+                    "type": "string",
+                    "example": "Uploaded invoice INV-001"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "dtos.AggregatorActivityLogListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.AggregatorActivityLogDto"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/database.PaginationResponse"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.AggregatorBulkUploadListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BulkUpload"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/database.PaginationResponse"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.AggregatorBusinessDetailDto": {
+            "type": "object",
+            "properties": {
+                "accepted_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "company_name": {
+                    "type": "string",
+                    "example": "Business Corp"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "keys_set": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Business Owner"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+2348012345678"
+                },
+                "service_id": {
+                    "type": "string",
+                    "example": "6A2BC898"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "TIN-123456789"
+                }
+            }
+        },
+        "dtos.AggregatorBusinessFullDetailDto": {
+            "type": "object",
+            "properties": {
+                "accepted_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "company_name": {
+                    "type": "string",
+                    "example": "Business Corp"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "keys_set": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Business Owner"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+2348012345678"
+                },
+                "service_id": {
+                    "type": "string",
+                    "example": "6A2BC898"
+                },
+                "subscription": {
+                    "description": "Subscription",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dtos.BusinessSubscriptionInfoDto"
+                        }
+                    ]
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "TIN-123456789"
+                },
+                "total_bulk_uploads": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "total_invoices_uploaded": {
+                    "description": "Stats",
+                    "type": "integer",
+                    "example": 120
+                }
+            }
+        },
+        "dtos.AggregatorBusinessListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.AggregatorBusinessDetailDto"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/database.PaginationResponse"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.AggregatorDashboardDto": {
+            "type": "object",
+            "properties": {
+                "pending_invitations": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "total_bulk_uploads": {
+                    "type": "integer",
+                    "example": 25
+                },
+                "total_businesses": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 500
+                }
+            }
+        },
+        "dtos.AggregatorDashboardResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.AggregatorDashboardDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.AggregatorInvitationDto": {
+            "type": "object",
+            "properties": {
+                "business_email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "business_name": {
+                    "type": "string",
+                    "example": "Business Corp"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "pending"
+                }
+            }
+        },
+        "dtos.AggregatorInvitationListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.AggregatorInvitationDto"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.AggregatorInvoiceListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MinimalInvoiceDTO"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/database.PaginationResponse"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.AggregatorSubscribeDataDto": {
+            "type": "object",
+            "properties": {
+                "authorization_url": {
+                    "type": "string",
+                    "example": "https://checkout.paystack.com/..."
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "provider": {
+                    "type": "string",
+                    "example": "paystack"
+                },
+                "transaction_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "transaction_ref": {
+                    "type": "string",
+                    "example": "aggsub_1712345678_abcdef"
+                }
+            }
+        },
+        "dtos.AggregatorSubscribeRequestDto": {
+            "type": "object",
+            "required": [
+                "business_id",
+                "plan_id"
+            ],
+            "properties": {
+                "business_id": {
+                    "type": "string"
+                },
+                "plan_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.AggregatorSubscribeResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.AggregatorSubscribeDataDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.AggregatorTransactionListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.TransactionDto"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/database.PaginationResponse"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
         "dtos.AllowanceCharge": {
             "type": "object",
             "required": [
@@ -2683,6 +3864,99 @@ const docTemplate = `{
                 "invoice_number": {
                     "type": "string",
                     "example": "VA12239"
+                }
+            }
+        },
+        "dtos.BusinessInvitationDto": {
+            "type": "object",
+            "properties": {
+                "aggregator_email": {
+                    "type": "string",
+                    "example": "aggregator@example.com"
+                },
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "aggregator_name": {
+                    "type": "string",
+                    "example": "Aggregator Corp"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "pending"
+                }
+            }
+        },
+        "dtos.BusinessInvitationListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.BusinessInvitationDto"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "dtos.BusinessSubscriptionInfoDto": {
+            "type": "object",
+            "properties": {
+                "billing_cycle_days": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "next_billing_date": {
+                    "type": "string",
+                    "example": "2026-05-01T00:00:00Z"
+                },
+                "plan_amount": {
+                    "type": "number",
+                    "example": 5000
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "plan_name": {
+                    "type": "string",
+                    "example": "Starter"
+                },
+                "remaining_invoices": {
+                    "type": "integer",
+                    "example": 380
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "used_invoices": {
+                    "type": "integer",
+                    "example": 120
                 }
             }
         },
@@ -3263,253 +4537,6 @@ const docTemplate = `{
                 "$ref": "#/definitions/dtos.AccountingPlatformConfigAuth"
             }
         },
-        "dtos.PluginBusinessCheckDataDto": {
-            "type": "object",
-            "properties": {
-                "active_subscription": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "business_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "john.doe@example.com"
-                },
-                "exists": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "subscription": {
-                    "$ref": "#/definitions/dtos.PluginBusinessSubscriptionDetailsDto"
-                }
-            }
-        },
-        "dtos.PluginBusinessCheckResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dtos.PluginBusinessCheckDataDto"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.PluginBusinessSubscriptionDetailsDto": {
-            "type": "object",
-            "properties": {
-                "next_billing_date": {
-                    "type": "string"
-                },
-                "plan": {
-                    "type": "string",
-                    "example": "basic"
-                },
-                "remaining_invoices": {
-                    "type": "integer",
-                    "example": 80
-                },
-                "total_invoices": {
-                    "type": "integer",
-                    "example": 100
-                },
-                "used_invoices": {
-                    "type": "integer",
-                    "example": 20
-                }
-            }
-        },
-        "dtos.PluginPlansResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.SubscriptionPlan"
-                    }
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.PluginRegisterDataDto": {
-            "type": "object",
-            "properties": {
-                "production": {
-                    "$ref": "#/definitions/dtos.PluginRegisteredBusinessDto"
-                },
-                "sandbox": {
-                    "$ref": "#/definitions/dtos.PluginRegisteredBusinessDto"
-                }
-            }
-        },
-        "dtos.PluginRegisterResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dtos.PluginRegisterDataDto"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.PluginRegisteredBusinessDto": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "john.doe@example.com"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "is_sandbox": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "name": {
-                    "type": "string",
-                    "example": "John Doe"
-                },
-                "tin": {
-                    "type": "string",
-                    "example": "TIN-123456789"
-                }
-            }
-        },
-        "dtos.PluginSubscribeDataDto": {
-            "type": "object",
-            "properties": {
-                "authorization_url": {
-                    "type": "string",
-                    "example": "https://checkout.paystack.com/3ni8kdavz62431k"
-                },
-                "provider": {
-                    "type": "string",
-                    "example": "paystack"
-                },
-                "transaction_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "transaction_ref": {
-                    "type": "string",
-                    "example": "txn_1736272012_abcd1234ef"
-                }
-            }
-        },
-        "dtos.PluginSubscribeRequestDto": {
-            "type": "object",
-            "required": [
-                "id",
-                "plan_id"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "is_sandbox": {
-                    "type": "boolean"
-                },
-                "plan_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.PluginSubscribeResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dtos.PluginSubscribeDataDto"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.PluginWebhookDataDto": {
-            "type": "object",
-            "properties": {
-                "database": {
-                    "type": "string",
-                    "example": "sandbox"
-                },
-                "event": {
-                    "type": "string",
-                    "example": "charge.success"
-                },
-                "reference": {
-                    "type": "string",
-                    "example": "txn_1736272012_abcd1234ef"
-                },
-                "transaction_status": {
-                    "type": "string",
-                    "example": "success"
-                }
-            }
-        },
-        "dtos.PluginWebhookResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dtos.PluginWebhookDataDto"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
         "dtos.PostalAddress": {
             "type": "object",
             "required": [
@@ -3646,48 +4673,19 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.SmeRegistrationDto": {
+        "dtos.RespondToInvitationDto": {
             "type": "object",
             "required": [
-                "aggregator_id",
-                "company_name",
-                "email",
-                "name",
-                "password",
-                "phone_number",
-                "tin"
+                "invitation_id"
             ],
             "properties": {
-                "aggregator_id": {
-                    "type": "string",
-                    "example": ""
+                "accept": {
+                    "type": "boolean",
+                    "example": true
                 },
-                "company_name": {
+                "invitation_id": {
                     "type": "string",
-                    "example": "Acme Inc."
-                },
-                "email": {
-                    "type": "string",
-                    "example": "john.doe@example.com"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 250,
-                    "minLength": 2,
-                    "example": "John Doe"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6,
-                    "example": "password123"
-                },
-                "phone_number": {
-                    "type": "string",
-                    "example": "+1234567890"
-                },
-                "tin": {
-                    "type": "string",
-                    "example": "TIN-123456789"
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         },
@@ -3796,6 +4794,71 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.TransactionDto": {
+            "type": "object",
+            "properties": {
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "amount": {
+                    "type": "number",
+                    "example": 5000
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "business_name": {
+                    "type": "string",
+                    "example": "Business Corp"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "NGN"
+                },
+                "gateway_response": {
+                    "type": "string",
+                    "example": "Approved"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "plan": {
+                    "type": "string",
+                    "example": "Starter"
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "plan_123"
+                },
+                "provider": {
+                    "type": "string",
+                    "example": "paystack"
+                },
+                "provider_reference": {
+                    "type": "string",
+                    "example": "ref_123456789"
+                },
+                "reference": {
+                    "type": "string",
+                    "example": "txn_123456789"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                }
+            }
+        },
         "dtos.UpdateBusinessDto": {
             "type": "object",
             "properties": {
@@ -3821,6 +4884,10 @@ const docTemplate = `{
                 "phone_number": {
                     "type": "string",
                     "example": "+1234567890"
+                },
+                "service_id": {
+                    "type": "string",
+                    "example": "6A2BC898"
                 }
             }
         },
@@ -4092,6 +5159,10 @@ const docTemplate = `{
                     "type": "boolean",
                     "example": true
                 },
+                "keys_set": {
+                    "type": "boolean",
+                    "example": true
+                },
                 "name": {
                     "type": "string",
                     "example": "John Doe"
@@ -4239,6 +5310,88 @@ const docTemplate = `{
             ],
             "properties": {
                 "tin": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BulkUpload": {
+            "type": "object",
+            "properties": {
+                "aggregator_id": {
+                    "type": "string"
+                },
+                "business_id": {
+                    "type": "string"
+                },
+                "completed_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "file_key": {
+                    "type": "string"
+                },
+                "file_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "partially_successful_invoices": {
+                    "type": "integer"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "successful_invoices": {
+                    "type": "integer"
+                },
+                "total_records": {
+                    "type": "integer"
+                },
+                "unsuccessful_invoices": {
+                    "type": "integer"
+                },
+                "valid_records": {
+                    "type": "integer"
+                },
+                "validation_error_count": {
+                    "type": "integer"
+                },
+                "validation_errors": {
+                    "type": "object"
+                }
+            }
+        },
+        "models.MinimalInvoiceDTO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "current_status": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "invoice_number": {
+                    "type": "string"
+                },
+                "irn": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "status_text": {
                     "type": "string"
                 }
             }

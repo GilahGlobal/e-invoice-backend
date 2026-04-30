@@ -3,6 +3,7 @@ package entity
 import (
 	"einvoice-access-point/internal/services/entity"
 	"einvoice-access-point/pkg/database"
+	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
 
@@ -30,6 +31,7 @@ type Controller struct {
 // @Failure      500 {object} models.Response "Internal server error"
 // @Router       /entity [get]
 func (base *Controller) GetEntities(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
 	var query models.PaginationQuery
 	if err := c.QueryParser(&query); err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Invalid query parameters", err, nil)
@@ -38,7 +40,7 @@ func (base *Controller) GetEntities(c *fiber.Ctx) error {
 
 	queries := entity.FetchQueryItems(query)
 
-	respData, errDetails, err := entity.GetEntities(queries)
+	respData, errDetails, err := entity.GetEntities(queries, userDetails.IsSandbox)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -63,13 +65,14 @@ func (base *Controller) GetEntities(c *fiber.Ctx) error {
 // @Failure      500 {object} models.Response "Internal server error"
 // @Router       /entity/{entity_id} [get]
 func (base *Controller) GetEntity(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
 	entityId := c.Params("entity_id")
 	if entityId == "" {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "entity id is required", nil, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	respData, errDetails, err := entity.GetEntity(entityId)
+	respData, errDetails, err := entity.GetEntity(entityId, userDetails.IsSandbox)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)

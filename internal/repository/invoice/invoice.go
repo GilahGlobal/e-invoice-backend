@@ -59,6 +59,15 @@ func FindInvoiceByNumberAndBusinessID(db database.DatabaseManager, invoiceNumber
 	return &invoice, nil
 }
 
+func FindInvoiceByIRNAndBusinessID(db database.DatabaseManager, irn string, businessID string) (*models.Invoice, error) {
+	var invoice models.Invoice
+	err := db.DB().Where("irn = ? AND business_id = ?", irn, businessID).First(&invoice).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &invoice, err
+}
+
 func UpdateInvoiceStatus(db database.DatabaseManager, invoice *models.Invoice, step string, status string) error {
 	var history []models.StatusHistoryEntry
 
@@ -176,6 +185,11 @@ func DeleteInvoiceByBusinessAndID(db database.DatabaseManager, businessID, invoi
 
 func UpdateInvoice(db database.DatabaseManager, invoiceNumber string, invoiceData []byte) error {
 	result := db.DB().Model(&models.Invoice{}).Where("invoice_number = ?", invoiceNumber).Update("invoice_data", invoiceData)
+	return result.Error
+}
+
+func UpdateInvoiceDataByID(db database.DatabaseManager, invoiceID string, invoiceData []byte) error {
+	result := db.DB().Model(&models.Invoice{}).Where("id = ?", invoiceID).Update("invoice_data", invoiceData)
 	return result.Error
 }
 

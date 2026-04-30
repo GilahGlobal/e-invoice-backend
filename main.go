@@ -46,14 +46,15 @@ func main() {
 	}
 
 	// Run migrations if enabled
-	if configuration.Database.Migrate {
-		migrations.RunAllMigrations(db)
-		// seed.SeedDatabase(db)
-	}
 
 	if configuration.TestDatabase.Migrate {
 		migrations.RunAllMigrations(testDb)
 		// seed.SeedDatabase(testDb)
+	}
+
+	if configuration.Database.Migrate {
+		migrations.RunAllMigrations(db)
+		// seed.SeedDatabase(db)
 	}
 
 	app := v1.Setup(logger, validatorRef, db, testDb, keys)

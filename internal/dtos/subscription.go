@@ -28,3 +28,22 @@ type CreateSubscriptionPlanResponseDto struct {
 	BaseResponseDto
 	Data CreateSubscriptionPlanDataDto `json:"data"`
 }
+
+type AggregatorSubscribeRequestDto struct {
+	BusinessID string `json:"business_id" validate:"required,uuid"`
+	PlanID     string `json:"plan_id" validate:"required"`
+}
+
+type AggregatorSubscribeDataDto struct {
+	Provider         string `json:"provider" example:"paystack"`
+	TransactionID    string `json:"transaction_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	TransactionRef   string `json:"transaction_ref" example:"aggsub_1712345678_abcdef"`
+	AuthorizationURL string `json:"authorization_url" example:"https://checkout.paystack.com/..."`
+	BusinessID       string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	PlanID           string `json:"plan_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+}
+
+type AggregatorSubscribeResponseDto struct {
+	BaseResponseDto
+	Data AggregatorSubscribeDataDto `json:"data"`
+}
