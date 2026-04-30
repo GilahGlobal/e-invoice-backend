@@ -84,11 +84,6 @@ func (base *Controller) SendAggregatorInvitation(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(rd)
 	}
 
-	if userDetails.BusinessID == nil {
-		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Business ID missing", nil, nil)
-		return c.Status(fiber.StatusForbidden).JSON(rd)
-	}
-
 	var req dtos.SendAggregatorInvitationDto
 	if err := c.BodyParser(&req); err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
