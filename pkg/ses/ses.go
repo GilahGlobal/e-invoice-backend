@@ -1,8 +1,11 @@
 package ses
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	internalConfig "einvoice-access-point/pkg/config"
 
@@ -55,4 +58,50 @@ func SendEmail(email, otp string) {
 	}
 
 	fmt.Println("Email sent:", result.MessageId)
+}
+
+type EmailRequest struct {
+	To      string `json:"to"`
+	Subject string `json:"subject"`
+	HTML    string `json:"html"`
+}
+
+func Send(email, otp string) error {
+	url := "https://ami-portal-backend-smdw.onrender.com/email/send"
+
+	payload := EmailRequest{
+		To:      email,
+		Subject: "Your OTP Code",
+		HTML: fmt.Sprintf(`
+			<h2>Verification Code</h2>
+			<p>Your OTP is:</p>
+			<h1>%s</h1>
+			<p>This code will expire shortly.</p>
+		`, otp),
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		return fmt.Errorf("failed to send email, status: %s", resp.Status)
+	}
+
+	return nil
 }
