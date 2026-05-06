@@ -560,15 +560,12 @@ func VerifyProdBuisnessAccount(db *gorm.DB, req dtos.VerifyEmailDto) error {
 func SendOtp(email string) {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
-	// otp, err := utility.GenerateOTP(6)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to generate OTP: %w", err)
-	// }
+	otp, _ := utility.GenerateOTP(6)
 
-	otp := 123456 // For testing purposes only, replace with generated OTP
+	// otp := 123456 // For testing purposes only, replace with generated OTP
 	key := VerifyEmailKey(email)
 	duration := 15 * time.Minute // 15 minutes expiration
 
 	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
-	ses.SendEmail(email, strconv.Itoa(otp))
+	ses.Send(email, strconv.Itoa(otp))
 }
