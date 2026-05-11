@@ -13,9 +13,10 @@ type ValidationResults struct {
 }
 
 type ValidationError struct {
-	InvoiceIndex  int    `json:"invoice_index"`
-	InvoiceNumber string `json:"invoice_number,omitempty"`
-	Error         any    `json:"error"`
+	InvoiceIndex  int                           `json:"invoice_index"`
+	InvoiceNumber string                        `json:"invoice_number,omitempty"`
+	Invoice       *dtos.UploadInvoiceRequestDto `json:"invoice,omitempty"`
+	Error         any                           `json:"error"`
 }
 
 type ProcessResults struct {
@@ -33,8 +34,41 @@ type ProcessResult struct {
 }
 
 type ProcessError struct {
-	InvoiceNumber string `json:"invoice_number"`
-	Error         string `json:"error"`
+	InvoiceNumber string                        `json:"invoice_number"`
+	Invoice       *dtos.UploadInvoiceRequestDto `json:"invoice,omitempty"`
+	Error         string                        `json:"error"`
+}
+
+type InvoiceProcessingError struct {
+	InvoiceIndex  int
+	InvoiceNumber string
+	Invoice       *dtos.UploadInvoiceRequestDto
+	Err           error
+}
+
+func (e *InvoiceProcessingError) Error() string {
+	if e == nil || e.Err == nil {
+		return ""
+	}
+	return e.Err.Error()
+}
+
+func newInvoiceProcessingError(invoiceIndex int, invoice dtos.UploadInvoiceRequestDto, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	return &InvoiceProcessingError{
+		InvoiceIndex:  invoiceIndex,
+		InvoiceNumber: invoice.InvoiceNumber,
+		Invoice:       cloneInvoiceForError(invoice),
+		Err:           err,
+	}
+}
+
+func cloneInvoiceForError(invoice dtos.UploadInvoiceRequestDto) *dtos.UploadInvoiceRequestDto {
+	cloned := invoice
+	return &cloned
 }
 
 type ProcessingStats struct {

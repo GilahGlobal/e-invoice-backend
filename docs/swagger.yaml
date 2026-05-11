@@ -352,6 +352,71 @@ definitions:
         example: 200
         type: integer
     type: object
+  dtos.BulkUploadFailedInvoiceDto:
+    properties:
+      error:
+        type: object
+      invoice:
+        $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+      invoice_index:
+        example: 1
+        type: integer
+      invoice_number:
+        example: VA12239
+        type: string
+    type: object
+  dtos.BulkUploadFailedInvoicesDto:
+    properties:
+      aggregator_id:
+        example: 4f6ec813-c898-49ce-8fc7-46f529a9354a
+        type: string
+      bulk_upload_id:
+        example: 019d28e5-bfad-7211-a56f-4e3376a67cf9
+        type: string
+      business_id:
+        example: ac0d4848-c898-49ce-8fc7-46f529a9354a
+        type: string
+      completed_at:
+        example: "2026-03-26T07:47:21.591765+01:00"
+        type: string
+      created_at:
+        example: "2026-03-26T07:47:19.286025+01:00"
+        type: string
+      failed_invoices:
+        items:
+          $ref: '#/definitions/dtos.BulkUploadFailedInvoiceDto'
+        type: array
+      failed_invoices_count:
+        example: 3
+        type: integer
+      file_key:
+        example: invoices/sample.xlsx
+        type: string
+      file_url:
+        example: https://nexar-file-uploads.s3.amazonaws.com/invoices/sample.xlsx
+        type: string
+      partially_successful_invoices:
+        example: 1
+        type: integer
+      started_at:
+        example: "2026-03-26T07:47:21.584844+01:00"
+        type: string
+      status:
+        example: completed
+        type: string
+      successful_invoices:
+        example: 0
+        type: integer
+      total_records:
+        example: 4
+        type: integer
+      unsuccessful_invoices:
+        example: 3
+        type: integer
+      valid_records:
+        example: 3
+        type: integer
+    type: object
   dtos.BulkUploadLogDto:
     properties:
       business_id:
@@ -410,6 +475,8 @@ definitions:
         example: 'invoice VA12239: validation failed: Key: ''UploadInvoiceRequestDto.InvoiceTypeCode''
           Error:Field validation for ''InvoiceTypeCode'' failed on the ''oneof'' tag'
         type: string
+      invoice:
+        $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
       invoice_index:
         example: 1
         type: integer
@@ -565,6 +632,20 @@ definitions:
         type: string
       pagination:
         $ref: '#/definitions/database.PaginationResponse'
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  dtos.GetBulkUploadFailedInvoicesResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.BulkUploadFailedInvoicesDto'
+      message:
+        example: Action performed successfully
+        type: string
       status:
         example: success
         type: string
@@ -1053,6 +1134,7 @@ definitions:
         - LUXURY_TAX
         - SERVICE_TAX
         - TOURISM_TAX
+        - WITHHOLDING_TAX
         example: STANDARD_VAT
         type: string
       percent:
@@ -1123,9 +1205,6 @@ definitions:
         type: string
       provider:
         example: paystack
-        type: string
-      provider_reference:
-        example: ref_123456789
         type: string
       reference:
         example: txn_123456789
@@ -1625,6 +1704,44 @@ paths:
       security:
       - BearerAuth: []
       summary: List All Bulk Uploads
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads/{bulk_id}/failed:
+    get:
+      description: Gets the failed invoices recorded for a specific bulk upload uploaded
+        by this aggregator
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk upload failed invoices fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.GetBulkUploadFailedInvoicesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Get failed invoices from a bulk upload
       tags:
       - Aggregator Portal
   /aggregator/bulk-uploads/{id}:
@@ -3010,6 +3127,46 @@ paths:
       security:
       - BearerAuth: []
       summary: Get bulk upload logs
+      tags:
+      - Invoice
+  /invoice/bulk-upload/{bulk_id}/failed:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the failed invoices recorded for a specific bulk upload
+        belonging to the authenticated business
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk upload failed invoices fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.GetBulkUploadFailedInvoicesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Get failed invoices from a bulk upload
       tags:
       - Invoice
   /invoice/confirm/{irn}:
