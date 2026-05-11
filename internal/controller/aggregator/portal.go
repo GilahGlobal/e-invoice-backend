@@ -427,6 +427,42 @@ func (base *Controller) ListBulkUploadLogs(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// @Summary Get failed invoices from a bulk upload
+// @Description Gets the failed invoices recorded for a specific bulk upload uploaded by this aggregator
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param bulk_id path string true "Bulk upload ID"
+// @Success 200 {object} dtos.GetBulkUploadFailedInvoicesResponseDto "Bulk upload failed invoices fetched successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 404 {object} models.Response "Bulk upload not found"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/bulk-uploads/{bulk_id}/failed [get]
+func (base *Controller) GetBulkUploadFailedInvoices(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	bulkUploadID := c.Params("bulk_id")
+	if bulkUploadID == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "bulk upload id is required", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	failedInvoices, status, err := aggregatorSvc.GetBulkUploadFailedInvoices(userDetails.ID, bulkUploadID, db)
+	if err != nil {
+		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
+		return c.Status(status).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(status, "Bulk upload failed invoices fetched successfully", failedInvoices)
+	return c.Status(status).JSON(rd)
+}
+
 // @Summary Activity Log
 // @Description Fetch the activity logs sequence for the aggregator
 // @Tags Aggregator Portal

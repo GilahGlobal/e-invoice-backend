@@ -124,6 +124,26 @@ func normalizeHeader(header string) string {
 	return header
 }
 
+func rowIsEmpty(row []string) bool {
+	for _, cell := range row {
+		if strings.TrimSpace(cell) != "" {
+			return false
+		}
+	}
+	return true
+}
+
+func countNonEmptyRows(rows [][]string) int {
+	count := 0
+	for _, row := range rows {
+		if rowIsEmpty(row) {
+			continue
+		}
+		count++
+	}
+	return count
+}
+
 func IsValidDate(dateStr string) bool {
 	_, err := time.Parse("2006-01-02", dateStr)
 	return err == nil

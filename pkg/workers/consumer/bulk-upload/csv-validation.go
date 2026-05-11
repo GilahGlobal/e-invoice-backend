@@ -93,22 +93,29 @@ func (cp *CSVProcessor) countCSVRows(data []byte) (int, error) {
 	reader.FieldsPerRecord = -1
 
 	rows := 0
+	isHeader := true
 	for {
-		_, err := reader.Read()
+		row, err := reader.Read()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
 			return 0, err
 		}
+
+		if isHeader {
+			isHeader = false
+			continue
+		}
+
+		if rowIsEmpty(row) {
+			continue
+		}
+
 		rows++
 	}
 
-	// Subtract 1 for header row
-	if rows > 0 {
-		return rows - 1, nil
-	}
-	return 0, nil
+	return rows, nil
 }
 
 // processSequentially processes CSV data sequentially
@@ -460,9 +467,9 @@ func (cp *CSVProcessor) parseAndValidateRow(headerIndex map[string]int, row []st
 			errorStrs = append(errorStrs, err.Error())
 		}
 		if invoice.InvoiceNumber != "" {
-			return invoice, fmt.Errorf("invoice %s: parse errors: %s", invoice.InvoiceNumber, strings.Join(errorStrs, "; "))
+			return invoice, newInvoiceProcessingError(rowNumber, invoice, fmt.Errorf("invoice %s: parse errors: %s", invoice.InvoiceNumber, strings.Join(errorStrs, "; ")))
 		}
-		return invoice, fmt.Errorf("parse errors: %s", strings.Join(errorStrs, "; "))
+		return invoice, newInvoiceProcessingError(rowNumber, invoice, fmt.Errorf("parse errors: %s", strings.Join(errorStrs, "; ")))
 	}
 
 	// Validate the struct
@@ -470,11 +477,11 @@ func (cp *CSVProcessor) parseAndValidateRow(headerIndex map[string]int, row []st
 		if invoice.InvoiceNumber != "" {
 			errMap := utility.ValidationErrorsToJSON(err, dtos.UploadInvoiceRequestDto{})
 			jsonBytes, _ := json.Marshal(errMap)
-			return invoice, fmt.Errorf("invoice %s: validation failed: %s", invoice.InvoiceNumber, string(jsonBytes))
+			return invoice, newInvoiceProcessingError(rowNumber, invoice, fmt.Errorf("invoice %s: validation failed: %s", invoice.InvoiceNumber, string(jsonBytes)))
 		}
 		errMap := utility.ValidationErrorsToJSON(err, dtos.UploadInvoiceRequestDto{})
 		jsonBytes, _ := json.Marshal(errMap)
-		return invoice, fmt.Errorf("validation failed: %s", string(jsonBytes))
+		return invoice, newInvoiceProcessingError(rowNumber, invoice, fmt.Errorf("validation failed: %s", string(jsonBytes)))
 	}
 
 	return invoice, nil
@@ -787,10 +794,5 @@ func (cp *CSVProcessor) cleanCSVValue(value string) string {
 
 // isEmptyRow checks if a row is empty
 func (cp *CSVProcessor) isEmptyRow(row []string) bool {
-	for _, cell := range row {
-		if strings.TrimSpace(cell) != "" {
-			return false
-		}
-	}
-	return true
+	return rowIsEmpty(row)
 }
