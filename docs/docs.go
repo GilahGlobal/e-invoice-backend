@@ -4978,7 +4978,9 @@ const docTemplate = `{
                         "LUXURY_TAX",
                         "SERVICE_TAX",
                         "TOURISM_TAX",
-                        "WITHHOLDING_TAX"
+                        "WITHHOLDING_TAX",
+                        "STAMP_DUTY",
+                        "EXEMPTED"
                     ],
                     "example": "STANDARD_VAT"
                 },
@@ -5163,6 +5165,7 @@ const docTemplate = `{
                 "accounting_supplier_party",
                 "business_id",
                 "document_currency_code",
+                "invoice_kind",
                 "invoice_line",
                 "invoice_type_code",
                 "issue_date",
@@ -5227,6 +5230,15 @@ const docTemplate = `{
                 },
                 "invoice_delivery_period": {
                     "$ref": "#/definitions/dtos.InvoiceDeliveryPeriod"
+                },
+                "invoice_kind": {
+                    "type": "string",
+                    "enum": [
+                        "B2C",
+                        "B2B",
+                        "B2G"
+                    ],
+                    "example": "B2B"
                 },
                 "invoice_line": {
                     "type": "array",

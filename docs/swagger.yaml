@@ -1135,6 +1135,8 @@ definitions:
         - SERVICE_TAX
         - TOURISM_TAX
         - WITHHOLDING_TAX
+        - STAMP_DUTY
+        - EXEMPTED
         example: STANDARD_VAT
         type: string
       percent:
@@ -1308,6 +1310,13 @@ definitions:
         type: string
       invoice_delivery_period:
         $ref: '#/definitions/dtos.InvoiceDeliveryPeriod'
+      invoice_kind:
+        enum:
+        - B2C
+        - B2B
+        - B2G
+        example: B2B
+        type: string
       invoice_line:
         items:
           $ref: '#/definitions/dtos.InvoiceLine'
@@ -1396,6 +1405,7 @@ definitions:
     - accounting_supplier_party
     - business_id
     - document_currency_code
+    - invoice_kind
     - invoice_line
     - invoice_type_code
     - issue_date
