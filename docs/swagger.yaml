@@ -1270,10 +1270,6 @@ definitions:
     type: object
   dtos.UploadInvoiceRequestDto:
     properties:
-      _document_reference:
-        items:
-          $ref: '#/definitions/dtos.DocumentReference'
-        type: array
       accounting_cost:
         example: "2000"
         type: string
@@ -1284,6 +1280,10 @@ definitions:
       actual_delivery_date:
         example: "2026-01-16"
         type: string
+      additional_document_reference:
+        items:
+          $ref: '#/definitions/dtos.DocumentReference'
+        type: array
       allowance_charge:
         items:
           $ref: '#/definitions/dtos.AllowanceCharge'
