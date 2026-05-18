@@ -5174,12 +5174,6 @@ const docTemplate = `{
                 "tax_total"
             ],
             "properties": {
-                "_document_reference": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.DocumentReference"
-                    }
-                },
                 "accounting_cost": {
                     "type": "string",
                     "example": "2000"
@@ -5193,6 +5187,12 @@ const docTemplate = `{
                 "actual_delivery_date": {
                     "type": "string",
                     "example": "2026-01-16"
+                },
+                "additional_document_reference": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.DocumentReference"
+                    }
                 },
                 "allowance_charge": {
                     "type": "array",
