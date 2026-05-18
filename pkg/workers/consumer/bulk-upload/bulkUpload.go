@@ -143,15 +143,31 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 	for _, processErr := range processedResults.Errors {
 		if strings.HasPrefix(processErr.Error, "FIRS validation failed:") {
 			errMsg := strings.TrimPrefix(processErr.Error, "FIRS validation failed: ")
-			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, errMsg))
+			errorsToStore = append(errorsToStore, &InvoiceProcessingError{
+				InvoiceNumber: processErr.InvoiceNumber,
+				Invoice:       processErr.Invoice,
+				Err:           fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, errMsg),
+			})
 		} else if strings.HasPrefix(processErr.Error, "invoice cannot be overwritten:") {
 			log.Printf("Duplicate invoice detected: %s (same invoice number)\n", processErr.InvoiceNumber)
-			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: duplicate invoice sent (same invoice number)", processErr.InvoiceNumber))
+			errorsToStore = append(errorsToStore, &InvoiceProcessingError{
+				InvoiceNumber: processErr.InvoiceNumber,
+				Invoice:       processErr.Invoice,
+				Err:           fmt.Errorf("invoice %s: duplicate invoice sent (same invoice number)", processErr.InvoiceNumber),
+			})
 		} else if strings.Contains(strings.ToLower(processErr.Error), "duplicate") {
 			log.Printf("Duplicate invoice detected: %s - %s\n", processErr.InvoiceNumber, processErr.Error)
-			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: duplicate invoice sent - %s", processErr.InvoiceNumber, processErr.Error))
+			errorsToStore = append(errorsToStore, &InvoiceProcessingError{
+				InvoiceNumber: processErr.InvoiceNumber,
+				Invoice:       processErr.Invoice,
+				Err:           fmt.Errorf("invoice %s: duplicate invoice sent - %s", processErr.InvoiceNumber, processErr.Error),
+			})
 		} else {
-			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, processErr.Error))
+			errorsToStore = append(errorsToStore, &InvoiceProcessingError{
+				InvoiceNumber: processErr.InvoiceNumber,
+				Invoice:       processErr.Invoice,
+				Err:           fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, processErr.Error),
+			})
 		}
 	}
 
@@ -211,12 +227,14 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 			results.ErrorCount++
 			results.Errors = append(results.Errors, ProcessError{
 				InvoiceNumber: result.Invoice.InvoiceNumber,
+				Invoice:       cloneInvoiceForError(*result.Invoice),
 				Error:         result.Error.Error(),
 			})
 		} else {
 			results.ErrorCount++
 			results.Errors = append(results.Errors, ProcessError{
 				InvoiceNumber: result.Invoice.InvoiceNumber,
+				Invoice:       cloneInvoiceForError(*result.Invoice),
 				Error:         "invoice did not reach signed/transmitted/confirmed status",
 			})
 		}
@@ -374,6 +392,14 @@ func (qc *BulkUploadConsumer) storeValidationErrors(bulkID, fileKey, businessID 
 	for i, err := range errs {
 		msg := err.Error()
 		invoiceNumber := ""
+		rowNumber := 0
+		var invoicePayload *dtos.UploadInvoiceRequestDto
+		if invoiceErr, ok := err.(*InvoiceProcessingError); ok {
+			invoiceNumber = invoiceErr.InvoiceNumber
+			rowNumber = invoiceErr.InvoiceIndex
+			invoicePayload = invoiceErr.Invoice
+		}
+
 		if idx := strings.Index(msg, "invoice "); idx != -1 {
 			start := idx + len("invoice ")
 			end := start
@@ -388,7 +414,6 @@ func (qc *BulkUploadConsumer) storeValidationErrors(bulkID, fileKey, businessID 
 				invoiceNumber = msg[start:end]
 			}
 		}
-		rowNumber := 0
 		if idx := strings.Index(msg, "row "); idx != -1 {
 			start := idx + len("row ")
 			for start < len(msg) && msg[start] == ' ' {
@@ -422,6 +447,7 @@ func (qc *BulkUploadConsumer) storeValidationErrors(bulkID, fileKey, businessID 
 		validationErrors = append(validationErrors, ValidationError{
 			InvoiceIndex:  rowNumber,
 			InvoiceNumber: invoiceNumber,
+			Invoice:       invoicePayload,
 			Error:         parsedErr,
 		})
 	}

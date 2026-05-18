@@ -10,6 +10,7 @@ type UploadInvoiceRequestDto struct {
 	DueDate                     *string                `json:"due_date" example:"2026-01-20" validate:"omitempty,nrsdate"`
 	IssueTime                   *string                `json:"issue_time" example:"12:00:00" validate:"omitempty"`
 	InvoiceTypeCode             string                 `json:"invoice_type_code" example:"381" validate:"required,oneof=380 381 384 385 386 388 389 390 392 393 394 395 396 397 399 400 402 404 406 408"`
+	InvoiceKind                 string                 `json:"invoice_kind" example:"B2B" validate:"required,oneof=B2C B2B B2G"`
 	PaymentStatus               *string                `json:"payment_status" example:"PENDING" validate:"omitempty,oneof=PENDING PAID REJECTED"`
 	Note                        *string                `json:"note" example:"Invoice note" validate:"omitempty"`
 	TaxPointDate                *string                `json:"tax_point_date" example:"2026-01-16" validate:"omitempty,nrsdate"`
@@ -36,7 +37,6 @@ type UploadInvoiceRequestDto struct {
 	TaxTotal                    []TaxTotal             `json:"tax_total" validate:"required,dive"`
 	LegalMonetaryTotal          LegalMonetaryTotal     `json:"legal_monetary_total" validate:"required"`
 	InvoiceLine                 []InvoiceLine          `json:"invoice_line" validate:"required,dive"`
-	SmeID                       *string                `json:"sme_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"omitempty,uuid"`
 }
 
 type InvoiceDeliveryPeriod struct {
@@ -89,7 +89,7 @@ type TaxSubtotal struct {
 }
 
 type TaxCategory struct {
-	ID      string  `json:"id" example:"STANDARD_VAT" validate:"required,oneof=STANDARD_GST REDUCED_GST ZERO_GST STANDARD_VAT REDUCED_VAT ZERO_VAT STATE_SALES_TAX LOCAL_SALES_TAX ALCOHOL_EXCISE_TAX TOBACCO_EXCISE_TAX FUEL_EXCISE_TAX CORPORATE_INCOME_TAX PERSONAL_INCOME_TAX SOCIAL_SECURITY_TAX MEDICARE_TAX REAL_ESTATE_TAX PERSONAL_PROPERTY_TAX CARBON_TAX PLASTIC_TAX IMPORT_DUTY EXPORT_DUTY LUXURY_TAX SERVICE_TAX TOURISM_TAX WITHHOLDING_TAX"`
+	ID      string  `json:"id" example:"STANDARD_VAT" validate:"required,oneof=STANDARD_GST REDUCED_GST ZERO_GST STANDARD_VAT REDUCED_VAT ZERO_VAT STATE_SALES_TAX LOCAL_SALES_TAX ALCOHOL_EXCISE_TAX TOBACCO_EXCISE_TAX FUEL_EXCISE_TAX CORPORATE_INCOME_TAX PERSONAL_INCOME_TAX SOCIAL_SECURITY_TAX MEDICARE_TAX REAL_ESTATE_TAX PERSONAL_PROPERTY_TAX CARBON_TAX PLASTIC_TAX IMPORT_DUTY EXPORT_DUTY LUXURY_TAX SERVICE_TAX TOURISM_TAX WITHHOLDING_TAX STAMP_DUTY EXEMPTED"`
 	Percent float64 `json:"percent" example:"15.00" validate:"required"`
 }
 

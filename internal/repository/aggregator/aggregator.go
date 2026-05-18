@@ -265,6 +265,19 @@ func GetAllBulkUploadsByAggregator(db *gorm.DB, aggregatorID string, page, size 
 	return uploads, total, nil
 }
 
+func GetBulkUploadByIDForAggregator(db *gorm.DB, aggregatorID, bulkUploadID string) (*models.BulkUpload, error) {
+	var bulkUpload models.BulkUpload
+	err := db.Where("id = ? AND aggregator_id = ?", bulkUploadID, aggregatorID).First(&bulkUpload).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &bulkUpload, nil
+}
+
 // =====================
 // Activity Log
 // =====================
