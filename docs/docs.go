@@ -176,7 +176,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/aggregator/bulk-uploads/{id}": {
+        "/aggregator/bulk-uploads/{business_id}": {
             "get": {
                 "security": [
                     {
@@ -195,7 +195,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Business ID",
-                        "name": "id",
+                        "name": "business_id",
                         "in": "path",
                         "required": true
                     },
@@ -216,7 +216,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Bulk uploads fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorBulkUploadListResponseDto"
+                            "$ref": "#/definitions/dtos.GetBulkUploadLogsResponseDto"
                         }
                     },
                     "400": {
@@ -238,7 +238,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/aggregator/bulk-uploads/{id}": {
             "post": {
                 "security": [
                     {

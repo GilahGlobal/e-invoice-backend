@@ -38,11 +38,15 @@ func GetInvoiceDetails(db *gorm.DB, businessID, invoiceID string) (*models.Invoi
 	return repository.FindInvoiceByBusinessAndID(pdb, businessID, invoiceID)
 }
 
-func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode, encryptedIRN string, invoiceExists *models.Invoice, isSandbox bool, aggregatorID *string) (*models.Invoice, *string, error, bool) {
+func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode, encryptedIRN string, invoiceExists *models.Invoice, isSandbox bool, aggregatorID *string, client string) (*models.Invoice, *string, error, bool) {
 
 	pdb := inst.InitDB(db, false)
 	isInvoiceSigned := false
 	var invoice *models.Invoice
+	platform := "internal"
+	if client == "" {
+		platform = "API"
+	}
 
 	invoiceData, err := json.Marshal(payload)
 	if err != nil {
@@ -76,7 +80,7 @@ func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNum
 			IRN:              *payload.IRN,
 			QrCode:           qrCode,
 			BusinessID:       businessID,
-			Platform:         "internal",
+			Platform:         platform,
 			PlatformMetadata: platformMetadata,
 			InvoiceData:      invoiceData,
 			CurrentStatus:    currentStatus,

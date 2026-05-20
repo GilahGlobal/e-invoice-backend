@@ -1751,13 +1751,13 @@ paths:
       summary: Get failed invoices from a bulk upload
       tags:
       - Aggregator Portal
-  /aggregator/bulk-uploads/{id}:
+  /aggregator/bulk-uploads/{business_id}:
     get:
       description: Gets bulk uploads uploaded by aggregator for a specific business
       parameters:
       - description: Business ID
         in: path
-        name: id
+        name: business_id
         required: true
         type: string
       - description: Page number
@@ -1774,7 +1774,7 @@ paths:
         "200":
           description: Bulk uploads fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorBulkUploadListResponseDto'
+            $ref: '#/definitions/dtos.GetBulkUploadLogsResponseDto'
         "400":
           description: Bad request
           schema:
@@ -1792,6 +1792,7 @@ paths:
       summary: List Bulk Uploads by Business
       tags:
       - Aggregator Portal
+  /aggregator/bulk-uploads/{id}:
     post:
       consumes:
       - multipart/form-data
