@@ -382,6 +382,7 @@ func (base *Controller) DeleteInvoice(c *fiber.Ctx) error {
 // @Router /invoice/upload [post]
 func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 
+	client := c.Get("client")
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
@@ -449,7 +450,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil)
+	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil, client)
 
 	response := map[string]interface{}{
 		"metadata": createdInvoice.StatusHistory,

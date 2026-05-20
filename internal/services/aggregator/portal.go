@@ -190,12 +190,12 @@ func ListBulkUploadsByBusiness(aggregatorID, businessID string, page, size int, 
 		return nil, nil, fmt.Errorf("business not found or not managed by this aggregator")
 	}
 
-	uploads, total, err := aggregatorRepo.GetBulkUploadsByAggregatorAndBusiness(db, aggregatorID, businessID, page, size)
+	uploads, pagination, err := invoiceSvc.GetBulkUploadLogsByBusinessID(db, businessID, page, size)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to fetch bulk uploads: %w", err)
 	}
 
-	return uploads, buildPagination(page, size, total), nil
+	return uploads, &pagination, nil
 }
 
 func ListAllBulkUploads(aggregatorID string, page, size int, db *gorm.DB) ([]models.BulkUpload, *database.PaginationResponse, error) {
