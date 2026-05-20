@@ -382,14 +382,14 @@ func (base *Controller) ListAllBulkUploads(c *fiber.Ctx) error {
 // @Tags Aggregator Portal
 // @Produce json
 // @Security BearerAuth
-// @Param id path string true "Business ID"
+// @Param business_id path string true "Business ID"
 // @Param page query int false "Page number"
 // @Param size query int false "Page size"
-// @Success 200 {object} dtos.AggregatorBulkUploadListResponseDto "Bulk uploads fetched successfully"
+// @Success 200 {object} dtos.GetBulkUploadLogsResponseDto "Bulk uploads fetched successfully"
 // @Failure 400 {object} models.Response "Bad request"
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 500 {object} models.Response "Internal server error"
-// @Router /aggregator/bulk-uploads/{id} [get]
+// @Router /aggregator/bulk-uploads/{business_id} [get]
 func (base *Controller) ListBulkUploadLogs(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -397,7 +397,7 @@ func (base *Controller) ListBulkUploadLogs(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
 
-	businessID := c.Params("id")
+	businessID := c.Params("business_id")
 	if businessID == "" {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -520,6 +520,7 @@ func (base *Controller) ActivityLog(c *fiber.Ctx) error {
 // @Failure 500 {object} models.Response "Internal server error"
 // @Router /aggregator/invoices/{id} [post]
 func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
+	client := c.Get("client")
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
@@ -605,7 +606,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	createdInvoice, _, err, isInvoiceSigned := invoiceSvc.CreateInvoice(db, req, req.InvoiceNumber, businessID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, &userDetails.ID)
+	createdInvoice, _, err, isInvoiceSigned := invoiceSvc.CreateInvoice(db, req, req.InvoiceNumber, businessID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, &userDetails.ID, client)
 	if reservedSubscriptionID != "" && createdInvoice == nil {
 		_ = subscriptionSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
 	}
