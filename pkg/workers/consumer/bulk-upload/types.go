@@ -15,6 +15,7 @@ type ValidationResults struct {
 type ValidationError struct {
 	InvoiceIndex  int                           `json:"invoice_index"`
 	InvoiceNumber string                        `json:"invoice_number,omitempty"`
+	Stage         string                        `json:"stage,omitempty"`
 	Invoice       *dtos.UploadInvoiceRequestDto `json:"invoice,omitempty"`
 	Error         any                           `json:"error"`
 }
@@ -35,6 +36,7 @@ type ProcessResult struct {
 
 type ProcessError struct {
 	InvoiceNumber string                        `json:"invoice_number"`
+	Stage         string                        `json:"stage,omitempty"`
 	Invoice       *dtos.UploadInvoiceRequestDto `json:"invoice,omitempty"`
 	Error         string                        `json:"error"`
 }
@@ -42,9 +44,17 @@ type ProcessError struct {
 type InvoiceProcessingError struct {
 	InvoiceIndex  int
 	InvoiceNumber string
+	Stage         string
 	Invoice       *dtos.UploadInvoiceRequestDto
 	Err           error
 }
+
+const (
+	FailureStageValidation     = "validation"
+	FailureStageDuplicateCheck = "duplicate_check"
+	FailureStageSubscription   = "subscription_check"
+	FailureStageDatabase       = "database"
+)
 
 func (e *InvoiceProcessingError) Error() string {
 	if e == nil || e.Err == nil {
@@ -53,7 +63,7 @@ func (e *InvoiceProcessingError) Error() string {
 	return e.Err.Error()
 }
 
-func newInvoiceProcessingError(invoiceIndex int, invoice dtos.UploadInvoiceRequestDto, err error) error {
+func newInvoiceProcessingError(invoiceIndex int, stage string, invoice dtos.UploadInvoiceRequestDto, err error) error {
 	if err == nil {
 		return nil
 	}
@@ -61,6 +71,7 @@ func newInvoiceProcessingError(invoiceIndex int, invoice dtos.UploadInvoiceReque
 	return &InvoiceProcessingError{
 		InvoiceIndex:  invoiceIndex,
 		InvoiceNumber: invoice.InvoiceNumber,
+		Stage:         stage,
 		Invoice:       cloneInvoiceForError(invoice),
 		Err:           err,
 	}

@@ -364,6 +364,12 @@ definitions:
       invoice_number:
         example: VA12239
         type: string
+      reason:
+        example: duplicate invoice sent
+        type: string
+      stage:
+        example: validated_invoice
+        type: string
     type: object
   dtos.BulkUploadFailedInvoicesDto:
     properties:
@@ -482,6 +488,9 @@ definitions:
         type: integer
       invoice_number:
         example: VA12239
+        type: string
+      stage:
+        example: validation
         type: string
     type: object
   dtos.BusinessInvitationDto:
@@ -1749,6 +1758,53 @@ paths:
       security:
       - BearerAuth: []
       summary: Get failed invoices from a bulk upload
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads/{bulk_id}/failed/download:
+    get:
+      description: Download the failed invoices recorded for a specific bulk upload
+        uploaded by this aggregator as csv or excel
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      - description: Export format
+        enum:
+        - csv
+        - excel
+        - xlsx
+        in: query
+        name: format
+        type: string
+      produces:
+      - text/csv
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: Bulk upload failed invoices file
+          schema:
+            type: file
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Download failed invoices from a bulk upload
       tags:
       - Aggregator Portal
   /aggregator/bulk-uploads/{business_id}:
@@ -3175,6 +3231,53 @@ paths:
       security:
       - BearerAuth: []
       summary: Get failed invoices from a bulk upload
+      tags:
+      - Invoice
+  /invoice/bulk-upload/{bulk_id}/failed/download:
+    get:
+      description: Download the failed invoices recorded for a specific bulk upload
+        belonging to the authenticated business as csv or excel
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      - description: Export format
+        enum:
+        - csv
+        - excel
+        - xlsx
+        in: query
+        name: format
+        type: string
+      produces:
+      - text/csv
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: Bulk upload failed invoices file
+          schema:
+            type: file
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Download failed invoices from a bulk upload
       tags:
       - Invoice
   /invoice/confirm/{irn}:
