@@ -9,6 +9,7 @@ type BulkUploadValidationErrorDto struct {
 	Error         string                   `json:"error" example:"invoice VA12239: validation failed: Key: 'UploadInvoiceRequestDto.InvoiceTypeCode' Error:Field validation for 'InvoiceTypeCode' failed on the 'oneof' tag"`
 	InvoiceIndex  int                      `json:"invoice_index" example:"1"`
 	InvoiceNumber string                   `json:"invoice_number,omitempty" example:"VA12239"`
+	Stage         string                   `json:"stage,omitempty" example:"validation"`
 	Invoice       *UploadInvoiceRequestDto `json:"invoice,omitempty"`
 }
 
@@ -40,8 +41,16 @@ type GetBulkUploadLogsResponseDto struct {
 type BulkUploadFailedInvoiceDto struct {
 	InvoiceIndex  int                      `json:"invoice_index" example:"1"`
 	InvoiceNumber string                   `json:"invoice_number,omitempty" example:"VA12239"`
+	Stage         string                   `json:"stage,omitempty" example:"validated_invoice"`
+	Reason        string                   `json:"reason" example:"duplicate invoice sent"`
 	Invoice       *UploadInvoiceRequestDto `json:"invoice,omitempty"`
 	Error         any                      `json:"error" swaggertype:"object"`
+}
+
+type BulkUploadFailedInvoiceExportRowDto struct {
+	InvoiceNumber string `json:"invoice_number" example:"VA12239"`
+	Stage         string `json:"stage" example:"validated_invoice"`
+	Reason        string `json:"reason" example:"failed to validate invoice on FIRS portal"`
 }
 
 type BulkUploadFailedInvoicesDto struct {

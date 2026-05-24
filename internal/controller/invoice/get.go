@@ -262,6 +262,61 @@ func (base *Controller) GetBulkUploadFailedInvoices(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// DownloadBulkUploadFailedInvoices godoc
+// @Summary Download failed invoices from a bulk upload
+// @Description Download the failed invoices recorded for a specific bulk upload belonging to the authenticated business as csv or excel
+// @Tags Invoice
+// @Produce text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Security BearerAuth
+// @Param bulk_id path string true "Bulk upload ID"
+// @Param format query string false "Export format" Enums(csv,excel,xlsx)
+// @Success 200 {file} file "Bulk upload failed invoices file"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 404 {object} models.Response "Bulk upload not found"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /invoice/bulk-upload/{bulk_id}/failed/download [get]
+func (base *Controller) DownloadBulkUploadFailedInvoices(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	if userDetails.BusinessID == nil || *userDetails.BusinessID == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business_id is required", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	bulkUploadID := c.Params("bulk_id")
+	if bulkUploadID == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "bulk upload id is required", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	failedInvoices, err := invoice.GetBulkUploadFailedInvoices(db, bulkUploadID, *userDetails.BusinessID)
+	if err != nil {
+		status := fiber.StatusInternalServerError
+		if strings.Contains(strings.ToLower(err.Error()), "not found") {
+			status = fiber.StatusNotFound
+		}
+
+		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
+		return c.Status(status).JSON(rd)
+	}
+
+	fileData, contentType, extension, err := invoice.ExportBulkUploadFailedInvoices(failedInvoices, c.Query("format", "csv"))
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	c.Set("Content-Type", contentType)
+	c.Set("Content-Disposition", "attachment; filename=\"bulk_upload_failed_invoices_"+bulkUploadID+"."+extension+"\"")
+	return c.Status(fiber.StatusOK).Send(fileData)
+}
+
 // CreateInvoice godoc
 // @Summary Create a new Invoice
 // @Description Upload a JSON invoice file and store it in DB

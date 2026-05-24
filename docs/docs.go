@@ -176,6 +176,76 @@ const docTemplate = `{
                 }
             }
         },
+        "/aggregator/bulk-uploads/{bulk_id}/failed/download": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Download the failed invoices recorded for a specific bulk upload uploaded by this aggregator as csv or excel",
+                "produces": [
+                    "text/csv",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Download failed invoices from a bulk upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bulk upload ID",
+                        "name": "bulk_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "csv",
+                            "excel",
+                            "xlsx"
+                        ],
+                        "type": "string",
+                        "description": "Export format",
+                        "name": "format",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bulk upload failed invoices file",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Bulk upload not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/aggregator/bulk-uploads/{business_id}": {
             "get": {
                 "security": [
@@ -2322,6 +2392,76 @@ const docTemplate = `{
                 }
             }
         },
+        "/invoice/bulk-upload/{bulk_id}/failed/download": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Download the failed invoices recorded for a specific bulk upload belonging to the authenticated business as csv or excel",
+                "produces": [
+                    "text/csv",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "tags": [
+                    "Invoice"
+                ],
+                "summary": "Download failed invoices from a bulk upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bulk upload ID",
+                        "name": "bulk_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "csv",
+                            "excel",
+                            "xlsx"
+                        ],
+                        "type": "string",
+                        "description": "Export format",
+                        "name": "format",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bulk upload failed invoices file",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Bulk upload not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/invoice/confirm/{irn}": {
             "get": {
                 "security": [
@@ -3916,6 +4056,14 @@ const docTemplate = `{
                 "invoice_number": {
                     "type": "string",
                     "example": "VA12239"
+                },
+                "reason": {
+                    "type": "string",
+                    "example": "duplicate invoice sent"
+                },
+                "stage": {
+                    "type": "string",
+                    "example": "validated_invoice"
                 }
             }
         },
@@ -4078,6 +4226,10 @@ const docTemplate = `{
                 "invoice_number": {
                     "type": "string",
                     "example": "VA12239"
+                },
+                "stage": {
+                    "type": "string",
+                    "example": "validation"
                 }
             }
         },
