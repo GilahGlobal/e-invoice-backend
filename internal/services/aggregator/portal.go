@@ -216,7 +216,7 @@ func GetBulkUploadFailedInvoices(aggregatorID, bulkUploadID string, db *gorm.DB)
 		return nil, http.StatusNotFound, fmt.Errorf("bulk upload not found or not uploaded by this aggregator")
 	}
 
-	failedInvoices, err := invoiceSvc.BuildBulkUploadFailedInvoicesResponse(bulkUpload)
+	failedInvoices, err := invoiceSvc.BuildBulkUploadFailedInvoicesResponse(db, bulkUpload)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}

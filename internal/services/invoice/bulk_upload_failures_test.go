@@ -1,7 +1,9 @@
 package invoice
 
 import (
+	"einvoice-access-point/internal/dtos"
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -21,6 +23,7 @@ func TestParseBulkUploadFailedInvoices(t *testing.T) {
 			{
 				"invoice_index":1,
 				"invoice_number":"INV-001",
+				"stage":"validated_invoice",
 				"invoice":{
 					"invoice_number":"INV-001",
 					"business_id":"123e4567-e89b-12d3-a456-426614174000",
@@ -69,6 +72,9 @@ func TestParseBulkUploadFailedInvoices(t *testing.T) {
 		if failures[0].Invoice == nil || failures[0].Invoice.InvoiceNumber != "INV-001" {
 			t.Fatalf("expected first failure to include invoice payload, got %#v", failures[0].Invoice)
 		}
+		if failures[0].Stage != "validated_invoice" {
+			t.Fatalf("expected first failure stage to be parsed, got %q", failures[0].Stage)
+		}
 
 		objectError, ok := failures[1].Error.(map[string]any)
 		if !ok {
@@ -85,4 +91,30 @@ func TestParseBulkUploadFailedInvoices(t *testing.T) {
 			t.Fatal("expected an error for invalid json payload")
 		}
 	})
+}
+
+func TestNormalizeBulkUploadFailureReason(t *testing.T) {
+	reason := normalizeBulkUploadFailureReason(map[string]any{"detail": "invalid tax amount"})
+	if !strings.Contains(reason, "invalid tax amount") {
+		t.Fatalf("expected normalized reason to contain serialized object, got %q", reason)
+	}
+}
+
+func TestBuildBulkUploadFailedInvoiceExportRows(t *testing.T) {
+	rows := BuildBulkUploadFailedInvoiceExportRows(&dtos.BulkUploadFailedInvoicesDto{
+		FailedInvoices: []dtos.BulkUploadFailedInvoiceDto{
+			{
+				InvoiceNumber: "INV-001",
+				Stage:         "validation",
+				Reason:        "missing invoice line",
+			},
+		},
+	})
+
+	if len(rows) != 1 {
+		t.Fatalf("expected 1 export row, got %d", len(rows))
+	}
+	if rows[0].Stage != "validation" || rows[0].Reason != "missing invoice line" {
+		t.Fatalf("unexpected export row: %#v", rows[0])
+	}
 }

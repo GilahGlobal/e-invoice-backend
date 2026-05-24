@@ -272,9 +272,9 @@ func (ep *ExcelProcessor) parseAndValidateRow(headerIndex map[string]int, row []
 			errorStrs = append(errorStrs, err.Error())
 		}
 		if invoice.InvoiceNumber != "" {
-			return invoice, newInvoiceProcessingError(rowNumber, invoice, fmt.Errorf("invoice %s: parse errors: %s", invoice.InvoiceNumber, strings.Join(errorStrs, "; ")))
+			return invoice, newInvoiceProcessingError(rowNumber, FailureStageValidation, invoice, fmt.Errorf("invoice %s: parse errors: %s", invoice.InvoiceNumber, strings.Join(errorStrs, "; ")))
 		}
-		return invoice, newInvoiceProcessingError(rowNumber, invoice, fmt.Errorf("parse errors: %s", strings.Join(errorStrs, "; ")))
+		return invoice, newInvoiceProcessingError(rowNumber, FailureStageValidation, invoice, fmt.Errorf("parse errors: %s", strings.Join(errorStrs, "; ")))
 	}
 
 	// Validate the struct
@@ -282,11 +282,11 @@ func (ep *ExcelProcessor) parseAndValidateRow(headerIndex map[string]int, row []
 		if invoice.InvoiceNumber != "" {
 			errMap := utility.ValidationErrorsToJSON(err, dtos.UploadInvoiceRequestDto{})
 			jsonBytes, _ := json.Marshal(errMap)
-			return invoice, newInvoiceProcessingError(rowNumber, invoice, fmt.Errorf("invoice %s: validation failed: %s", invoice.InvoiceNumber, string(jsonBytes)))
+			return invoice, newInvoiceProcessingError(rowNumber, FailureStageValidation, invoice, fmt.Errorf("invoice %s: validation failed: %s", invoice.InvoiceNumber, string(jsonBytes)))
 		}
 		errMap := utility.ValidationErrorsToJSON(err, dtos.UploadInvoiceRequestDto{})
 		jsonBytes, _ := json.Marshal(errMap)
-		return invoice, newInvoiceProcessingError(rowNumber, invoice, fmt.Errorf("validation failed: %s", string(jsonBytes)))
+		return invoice, newInvoiceProcessingError(rowNumber, FailureStageValidation, invoice, fmt.Errorf("validation failed: %s", string(jsonBytes)))
 	}
 
 	return invoice, nil
