@@ -511,7 +511,13 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		"metadata": createdInvoice.StatusHistory,
 	}
 	if isInvoiceSigned {
-		response["data"] = irnPayload
+		response["data"] = map[string]interface{}{
+			"id":             createdInvoice.ID,
+			"invoice_number": irnPayload.InvoiceNumber,
+			"irn":            irnPayload.IRN,
+			"qr_code":        irnPayload.QRCode,
+			"qr_code_2":      irnPayload.QRCode2,
+		}
 	}
 
 	if err != nil {
