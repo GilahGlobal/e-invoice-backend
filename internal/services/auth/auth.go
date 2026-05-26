@@ -276,6 +276,35 @@ func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) err
 	return CompleteForgotPasswordAcrossEnvironments(req, db)
 }
 
+func ChangePassword(userID string, req dtos.ChangePasswordDto, db *gorm.DB) error {
+	pdb := inst.InitDB(db, false)
+
+	user, err := userRepo.FindUserByID(pdb, userID)
+	if err != nil {
+		return fmt.Errorf("account details cannot be retrieved")
+	}
+
+	if !utility.CompareHash(req.OldPassword, user.Password) {
+		return errors.New("old password is incorrect")
+	}
+
+	if req.OldPassword == req.NewPassword {
+		return errors.New("new password must be different from old password")
+	}
+
+	password, err := utility.HashPassword(req.NewPassword)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	user.Password = password
+	if _, err := pdb.UpdateFields(*user, *user, user.ID); err != nil {
+		return fmt.Errorf("failed to update password: %w", err)
+	}
+
+	return nil
+}
+
 func CompleteForgotPasswordAcrossEnvironments(req dtos.CompleteForgotPasswordDto, dbs ...*gorm.DB) error {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
