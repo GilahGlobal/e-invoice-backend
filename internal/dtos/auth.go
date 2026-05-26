@@ -68,11 +68,6 @@ type CompleteForgotPasswordDto struct {
 	Password string `json:"password" example:"password123" validate:"required,min=6"`
 }
 
-type ChangePasswordDto struct {
-	OldPassword string `json:"old_password" example:"password123" validate:"required,min=6"`
-	NewPassword string `json:"new_password" example:"newpassword123" validate:"required,min=6"`
-}
-
 type PlatformConfigsAuth map[string]AccountingPlatformConfigAuth
 type AccountingPlatformConfigAuth struct {
 	OrgID      string `json:"org_id" example:"org-123456789"`

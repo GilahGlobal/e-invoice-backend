@@ -560,6 +560,20 @@ definitions:
         example: 120
         type: integer
     type: object
+  dtos.ChangePasswordDto:
+    properties:
+      new_password:
+        example: newpassword123
+        minLength: 6
+        type: string
+      old_password:
+        example: password123
+        minLength: 6
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
   dtos.CompleteForgotPasswordDto:
     properties:
       email:
@@ -2351,6 +2365,47 @@ paths:
       summary: List All Transactions
       tags:
       - Aggregator Portal
+  /auth/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change the password of an authenticated user by verifying the old
+        password first
+      parameters:
+      - description: Change password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ChangePasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: password changed successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Change Password
+      tags:
+      - Auth
   /auth/complete-forgot-password:
     post:
       consumes:
@@ -2807,6 +2862,51 @@ paths:
       summary: Send Invitation
       tags:
       - Business Aggregator Portal
+  /business/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change the password of an authenticated business user by verifying
+        the old password first
+      parameters:
+      - description: Change password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ChangePasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: password changed successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Change Password
+      tags:
+      - Business
   /business/crypto-keys:
     post:
       consumes:
