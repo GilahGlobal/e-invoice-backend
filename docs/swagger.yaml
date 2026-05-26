@@ -693,6 +693,10 @@ definitions:
       business_id:
         example: BUS-12345
         type: string
+      company_name:
+        example: Acme Inc.
+        maxLength: 250
+        type: string
       created_at:
         example: "2026-01-16T12:00:00Z"
         type: string
@@ -708,10 +712,16 @@ definitions:
       name:
         example: Acme Inc.
         type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
       platform_configs:
         $ref: '#/definitions/dtos.PlatformConfigsAuth'
       service_id:
         example: SRV-98765
+        type: string
+      tin:
+        example: "123456789"
         type: string
       updated_at:
         example: "2026-01-16T12:30:00Z"
