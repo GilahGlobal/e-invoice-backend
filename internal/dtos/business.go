@@ -8,6 +8,12 @@ type UpdateBusinessDto struct {
 	BusinessID  *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"omitempty,uuid"`
 	ServiceID   *string `json:"service_id" example:"6A2BC898" validate:"omitempty"`
 }
+
+type ChangePasswordDto struct {
+	OldPassword string `json:"old_password" example:"password123" validate:"required,min=6"`
+	NewPassword string `json:"new_password" example:"newpassword123" validate:"required,min=6"`
+}
+
 type GetBusinessResponseDto struct {
 	ID                   string              `json:"id" example:"b2c8f0e7-9b6a-4d1e-bd2a-2d0d6f9f93c7"`
 	Email                string              `json:"email" example:"business@example.com"`
