@@ -18,6 +18,9 @@ type GetBusinessResponseDto struct {
 	APIKey               string              `json:"api_key" example:"sk_test_12345"`
 	AccStatus            string              `json:"acc_status" example:"active"`
 	IRNSigningConfigured bool                `json:"irn_signing_configured" example:"true"`
+	TIN                  string              `json:"tin" example:"123456789" validate:"omitempty,numeric"`
+	PhoneNumber          string              `json:"phone_number" example:"+1234567890" validate:"omitempty,numeric"`
+	CompanyName          string              `json:"company_name" example:"Acme Inc." validate:"omitempty,max=250"`
 	CreatedAt            string              `json:"created_at" example:"2026-01-16T12:00:00Z"`
 	UpdatedAt            string              `json:"updated_at" example:"2026-01-16T12:30:00Z"`
 }

@@ -4515,6 +4515,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "BUS-12345"
                 },
+                "company_name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "example": "Acme Inc."
+                },
                 "created_at": {
                     "type": "string",
                     "example": "2026-01-16T12:00:00Z"
@@ -4535,12 +4540,20 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Acme Inc."
                 },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
                 "platform_configs": {
                     "$ref": "#/definitions/dtos.PlatformConfigsAuth"
                 },
                 "service_id": {
                     "type": "string",
                     "example": "SRV-98765"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "123456789"
                 },
                 "updated_at": {
                     "type": "string",
