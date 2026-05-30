@@ -560,6 +560,20 @@ definitions:
         example: 120
         type: integer
     type: object
+  dtos.ChangePasswordDto:
+    properties:
+      new_password:
+        example: newpassword123
+        minLength: 6
+        type: string
+      old_password:
+        example: password123
+        minLength: 6
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
   dtos.CompleteForgotPasswordDto:
     properties:
       email:
@@ -693,6 +707,10 @@ definitions:
       business_id:
         example: BUS-12345
         type: string
+      company_name:
+        example: Acme Inc.
+        maxLength: 250
+        type: string
       created_at:
         example: "2026-01-16T12:00:00Z"
         type: string
@@ -708,10 +726,16 @@ definitions:
       name:
         example: Acme Inc.
         type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
       platform_configs:
         $ref: '#/definitions/dtos.PlatformConfigsAuth'
       service_id:
         example: SRV-98765
+        type: string
+      tin:
+        example: "123456789"
         type: string
       updated_at:
         example: "2026-01-16T12:30:00Z"
@@ -2341,6 +2365,47 @@ paths:
       summary: List All Transactions
       tags:
       - Aggregator Portal
+  /auth/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change the password of an authenticated user by verifying the old
+        password first
+      parameters:
+      - description: Change password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ChangePasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: password changed successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Change Password
+      tags:
+      - Auth
   /auth/complete-forgot-password:
     post:
       consumes:
@@ -2797,6 +2862,51 @@ paths:
       summary: Send Invitation
       tags:
       - Business Aggregator Portal
+  /business/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change the password of an authenticated business user by verifying
+        the old password first
+      parameters:
+      - description: Change password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ChangePasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: password changed successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Change Password
+      tags:
+      - Business
   /business/crypto-keys:
     post:
       consumes:
@@ -3682,6 +3792,38 @@ paths:
       tags:
       - Invoice
   /invoice/upload:
+    patch:
+      consumes:
+      - application/json
+      description: Re-uploads an invoice with the same invoice_number. Deprecates
+        the old invoice on NRS (REJECTED), generates a fresh IRN.
+      parameters:
+      - description: Invoice Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice modified successfully
+          schema:
+            $ref: '#/definitions/dtos.UploadInvoiceResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Validation failed
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Modify an existing invoice
+      tags:
+      - Internal Invoice
     post:
       consumes:
       - application/json

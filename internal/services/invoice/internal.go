@@ -153,3 +153,52 @@ func IRNGeneration(db *gorm.DB, ownerID, invoiceNumber, serviceId, businessID st
 		QRCode2:       signedIRNResponse.EncryptedIRN,
 	}, nil
 }
+
+func DeprecateInvoiceOnNRS(oldIRN string, isSandbox bool) error {
+	_, _, err := UpdateInvoice(firs_models.UpdateInvoice{
+		PaymentStatus: "REJECTED",
+	}, oldIRN, isSandbox)
+	return err
+}
+
+func ReplaceInvoiceRecord(db *gorm.DB, existing *models.Invoice, payload dtos.UploadInvoiceRequestDto, newIRN, qrCode, encryptedIRN, client string) (*models.Invoice, error) {
+	pdb := inst.InitDB(db, false)
+
+	invoiceData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal invoice data: %w", err)
+	}
+
+	currentStatus, statusHistory, err := models.InitNewInvoiceStatus()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize invoice status: %w", err)
+	}
+
+	platform := "internal"
+	if client == "" {
+		platform = "API"
+	}
+
+	newInvoice := &models.Invoice{
+		ID:               existing.ID,
+		InvoiceNumber:    existing.InvoiceNumber,
+		BusinessID:       existing.BusinessID,
+		AggregatorID:     existing.AggregatorID,
+		CreatedAt:        existing.CreatedAt,
+		IRN:              newIRN,
+		QrCode:           qrCode,
+		EncryptedIRN:     encryptedIRN,
+		InvoiceData:      invoiceData,
+		CurrentStatus:    currentStatus,
+		StatusHistory:    statusHistory,
+		Platform:         platform,
+		PlatformMetadata: "{}",
+		Timestamp:        time.Now(),
+	}
+
+	if err := repository.SaveInvoice(pdb, newInvoice); err != nil {
+		return nil, fmt.Errorf("failed to save replaced invoice: %w", err)
+	}
+
+	return newInvoice, nil
+}

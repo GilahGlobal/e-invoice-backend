@@ -1082,6 +1082,69 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change the password of an authenticated user by verifying the old password first",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Change Password",
+                "parameters": [
+                    {
+                        "description": "Change password request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ChangePasswordDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "password changed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/complete-forgot-password": {
             "post": {
                 "description": "Complete forgot password process",
@@ -1779,6 +1842,75 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/business/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change the password of an authenticated business user by verifying the old password first",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Change Password",
+                "parameters": [
+                    {
+                        "description": "Change password request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ChangePasswordDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "password changed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -3141,6 +3273,55 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Re-uploads an invoice with the same invoice_number. Deprecates the old invoice on NRS (REJECTED), generates a fresh IRN.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Internal Invoice"
+                ],
+                "summary": "Modify an existing invoice",
+                "parameters": [
+                    {
+                        "description": "Invoice Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice modified successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadInvoiceResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
             }
         },
         "/invoice/validate": {
@@ -4326,6 +4507,25 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.ChangePasswordDto": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "old_password"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "newpassword123"
+                },
+                "old_password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "password123"
+                }
+            }
+        },
         "dtos.CompleteForgotPasswordDto": {
             "type": "object",
             "required": [
@@ -4515,6 +4715,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "BUS-12345"
                 },
+                "company_name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "example": "Acme Inc."
+                },
                 "created_at": {
                     "type": "string",
                     "example": "2026-01-16T12:00:00Z"
@@ -4535,12 +4740,20 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Acme Inc."
                 },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
                 "platform_configs": {
                     "$ref": "#/definitions/dtos.PlatformConfigsAuth"
                 },
                 "service_id": {
                     "type": "string",
                     "example": "SRV-98765"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "123456789"
                 },
                 "updated_at": {
                     "type": "string",
