@@ -3792,6 +3792,38 @@ paths:
       tags:
       - Invoice
   /invoice/upload:
+    patch:
+      consumes:
+      - application/json
+      description: Re-uploads an invoice with the same invoice_number. Deprecates
+        the old invoice on NRS (REJECTED), generates a fresh IRN.
+      parameters:
+      - description: Invoice Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice modified successfully
+          schema:
+            $ref: '#/definitions/dtos.UploadInvoiceResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Validation failed
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Modify an existing invoice
+      tags:
+      - Internal Invoice
     post:
       consumes:
       - application/json

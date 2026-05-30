@@ -3266,6 +3266,55 @@
                         }
                     }
                 }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Re-uploads an invoice with the same invoice_number. Deprecates the old invoice on NRS (REJECTED), generates a fresh IRN.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Internal Invoice"
+                ],
+                "summary": "Modify an existing invoice",
+                "parameters": [
+                    {
+                        "description": "Invoice Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice modified successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadInvoiceResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
             }
         },
         "/invoice/validate": {
