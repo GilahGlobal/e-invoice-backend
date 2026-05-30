@@ -529,3 +529,106 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice created successfully", response)
 	return c.Status(fiber.StatusCreated).JSON(rd)
 }
+
+// ModifyInvoice godoc
+// @Summary Modify an existing invoice
+// @Description Re-uploads an invoice with the same invoice_number. Deprecates the old invoice on NRS (REJECTED), generates a fresh IRN.
+// @Tags Internal Invoice
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param   payload  body  dtos.UploadInvoiceRequestDto  true  "Invoice Payload"
+// @Success 200 {object} dtos.UploadInvoiceResponseDto "Invoice modified successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 422 {object} models.Response "Validation failed"
+// @Router /invoice/upload [patch]
+func (base *Controller) ModifyInvoice(c *fiber.Ctx) error {
+
+	client := c.Get("client")
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	setup, err := businessservice.ValidateInvoiceUploadSetup(db, userDetails.ID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	var req dtos.UploadInvoiceRequestDto
+	if err := c.BodyParser(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	if err := base.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(
+			fiber.StatusUnprocessableEntity,
+			"error", "Validation failed",
+			utility.ValidationErrorsToJSON(err, firs_models.InvoiceRequest{}),
+			nil,
+		)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	// Look up existing invoice
+	existingInvoice, err := invoice.GetInvoiceByInvoiceNumber(db, req.InvoiceNumber, userDetails.ID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+	if existingInvoice == nil {
+		rd := utility.BuildErrorResponse(fiber.StatusNotFound, "error", "invoice not found with the given invoice number", nil, nil)
+		return c.Status(fiber.StatusNotFound).JSON(rd)
+	}
+
+	// Deprecate old invoice on NRS — abort if this fails
+	oldIRN := existingInvoice.IRN
+	if err := invoice.DeprecateInvoiceOnNRS(oldIRN, userDetails.IsSandbox); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "failed to deprecate old invoice on NRS: "+err.Error(), nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	// Generate fresh IRN (always new, ignore any IRN in the request)
+	irnData, irnErr := invoice.IRNGeneration(db, userDetails.ID, req.InvoiceNumber, setup.ServiceID, req.BusinessID, userDetails.IsSandbox)
+	if irnErr != nil {
+		rd := *irnErr
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+	req.IRN = &irnData.IRN
+
+	// Hard-replace the old record in-place
+	replacedInvoice, err := invoice.ReplaceInvoiceRecord(db, existingInvoice, req, irnData.IRN, irnData.QRCode, irnData.QRCode2, client)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
+		return c.Status(fiber.StatusInternalServerError).JSON(rd)
+	}
+
+	// Run full FIRS pipeline on the new invoice
+	firsErr, isInvoiceSigned := invoice.FirsAllInOneProcess(req, replacedInvoice, db, userDetails.IsSandbox)
+
+	response := map[string]interface{}{
+		"metadata": replacedInvoice.StatusHistory,
+	}
+	if isInvoiceSigned {
+		response["data"] = map[string]interface{}{
+			"id":             replacedInvoice.ID,
+			"invoice_number": irnData.InvoiceNumber,
+			"irn":            irnData.IRN,
+			"qr_code":        irnData.QRCode,
+			"qr_code_2":      irnData.QRCode2,
+		}
+	}
+
+	if firsErr != nil {
+		errorArray := strings.Split(firsErr.Error(), "-")
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", errorArray[len(errorArray)-1], response, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice modified successfully", response)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}

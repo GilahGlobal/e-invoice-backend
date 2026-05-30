@@ -35,6 +35,7 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, validator *validator.Valida
 		invoiceUrlSec.Post("/create", invoiceController.CreateInvoice)
 		invoiceUrlSec.Delete("/:invoice_id", invoiceController.DeleteInvoice)
 		invoiceUrlSec.Post("/upload", invoiceController.UploadInvoice)
+		invoiceUrlSec.Patch("/upload", invoiceController.ModifyInvoice)
 	}
 	{
 		invoiceUrlSec.Post("/validate-irn", invoiceController.ValidateIRN)
