@@ -21,17 +21,22 @@ jobs:
 
       - name: Deploy to server (optimized)
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} " \
-            set -e && \
-            cd ~/e-invoice-backend && \
-            echo '📥 Syncing code to origin/master (discarding local changes)...' && \
-            git fetch origin master && \
-            git reset --hard origin/master && \
-            git clean -fd && \
-            echo '🐳 Rebuilding and restarting containers...' && \
-            docker-compose down && \
-            docker-compose up -d --build && \
-            echo '🧹 Cleaning unused images...' && \
-            docker image prune -f && \
-            echo '✅ Deployment complete' \
-          "
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          set -e
+          
+          cd ~/e-invoice-backend
+          
+          echo "📥 Syncing code..."
+          git fetch origin master
+          git reset --hard origin/master
+          git clean -fd
+          
+          echo "🐳 Rebuilding containers..."
+          docker compose down
+          docker compose up -d --build
+          
+          echo "🧹 Cleaning images..."
+          docker image prune -f
+          
+          echo "✅ Deployment complete"
+          EOF
