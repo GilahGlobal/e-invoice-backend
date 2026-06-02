@@ -108,6 +108,7 @@ func PatchRequest(client HTTPClient, config RequestConfig, response interface{})
 		return nil, err
 	}
 
+	log.Println("firs url: ", config.URL)
 	req, err := http.NewRequest(http.MethodPatch, config.URL, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
