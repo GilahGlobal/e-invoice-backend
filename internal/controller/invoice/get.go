@@ -587,9 +587,17 @@ func (base *Controller) ModifyInvoice(c *fiber.Ctx) error {
 
 	// Deprecate old invoice on NRS — abort if this fails
 	oldIRN := existingInvoice.IRN
-	if err := invoice.DeprecateInvoiceOnNRS(oldIRN, userDetails.IsSandbox); err != nil {
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "failed to deprecate old invoice on NRS: "+err.Error(), nil, nil)
-		return c.Status(fiber.StatusBadRequest).JSON(rd)
+
+	blockedStatuses := map[string]bool{
+		models.StatusSignedInvoice: true,
+		models.StatusTransmitted:   true,
+		models.StatusConfirmed:     true,
+	}
+	if !blockedStatuses[existingInvoice.CurrentStatus] {
+		if err := invoice.DeprecateInvoiceOnNRS(oldIRN, userDetails.IsSandbox); err != nil {
+			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "failed to deprecate old invoice on NRS: "+err.Error(), nil, nil)
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
 	}
 
 	// Generate fresh IRN (always new, ignore any IRN in the request)
