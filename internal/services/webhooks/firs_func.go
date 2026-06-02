@@ -81,7 +81,7 @@ func otherFirsProcesses(payload zoho.WebhookPayload, business *models.Business, 
 	}
 	_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusSignedInvoice, "success")
 
-	_, theErr, err = invoice.TransmitInvoice(*newInvoiceResp.IRN)
+	_, theErr, err = invoice.TransmitInvoice(*newInvoiceResp.IRN, isSandBox)
 	if err != nil {
 		_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusTransmitted, "failed")
 		return fmt.Errorf("failed to transmit invoice: %v - %v", *theErr, err)
