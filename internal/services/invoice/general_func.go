@@ -35,7 +35,7 @@ func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *mod
 		return fmt.Errorf("failed to update invoice status: %v", err), false
 	}
 
-	_, theErr, err = TransmitInvoice(*payload.IRN)
+	_, theErr, err = TransmitInvoice(*payload.IRN, isSandbox)
 	if err != nil {
 		_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusTransmitted, "failed")
 		return fmt.Errorf("failed to transmit invoice: %v - %v", *theErr, err), true
@@ -92,7 +92,7 @@ func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload dtos.Up
 			return fmt.Errorf("failed to update invoice status: %v", err), false
 		}
 
-		_, theErr, err = TransmitInvoice(*payload.IRN)
+		_, theErr, err = TransmitInvoice(*payload.IRN, isSandbox)
 		if err != nil {
 			_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusTransmitted, "failed")
 			return fmt.Errorf("failed to transmit invoice: %v - %v", *theErr, err), true
