@@ -71,9 +71,9 @@ func TransmitInvoice(irn string, isSandbox bool) (*firs_models.FirsResponse, *st
 	return theResp, nil, nil
 }
 
-func TransmitConfirmInvoice(irn string) (*firs_models.FirsResponse, *string, error) {
+func TransmitConfirmInvoice(irn string, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
 
-	resp, err := firs.TransmitConfirmInvoice(irn)
+	resp, err := firs.TransmitConfirmInvoice(irn, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to confirm transamitted invoicee: %w", err)
 	}
