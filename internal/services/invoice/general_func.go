@@ -45,15 +45,11 @@ func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *mod
 		return fmt.Errorf("failed to update invoice status: %v", err), true
 	}
 
-	_, theErr, err = TransmitConfirmInvoice(*payload.IRN, isSandbox)
-	if err != nil {
-		_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "failed")
-		return fmt.Errorf("failed to confirm transmit invoice: %v - %v", *theErr, err), true
-	}
-	err = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "success")
-	if err != nil {
-		return fmt.Errorf("failed to update invoice status: %v", err), true
-	}
+	// _, theErr, err = TransmitConfirmInvoice(*payload.IRN, isSandbox)
+	// if err != nil {
+	// 	_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "failed")
+	// 	return fmt.Errorf("failed to confirm transmit invoice: %v - %v", *theErr, err), true
+	// }
 
 	confirmInvoiceResp, theErr, err := ConfirmInvoice(*payload.IRN, isSandbox)
 	if err != nil {
@@ -61,7 +57,12 @@ func FirsAllInOneProcess(payload dtos.UploadInvoiceRequestDto, invoiceModel *mod
 	}
 
 	if confirmInvoiceResp.Code != 200 {
+		_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "failed")
 		return fmt.Errorf("failed to confirm invoice, didnt get 200 or delivered is false"), true
+	}
+	err = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "success")
+	if err != nil {
+		return fmt.Errorf("failed to update invoice status: %v", err), true
 	}
 
 	return nil, true
@@ -102,23 +103,28 @@ func UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload dtos.Up
 			return fmt.Errorf("failed to update invoice status: %v", err), true
 		}
 
-		_, theErr, err = TransmitConfirmInvoice(*payload.IRN, isSandbox)
-		if err != nil {
-			_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "failed")
-			return fmt.Errorf("failed to confirm transmit invoice: %v - %v", *theErr, err), true
-		}
-		err = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "success")
-		if err != nil {
-			return fmt.Errorf("failed to update invoice status: %v", err), true
-		}
+		// _, theErr, err = TransmitConfirmInvoice(*payload.IRN, isSandbox)
+		// if err != nil {
+		// 	_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "failed")
+		// 	return fmt.Errorf("failed to confirm transmit invoice: %v - %v", *theErr, err), true
+		// }
+		// err = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "success")
+		// if err != nil {
+		// 	return fmt.Errorf("failed to update invoice status: %v", err), true
+		// }
 
 		confirmInvoiceResp, theErr, err := ConfirmInvoice(*payload.IRN, isSandbox)
 		if err != nil {
+			_ = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "failed")
 			return fmt.Errorf("failed to confirm invoice: %v - %v", *theErr, err), true
 		}
 
 		if confirmInvoiceResp.Code != 200 {
 			return fmt.Errorf("failed to confirm invoice, didnt get 200 or delivered is false"), true
+		}
+		err = repository.UpdateInvoiceStatus(pdb, invoiceModel, models.StatusConfirmed, "success")
+		if err != nil {
+			return fmt.Errorf("failed to update invoice status: %v", err), true
 		}
 
 		return nil, true
