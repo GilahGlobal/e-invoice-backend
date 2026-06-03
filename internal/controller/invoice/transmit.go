@@ -139,12 +139,13 @@ func (base *Controller) TransmitInvoice(c *fiber.Ctx) error {
 // @Router /invoice/transmit/confirm/{irn} [get]
 func (base *Controller) TransmitConfirmInvoice(c *fiber.Ctx) error {
 	irn := c.Params("irn")
+	userDetails, err := middleware.GetUserDetails(c)
 	if irn == "" {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	respData, errDetails, err := invoice.TransmitConfirmInvoice(irn)
+	respData, errDetails, err := invoice.TransmitConfirmInvoice(irn, userDetails.IsSandbox)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
