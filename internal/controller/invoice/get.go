@@ -585,10 +585,6 @@ func (base *Controller) ModifyInvoice(c *fiber.Ctx) error {
 		rd := utility.BuildErrorResponse(fiber.StatusNotFound, "error", "invoice not found with the given invoice number", nil, nil)
 		return c.Status(fiber.StatusNotFound).JSON(rd)
 	}
-	if time.Since(existingInvoice.CreatedAt) < 24*time.Hour {
-		rd := utility.BuildErrorResponse(fiber.StatusFailedDependency, "error", "invoice can only be modified after 24 hours", nil, nil)
-		return c.Status(fiber.StatusNotFound).JSON(rd)
-	}
 
 	// Deprecate old invoice on NRS — abort if this fails
 	oldIRN := existingInvoice.IRN
@@ -600,6 +596,11 @@ func (base *Controller) ModifyInvoice(c *fiber.Ctx) error {
 	}
 
 	if blockedStatuses[existingInvoice.CurrentStatus] {
+		if time.Since(existingInvoice.CreatedAt) < 24*time.Hour {
+			rd := utility.BuildErrorResponse(fiber.StatusFailedDependency, "error", "invoice can only be modified after 24 hours", nil, nil)
+			return c.Status(fiber.StatusNotFound).JSON(rd)
+		}
+
 		if err := invoice.DeprecateInvoiceOnNRS(oldIRN, userDetails.IsSandbox); err != nil {
 			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "failed to deprecate old invoice on NRS: "+err.Error(), nil, nil)
 			return c.Status(fiber.StatusBadRequest).JSON(rd)
