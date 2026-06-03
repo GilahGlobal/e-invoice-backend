@@ -1,2 +1,2 @@
 # E-invoice-API
-gention e-invoicing access point API project
+Antly e-invoicing access point API project
