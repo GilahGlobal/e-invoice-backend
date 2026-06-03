@@ -14,6 +14,7 @@ import (
 	"einvoice-access-point/pkg/workers/producer"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -584,6 +585,10 @@ func (base *Controller) ModifyInvoice(c *fiber.Ctx) error {
 		rd := utility.BuildErrorResponse(fiber.StatusNotFound, "error", "invoice not found with the given invoice number", nil, nil)
 		return c.Status(fiber.StatusNotFound).JSON(rd)
 	}
+	if time.Since(existingInvoice.CreatedAt) < 24*time.Hour {
+		rd := utility.BuildErrorResponse(fiber.StatusFailedDependency, "error", "invoice can only be modified after 24 hours", nil, nil)
+		return c.Status(fiber.StatusNotFound).JSON(rd)
+	}
 
 	// Deprecate old invoice on NRS — abort if this fails
 	oldIRN := existingInvoice.IRN
@@ -593,7 +598,8 @@ func (base *Controller) ModifyInvoice(c *fiber.Ctx) error {
 		models.StatusTransmitted:   true,
 		models.StatusConfirmed:     true,
 	}
-	if !blockedStatuses[existingInvoice.CurrentStatus] {
+
+	if blockedStatuses[existingInvoice.CurrentStatus] {
 		if err := invoice.DeprecateInvoiceOnNRS(oldIRN, userDetails.IsSandbox); err != nil {
 			rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "failed to deprecate old invoice on NRS: "+err.Error(), nil, nil)
 			return c.Status(fiber.StatusBadRequest).JSON(rd)
