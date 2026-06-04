@@ -12,7 +12,7 @@ import (
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
-	"einvoice-access-point/pkg/ses"
+	"einvoice-access-point/pkg/resend_email"
 	"einvoice-access-point/pkg/utility"
 	"encoding/hex"
 	"errors"
@@ -596,5 +596,5 @@ func SendOtp(email string) {
 	duration := 15 * time.Minute // 15 minutes expiration
 
 	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
-	ses.Send(email, strconv.Itoa(otp))
+	resend_email.Send(email, strconv.Itoa(otp))
 }
