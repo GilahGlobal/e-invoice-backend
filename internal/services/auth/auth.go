@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	mainRedis "github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
@@ -51,8 +52,8 @@ func ResendVerificationOTP(db *gorm.DB, email string) error {
 	if user.EmailVerified {
 		return errors.New("email already verified")
 	}
-
-	SendOtp(user.Email)
+	key := VerifyEmailKey(email)
+	SendOtp(user.Email, key)
 
 	return nil
 }
@@ -268,12 +269,9 @@ func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) err
 		return queryError
 	}
 
-	SendOtp(user.Email)
+	key := forgotPasswordKey(email)
+	SendOtp(user.Email, key)
 	return nil
-}
-
-func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) error {
-	return CompleteForgotPasswordAcrossEnvironments(req, db)
 }
 
 func ChangePassword(userID string, req dtos.ChangePasswordDto, db *gorm.DB) error {
@@ -313,7 +311,10 @@ func CompleteForgotPasswordAcrossEnvironments(req dtos.CompleteForgotPasswordDto
 
 	otp, err := redisClient.Get(ctx, key).Result()
 
-	log.Println(err)
+	if err == mainRedis.Nil {
+		return errors.New("token not found or has expired")
+	}
+
 	if err != nil {
 		return errors.New("unable to verify token")
 	}
@@ -586,15 +587,15 @@ func VerifyProdBuisnessAccount(db *gorm.DB, req dtos.VerifyEmailDto) error {
 	return nil
 }
 
-func SendOtp(email string) {
+func SendOtp(email, key string) {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
 	otp, _ := utility.GenerateOTP(6)
 
 	// otp := 123456 // For testing purposes only, replace with generated OTP
-	key := VerifyEmailKey(email)
 	duration := 15 * time.Minute // 15 minutes expiration
 
-	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
+	err := redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
+	log.Println("possible error: ", err)
 	resend_email.Send(email, strconv.Itoa(otp))
 }

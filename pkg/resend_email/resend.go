@@ -18,7 +18,7 @@ func SendEmail(email, otp string) {
 	client := getResendClient()
 
 	params := &resend.SendEmailRequest{
-		From:    "noreply@einvoice.nexar.ng",
+		From:    "no-reply <noreply@einvoice.nexar.ng>",
 		To:      []string{email},
 		Html:    fmt.Sprintf("<h1>Otp: %s </h1>", otp),
 		Subject: "Your OTP Code",
