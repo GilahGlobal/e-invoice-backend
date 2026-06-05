@@ -133,6 +133,7 @@ func (ep *ExcelProcessor) validateRequiredHeaders(headerIndex map[string]int) er
 		"legal_monetary_total.tax_inclusive_amount",
 		"legal_monetary_total.payable_amount",
 		"invoice_line",
+		"invoice_kind",
 		"supplier_party.party_name",
 		"supplier_party.tin",
 		"supplier_party.email",
@@ -361,6 +362,7 @@ func (ep *ExcelProcessor) getFieldDefinitions() map[string]bool {
 		"supplier_party.lga":                         true,
 		"supplier_party.state":                       true,
 		"supplier_party.country":                     true,
+		"invoice_kind":                               true,
 		"payment_status":                             false,
 		"irn":                                        false,
 		"due_date":                                   false,
@@ -400,6 +402,8 @@ func (ep *ExcelProcessor) parseField(fieldName, value string, invoice *dtos.Uplo
 		invoice.IssueDate = value
 	case "invoice_type_code":
 		invoice.InvoiceTypeCode = value
+	case "invoice_kind":
+		invoice.InvoiceKind = value
 	case "document_currency_code":
 		if !IsValidCurrencyCode(value) {
 			return fmt.Errorf("currency code '%s' is invalid", value)
