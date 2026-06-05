@@ -432,6 +432,7 @@ func (cp *CSVProcessor) validateRequiredHeaders(headerIndex map[string]int) erro
 		"legal_monetary_total.tax_inclusive_amount",
 		"legal_monetary_total.payable_amount",
 		"invoice_line",
+		"invoice_kind",
 		"supplier_party.party_name",
 		"supplier_party.tin",
 		"supplier_party.email",
@@ -541,6 +542,7 @@ func (cp *CSVProcessor) getFieldDefinitions() map[string]bool {
 		"tax_total":                     true,
 		"legal_monetary_total":          true,
 		"invoice_line":                  true,
+		"invoice_kind":                  true,
 		"payment_status":                false,
 		"irn":                           false,
 		"due_date":                      false,
@@ -596,6 +598,8 @@ func (cp *CSVProcessor) parseField(fieldName, value string, invoice *dtos.Upload
 		invoice.PaymentStatus = stringPtr(value)
 	case "irn":
 		invoice.IRN = stringPtr(value)
+	case "invoice_kind":
+		invoice.InvoiceKind = value
 	case "due_date":
 		if value != "" && !IsValidDate(value) {
 			return fmt.Errorf("invalid date format, expected YYYY-MM-DD")

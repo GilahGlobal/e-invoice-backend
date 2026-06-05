@@ -101,7 +101,7 @@ type LegalMonetaryTotal struct {
 }
 
 type InvoiceLine struct {
-	HSNCode             string  `json:"hsn_code" example:"1282.10" validate:"required"`
+	HSNCode             string  `json:"hsn_code" example:"1282.10" validate:"required,hsncode"`
 	ProductCategory     string  `json:"product_category" example:"Electronics" validate:"required"`
 	DiscountRate        float64 `json:"discount_rate" example:"5"`
 	DiscountAmount      float64 `json:"discount_amount" example:"2500"`
