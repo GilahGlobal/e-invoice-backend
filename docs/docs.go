@@ -3498,7 +3498,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "TIN-123456789"
+                    "example": "33239129-0001"
                 },
                 "total_bulk_uploads": {
                     "type": "integer",
@@ -4051,7 +4051,7 @@ const docTemplate = `{
             "properties": {
                 "irn": {
                     "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
+                    "example": "INVBY020-6A2BC898-20260609"
                 },
                 "issue_date": {
                     "type": "string",
@@ -4222,7 +4222,7 @@ const docTemplate = `{
                 },
                 "irn": {
                     "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
+                    "example": "INVBY020-6A2BC898-20260609"
                 },
                 "platform": {
                     "description": "e.g., zoho, quickbooks",
@@ -4257,7 +4257,7 @@ const docTemplate = `{
                 },
                 "irn": {
                     "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
+                    "example": "INVBY020-6A2BC898-20260609"
                 },
                 "qr_code": {
                     "type": "string",
@@ -4465,7 +4465,7 @@ const docTemplate = `{
                 },
                 "irn": {
                     "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
+                    "example": "INVBY020-6A2BC898-20260609"
                 },
                 "platform": {
                     "type": "string",
@@ -4980,7 +4980,7 @@ const docTemplate = `{
                 },
                 "buyer_reference": {
                     "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
+                    "example": "INVBY020-6A2BC898-20260609"
                 },
                 "contract_document_reference": {
                     "$ref": "#/definitions/dtos.DocumentReference"
@@ -5038,7 +5038,7 @@ const docTemplate = `{
                 },
                 "irn": {
                     "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
+                    "example": "INVBY020-6A2BC898-20260609"
                 },
                 "issue_date": {
                     "type": "string",
@@ -5057,7 +5057,7 @@ const docTemplate = `{
                 },
                 "order_reference": {
                     "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
+                    "example": "INVBY020-6A2BC898-20260609"
                 },
                 "originator_document_reference": {
                     "$ref": "#/definitions/dtos.DocumentReference"
