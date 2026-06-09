@@ -71,6 +71,7 @@ type BaseConfig struct {
 	MAIL_PASSWORD string `mapstructure:"MAIL_PASSWORD"`
 	MAIL_USERNAME string `mapstructure:"MAIL_USERNAME"`
 	MAIL_PORT     string `mapstructure:"MAIL_PORT"`
+	RESEND_API_KEY string `mapstructure:"RESEND_API_KEY"`
 
 	REDIS_PORT string `mapstructure:"REDIS_PORT"`
 	REDIS_HOST string `mapstructure:"REDIS_HOST"`
@@ -164,8 +165,9 @@ func (config *BaseConfig) SetupConfigurationn() *Configuration {
 		Mail: MAIL{
 			Server:   config.MAIL_SERVER,
 			Password: config.MAIL_PASSWORD,
-			Port:     config.MAIL_PORT,
-			Username: config.MAIL_USERNAME,
+			Port:         config.MAIL_PORT,
+			Username:     config.MAIL_USERNAME,
+			ResendApiKey: config.RESEND_API_KEY,
 		},
 
 		Redis: Redis{

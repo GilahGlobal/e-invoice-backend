@@ -6,12 +6,13 @@ import (
 	businessRepo "einvoice-access-point/internal/repository/business"
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/models"
-	"einvoice-access-point/pkg/ses"
+	"einvoice-access-point/pkg/resend_email"
 	"einvoice-access-point/pkg/utility"
 	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -22,6 +23,9 @@ func SendInvitation(businessID, aggregatorID string, db *gorm.DB) (int, error) {
 		return http.StatusNotFound, fmt.Errorf("business not found")
 	}
 
+	if business.BusinessID == nil {
+		return fiber.StatusForbidden, fmt.Errorf("Business ID missing")
+	}
 	// Check if business already has an aggregator
 	if business.AggregatorID != nil && *business.AggregatorID != "" {
 		return http.StatusBadRequest, fmt.Errorf("business already has an aggregator assigned")
@@ -57,7 +61,7 @@ func SendInvitation(businessID, aggregatorID string, db *gorm.DB) (int, error) {
 	}
 
 	// Send email notification to aggregator
-	ses.SendAggregatorInvitationEmail(aggregator.Email, business.CompanyName)
+	resend_email.SendAggregatorInvitationEmail(aggregator.Email, business.CompanyName)
 
 	return http.StatusCreated, nil
 }
@@ -110,7 +114,7 @@ func RespondToInvitation(invitationID, aggregatorID string, accept bool, db *gor
 		}, db)
 
 		// Notify business
-		// ses.SendInvitationAcceptedEmail(invitation.Business.Email, invitation.Aggregator.CompanyName)
+		// resend_email.SendInvitationAcceptedEmail(invitation.Business.Email, invitation.Aggregator.CompanyName)
 	} else {
 		invitation.Status = models.InvitationStatusRejected
 		invitation.RejectedAt = &now
@@ -125,7 +129,7 @@ func RespondToInvitation(invitationID, aggregatorID string, accept bool, db *gor
 		}, db)
 
 		// Notify business
-		// ses.SendInvitationRejectedEmail(invitation.Business.Email, invitation.Aggregator.CompanyName)
+		// resend_email.SendInvitationRejectedEmail(invitation.Business.Email, invitation.Aggregator.CompanyName)
 	}
 
 	if err := aggregatorRepo.UpdateInvitation(invitation, db); err != nil {

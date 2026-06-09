@@ -2,6 +2,7 @@ package business
 
 import (
 	"einvoice-access-point/internal/dtos"
+	authSvc "einvoice-access-point/internal/services/auth"
 	"einvoice-access-point/internal/services/business"
 	"einvoice-access-point/pkg/database"
 	"einvoice-access-point/pkg/middleware"
@@ -70,6 +71,53 @@ func (base *Controller) GetBusiness(c *fiber.Ctx) error {
 
 	rd := utility.BuildSuccessResponse(http.StatusOK, "business gotten successfully", business)
 	return c.Status(http.StatusOK).JSON(rd)
+}
+
+// @Summary      Change Password
+// @Description  Change the password of an authenticated business user by verifying the old password first
+// @Tags         Business
+// @Accept       json
+// @Produce      json
+// @Security BearerAuth
+// @Param data body dtos.ChangePasswordDto true "Change password request payload"
+// @Success      200 {object} dtos.BaseResponseDto "password changed successfully"
+// @Failure      400 {object} models.Response "Bad request"
+// @Failure      401 {object} models.Response "Unauthorized"
+// @Failure      403 {object} models.Response "Forbidden"
+// @Failure      422 {object} models.Response "Unprocessable entity"
+// @Failure      500 {object} models.Response "Internal server error"
+// @Router       /business/change-password [post]
+func (base *Controller) ChangePassword(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	if userDetails.IsAggregator {
+		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Aggregator account cannot use business password change route", nil, nil)
+		return c.Status(fiber.StatusForbidden).JSON(rd)
+	}
+
+	var req dtos.ChangePasswordDto
+	if err := c.BodyParser(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	if err := base.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, base.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDb)
+	if err := authSvc.ChangePassword(userDetails.ID, req, db); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "password changed successfully", nil)
+	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
 // @Summary      Update Business Details

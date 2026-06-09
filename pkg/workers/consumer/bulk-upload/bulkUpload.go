@@ -16,6 +16,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -44,6 +45,10 @@ func NewBulkUploadConsumer(db, testDB *database.Database, logger *utility.Logger
 		dateStr := fl.Field().String()
 		_, err := time.Parse("2006-01-02", dateStr)
 		return err == nil
+	})
+	v.RegisterValidation("hsncode", func(fl validator.FieldLevel) bool {
+		hsnCodeRegex := regexp.MustCompile(`^\d{4}\.\d{2}$`)
+		return hsnCodeRegex.MatchString(fl.Field().String())
 	})
 
 	return &BulkUploadConsumer{
@@ -143,15 +148,35 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 	for _, processErr := range processedResults.Errors {
 		if strings.HasPrefix(processErr.Error, "FIRS validation failed:") {
 			errMsg := strings.TrimPrefix(processErr.Error, "FIRS validation failed: ")
-			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, errMsg))
+			errorsToStore = append(errorsToStore, &InvoiceProcessingError{
+				InvoiceNumber: processErr.InvoiceNumber,
+				Stage:         processErr.Stage,
+				Invoice:       processErr.Invoice,
+				Err:           fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, errMsg),
+			})
 		} else if strings.HasPrefix(processErr.Error, "invoice cannot be overwritten:") {
 			log.Printf("Duplicate invoice detected: %s (same invoice number)\n", processErr.InvoiceNumber)
-			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: duplicate invoice sent (same invoice number)", processErr.InvoiceNumber))
+			errorsToStore = append(errorsToStore, &InvoiceProcessingError{
+				InvoiceNumber: processErr.InvoiceNumber,
+				Stage:         processErr.Stage,
+				Invoice:       processErr.Invoice,
+				Err:           fmt.Errorf("invoice %s: duplicate invoice sent (same invoice number)", processErr.InvoiceNumber),
+			})
 		} else if strings.Contains(strings.ToLower(processErr.Error), "duplicate") {
 			log.Printf("Duplicate invoice detected: %s - %s\n", processErr.InvoiceNumber, processErr.Error)
-			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: duplicate invoice sent - %s", processErr.InvoiceNumber, processErr.Error))
+			errorsToStore = append(errorsToStore, &InvoiceProcessingError{
+				InvoiceNumber: processErr.InvoiceNumber,
+				Stage:         processErr.Stage,
+				Invoice:       processErr.Invoice,
+				Err:           fmt.Errorf("invoice %s: duplicate invoice sent - %s", processErr.InvoiceNumber, processErr.Error),
+			})
 		} else {
-			errorsToStore = append(errorsToStore, fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, processErr.Error))
+			errorsToStore = append(errorsToStore, &InvoiceProcessingError{
+				InvoiceNumber: processErr.InvoiceNumber,
+				Stage:         processErr.Stage,
+				Invoice:       processErr.Invoice,
+				Err:           fmt.Errorf("invoice %s: %s", processErr.InvoiceNumber, processErr.Error),
+			})
 		}
 	}
 
@@ -211,12 +236,16 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 			results.ErrorCount++
 			results.Errors = append(results.Errors, ProcessError{
 				InvoiceNumber: result.Invoice.InvoiceNumber,
+				Stage:         normalizeFailureStage(result.Status, result.Error),
+				Invoice:       cloneInvoiceForError(*result.Invoice),
 				Error:         result.Error.Error(),
 			})
 		} else {
 			results.ErrorCount++
 			results.Errors = append(results.Errors, ProcessError{
 				InvoiceNumber: result.Invoice.InvoiceNumber,
+				Stage:         normalizeFailureStage(result.Status, nil),
+				Invoice:       cloneInvoiceForError(*result.Invoice),
 				Error:         "invoice did not reach signed/transmitted/confirmed status",
 			})
 		}
@@ -260,7 +289,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 	invoiceExists, err := invoice.GetInvoiceByInvoiceNumber(db, invoicePayload.InvoiceNumber, id)
 
 	if err != nil {
-		return false, "", fmt.Errorf("database error: %w", err)
+		return false, FailureStageDatabase, fmt.Errorf("database error: %w", err)
 	}
 
 	if invoiceExists != nil {
@@ -270,21 +299,21 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 			models.StatusConfirmed:     true,
 		}
 		if blockedStatuses[invoiceExists.CurrentStatus] {
-			return false, "", fmt.Errorf("invoice cannot be overwritten: %s", invoicePayload.InvoiceNumber)
+			return false, FailureStageDuplicateCheck, fmt.Errorf("invoice cannot be overwritten: %s", invoicePayload.InvoiceNumber)
 		}
 	}
 
 	reservedSubscriptionID := ""
 	if aggregatorID != nil {
 		if _, _, err := subscriptionSvc.RequireAggregatorBusinessSubscription(db, *aggregatorID, businessId); err != nil {
-			return false, "", err
+			return false, FailureStageSubscription, err
 		}
 
 		if invoiceExists == nil {
 			var status int
 			reservedSubscriptionID, status, err = subscriptionSvc.ReserveAggregatorInvoiceQuota(db, *aggregatorID, businessId, 1)
 			if err != nil {
-				return false, "", fmt.Errorf("subscription guard failed (%d): %w", status, err)
+				return false, FailureStageSubscription, fmt.Errorf("subscription guard failed (%d): %w", status, err)
 			}
 		}
 	}
@@ -297,7 +326,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 				_ = subscriptionSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
 			}
 			rd := *err
-			return false, "", fmt.Errorf("IRN generation failed: %s", rd.Message)
+			return false, models.StatusGeneratedIRN, fmt.Errorf("IRN generation failed: %s", rd.Message)
 		}
 		irnPayload = *IRNData
 		invoicePayload.IRN = &irnPayload.IRN
@@ -308,7 +337,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		}
 		invoicePayload.IRN = &invoiceExists.IRN
 	}
-	createdInvoice, _, err, invoiceSigned := invoice.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, isSandbox, aggregatorID)
+	createdInvoice, _, err, invoiceSigned := invoice.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, isSandbox, aggregatorID, "internal")
 	if reservedSubscriptionID != "" && createdInvoice == nil {
 		_ = subscriptionSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
 	}
@@ -333,6 +362,28 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 	}
 
 	return err == nil && invoiceSigned, currentStatus, nil
+}
+
+func normalizeFailureStage(stage string, err error) string {
+	if stage != "" {
+		return stage
+	}
+
+	if err == nil {
+		return "unknown"
+	}
+
+	errMsg := strings.ToLower(err.Error())
+	switch {
+	case strings.Contains(errMsg, "duplicate"):
+		return FailureStageDuplicateCheck
+	case strings.Contains(errMsg, "subscription"):
+		return FailureStageSubscription
+	case strings.Contains(errMsg, "database"):
+		return FailureStageDatabase
+	default:
+		return "unknown"
+	}
 }
 
 func (qc *BulkUploadConsumer) logResults(bulkID, fileKey, businessID string, stats *ProcessingStats, results *ProcessResults, isSanbox bool) {
@@ -374,6 +425,16 @@ func (qc *BulkUploadConsumer) storeValidationErrors(bulkID, fileKey, businessID 
 	for i, err := range errs {
 		msg := err.Error()
 		invoiceNumber := ""
+		rowNumber := 0
+		stage := ""
+		var invoicePayload *dtos.UploadInvoiceRequestDto
+		if invoiceErr, ok := err.(*InvoiceProcessingError); ok {
+			invoiceNumber = invoiceErr.InvoiceNumber
+			rowNumber = invoiceErr.InvoiceIndex
+			stage = invoiceErr.Stage
+			invoicePayload = invoiceErr.Invoice
+		}
+
 		if idx := strings.Index(msg, "invoice "); idx != -1 {
 			start := idx + len("invoice ")
 			end := start
@@ -388,7 +449,6 @@ func (qc *BulkUploadConsumer) storeValidationErrors(bulkID, fileKey, businessID 
 				invoiceNumber = msg[start:end]
 			}
 		}
-		rowNumber := 0
 		if idx := strings.Index(msg, "row "); idx != -1 {
 			start := idx + len("row ")
 			for start < len(msg) && msg[start] == ' ' {
@@ -422,6 +482,8 @@ func (qc *BulkUploadConsumer) storeValidationErrors(bulkID, fileKey, businessID 
 		validationErrors = append(validationErrors, ValidationError{
 			InvoiceIndex:  rowNumber,
 			InvoiceNumber: invoiceNumber,
+			Stage:         stage,
+			Invoice:       invoicePayload,
 			Error:         parsedErr,
 		})
 	}

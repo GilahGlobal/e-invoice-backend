@@ -352,6 +352,77 @@ definitions:
         example: 200
         type: integer
     type: object
+  dtos.BulkUploadFailedInvoiceDto:
+    properties:
+      error:
+        type: object
+      invoice:
+        $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+      invoice_index:
+        example: 1
+        type: integer
+      invoice_number:
+        example: VA12239
+        type: string
+      reason:
+        example: duplicate invoice sent
+        type: string
+      stage:
+        example: validated_invoice
+        type: string
+    type: object
+  dtos.BulkUploadFailedInvoicesDto:
+    properties:
+      aggregator_id:
+        example: 4f6ec813-c898-49ce-8fc7-46f529a9354a
+        type: string
+      bulk_upload_id:
+        example: 019d28e5-bfad-7211-a56f-4e3376a67cf9
+        type: string
+      business_id:
+        example: ac0d4848-c898-49ce-8fc7-46f529a9354a
+        type: string
+      completed_at:
+        example: "2026-03-26T07:47:21.591765+01:00"
+        type: string
+      created_at:
+        example: "2026-03-26T07:47:19.286025+01:00"
+        type: string
+      failed_invoices:
+        items:
+          $ref: '#/definitions/dtos.BulkUploadFailedInvoiceDto'
+        type: array
+      failed_invoices_count:
+        example: 3
+        type: integer
+      file_key:
+        example: invoices/sample.xlsx
+        type: string
+      file_url:
+        example: https://nexar-file-uploads.s3.amazonaws.com/invoices/sample.xlsx
+        type: string
+      partially_successful_invoices:
+        example: 1
+        type: integer
+      started_at:
+        example: "2026-03-26T07:47:21.584844+01:00"
+        type: string
+      status:
+        example: completed
+        type: string
+      successful_invoices:
+        example: 0
+        type: integer
+      total_records:
+        example: 4
+        type: integer
+      unsuccessful_invoices:
+        example: 3
+        type: integer
+      valid_records:
+        example: 3
+        type: integer
+    type: object
   dtos.BulkUploadLogDto:
     properties:
       business_id:
@@ -410,11 +481,16 @@ definitions:
         example: 'invoice VA12239: validation failed: Key: ''UploadInvoiceRequestDto.InvoiceTypeCode''
           Error:Field validation for ''InvoiceTypeCode'' failed on the ''oneof'' tag'
         type: string
+      invoice:
+        $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
       invoice_index:
         example: 1
         type: integer
       invoice_number:
         example: VA12239
+        type: string
+      stage:
+        example: validation
         type: string
     type: object
   dtos.BusinessInvitationDto:
@@ -483,6 +559,20 @@ definitions:
       used_invoices:
         example: 120
         type: integer
+    type: object
+  dtos.ChangePasswordDto:
+    properties:
+      new_password:
+        example: newpassword123
+        minLength: 6
+        type: string
+      old_password:
+        example: password123
+        minLength: 6
+        type: string
+    required:
+    - new_password
+    - old_password
     type: object
   dtos.CompleteForgotPasswordDto:
     properties:
@@ -572,6 +662,20 @@ definitions:
         example: 200
         type: integer
     type: object
+  dtos.GetBulkUploadFailedInvoicesResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.BulkUploadFailedInvoicesDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   dtos.GetBulkUploadLogsResponseDto:
     properties:
       data:
@@ -603,6 +707,10 @@ definitions:
       business_id:
         example: BUS-12345
         type: string
+      company_name:
+        example: Acme Inc.
+        maxLength: 250
+        type: string
       created_at:
         example: "2026-01-16T12:00:00Z"
         type: string
@@ -618,10 +726,16 @@ definitions:
       name:
         example: Acme Inc.
         type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
       platform_configs:
         $ref: '#/definitions/dtos.PlatformConfigsAuth'
       service_id:
         example: SRV-98765
+        type: string
+      tin:
+        example: "123456789"
         type: string
       updated_at:
         example: "2026-01-16T12:30:00Z"
@@ -1053,6 +1167,9 @@ definitions:
         - LUXURY_TAX
         - SERVICE_TAX
         - TOURISM_TAX
+        - WITHHOLDING_TAX
+        - STAMP_DUTY
+        - EXEMPTED
         example: STANDARD_VAT
         type: string
       percent:
@@ -1124,9 +1241,6 @@ definitions:
       provider:
         example: paystack
         type: string
-      provider_reference:
-        example: ref_123456789
-        type: string
       reference:
         example: txn_123456789
         type: string
@@ -1189,10 +1303,6 @@ definitions:
     type: object
   dtos.UploadInvoiceRequestDto:
     properties:
-      _document_reference:
-        items:
-          $ref: '#/definitions/dtos.DocumentReference'
-        type: array
       accounting_cost:
         example: "2000"
         type: string
@@ -1203,6 +1313,10 @@ definitions:
       actual_delivery_date:
         example: "2026-01-16"
         type: string
+      additional_document_reference:
+        items:
+          $ref: '#/definitions/dtos.DocumentReference'
+        type: array
       allowance_charge:
         items:
           $ref: '#/definitions/dtos.AllowanceCharge'
@@ -1229,6 +1343,13 @@ definitions:
         type: string
       invoice_delivery_period:
         $ref: '#/definitions/dtos.InvoiceDeliveryPeriod'
+      invoice_kind:
+        enum:
+        - B2C
+        - B2B
+        - B2G
+        example: B2B
+        type: string
       invoice_line:
         items:
           $ref: '#/definitions/dtos.InvoiceLine'
@@ -1298,9 +1419,6 @@ definitions:
         type: string
       receipt_document_reference:
         $ref: '#/definitions/dtos.DocumentReference'
-      sme_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
       tax_currency_code:
         example: NGN
         type: string
@@ -1317,6 +1435,7 @@ definitions:
     - accounting_supplier_party
     - business_id
     - document_currency_code
+    - invoice_kind
     - invoice_line
     - invoice_type_code
     - issue_date
@@ -1627,13 +1746,98 @@ paths:
       summary: List All Bulk Uploads
       tags:
       - Aggregator Portal
-  /aggregator/bulk-uploads/{id}:
+  /aggregator/bulk-uploads/{bulk_id}/failed:
+    get:
+      description: Gets the failed invoices recorded for a specific bulk upload uploaded
+        by this aggregator
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk upload failed invoices fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.GetBulkUploadFailedInvoicesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Get failed invoices from a bulk upload
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads/{bulk_id}/failed/download:
+    get:
+      description: Download the failed invoices recorded for a specific bulk upload
+        uploaded by this aggregator as csv or excel
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      - description: Export format
+        enum:
+        - csv
+        - excel
+        - xlsx
+        in: query
+        name: format
+        type: string
+      produces:
+      - text/csv
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: Bulk upload failed invoices file
+          schema:
+            type: file
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Download failed invoices from a bulk upload
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads/{business_id}:
     get:
       description: Gets bulk uploads uploaded by aggregator for a specific business
       parameters:
       - description: Business ID
         in: path
-        name: id
+        name: business_id
         required: true
         type: string
       - description: Page number
@@ -1650,7 +1854,7 @@ paths:
         "200":
           description: Bulk uploads fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorBulkUploadListResponseDto'
+            $ref: '#/definitions/dtos.GetBulkUploadLogsResponseDto'
         "400":
           description: Bad request
           schema:
@@ -1668,6 +1872,7 @@ paths:
       summary: List Bulk Uploads by Business
       tags:
       - Aggregator Portal
+  /aggregator/bulk-uploads/{id}:
     post:
       consumes:
       - multipart/form-data
@@ -2160,6 +2365,47 @@ paths:
       summary: List All Transactions
       tags:
       - Aggregator Portal
+  /auth/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change the password of an authenticated user by verifying the old
+        password first
+      parameters:
+      - description: Change password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ChangePasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: password changed successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Change Password
+      tags:
+      - Auth
   /auth/complete-forgot-password:
     post:
       consumes:
@@ -2616,6 +2862,51 @@ paths:
       summary: Send Invitation
       tags:
       - Business Aggregator Portal
+  /business/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change the password of an authenticated business user by verifying
+        the old password first
+      parameters:
+      - description: Change password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ChangePasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: password changed successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Change Password
+      tags:
+      - Business
   /business/crypto-keys:
     post:
       consumes:
@@ -3010,6 +3301,93 @@ paths:
       security:
       - BearerAuth: []
       summary: Get bulk upload logs
+      tags:
+      - Invoice
+  /invoice/bulk-upload/{bulk_id}/failed:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the failed invoices recorded for a specific bulk upload
+        belonging to the authenticated business
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk upload failed invoices fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.GetBulkUploadFailedInvoicesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Get failed invoices from a bulk upload
+      tags:
+      - Invoice
+  /invoice/bulk-upload/{bulk_id}/failed/download:
+    get:
+      description: Download the failed invoices recorded for a specific bulk upload
+        belonging to the authenticated business as csv or excel
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      - description: Export format
+        enum:
+        - csv
+        - excel
+        - xlsx
+        in: query
+        name: format
+        type: string
+      produces:
+      - text/csv
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: Bulk upload failed invoices file
+          schema:
+            type: file
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Download failed invoices from a bulk upload
       tags:
       - Invoice
   /invoice/confirm/{irn}:
@@ -3414,6 +3792,38 @@ paths:
       tags:
       - Invoice
   /invoice/upload:
+    patch:
+      consumes:
+      - application/json
+      description: Re-uploads an invoice with the same invoice_number. Deprecates
+        the old invoice on NRS (REJECTED), generates a fresh IRN.
+      parameters:
+      - description: Invoice Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice modified successfully
+          schema:
+            $ref: '#/definitions/dtos.UploadInvoiceResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "422":
+          description: Validation failed
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Modify an existing invoice
+      tags:
+      - Internal Invoice
     post:
       consumes:
       - application/json

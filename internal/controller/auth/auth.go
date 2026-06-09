@@ -82,7 +82,7 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
-	go auth.SendOtp(strings.ToLower(reqData.Email))
+	go auth.SendOtp(strings.ToLower(reqData.Email), auth.VerifyEmailKey(req.Email))
 
 	base.Logger.Info("user created successfully")
 	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "An otp has been sent to your mail, use it to verify your account", nil)
@@ -212,6 +212,47 @@ func (base *Controller) Logout(c *fiber.Ctx) error {
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "user logout successfully", respData)
 	return c.Status(code).JSON(rd)
+}
+
+// @Summary Change Password
+// @Description Change the password of an authenticated user by verifying the old password first
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param data body dtos.ChangePasswordDto true "Change password request payload"
+// @Success 200 {object} dtos.BaseResponseDto "password changed successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 422 {object} models.Response "Unprocessable entity"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /auth/change-password [post]
+func (base *Controller) ChangePassword(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	var req dtos.ChangePasswordDto
+	if err := c.BodyParser(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	if err := base.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, base.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	if err := auth.ChangePassword(userDetails.ID, req, db); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "password changed successfully", nil)
+	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
 // @Summary Initiate Forgot Password

@@ -382,14 +382,14 @@ func (base *Controller) ListAllBulkUploads(c *fiber.Ctx) error {
 // @Tags Aggregator Portal
 // @Produce json
 // @Security BearerAuth
-// @Param id path string true "Business ID"
+// @Param business_id path string true "Business ID"
 // @Param page query int false "Page number"
 // @Param size query int false "Page size"
-// @Success 200 {object} dtos.AggregatorBulkUploadListResponseDto "Bulk uploads fetched successfully"
+// @Success 200 {object} dtos.GetBulkUploadLogsResponseDto "Bulk uploads fetched successfully"
 // @Failure 400 {object} models.Response "Bad request"
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 500 {object} models.Response "Internal server error"
-// @Router /aggregator/bulk-uploads/{id} [get]
+// @Router /aggregator/bulk-uploads/{business_id} [get]
 func (base *Controller) ListBulkUploadLogs(c *fiber.Ctx) error {
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
@@ -397,7 +397,7 @@ func (base *Controller) ListBulkUploadLogs(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(rd)
 	}
 
-	businessID := c.Params("id")
+	businessID := c.Params("business_id")
 	if businessID == "" {
 		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
@@ -425,6 +425,86 @@ func (base *Controller) ListBulkUploadLogs(c *fiber.Ctx) error {
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Bulk uploads fetched successfully", uploads, pagination)
 	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Get failed invoices from a bulk upload
+// @Description Gets the failed invoices recorded for a specific bulk upload uploaded by this aggregator
+// @Tags Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param bulk_id path string true "Bulk upload ID"
+// @Success 200 {object} dtos.GetBulkUploadFailedInvoicesResponseDto "Bulk upload failed invoices fetched successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 404 {object} models.Response "Bulk upload not found"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/bulk-uploads/{bulk_id}/failed [get]
+func (base *Controller) GetBulkUploadFailedInvoices(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	bulkUploadID := c.Params("bulk_id")
+	if bulkUploadID == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "bulk upload id is required", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	failedInvoices, status, err := aggregatorSvc.GetBulkUploadFailedInvoices(userDetails.ID, bulkUploadID, db)
+	if err != nil {
+		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
+		return c.Status(status).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(status, "Bulk upload failed invoices fetched successfully", failedInvoices)
+	return c.Status(status).JSON(rd)
+}
+
+// @Summary Download failed invoices from a bulk upload
+// @Description Download the failed invoices recorded for a specific bulk upload uploaded by this aggregator as csv or excel
+// @Tags Aggregator Portal
+// @Produce text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Security BearerAuth
+// @Param bulk_id path string true "Bulk upload ID"
+// @Param format query string false "Export format" Enums(csv,excel,xlsx)
+// @Success 200 {file} file "Bulk upload failed invoices file"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 404 {object} models.Response "Bulk upload not found"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /aggregator/bulk-uploads/{bulk_id}/failed/download [get]
+func (base *Controller) DownloadBulkUploadFailedInvoices(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	bulkUploadID := c.Params("bulk_id")
+	if bulkUploadID == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "bulk upload id is required", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+	failedInvoices, status, err := aggregatorSvc.GetBulkUploadFailedInvoices(userDetails.ID, bulkUploadID, db)
+	if err != nil {
+		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
+		return c.Status(status).JSON(rd)
+	}
+
+	fileData, contentType, extension, err := invoiceSvc.ExportBulkUploadFailedInvoices(failedInvoices, c.Query("format", "csv"))
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	c.Set("Content-Type", contentType)
+	c.Set("Content-Disposition", "attachment; filename=\"bulk_upload_failed_invoices_"+bulkUploadID+"."+extension+"\"")
+	return c.Status(fiber.StatusOK).Send(fileData)
 }
 
 // @Summary Activity Log
@@ -484,6 +564,7 @@ func (base *Controller) ActivityLog(c *fiber.Ctx) error {
 // @Failure 500 {object} models.Response "Internal server error"
 // @Router /aggregator/invoices/{id} [post]
 func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
+	client := c.Get("client")
 	userDetails, err := middleware.GetUserDetails(c)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
@@ -569,7 +650,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	createdInvoice, _, err, isInvoiceSigned := invoiceSvc.CreateInvoice(db, req, req.InvoiceNumber, businessID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, &userDetails.ID)
+	createdInvoice, _, err, isInvoiceSigned := invoiceSvc.CreateInvoice(db, req, req.InvoiceNumber, businessID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, &userDetails.ID, client)
 	if reservedSubscriptionID != "" && createdInvoice == nil {
 		_ = subscriptionSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
 	}

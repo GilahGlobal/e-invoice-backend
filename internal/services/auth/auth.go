@@ -12,7 +12,7 @@ import (
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
-	"einvoice-access-point/pkg/ses"
+	"einvoice-access-point/pkg/resend_email"
 	"einvoice-access-point/pkg/utility"
 	"encoding/hex"
 	"errors"
@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	mainRedis "github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
@@ -51,8 +52,8 @@ func ResendVerificationOTP(db *gorm.DB, email string) error {
 	if user.EmailVerified {
 		return errors.New("email already verified")
 	}
-
-	SendOtp(user.Email)
+	key := VerifyEmailKey(email)
+	SendOtp(user.Email, key)
 
 	return nil
 }
@@ -268,12 +269,38 @@ func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) err
 		return queryError
 	}
 
-	SendOtp(user.Email)
+	key := forgotPasswordKey(email)
+	SendOtp(user.Email, key)
 	return nil
 }
 
-func CompleteForgotPassword(req dtos.CompleteForgotPasswordDto, db *gorm.DB) error {
-	return CompleteForgotPasswordAcrossEnvironments(req, db)
+func ChangePassword(userID string, req dtos.ChangePasswordDto, db *gorm.DB) error {
+	pdb := inst.InitDB(db, false)
+
+	user, err := userRepo.FindUserByID(pdb, userID)
+	if err != nil {
+		return fmt.Errorf("account details cannot be retrieved")
+	}
+
+	if !utility.CompareHash(req.OldPassword, user.Password) {
+		return errors.New("old password is incorrect")
+	}
+
+	if req.OldPassword == req.NewPassword {
+		return errors.New("new password must be different from old password")
+	}
+
+	password, err := utility.HashPassword(req.NewPassword)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	user.Password = password
+	if _, err := pdb.UpdateFields(*user, *user, user.ID); err != nil {
+		return fmt.Errorf("failed to update password: %w", err)
+	}
+
+	return nil
 }
 
 func CompleteForgotPasswordAcrossEnvironments(req dtos.CompleteForgotPasswordDto, dbs ...*gorm.DB) error {
@@ -284,7 +311,10 @@ func CompleteForgotPasswordAcrossEnvironments(req dtos.CompleteForgotPasswordDto
 
 	otp, err := redisClient.Get(ctx, key).Result()
 
-	log.Println(err)
+	if err == mainRedis.Nil {
+		return errors.New("token not found or has expired")
+	}
+
 	if err != nil {
 		return errors.New("unable to verify token")
 	}
@@ -557,18 +587,15 @@ func VerifyProdBuisnessAccount(db *gorm.DB, req dtos.VerifyEmailDto) error {
 	return nil
 }
 
-func SendOtp(email string) {
+func SendOtp(email, key string) {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
-	// otp, err := utility.GenerateOTP(6)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to generate OTP: %w", err)
-	// }
+	otp, _ := utility.GenerateOTP(6)
 
-	otp := 123456 // For testing purposes only, replace with generated OTP
-	key := VerifyEmailKey(email)
+	// otp := 123456 // For testing purposes only, replace with generated OTP
 	duration := 15 * time.Minute // 15 minutes expiration
 
-	redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
-	ses.SendEmail(email, strconv.Itoa(otp))
+	err := redisClient.Set(ctx, key, strconv.Itoa(otp), duration)
+	log.Println("possible error: ", err)
+	resend_email.Send(email, strconv.Itoa(otp))
 }

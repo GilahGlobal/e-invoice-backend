@@ -193,6 +193,10 @@ func UpdateInvoiceDataByID(db database.DatabaseManager, invoiceID string, invoic
 	return result.Error
 }
 
+func SaveInvoice(db database.DatabaseManager, invoice *models.Invoice) error {
+	return db.DB().Save(invoice).Error
+}
+
 func CreateBulkUploadLog(db database.DatabaseManager, payload *models.BulkUpload) error {
 	return db.DB().Create(payload).Error
 }

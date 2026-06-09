@@ -72,7 +72,7 @@ func (ep *ExcelProcessor) ProcessExcel(data []byte, businessID string) ([]dtos.U
 	}
 
 	dataRows := rows[1:]
-	stats.TotalRows = len(dataRows)
+	stats.TotalRows = countNonEmptyRows(dataRows)
 
 	// Choose processing strategy based on row count
 	var invoices []dtos.UploadInvoiceRequestDto
@@ -133,6 +133,7 @@ func (ep *ExcelProcessor) validateRequiredHeaders(headerIndex map[string]int) er
 		"legal_monetary_total.tax_inclusive_amount",
 		"legal_monetary_total.payable_amount",
 		"invoice_line",
+		"invoice_kind",
 		"supplier_party.party_name",
 		"supplier_party.tin",
 		"supplier_party.email",
@@ -272,9 +273,9 @@ func (ep *ExcelProcessor) parseAndValidateRow(headerIndex map[string]int, row []
 			errorStrs = append(errorStrs, err.Error())
 		}
 		if invoice.InvoiceNumber != "" {
-			return invoice, fmt.Errorf("invoice %s: parse errors: %s", invoice.InvoiceNumber, strings.Join(errorStrs, "; "))
+			return invoice, newInvoiceProcessingError(rowNumber, FailureStageValidation, invoice, fmt.Errorf("invoice %s: parse errors: %s", invoice.InvoiceNumber, strings.Join(errorStrs, "; ")))
 		}
-		return invoice, fmt.Errorf("parse errors: %s", strings.Join(errorStrs, "; "))
+		return invoice, newInvoiceProcessingError(rowNumber, FailureStageValidation, invoice, fmt.Errorf("parse errors: %s", strings.Join(errorStrs, "; ")))
 	}
 
 	// Validate the struct
@@ -282,11 +283,11 @@ func (ep *ExcelProcessor) parseAndValidateRow(headerIndex map[string]int, row []
 		if invoice.InvoiceNumber != "" {
 			errMap := utility.ValidationErrorsToJSON(err, dtos.UploadInvoiceRequestDto{})
 			jsonBytes, _ := json.Marshal(errMap)
-			return invoice, fmt.Errorf("invoice %s: validation failed: %s", invoice.InvoiceNumber, string(jsonBytes))
+			return invoice, newInvoiceProcessingError(rowNumber, FailureStageValidation, invoice, fmt.Errorf("invoice %s: validation failed: %s", invoice.InvoiceNumber, string(jsonBytes)))
 		}
 		errMap := utility.ValidationErrorsToJSON(err, dtos.UploadInvoiceRequestDto{})
 		jsonBytes, _ := json.Marshal(errMap)
-		return invoice, fmt.Errorf("validation failed: %s", string(jsonBytes))
+		return invoice, newInvoiceProcessingError(rowNumber, FailureStageValidation, invoice, fmt.Errorf("validation failed: %s", string(jsonBytes)))
 	}
 
 	return invoice, nil
@@ -361,11 +362,21 @@ func (ep *ExcelProcessor) getFieldDefinitions() map[string]bool {
 		"supplier_party.lga":                         true,
 		"supplier_party.state":                       true,
 		"supplier_party.country":                     true,
+		"invoice_kind":                               true,
 		"payment_status":                             false,
 		"irn":                                        false,
 		"due_date":                                   false,
 		"issue_time":                                 false,
 		"note":                                       false,
+		"customer_party.party_name":                  false,
+		"customer_party.tin":                         false,
+		"customer_party.email":                       false,
+		"customer_party.street_name":                 false,
+		"customer_party.city_name":                   false,
+		"customer_party.postal_zone":                 false,
+		"customer_party.lga":                         false,
+		"customer_party.state":                       false,
+		"customer_party.country":                     false,
 		"tax_point_date":                             false,
 		"accounting_cost":                            false,
 		"buyer_reference":                            false,
@@ -383,12 +394,16 @@ func (ep *ExcelProcessor) getFieldDefinitions() map[string]bool {
 		"additional_document_reference":              false,
 		"payment_means":                              false,
 		"allowance_charge":                           false,
-		"accounting_customer_party":                  false,
 	}
 }
 
 // parseField parses a single field value
 func (ep *ExcelProcessor) parseField(fieldName, value string, invoice *dtos.UploadInvoiceRequestDto) error {
+
+	if strings.HasPrefix(fieldName, "customer_party.") && invoice.AccountingCustomerParty == nil {
+		invoice.AccountingCustomerParty = &dtos.Party{}
+	}
+
 	switch fieldName {
 	// String fields
 	case "invoice_number":
@@ -400,6 +415,8 @@ func (ep *ExcelProcessor) parseField(fieldName, value string, invoice *dtos.Uplo
 		invoice.IssueDate = value
 	case "invoice_type_code":
 		invoice.InvoiceTypeCode = value
+	case "invoice_kind":
+		invoice.InvoiceKind = value
 	case "document_currency_code":
 		if !IsValidCurrencyCode(value) {
 			return fmt.Errorf("currency code '%s' is invalid", value)
@@ -471,6 +488,30 @@ func (ep *ExcelProcessor) parseField(fieldName, value string, invoice *dtos.Uplo
 	case "supplier_party.country":
 		invoice.AccountingSupplierParty.PostalAddress.Country = value
 
+		// Accounting customer Json flattened
+	case "customer_party.party_name":
+		invoice.AccountingCustomerParty.PartyName = value
+	case "customer_party.tin":
+		invoice.AccountingCustomerParty.TIN = value
+	case "customer_party.email":
+		invoice.AccountingCustomerParty.Email = value
+	case "customer_party.telephone":
+		invoice.AccountingCustomerParty.Telephone = stringPtr(value)
+	case "customer_party.business_description":
+		invoice.AccountingCustomerParty.BusinessDescription = stringPtr(value)
+	case "customer_party.street_name":
+		invoice.AccountingCustomerParty.PostalAddress.StreetName = value
+	case "customer_party.city_name":
+		invoice.AccountingCustomerParty.PostalAddress.CityName = value
+	case "customer_party.postal_zone":
+		invoice.AccountingCustomerParty.PostalAddress.PostalZone = value
+	case "customer_party.lga":
+		invoice.AccountingCustomerParty.PostalAddress.LGA = value
+	case "customer_party.state":
+		invoice.AccountingCustomerParty.PostalAddress.State = value
+	case "customer_party.country":
+		invoice.AccountingCustomerParty.PostalAddress.Country = value
+
 	// legal_monetary_total json flattened
 	case "legal_monetary_total.line_extension_amount":
 		floatValue, err := strconv.ParseFloat(value, 64)
@@ -511,13 +552,13 @@ func (ep *ExcelProcessor) parseField(fieldName, value string, invoice *dtos.Uplo
 		}
 		invoice.InvoiceLine = invoiceLines
 
-	// Optional JSON pointer fields
-	case "accounting_customer_party":
-		var party dtos.Party
-		if err := json.Unmarshal([]byte(value), &party); err != nil {
-			return fmt.Errorf("failed to parse JSON: %w", err)
-		}
-		invoice.AccountingCustomerParty = &party
+	// // Optional JSON pointer fields
+	// case "accounting_customer_party":
+	// 	var party dtos.Party
+	// 	if err := json.Unmarshal([]byte(value), &party); err != nil {
+	// 		return fmt.Errorf("failed to parse JSON: %w", err)
+	// 	}
+	// 	invoice.AccountingCustomerParty = &party
 
 	case "payee_party":
 		var party dtos.Party
@@ -603,12 +644,7 @@ func (ep *ExcelProcessor) parseField(fieldName, value string, invoice *dtos.Uplo
 
 // isEmptyRow checks if a row is empty
 func (ep *ExcelProcessor) isEmptyRow(row []string) bool {
-	for _, cell := range row {
-		if strings.TrimSpace(cell) != "" {
-			return false
-		}
-	}
-	return true
+	return rowIsEmpty(row)
 }
 
 // ProcessExcelWithRetry processes Excel with retry logic

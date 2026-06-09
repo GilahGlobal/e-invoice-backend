@@ -29,10 +29,13 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, validator *validator.Valida
 	{
 		invoiceUrlSec.Get("", invoiceController.GetAllInvoices)
 		invoiceUrlSec.Get("/bulk-upload", invoiceController.GetBulkUploadLogs)
+		invoiceUrlSec.Get("/bulk-upload/:bulk_id/failed", invoiceController.GetBulkUploadFailedInvoices)
+		invoiceUrlSec.Get("/bulk-upload/:bulk_id/failed/download", invoiceController.DownloadBulkUploadFailedInvoices)
 		invoiceUrlSec.Get("/:invoice_id", invoiceController.GetInvoiceDetails)
 		invoiceUrlSec.Post("/create", invoiceController.CreateInvoice)
 		invoiceUrlSec.Delete("/:invoice_id", invoiceController.DeleteInvoice)
 		invoiceUrlSec.Post("/upload", invoiceController.UploadInvoice)
+		invoiceUrlSec.Patch("/upload", invoiceController.ModifyInvoice)
 	}
 	{
 		invoiceUrlSec.Post("/validate-irn", invoiceController.ValidateIRN)

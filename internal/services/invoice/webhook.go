@@ -7,7 +7,7 @@ import (
 
 func PrcoessFirsWebhook(payload firs_models.FirsWebhookPayload) error {
 
-	_, theErr, err := TransmitConfirmInvoice(payload.IRN)
+	_, theErr, err := TransmitConfirmInvoice(payload.IRN, false)
 	if err == nil {
 		return fmt.Errorf("failed to confirm transamitted invoice: %v - %v", *theErr, err)
 	}

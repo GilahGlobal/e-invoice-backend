@@ -40,7 +40,9 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, db, testDB *database.Dat
 	protected.Get("/invoices", controller.ListAllInvoices)
 	protected.Get("/invoices/:id", controller.ListBusinessInvoices)
 	protected.Get("/bulk-uploads", controller.ListAllBulkUploads)
-	protected.Get("/bulk-uploads/:id", controller.ListBulkUploadLogs)
+	protected.Get("/bulk-uploads/:bulk_id/failed", controller.GetBulkUploadFailedInvoices)
+	protected.Get("/bulk-uploads/:bulk_id/failed/download", controller.DownloadBulkUploadFailedInvoices)
+	protected.Get("/bulk-uploads/:business_id", controller.ListBulkUploadLogs)
 	protected.Get("/transactions", controller.ListAllTransactions)
 	protected.Get("/activity-log", controller.ActivityLog)
 

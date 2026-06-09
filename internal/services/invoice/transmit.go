@@ -55,9 +55,9 @@ func LookUpPartyID(partyId string) (*firs_models.FirsResponse, *string, error) {
 	return theResp, nil, nil
 }
 
-func TransmitInvoice(irn string) (*firs_models.FirsResponse, *string, error) {
+func TransmitInvoice(irn string, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
 
-	resp, err := firs.TransmitInvoice(irn)
+	resp, err := firs.TransmitInvoice(irn, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to transmit invoice: %w", err)
 	}
@@ -71,9 +71,9 @@ func TransmitInvoice(irn string) (*firs_models.FirsResponse, *string, error) {
 	return theResp, nil, nil
 }
 
-func TransmitConfirmInvoice(irn string) (*firs_models.FirsResponse, *string, error) {
+func TransmitConfirmInvoice(irn string, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
 
-	resp, err := firs.TransmitConfirmInvoice(irn)
+	resp, err := firs.TransmitConfirmInvoice(irn, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to confirm transamitted invoicee: %w", err)
 	}

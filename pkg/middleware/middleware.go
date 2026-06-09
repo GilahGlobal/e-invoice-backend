@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"fmt"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,10 +14,20 @@ import (
 func CORS() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		origin := c.Get("Origin")
+
+		if origin == "" {
+			referrer := strings.TrimRight(c.Get("Referer"), "/")
+
+			if referrer != "" {
+				if u, err := url.Parse(referrer); err == nil {
+					origin = u.Scheme + "://" + u.Host
+				}
+			}
+		}
 		if origin != "" {
 			c.Set("Access-Control-Allow-Origin", origin)
 			c.Set("Access-Control-Allow-Credentials", "true")
-			c.Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept, Origin, Cache-Control, X-Requested-With")
+			c.Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept, Origin, Cache-Control, X-Requested-With, Referer, Client")
 			c.Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
 		}
 

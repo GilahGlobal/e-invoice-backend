@@ -71,20 +71,29 @@ func LookUpByPartyID(partyId string) (*utility.Response, error) {
 	return utility.GetRequest(utility.DefaultHTTPClient, config, theResp)
 }
 
-func TransmitInvoice(irn string) (*utility.Response, error) {
+func TransmitInvoice(irn string, IsSandbox bool) (*utility.Response, error) {
+	configs := config.GetConfig()
+	var apiURL string
+	var headers map[string]string
 
-	var (
-		configs = config.GetConfig()
-		apiURL  = fmt.Sprintf("%v/invoice/transmit/%s", configs.Firs.FirsApiUrl, irn)
-	)
-
-	config := utility.RequestConfig{
-		URL: apiURL,
-		Headers: map[string]string{
+	if IsSandbox {
+		apiURL = fmt.Sprintf("%v/invoice/transmit/%s", configs.FirsSandbox.FirsApiUrl, irn)
+		headers = map[string]string{
+			"x-api-key":    configs.FirsSandbox.FirsApiKey,
+			"x-api-secret": configs.FirsSandbox.FirsClientKey,
+		}
+	} else {
+		apiURL = fmt.Sprintf("%v/invoice/transmit/%s", configs.Firs.FirsApiUrl, irn)
+		headers = map[string]string{
 			"x-api-key":    configs.Firs.FirsApiKey,
 			"x-api-secret": configs.Firs.FirsClientKey,
-		},
-		Body: nil,
+		}
+	}
+
+	config := utility.RequestConfig{
+		URL:     apiURL,
+		Headers: headers,
+		Body:    nil,
 	}
 
 	var theResp = &firs_models.FirsResponse{}
@@ -92,20 +101,29 @@ func TransmitInvoice(irn string) (*utility.Response, error) {
 	return utility.PostRequest(utility.DefaultHTTPClient, config, theResp)
 }
 
-func TransmitConfirmInvoice(irn string) (*utility.Response, error) {
+func TransmitConfirmInvoice(irn string, IsSandbox bool) (*utility.Response, error) {
+	configs := config.GetConfig()
+	var apiURL string
+	var headers map[string]string
 
-	var (
-		configs = config.GetConfig()
-		apiURL  = fmt.Sprintf("%v/invoice/transmit/%s", configs.Firs.FirsApiUrl, irn)
-	)
-
-	config := utility.RequestConfig{
-		URL: apiURL,
-		Headers: map[string]string{
+	if IsSandbox {
+		apiURL = fmt.Sprintf("%v/invoice/transmit/%s", configs.FirsSandbox.FirsApiUrl, irn)
+		headers = map[string]string{
+			"x-api-key":    configs.FirsSandbox.FirsApiKey,
+			"x-api-secret": configs.FirsSandbox.FirsClientKey,
+		}
+	} else {
+		apiURL = fmt.Sprintf("%v/invoice/transmit/%s", configs.Firs.FirsApiUrl, irn)
+		headers = map[string]string{
 			"x-api-key":    configs.Firs.FirsApiKey,
 			"x-api-secret": configs.Firs.FirsClientKey,
-		},
-		Body: nil,
+		}
+	}
+
+	config := utility.RequestConfig{
+		URL:     apiURL,
+		Headers: headers,
+		Body:    nil,
 	}
 
 	var theResp = &firs_models.FirsResponse{}

@@ -5,6 +5,7 @@ import (
 	aggregatorRepo "einvoice-access-point/internal/repository/aggregator"
 	planRepo "einvoice-access-point/internal/repository/plan"
 	subscriptionRepo "einvoice-access-point/internal/repository/subscription"
+	invoiceSvc "einvoice-access-point/internal/services/invoice"
 	"einvoice-access-point/pkg/database"
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/models"
@@ -189,12 +190,12 @@ func ListBulkUploadsByBusiness(aggregatorID, businessID string, page, size int, 
 		return nil, nil, fmt.Errorf("business not found or not managed by this aggregator")
 	}
 
-	uploads, total, err := aggregatorRepo.GetBulkUploadsByAggregatorAndBusiness(db, aggregatorID, businessID, page, size)
+	uploads, pagination, err := invoiceSvc.GetBulkUploadLogsByBusinessID(db, businessID, page, size)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to fetch bulk uploads: %w", err)
 	}
 
-	return uploads, buildPagination(page, size, total), nil
+	return uploads, &pagination, nil
 }
 
 func ListAllBulkUploads(aggregatorID string, page, size int, db *gorm.DB) ([]models.BulkUpload, *database.PaginationResponse, error) {
@@ -204,6 +205,23 @@ func ListAllBulkUploads(aggregatorID string, page, size int, db *gorm.DB) ([]mod
 	}
 
 	return uploads, buildPagination(page, size, total), nil
+}
+
+func GetBulkUploadFailedInvoices(aggregatorID, bulkUploadID string, db *gorm.DB) (*dtos.BulkUploadFailedInvoicesDto, int, error) {
+	bulkUpload, err := aggregatorRepo.GetBulkUploadByIDForAggregator(db, aggregatorID, bulkUploadID)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("failed to fetch bulk upload: %w", err)
+	}
+	if bulkUpload == nil {
+		return nil, http.StatusNotFound, fmt.Errorf("bulk upload not found or not uploaded by this aggregator")
+	}
+
+	failedInvoices, err := invoiceSvc.BuildBulkUploadFailedInvoicesResponse(db, bulkUpload)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	return failedInvoices, http.StatusOK, nil
 }
 
 func GetDashboard(aggregatorID string, db *gorm.DB) (*dtos.AggregatorDashboardDto, error) {

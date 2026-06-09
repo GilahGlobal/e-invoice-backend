@@ -111,7 +111,135 @@
                 }
             }
         },
-        "/aggregator/bulk-uploads/{id}": {
+        "/aggregator/bulk-uploads/{bulk_id}/failed": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Gets the failed invoices recorded for a specific bulk upload uploaded by this aggregator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Get failed invoices from a bulk upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bulk upload ID",
+                        "name": "bulk_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bulk upload failed invoices fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.GetBulkUploadFailedInvoicesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Bulk upload not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/bulk-uploads/{bulk_id}/failed/download": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Download the failed invoices recorded for a specific bulk upload uploaded by this aggregator as csv or excel",
+                "produces": [
+                    "text/csv",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Download failed invoices from a bulk upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bulk upload ID",
+                        "name": "bulk_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "csv",
+                            "excel",
+                            "xlsx"
+                        ],
+                        "type": "string",
+                        "description": "Export format",
+                        "name": "format",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bulk upload failed invoices file",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Bulk upload not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/bulk-uploads/{business_id}": {
             "get": {
                 "security": [
                     {
@@ -130,7 +258,7 @@
                     {
                         "type": "string",
                         "description": "Business ID",
-                        "name": "id",
+                        "name": "business_id",
                         "in": "path",
                         "required": true
                     },
@@ -151,7 +279,7 @@
                     "200": {
                         "description": "Bulk uploads fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorBulkUploadListResponseDto"
+                            "$ref": "#/definitions/dtos.GetBulkUploadLogsResponseDto"
                         }
                     },
                     "400": {
@@ -173,7 +301,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/aggregator/bulk-uploads/{id}": {
             "post": {
                 "security": [
                     {
@@ -945,6 +1075,69 @@
                 }
             }
         },
+        "/auth/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change the password of an authenticated user by verifying the old password first",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Change Password",
+                "parameters": [
+                    {
+                        "description": "Change password request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ChangePasswordDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "password changed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/complete-forgot-password": {
             "post": {
                 "description": "Complete forgot password process",
@@ -1655,6 +1848,75 @@
                 }
             }
         },
+        "/business/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change the password of an authenticated business user by verifying the old password first",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Change Password",
+                "parameters": [
+                    {
+                        "description": "Change password request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ChangePasswordDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "password changed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/business/crypto-keys": {
             "post": {
                 "security": [
@@ -2187,6 +2449,137 @@
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/invoice/bulk-upload/{bulk_id}/failed": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve the failed invoices recorded for a specific bulk upload belonging to the authenticated business",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invoice"
+                ],
+                "summary": "Get failed invoices from a bulk upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bulk upload ID",
+                        "name": "bulk_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bulk upload failed invoices fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.GetBulkUploadFailedInvoicesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Bulk upload not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/invoice/bulk-upload/{bulk_id}/failed/download": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Download the failed invoices recorded for a specific bulk upload belonging to the authenticated business as csv or excel",
+                "produces": [
+                    "text/csv",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "tags": [
+                    "Invoice"
+                ],
+                "summary": "Download failed invoices from a bulk upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bulk upload ID",
+                        "name": "bulk_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "csv",
+                            "excel",
+                            "xlsx"
+                        ],
+                        "type": "string",
+                        "description": "Export format",
+                        "name": "format",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bulk upload failed invoices file",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Bulk upload not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -2868,6 +3261,55 @@
                     },
                     "400": {
                         "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Re-uploads an invoice with the same invoice_number. Deprecates the old invoice on NRS (REJECTED), generates a fresh IRN.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Internal Invoice"
+                ],
+                "summary": "Modify an existing invoice",
+                "parameters": [
+                    {
+                        "description": "Invoice Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice modified successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UploadInvoiceResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -3772,6 +4214,104 @@
                 }
             }
         },
+        "dtos.BulkUploadFailedInvoiceDto": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "object"
+                },
+                "invoice": {
+                    "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                },
+                "invoice_index": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "invoice_number": {
+                    "type": "string",
+                    "example": "VA12239"
+                },
+                "reason": {
+                    "type": "string",
+                    "example": "duplicate invoice sent"
+                },
+                "stage": {
+                    "type": "string",
+                    "example": "validated_invoice"
+                }
+            }
+        },
+        "dtos.BulkUploadFailedInvoicesDto": {
+            "type": "object",
+            "properties": {
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "4f6ec813-c898-49ce-8fc7-46f529a9354a"
+                },
+                "bulk_upload_id": {
+                    "type": "string",
+                    "example": "019d28e5-bfad-7211-a56f-4e3376a67cf9"
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "ac0d4848-c898-49ce-8fc7-46f529a9354a"
+                },
+                "completed_at": {
+                    "type": "string",
+                    "example": "2026-03-26T07:47:21.591765+01:00"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-03-26T07:47:19.286025+01:00"
+                },
+                "failed_invoices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.BulkUploadFailedInvoiceDto"
+                    }
+                },
+                "failed_invoices_count": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "file_key": {
+                    "type": "string",
+                    "example": "invoices/sample.xlsx"
+                },
+                "file_url": {
+                    "type": "string",
+                    "example": "https://nexar-file-uploads.s3.amazonaws.com/invoices/sample.xlsx"
+                },
+                "partially_successful_invoices": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "started_at": {
+                    "type": "string",
+                    "example": "2026-03-26T07:47:21.584844+01:00"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "completed"
+                },
+                "successful_invoices": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "total_records": {
+                    "type": "integer",
+                    "example": 4
+                },
+                "unsuccessful_invoices": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "valid_records": {
+                    "type": "integer",
+                    "example": 3
+                }
+            }
+        },
         "dtos.BulkUploadLogDto": {
             "type": "object",
             "properties": {
@@ -3850,6 +4390,9 @@
                     "type": "string",
                     "example": "invoice VA12239: validation failed: Key: 'UploadInvoiceRequestDto.InvoiceTypeCode' Error:Field validation for 'InvoiceTypeCode' failed on the 'oneof' tag"
                 },
+                "invoice": {
+                    "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                },
                 "invoice_index": {
                     "type": "integer",
                     "example": 1
@@ -3857,6 +4400,10 @@
                 "invoice_number": {
                     "type": "string",
                     "example": "VA12239"
+                },
+                "stage": {
+                    "type": "string",
+                    "example": "validation"
                 }
             }
         },
@@ -3950,6 +4497,25 @@
                 "used_invoices": {
                     "type": "integer",
                     "example": 120
+                }
+            }
+        },
+        "dtos.ChangePasswordDto": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "old_password"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "newpassword123"
+                },
+                "old_password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "password123"
                 }
             }
         },
@@ -4078,6 +4644,26 @@
                 }
             }
         },
+        "dtos.GetBulkUploadFailedInvoicesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.BulkUploadFailedInvoicesDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
         "dtos.GetBulkUploadLogsResponseDto": {
             "type": "object",
             "properties": {
@@ -4122,6 +4708,11 @@
                     "type": "string",
                     "example": "BUS-12345"
                 },
+                "company_name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "example": "Acme Inc."
+                },
                 "created_at": {
                     "type": "string",
                     "example": "2026-01-16T12:00:00Z"
@@ -4142,12 +4733,20 @@
                     "type": "string",
                     "example": "Acme Inc."
                 },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
                 "platform_configs": {
                     "$ref": "#/definitions/dtos.PlatformConfigsAuth"
                 },
                 "service_id": {
                     "type": "string",
                     "example": "SRV-98765"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "123456789"
                 },
                 "updated_at": {
                     "type": "string",
@@ -4738,7 +5337,10 @@
                         "EXPORT_DUTY",
                         "LUXURY_TAX",
                         "SERVICE_TAX",
-                        "TOURISM_TAX"
+                        "TOURISM_TAX",
+                        "WITHHOLDING_TAX",
+                        "STAMP_DUTY",
+                        "EXEMPTED"
                     ],
                     "example": "STANDARD_VAT"
                 },
@@ -4834,10 +5436,6 @@
                     "type": "string",
                     "example": "paystack"
                 },
-                "provider_reference": {
-                    "type": "string",
-                    "example": "ref_123456789"
-                },
                 "reference": {
                     "type": "string",
                     "example": "txn_123456789"
@@ -4927,6 +5525,7 @@
                 "accounting_supplier_party",
                 "business_id",
                 "document_currency_code",
+                "invoice_kind",
                 "invoice_line",
                 "invoice_type_code",
                 "issue_date",
@@ -4935,12 +5534,6 @@
                 "tax_total"
             ],
             "properties": {
-                "_document_reference": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.DocumentReference"
-                    }
-                },
                 "accounting_cost": {
                     "type": "string",
                     "example": "2000"
@@ -4954,6 +5547,12 @@
                 "actual_delivery_date": {
                     "type": "string",
                     "example": "2026-01-16"
+                },
+                "additional_document_reference": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.DocumentReference"
+                    }
                 },
                 "allowance_charge": {
                     "type": "array",
@@ -4991,6 +5590,15 @@
                 },
                 "invoice_delivery_period": {
                     "$ref": "#/definitions/dtos.InvoiceDeliveryPeriod"
+                },
+                "invoice_kind": {
+                    "type": "string",
+                    "enum": [
+                        "B2C",
+                        "B2B",
+                        "B2G"
+                    ],
+                    "example": "B2B"
                 },
                 "invoice_line": {
                     "type": "array",
@@ -5079,10 +5687,6 @@
                 },
                 "receipt_document_reference": {
                     "$ref": "#/definitions/dtos.DocumentReference"
-                },
-                "sme_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "tax_currency_code": {
                     "type": "string",

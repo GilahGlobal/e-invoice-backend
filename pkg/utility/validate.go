@@ -146,3 +146,8 @@ func IsValidNRSDate(fl validator.FieldLevel) bool {
 	_, err := time.Parse("2006-01-02", fl.Field().String())
 	return err == nil
 }
+
+func ValidateHSNCode(fl validator.FieldLevel) bool {
+	hsnCodeRegex := regexp.MustCompile(`^\d{4}\.\d{2}$`)
+	return hsnCodeRegex.MatchString(fl.Field().String())
+}
