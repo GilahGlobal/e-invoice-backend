@@ -4510,7 +4510,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "123456789012345"
+                    "example": "33467982-0001"
                 }
             }
         },
