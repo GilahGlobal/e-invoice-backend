@@ -4218,11 +4218,11 @@ const docTemplate = `{
                 },
                 "invoice_number": {
                     "type": "string",
-                    "example": "INV-1001"
+                    "example": "INV1001"
                 },
                 "irn": {
                     "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "platform": {
                     "description": "e.g., zoho, quickbooks",
@@ -4253,11 +4253,11 @@ const docTemplate = `{
             "properties": {
                 "invoice_number": {
                     "type": "string",
-                    "example": "INV-1001"
+                    "example": "INV1001"
                 },
                 "irn": {
                     "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "qr_code": {
                     "type": "string",
@@ -4461,11 +4461,11 @@ const docTemplate = `{
                 },
                 "invoice_number": {
                     "type": "string",
-                    "example": "INV-1001"
+                    "example": "INV1001"
                 },
                 "irn": {
                     "type": "string",
-                    "example": "INV-1001-a456-426614174000"
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "platform": {
                     "type": "string",
@@ -4640,7 +4640,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "TIN-123456789"
+                    "example": "33897123-0001"
                 }
             }
         },
@@ -4751,7 +4751,7 @@ const docTemplate = `{
                 },
                 "percent": {
                     "type": "number",
-                    "example": 15
+                    "example": 0.075
                 }
             }
         },
@@ -5008,7 +5008,7 @@ const docTemplate = `{
                 "invoice_number": {
                     "type": "string",
                     "minLength": 1,
-                    "example": "INV-001"
+                    "example": "INV001"
                 },
                 "invoice_type_code": {
                     "type": "string",
@@ -5038,7 +5038,7 @@ const docTemplate = `{
                 },
                 "irn": {
                     "type": "string",
-                    "example": "IRN-001-20122345"
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "issue_date": {
                     "type": "string",
