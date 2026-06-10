@@ -155,9 +155,11 @@ func IRNGeneration(db *gorm.DB, ownerID, invoiceNumber, serviceId, businessID st
 }
 
 func DeprecateInvoiceOnNRS(oldIRN string, isSandbox bool) error {
-	_, _, err := UpdateInvoice(firs_models.UpdateInvoice{
+	theResp, _, err := UpdateInvoice(firs_models.UpdateInvoice{
 		PaymentStatus: "REJECTED",
 	}, oldIRN, isSandbox)
+
+	fmt.Println("Invoice depreciated successful: ", theResp)
 	return err
 }
 
@@ -201,4 +203,8 @@ func ReplaceInvoiceRecord(db *gorm.DB, existing *models.Invoice, payload dtos.Up
 	}
 
 	return newInvoice, nil
+}
+
+func GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*dtos.InvoiceStatsDto, error) {
+	return repository.GetInvoiceStats(db, businessID, aggregatorID)
 }

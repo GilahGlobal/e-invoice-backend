@@ -755,6 +755,20 @@ definitions:
         example: 200
         type: integer
     type: object
+  dtos.GetInvoiceStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.InvoiceStatsDto'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   dtos.InitiateForgotPasswordDto:
     properties:
       email:
@@ -867,6 +881,21 @@ definitions:
     - line_extension_amount
     - price
     - product_category
+    type: object
+  dtos.InvoiceStatsDto:
+    properties:
+      failed_invoices:
+        example: 20
+        type: integer
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      total_invoices:
+        example: 150
+        type: integer
     type: object
   dtos.InvoiceStepMetadata:
     properties:
@@ -1122,6 +1151,14 @@ definitions:
         type: string
     required:
     - invitation_id
+    type: object
+  dtos.SendAggregatorInvitationDto:
+    properties:
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    required:
+    - aggregator_id
     type: object
   dtos.SubscriptionPlansResponseDto:
     properties:
@@ -2064,6 +2101,39 @@ paths:
       summary: Update Business Setup
       tags:
       - Aggregator Portal
+  /aggregator/businesses/{id}/stats:
+    get:
+      consumes:
+      - application/json
+      description: Returns overall statistics for invoices including total, partial,
+        successful, and failed for a specific business managed by the aggregator.
+      parameters:
+      - description: Business ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice statistics fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.GetInvoiceStatsResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Get invoice statistics for a specific business under an aggregator
+      tags:
+      - Aggregator Portal
   /aggregator/dashboard:
     get:
       description: Fetch high level stats for aggregator dashboard
@@ -2265,6 +2335,28 @@ paths:
       security:
       - BearerAuth: []
       summary: Upload Invoice
+      tags:
+      - Aggregator Portal
+  /aggregator/stats:
+    get:
+      consumes:
+      - application/json
+      description: Returns overall statistics for invoices including total, partial,
+        successful, and failed for all businesses under the aggregator.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice statistics fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.GetInvoiceStatsResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Get invoice statistics for aggregator
       tags:
       - Aggregator Portal
   /aggregator/subscription/plans:
@@ -2591,7 +2683,7 @@ paths:
       summary: Register
       tags:
       - Auth
-  /auth/resend-verification-otp:
+  /auth/resend-otp:
     post:
       consumes:
       - application/json
@@ -2842,6 +2934,13 @@ paths:
   /business/aggregators/invite:
     post:
       description: Send an invitation to an aggregator
+      parameters:
+      - description: Send aggregator invitation request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.SendAggregatorInvitationDto'
       produces:
       - application/json
       responses:
@@ -3565,6 +3664,28 @@ paths:
       security:
       - BearerAuth: []
       summary: Sign IRN
+      tags:
+      - Invoice
+  /invoice/stats:
+    get:
+      consumes:
+      - application/json
+      description: Returns statistics for invoices including total, partial, successful,
+        and failed.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice statistics fetched successfully
+          schema:
+            $ref: '#/definitions/dtos.GetInvoiceStatsResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Get invoice statistics
       tags:
       - Invoice
   /invoice/transmit/{irn}:

@@ -100,7 +100,7 @@ func (base *Controller) Register(c *fiber.Ctx) error {
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 422 {object} models.Response "Unprocessable entity"
 // @Failure 500 {object} models.Response "Internal server error"
-// @Router /auth/resend-verification-otp [post]
+// @Router /auth/resend-otp [post]
 func (base *Controller) ResendVerificationOTP(c *fiber.Ctx) error {
 	var req dtos.ResendVerificationOtpDto
 
