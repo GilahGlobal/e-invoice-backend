@@ -1,6 +1,7 @@
 package invoice
 
 import (
+	"einvoice-access-point/internal/dtos"
 	"einvoice-access-point/pkg/database"
 	"einvoice-access-point/pkg/models"
 	"encoding/json"
@@ -259,4 +260,45 @@ func FindBulkUploadLogsByBusinessID(db database.DatabaseManager, businessID stri
 		PageCount:       len(result),
 		TotalPagesCount: totalPages,
 	}, nil
+}
+
+func GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*dtos.InvoiceStatsDto, error) {
+	var result dtos.InvoiceStatsDto
+
+	query := `
+	SELECT 
+		COUNT(*) AS total_invoices,
+		SUM(CASE WHEN current_status = 'confirmed_invoice' THEN 1 ELSE 0 END) AS successful_invoices,
+		SUM(CASE WHEN current_status IN ('signed_invoice', 'transmitted_invoice') THEN 1 ELSE 0 END) AS partial_invoices,
+		SUM(CASE 
+			WHEN current_status NOT IN ('confirmed_invoice', 'signed_invoice', 'transmitted_invoice') 
+			AND (
+				SELECT COALESCE(entry->>'status', 'pending')
+				FROM jsonb_array_elements(status_history) AS entry
+				WHERE entry->>'step' = invoices.current_status
+				ORDER BY entry->>'timestamp' DESC
+				LIMIT 1
+			) = 'failed' THEN 1 ELSE 0 END) AS failed_invoices
+	FROM invoices
+	WHERE deleted_at IS NULL
+	`
+
+	args := []interface{}{}
+
+	if businessID != nil && *businessID != "" {
+		query += " AND business_id = ?"
+		args = append(args, *businessID)
+	}
+
+	if aggregatorID != nil && *aggregatorID != "" {
+		query += " AND aggregator_id = ?"
+		args = append(args, *aggregatorID)
+	}
+
+	err := db.Raw(query, args...).Scan(&result).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }

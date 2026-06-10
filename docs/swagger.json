@@ -601,6 +601,56 @@
                 }
             }
         },
+        "/aggregator/businesses/{id}/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns overall statistics for invoices including total, partial, successful, and failed for a specific business managed by the aggregator.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Get invoice statistics for a specific business under an aggregator",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice statistics fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.GetInvoiceStatsResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/aggregator/dashboard": {
             "get": {
                 "security": [
@@ -914,6 +964,40 @@
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns overall statistics for invoices including total, partial, successful, and failed for all businesses under the aggregator.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Get invoice statistics for aggregator",
+                "responses": {
+                    "200": {
+                        "description": "Invoice statistics fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.GetInvoiceStatsResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -1422,7 +1506,7 @@
                 }
             }
         },
-        "/auth/resend-verification-otp": {
+        "/auth/resend-otp": {
             "post": {
                 "description": "Resend email verification OTP",
                 "consumes": [
@@ -1826,6 +1910,17 @@
                     "Business Aggregator Portal"
                 ],
                 "summary": "Send Invitation",
+                "parameters": [
+                    {
+                        "description": "Send aggregator invitation request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.SendAggregatorInvitationDto"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Invitation sent successfully",
@@ -2862,6 +2957,40 @@
                     },
                     "422": {
                         "description": "Validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/invoice/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns statistics for invoices including total, partial, successful, and failed.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invoice"
+                ],
+                "summary": "Get invoice statistics",
+                "responses": {
+                    "200": {
+                        "description": "Invoice statistics fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.GetInvoiceStatsResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4774,6 +4903,26 @@
                 }
             }
         },
+        "dtos.GetInvoiceStatsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.InvoiceStatsDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
         "dtos.InitiateForgotPasswordDto": {
             "type": "object",
             "required": [
@@ -4927,6 +5076,27 @@
                 "product_category": {
                     "type": "string",
                     "example": "Electronics"
+                }
+            }
+        },
+        "dtos.InvoiceStatsDto": {
+            "type": "object",
+            "properties": {
+                "failed_invoices": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "partial_invoices": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "successful_invoices": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 150
                 }
             }
         },
@@ -5276,6 +5446,18 @@
                     "example": true
                 },
                 "invitation_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "dtos.SendAggregatorInvitationDto": {
+            "type": "object",
+            "required": [
+                "aggregator_id"
+            ],
+            "properties": {
+                "aggregator_id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 }

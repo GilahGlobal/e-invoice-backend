@@ -27,6 +27,7 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, validator *validator.Valida
 		webhookUrl.Post("/firs", invoiceController.FirsWebhook)
 	}
 	{
+		invoiceUrlSec.Get("/stats", invoiceController.GetInvoiceStats)
 		invoiceUrlSec.Get("", invoiceController.GetAllInvoices)
 		invoiceUrlSec.Get("/bulk-upload", invoiceController.GetBulkUploadLogs)
 		invoiceUrlSec.Get("/bulk-upload/:bulk_id/failed", invoiceController.GetBulkUploadFailedInvoices)

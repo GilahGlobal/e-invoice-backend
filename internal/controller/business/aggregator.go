@@ -67,6 +67,7 @@ func (base *Controller) ListAvailableAggregators(c *fiber.Ctx) error {
 // @Tags Business Aggregator Portal
 // @Produce json
 // @Security BearerAuth
+// @Param data body dtos.SendAggregatorInvitationDto true "Send aggregator invitation request payload"
 // @Success 200 {object} dtos.BaseResponseDto "Invitation sent successfully"
 // @Failure 401 {object} models.Response "Unauthorized"
 // @Failure 500 {object} models.Response "Internal server error"

@@ -616,7 +616,7 @@ func (base *Controller) ModifyInvoice(c *fiber.Ctx) error {
 	req.IRN = &irnData.IRN
 
 	// Hard-replace the old record in-place
-	replacedInvoice, err := invoice.ReplaceInvoiceRecord(db, existingInvoice, req, irnData.IRN, irnData.QRCode, irnData.QRCode2, client)
+	replacedInvoice, err := invoice.ReplaceInvoiceRecord(db, existingInvoice, req, *req.IRN, irnData.QRCode, irnData.QRCode2, client)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
 		return c.Status(fiber.StatusInternalServerError).JSON(rd)
@@ -645,5 +645,41 @@ func (base *Controller) ModifyInvoice(c *fiber.Ctx) error {
 	}
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice modified successfully", response)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// GetInvoiceStats godoc
+// @Summary Get invoice statistics
+// @Description Returns statistics for invoices including total, partial, successful, and failed.
+// @Tags Invoice
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dtos.GetInvoiceStatsResponseDto "Invoice statistics fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Router /invoice/stats [get]
+func (base *Controller) GetInvoiceStats(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+
+	var businessID, aggregatorID *string
+	if userDetails.IsAggregator {
+		aggregatorID = &userDetails.ID
+	} else {
+		businessID = &userDetails.ID
+	}
+
+	stats, err := invoice.GetInvoiceStats(db, businessID, aggregatorID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", "failed to retrieve invoice stats", err, nil)
+		return c.Status(fiber.StatusInternalServerError).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice statistics fetched successfully", stats)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
