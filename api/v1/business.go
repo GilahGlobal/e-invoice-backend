@@ -25,6 +25,7 @@ func BusinessRoute(app *fiber.App, ApiVersion string, validator *validator.Valid
 		// Aggregator routing
 		businessUrlSec.Get("/aggregators", businessController.ListAvailableAggregators)
 		businessUrlSec.Post("/aggregators/invite", businessController.SendAggregatorInvitation)
+		businessUrlSec.Post("/aggregators/invite-by-email", businessController.SendAggregatorInvitationByEmail)
 		businessUrlSec.Get("/aggregators/invitations", businessController.ListSentInvitations)
 		businessUrlSec.Delete("/aggregators/invitations/:id", businessController.RevokeAggregatorInvitation)
 	}
