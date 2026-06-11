@@ -489,6 +489,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	var irnPayload dtos.InvoiceData
+	log.Println("irn ", req.IRN, " ", *req.IRN)
 	if req.IRN == nil {
 		IRNData, err := invoice.IRNGeneration(db, userDetails.ID, req.InvoiceNumber, setup.ServiceID, req.BusinessID, userDetails.IsSandbox)
 		if err != nil {
@@ -498,14 +499,23 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		irnPayload = *IRNData
 		req.IRN = &irnPayload.IRN
 	} else {
-		irnPayload = dtos.InvoiceData{
-			InvoiceNumber: req.InvoiceNumber,
-			IRN:           *req.IRN,
-			QRCode:        invoiceExists.QrCode,
-			QRCode2:       invoiceExists.EncryptedIRN,
+		if invoiceExists == nil {
+			irnPayload = dtos.InvoiceData{
+				InvoiceNumber: req.InvoiceNumber,
+				IRN:           *req.IRN,
+				QRCode:        "",
+				QRCode2:       "",
+			}
+		} else {
+			irnPayload = dtos.InvoiceData{
+				InvoiceNumber: req.InvoiceNumber,
+				IRN:           *req.IRN,
+				QRCode:        invoiceExists.QrCode,
+				QRCode2:       invoiceExists.EncryptedIRN,
+			}
 		}
 	}
-
+	log.Println("nkfknfdjn")
 	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil, client)
 
 	response := map[string]interface{}{

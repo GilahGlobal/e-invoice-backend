@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -23,9 +24,9 @@ func SendInvitation(businessID, aggregatorID string, db *gorm.DB) (int, error) {
 		return http.StatusNotFound, fmt.Errorf("business not found")
 	}
 
-	// if business.BusinessID == nil {
-	// 	return fiber.StatusForbidden, fmt.Errorf("Business ID missing")
-	// }
+	if business.BusinessID == nil {
+		return fiber.StatusForbidden, fmt.Errorf("Business ID has not been updated")
+	}
 	// Check if business already has an aggregator
 	if business.AggregatorID != nil && *business.AggregatorID != "" {
 		return http.StatusBadRequest, fmt.Errorf("business already has an aggregator assigned")
@@ -245,9 +246,9 @@ func SendInvitationByEmail(businessID, email string, db *gorm.DB) (int, error) {
 		return http.StatusNotFound, fmt.Errorf("business not found")
 	}
 
-	// if business.BusinessID == nil {
-	// 	return fiber.StatusForbidden, fmt.Errorf("Business ID has not been updated")
-	// }
+	if business.BusinessID == nil {
+		return fiber.StatusForbidden, fmt.Errorf("Business ID has not been updated")
+	}
 
 	// Check if business already has an aggregator
 	if business.AggregatorID != nil && *business.AggregatorID != "" {
