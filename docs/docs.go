@@ -1950,6 +1950,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/business/aggregators/invite-by-email": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send an invitation to an aggregator by their email. If they do not exist, creates a profile for them.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business Aggregator Portal"
+                ],
+                "summary": "Send Invitation By Email",
+                "parameters": [
+                    {
+                        "description": "Send aggregator invitation by email request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.SendAggregatorInvitationByEmailDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invitation sent successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/business/change-password": {
             "post": {
                 "security": [
@@ -5455,6 +5503,18 @@ const docTemplate = `{
                 "invitation_id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "dtos.SendAggregatorInvitationByEmailDto": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "aggregator@example.com"
                 }
             }
         },

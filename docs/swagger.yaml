@@ -1152,6 +1152,14 @@ definitions:
     required:
     - invitation_id
     type: object
+  dtos.SendAggregatorInvitationByEmailDto:
+    properties:
+      email:
+        example: aggregator@example.com
+        type: string
+    required:
+    - email
+    type: object
   dtos.SendAggregatorInvitationDto:
     properties:
       aggregator_id:
@@ -2959,6 +2967,37 @@ paths:
       security:
       - BearerAuth: []
       summary: Send Invitation
+      tags:
+      - Business Aggregator Portal
+  /business/aggregators/invite-by-email:
+    post:
+      description: Send an invitation to an aggregator by their email. If they do
+        not exist, creates a profile for them.
+      parameters:
+      - description: Send aggregator invitation by email request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.SendAggregatorInvitationByEmailDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitation sent successfully
+          schema:
+            $ref: '#/definitions/dtos.BaseResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - BearerAuth: []
+      summary: Send Invitation By Email
       tags:
       - Business Aggregator Portal
   /business/change-password:

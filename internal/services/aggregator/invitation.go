@@ -4,6 +4,7 @@ import (
 	"einvoice-access-point/internal/dtos"
 	aggregatorRepo "einvoice-access-point/internal/repository/aggregator"
 	businessRepo "einvoice-access-point/internal/repository/business"
+	"einvoice-access-point/pkg/config"
 	inst "einvoice-access-point/pkg/dbinit"
 	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/resend_email"
@@ -12,7 +13,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -23,9 +23,9 @@ func SendInvitation(businessID, aggregatorID string, db *gorm.DB) (int, error) {
 		return http.StatusNotFound, fmt.Errorf("business not found")
 	}
 
-	if business.BusinessID == nil {
-		return fiber.StatusForbidden, fmt.Errorf("Business ID missing")
-	}
+	// if business.BusinessID == nil {
+	// 	return fiber.StatusForbidden, fmt.Errorf("Business ID missing")
+	// }
 	// Check if business already has an aggregator
 	if business.AggregatorID != nil && *business.AggregatorID != "" {
 		return http.StatusBadRequest, fmt.Errorf("business already has an aggregator assigned")
@@ -43,7 +43,9 @@ func SendInvitation(businessID, aggregatorID string, db *gorm.DB) (int, error) {
 		return http.StatusInternalServerError, fmt.Errorf("failed to check existing invitations: %w", err)
 	}
 	if existing != nil {
-		return http.StatusBadRequest, fmt.Errorf("an active invitation already exists for this aggregator")
+		// If invitation already exists, we resend the email to be idempotent
+		resend_email.SendAggregatorInvitationEmail(aggregator.Email, business.CompanyName)
+		return http.StatusOK, nil
 	}
 
 	// Create invitation
@@ -234,4 +236,87 @@ func ListAvailableAggregators(search string, page, size int, db *gorm.DB) ([]dto
 	}
 
 	return result, total, nil
+}
+
+func SendInvitationByEmail(businessID, email string, db *gorm.DB) (int, error) {
+	// Check business exists
+	var business models.Business
+	if err := db.Where("id = ?", businessID).First(&business).Error; err != nil {
+		return http.StatusNotFound, fmt.Errorf("business not found")
+	}
+
+	// if business.BusinessID == nil {
+	// 	return fiber.StatusForbidden, fmt.Errorf("Business ID has not been updated")
+	// }
+
+	// Check if business already has an aggregator
+	if business.AggregatorID != nil && *business.AggregatorID != "" {
+		return http.StatusBadRequest, fmt.Errorf("business already has an aggregator assigned")
+	}
+
+	// Look up aggregator by email
+	var existingAggregator models.Business
+	err := db.Where("email = ? AND is_aggregator = ?", email, true).First(&existingAggregator).Error
+
+	if err == nil {
+		// Aggregator exists!
+		// Check if they are a pending aggregator we created earlier
+		if existingAggregator.Name == "Pending Aggregator" || !existingAggregator.EmailVerified {
+			// Find existing invitation
+			existingInvite, _ := aggregatorRepo.CheckExistingActiveInvitation(db, businessID, existingAggregator.ID)
+			if existingInvite != nil {
+				// Resend signup email
+				appUrl := config.GetConfig().App.Url
+				signupLink := fmt.Sprintf("%s/aggregator/signup?invite=%s&email=%s", appUrl, existingInvite.InviteToken, email)
+				resend_email.SendNewAggregatorInvitationEmail(email, business.CompanyName, signupLink)
+				return http.StatusOK, nil
+			}
+		}
+		// Otherwise fallback to normal SendInvitation which is now idempotent too
+		return SendInvitation(businessID, existingAggregator.ID, db)
+	} else if err != gorm.ErrRecordNotFound {
+		return http.StatusInternalServerError, fmt.Errorf("database error checking for aggregator: %w", err)
+	}
+
+	// Aggregator does not exist. We create a pending aggregator profile.
+	newAggregatorID := utility.GenerateUUID()
+	hashPassword, _ := utility.HashPassword(utility.GenerateUUID() + utility.GenerateUUID())
+
+	newAggregator := models.Business{
+		ID:            newAggregatorID,
+		Name:          "Pending Aggregator",
+		CompanyName:   "Pending Aggregator",
+		Email:         email,
+		Password:      hashPassword,
+		IsAggregator:  true,
+		EmailVerified: false,
+		AccStatus:     0,
+		ServiceID:     business.ServiceID, // Default to same service ID
+	}
+
+	if err := db.Create(&newAggregator).Error; err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to create pending aggregator profile: %w", err)
+	}
+
+	// Create invitation
+	inviteToken := utility.GenerateUUID()
+	invitation := &models.AggregatorInvitation{
+		ID:           utility.GenerateUUID(),
+		BusinessID:   businessID,
+		AggregatorID: newAggregatorID,
+		Status:       models.InvitationStatusPending,
+		InviteToken:  inviteToken,
+	}
+
+	if err := aggregatorRepo.CreateInvitation(invitation, db); err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to create invitation: %w", err)
+	}
+
+	// Send email notification to new aggregator
+	appUrl := config.GetConfig().App.Url
+	signupLink := fmt.Sprintf("%s/aggregator/signup?invite=%s&email=%s", appUrl, inviteToken, email)
+
+	resend_email.SendNewAggregatorInvitationEmail(email, business.CompanyName, signupLink)
+
+	return http.StatusCreated, nil
 }

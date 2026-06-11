@@ -206,3 +206,49 @@ func mapToGeneric(invitations []dtos.BusinessInvitationDto) []dtos.AggregatorInv
 	}
 	return result
 }
+
+// @Summary Send Invitation By Email
+// @Description Send an invitation to an aggregator by their email. If they do not exist, creates a profile for them.
+// @Tags Business Aggregator Portal
+// @Produce json
+// @Security BearerAuth
+// @Param data body dtos.SendAggregatorInvitationByEmailDto true "Send aggregator invitation by email request payload"
+// @Success 200 {object} dtos.BaseResponseDto "Invitation sent successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Failure 500 {object} models.Response "Internal server error"
+// @Router /business/aggregators/invite-by-email [post]
+func (base *Controller) SendAggregatorInvitationByEmail(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	if userDetails.IsAggregator {
+		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Aggregator account cannot send invitations", nil, nil)
+		return c.Status(fiber.StatusForbidden).JSON(rd)
+	}
+
+	var req dtos.SendAggregatorInvitationByEmailDto
+	if err := c.BodyParser(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	if err := base.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationErrorsToJSON(err, dtos.SendAggregatorInvitationByEmailDto{}), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDb)
+
+	status, err := aggregatorSvc.SendInvitationByEmail(userDetails.ID, req.Email, db)
+	if err != nil {
+		rd := utility.BuildErrorResponse(status, "error", err.Error(), err, nil)
+		return c.Status(status).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(status, "Invitation sent successfully to email", nil)
+	return c.Status(status).JSON(rd)
+}
