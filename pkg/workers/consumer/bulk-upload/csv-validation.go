@@ -432,6 +432,7 @@ func (cp *CSVProcessor) validateRequiredHeaders(headerIndex map[string]int) erro
 		"legal_monetary_total.tax_inclusive_amount",
 		"legal_monetary_total.payable_amount",
 		"invoice_line",
+		"invoice_kind",
 		"supplier_party.party_name",
 		"supplier_party.tin",
 		"supplier_party.email",
@@ -532,43 +533,67 @@ func (cp *CSVProcessor) parseCSVRow(headerIndex map[string]int, row []string, ro
 // getFieldDefinitions returns field definitions (field name -> required)
 func (cp *CSVProcessor) getFieldDefinitions() map[string]bool {
 	return map[string]bool{
-		"invoice_number":                true,
-		"issue_date":                    true,
-		"invoice_type_code":             true,
-		"document_currency_code":        true,
-		"tax_currency_code":             true,
-		"accounting_supplier_party":     true,
-		"tax_total":                     true,
-		"legal_monetary_total":          true,
-		"invoice_line":                  true,
-		"payment_status":                false,
-		"irn":                           false,
-		"due_date":                      false,
-		"issue_time":                    false,
-		"note":                          false,
-		"tax_point_date":                false,
-		"accounting_cost":               false,
-		"buyer_reference":               false,
-		"order_reference":               false,
-		"actual_delivery_date":          false,
-		"payment_terms_note":            false,
-		"accounting_customer_party":     false,
-		"payee_party":                   false,
-		"tax_representative_party":      false,
-		"invoice_delivery_period":       false,
-		"billing_reference":             false,
-		"dispatch_document_reference":   false,
-		"receipt_document_reference":    false,
-		"originator_document_reference": false,
-		"contract_document_reference":   false,
-		"additional_document_reference": false,
-		"payment_means":                 false,
-		"allowance_charge":              false,
+		"invoice_number":         true,
+		"issue_date":             true,
+		"invoice_type_code":      true,
+		"document_currency_code": true,
+		"tax_currency_code":      true,
+		"tax_total":              true,
+		"legal_monetary_total.line_extension_amount": true,
+		"legal_monetary_total.tax_exclusive_amount":  true,
+		"legal_monetary_total.tax_inclusive_amount":  true,
+		"legal_monetary_total.payable_amount":        true,
+		"invoice_line":                               true,
+		"supplier_party.party_name":                  true,
+		"supplier_party.tin":                         true,
+		"supplier_party.email":                       true,
+		"supplier_party.street_name":                 true,
+		"supplier_party.city_name":                   true,
+		"supplier_party.postal_zone":                 true,
+		"supplier_party.lga":                         true,
+		"supplier_party.state":                       true,
+		"supplier_party.country":                     true,
+		"invoice_kind":                               true,
+		"payment_status":                             false,
+		"irn":                                        false,
+		"due_date":                                   false,
+		"issue_time":                                 false,
+		"note":                                       false,
+		"customer_party.party_name":                  false,
+		"customer_party.tin":                         false,
+		"customer_party.email":                       false,
+		"customer_party.street_name":                 false,
+		"customer_party.city_name":                   false,
+		"customer_party.postal_zone":                 false,
+		"customer_party.lga":                         false,
+		"customer_party.state":                       false,
+		"customer_party.country":                     false,
+		"tax_point_date":                             false,
+		"accounting_cost":                            false,
+		"buyer_reference":                            false,
+		"order_reference":                            false,
+		"actual_delivery_date":                       false,
+		"payment_terms_note":                         false,
+		"payee_party":                                false,
+		"tax_representative_party":                   false,
+		"invoice_delivery_period":                    false,
+		"billing_reference":                          false,
+		"dispatch_document_reference":                false,
+		"receipt_document_reference":                 false,
+		"originator_document_reference":              false,
+		"contract_document_reference":                false,
+		"additional_document_reference":              false,
+		"payment_means":                              false,
+		"allowance_charge":                           false,
 	}
 }
 
 // parseField parses a single field value
 func (cp *CSVProcessor) parseField(fieldName, value string, invoice *dtos.UploadInvoiceRequestDto) error {
+	if strings.HasPrefix(fieldName, "customer_party.") && invoice.AccountingCustomerParty == nil {
+		invoice.AccountingCustomerParty = &dtos.Party{}
+	}
+
 	switch fieldName {
 	// String fields
 	case "invoice_number":
@@ -596,6 +621,8 @@ func (cp *CSVProcessor) parseField(fieldName, value string, invoice *dtos.Upload
 		invoice.PaymentStatus = stringPtr(value)
 	case "irn":
 		invoice.IRN = stringPtr(value)
+	case "invoice_kind":
+		invoice.InvoiceKind = value
 	case "due_date":
 		if value != "" && !IsValidDate(value) {
 			return fmt.Errorf("invalid date format, expected YYYY-MM-DD")
@@ -650,6 +677,30 @@ func (cp *CSVProcessor) parseField(fieldName, value string, invoice *dtos.Upload
 		invoice.AccountingSupplierParty.PostalAddress.State = value
 	case "supplier_party.country":
 		invoice.AccountingSupplierParty.PostalAddress.Country = value
+
+		// Accounting customer Json flattened
+	case "customer_party.party_name":
+		invoice.AccountingCustomerParty.PartyName = value
+	case "customer_party.tin":
+		invoice.AccountingCustomerParty.TIN = value
+	case "customer_party.email":
+		invoice.AccountingCustomerParty.Email = value
+	case "customer_party.telephone":
+		invoice.AccountingCustomerParty.Telephone = stringPtr(value)
+	case "customer_party.business_description":
+		invoice.AccountingCustomerParty.BusinessDescription = stringPtr(value)
+	case "customer_party.street_name":
+		invoice.AccountingCustomerParty.PostalAddress.StreetName = value
+	case "customer_party.city_name":
+		invoice.AccountingCustomerParty.PostalAddress.CityName = value
+	case "customer_party.postal_zone":
+		invoice.AccountingCustomerParty.PostalAddress.PostalZone = value
+	case "customer_party.lga":
+		invoice.AccountingCustomerParty.PostalAddress.LGA = value
+	case "customer_party.state":
+		invoice.AccountingCustomerParty.PostalAddress.State = value
+	case "customer_party.country":
+		invoice.AccountingCustomerParty.PostalAddress.Country = value
 
 	// legal_monetary_total json flattened
 	case "legal_monetary_total.line_extension_amount":

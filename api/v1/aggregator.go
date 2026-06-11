@@ -27,12 +27,14 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, db, testDB *database.Dat
 
 	// Portal - Dashboard & Invitations
 	protected.Get("/dashboard", controller.Dashboard)
+	protected.Get("/stats", controller.GetInvoiceStats)
 	protected.Get("/invitations", controller.ListInvitations)
 	protected.Post("/invitations/respond", controller.RespondToInvitation)
 
 	// Portal - Business Management
 	protected.Get("/businesses", controller.ListBusinesses)
 	protected.Get("/businesses/:id", controller.GetBusinessDetail)
+	protected.Get("/businesses/:id/stats", controller.GetBusinessInvoiceStats)
 	protected.Delete("/businesses/:id", controller.RemoveBusiness)
 	protected.Patch("/businesses/:id", controller.UpdateBusinessSetup)
 

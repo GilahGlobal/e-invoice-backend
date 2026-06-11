@@ -16,6 +16,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -44,6 +45,10 @@ func NewBulkUploadConsumer(db, testDB *database.Database, logger *utility.Logger
 		dateStr := fl.Field().String()
 		_, err := time.Parse("2006-01-02", dateStr)
 		return err == nil
+	})
+	v.RegisterValidation("hsncode", func(fl validator.FieldLevel) bool {
+		hsnCodeRegex := regexp.MustCompile(`^\d{4}\.\d{2}$`)
+		return hsnCodeRegex.MatchString(fl.Field().String())
 	})
 
 	return &BulkUploadConsumer{

@@ -198,3 +198,8 @@ type AggregatorUpdateBusinessSetupDto struct {
 	ServiceID  *string `json:"service_id" example:"6A2BC898" validate:"omitempty"`
 	BusinessID *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"omitempty,uuid"`
 }
+
+
+type SendAggregatorInvitationByEmailDto struct {
+	Email string `json:"email" example:"aggregator@example.com" validate:"required,email"`
+}

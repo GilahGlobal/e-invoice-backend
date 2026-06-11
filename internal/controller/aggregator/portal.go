@@ -5,6 +5,7 @@ import (
 	"einvoice-access-point/internal/dtos"
 	aggregatorSvc "einvoice-access-point/internal/services/aggregator"
 	businessSvc "einvoice-access-point/internal/services/business"
+	"einvoice-access-point/internal/services/invoice"
 	invoiceSvc "einvoice-access-point/internal/services/invoice"
 	subscriptionSvc "einvoice-access-point/internal/services/subscription"
 	"einvoice-access-point/pkg/database"
@@ -904,5 +905,71 @@ func (base *Controller) UpdateBusinessSetup(c *fiber.Ctx) error {
 	aggregatorSvc.LogActivity(db, userDetails.ID, businessID, models.ActivityBusinessSetupUpdate, activityDetails)
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business setup updated successfully", nil)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// GetInvoiceStats godoc
+// @Summary Get invoice statistics for aggregator
+// @Description Returns overall statistics for invoices including total, partial, successful, and failed for all businesses under the aggregator.
+// @Tags Aggregator Portal
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dtos.GetInvoiceStatsResponseDto "Invoice statistics fetched successfully"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Router /aggregator/stats [get]
+func (base *Controller) GetInvoiceStats(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+
+	stats, err := invoice.GetInvoiceStats(db, nil, &userDetails.ID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", "failed to retrieve invoice stats", err, nil)
+		return c.Status(fiber.StatusInternalServerError).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice statistics fetched successfully", stats)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// GetBusinessInvoiceStats godoc
+// @Summary Get invoice statistics for a specific business under an aggregator
+// @Description Returns overall statistics for invoices including total, partial, successful, and failed for a specific business managed by the aggregator.
+// @Tags Aggregator Portal
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Business ID" format(uuid)
+// @Success 200 {object} dtos.GetInvoiceStatsResponseDto "Invoice statistics fetched successfully"
+// @Failure 400 {object} models.Response "Bad request"
+// @Failure 401 {object} models.Response "Unauthorized"
+// @Router /aggregator/businesses/{id}/stats [get]
+func (base *Controller) GetBusinessInvoiceStats(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+		return c.Status(fiber.StatusUnauthorized).JSON(rd)
+	}
+
+	businessID := c.Params("id")
+	if businessID == "" {
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+
+	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDB)
+
+	stats, err := invoice.GetInvoiceStats(db, &businessID, &userDetails.ID)
+	if err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", "failed to retrieve invoice stats", err, nil)
+		return c.Status(fiber.StatusInternalServerError).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business invoice statistics fetched successfully", stats)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }

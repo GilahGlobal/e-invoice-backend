@@ -101,7 +101,7 @@ type LegalMonetaryTotal struct {
 }
 
 type InvoiceLine struct {
-	HSNCode             string  `json:"hsn_code" example:"1282.10" validate:"required"`
+	HSNCode             string  `json:"hsn_code" example:"1282.10" validate:"required,hsncode"`
 	ProductCategory     string  `json:"product_category" example:"Electronics" validate:"required"`
 	DiscountRate        float64 `json:"discount_rate" example:"5"`
 	DiscountAmount      float64 `json:"discount_amount" example:"2500"`
@@ -178,4 +178,16 @@ type Invoice struct {
 type GetInvoiceDetailsResponseDto struct {
 	BaseResponseDto
 	Data Invoice `json:"data"`
+}
+
+type InvoiceStatsDto struct {
+	TotalInvoices      int64 `json:"total_invoices" example:"150"`
+	SuccessfulInvoices int64 `json:"successful_invoices" example:"100"`
+	PartialInvoices    int64 `json:"partial_invoices" example:"30"`
+	FailedInvoices     int64 `json:"failed_invoices" example:"20"`
+}
+
+type GetInvoiceStatsResponseDto struct {
+	BaseResponseDto
+	Data InvoiceStatsDto `json:"data"`
 }
