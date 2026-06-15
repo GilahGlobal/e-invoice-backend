@@ -274,6 +274,39 @@ func InitiateForgotPassword(req dtos.InitiateForgotPasswordDto, db *gorm.DB) err
 	return nil
 }
 
+func InitiateForgotPasswordAcrossEnvironments(req dtos.InitiateForgotPasswordDto, dbs ...*gorm.DB) error {
+	email := strings.ToLower(strings.TrimSpace(req.Email))
+
+	for _, db := range dbs {
+		if db == nil {
+			continue
+		}
+
+		pdb := inst.InitDB(db, false)
+		user := models.Business{}
+		queryError, err := pdb.SelectOneFromDb(&user, "email = ?", email)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
+			return fmt.Errorf("account details cannot be retrieved")
+		}
+
+		if queryError != nil {
+			if errors.Is(queryError, gorm.ErrRecordNotFound) {
+				continue
+			}
+			return queryError
+		}
+
+		key := forgotPasswordKey(email)
+		SendOtp(user.Email, key)
+		return nil
+	}
+
+	return fmt.Errorf("account details cannot be retrieved")
+}
+
 func ChangePassword(userID string, req dtos.ChangePasswordDto, db *gorm.DB) error {
 	pdb := inst.InitDB(db, false)
 
@@ -338,6 +371,9 @@ func CompleteForgotPasswordAcrossEnvironments(req dtos.CompleteForgotPasswordDto
 		user := models.Business{}
 		queryError, err := pdb.SelectOneFromDb(&user, "email = ?", email)
 		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
 			return fmt.Errorf("account details cannot be retrieved: %w", err)
 		}
 
