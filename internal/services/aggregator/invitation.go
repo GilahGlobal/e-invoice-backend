@@ -183,11 +183,19 @@ func ListAggregatorInvitations(aggregatorID string, db *gorm.DB) ([]dtos.Aggrega
 	result := make([]dtos.AggregatorInvitationDto, 0, len(invitations))
 	for _, inv := range invitations {
 		business, _ := businessRepo.FindUserByID(pdb, inv.BusinessID)
+
+		bizName := "Unknown Business"
+		bizEmail := "unknown"
+		if business != nil {
+			bizName = business.CompanyName
+			bizEmail = business.Email
+		}
+
 		result = append(result, dtos.AggregatorInvitationDto{
 			ID:            inv.ID,
 			BusinessID:    inv.BusinessID,
-			BusinessName:  business.CompanyName,
-			BusinessEmail: business.Email,
+			BusinessName:  bizName,
+			BusinessEmail: bizEmail,
 			Status:        inv.Status,
 			CreatedAt:     inv.CreatedAt.Format(time.RFC3339),
 		})
@@ -206,11 +214,26 @@ func ListBusinessInvitations(businessID string, db *gorm.DB) ([]dtos.BusinessInv
 	result := make([]dtos.BusinessInvitationDto, 0, len(invitations))
 	for _, inv := range invitations {
 		aggregator, _ := businessRepo.FindUserByID(pdb, inv.AggregatorID)
+
+		aggName := "Pending Aggregator"
+		aggEmail := "Pending"
+		if aggregator != nil {
+			aggName = aggregator.CompanyName
+			aggEmail = aggregator.Email
+		} else {
+			// Fallback: try finding the aggregator without considering AccStatus
+			var fallbackAgg models.Business
+			if err := db.Unscoped().Where("id = ?", inv.AggregatorID).First(&fallbackAgg).Error; err == nil {
+				aggName = fallbackAgg.CompanyName
+				aggEmail = fallbackAgg.Email
+			}
+		}
+
 		result = append(result, dtos.BusinessInvitationDto{
 			ID:              inv.ID,
 			AggregatorID:    inv.AggregatorID,
-			AggregatorName:  aggregator.CompanyName,
-			AggregatorEmail: aggregator.Email,
+			AggregatorName:  aggName,
+			AggregatorEmail: aggEmail,
 			Status:          inv.Status,
 			CreatedAt:       inv.CreatedAt.Format(time.RFC3339),
 		})
