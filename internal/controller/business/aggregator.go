@@ -6,6 +6,7 @@ import (
 	"einvoice-access-point/pkg/middleware"
 	"einvoice-access-point/pkg/models"
 	"einvoice-access-point/pkg/utility"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -136,6 +137,7 @@ func (base *Controller) ListSentInvitations(c *fiber.Ctx) error {
 
 	db := middleware.GetDatabaseInstance(userDetails.IsSandbox, base.Db, base.TestDb)
 
+	log.Println("got here")
 	invitations, err := aggregatorSvc.ListBusinessInvitations(userDetails.ID, db)
 	if err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), err, nil)

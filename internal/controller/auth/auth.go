@@ -281,7 +281,7 @@ func (base *Controller) InitiateForgotPassword(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	err = auth.InitiateForgotPassword(req, base.TestDB.Postgresql.DB())
+	err = auth.InitiateForgotPasswordAcrossEnvironments(req, base.forgotPasswordTargets()...)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
