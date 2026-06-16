@@ -606,8 +606,10 @@ func (base *Controller) ModifyInvoice(c *fiber.Ctx) error {
 	}
 
 	if blockedStatuses[existingInvoice.CurrentStatus] {
-		if time.Since(existingInvoice.CreatedAt) < 24*time.Hour {
-			rd := utility.BuildErrorResponse(fiber.StatusFailedDependency, "error", "invoice can only be modified after 24 hours", nil, nil)
+		now := time.Now().UTC()
+		created := existingInvoice.CreatedAt.UTC()
+		if now.Year() == created.Year() && now.YearDay() == created.YearDay() {
+			rd := utility.BuildErrorResponse(fiber.StatusFailedDependency, "error", "invoice can only be modified on a different day from its creation", nil, nil)
 			return c.Status(fiber.StatusNotFound).JSON(rd)
 		}
 
