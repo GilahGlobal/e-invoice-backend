@@ -3,6 +3,7 @@ package aggregator
 import (
 	"einvoice-access-point/pkg/models"
 	"errors"
+	"log"
 	"strings"
 
 	"gorm.io/gorm"
@@ -150,13 +151,17 @@ func GetAcceptedBusinesses(db *gorm.DB, aggregatorID string, page, size int, sea
 // GetBusinessByIDForAggregator fetches a business that belongs to the aggregator
 func GetBusinessByIDForAggregator(db *gorm.DB, aggregatorID, businessID string) (*models.Business, error) {
 	var business models.Business
+	log.Println("aggregatorID: ", aggregatorID)
+	log.Println("businessID: ", businessID)
 	err := db.Where("id = ? AND aggregator_id = ?", businessID, aggregatorID).First(&business).Error
+	log.Println(err)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
 	}
+	log.Println(business)
 	return &business, nil
 }
 
