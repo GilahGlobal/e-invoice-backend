@@ -349,7 +349,7 @@ func CompleteForgotPasswordAcrossEnvironments(req dtos.CompleteForgotPasswordDto
 	}
 
 	if err != nil {
-		return errors.New(err)
+		return fmt.Errorf("unable to verify otp: %w", err)
 	}
 
 	if otp != req.OTP {
