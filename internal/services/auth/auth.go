@@ -553,8 +553,12 @@ func VerifyBusinessAccount(db *gorm.DB, req dtos.VerifyEmailDto, isSandbox bool)
 
 	otp, err := redisClient.Get(ctx, key).Result()
 
+	if err == mainRedis.Nil {
+		return nil, errors.New("otp not found or has expired")
+	}
+
 	if err != nil {
-		return nil, errors.New("unable to verify token, error from redis: " + err.Error())
+		return nil, errors.New("unable to verify otp")
 	}
 
 	if otp != req.OTP {
