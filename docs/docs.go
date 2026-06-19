@@ -3437,7 +3437,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Invoice created successfully",
                         "schema": {
                             "$ref": "#/definitions/dtos.UploadInvoiceResponseDto"
