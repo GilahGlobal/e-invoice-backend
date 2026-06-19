@@ -489,7 +489,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	var irnPayload dtos.InvoiceData
-	if req.IRN == nil {
+	if req.IRN == nil || *req.IRN == "" {
 		IRNData, err := invoice.IRNGeneration(db, userDetails.ID, req.InvoiceNumber, setup.ServiceID, req.BusinessID, userDetails.IsSandbox)
 		if err != nil {
 			rd := *err
