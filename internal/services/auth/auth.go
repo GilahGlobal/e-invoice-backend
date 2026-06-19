@@ -345,14 +345,17 @@ func CompleteForgotPasswordAcrossEnvironments(req dtos.CompleteForgotPasswordDto
 	otp, err := redisClient.Get(ctx, key).Result()
 
 	if err == mainRedis.Nil {
-		return errors.New("otp not found or has expired")
+		log.Println("otp not found or has expired")
+		return errors.New("otp has expired")
 	}
 
 	if err != nil {
+		log.Println("unable to verify otp")
 		return errors.New("unable to verify otp")
 	}
 
 	if otp != req.OTP {
+		log.Println("invalid OTP provided")
 		return errors.New("invalid OTP provided")
 	}
 
