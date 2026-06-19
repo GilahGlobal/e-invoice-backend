@@ -95,8 +95,8 @@ func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNum
 			return nil, &errDetails, fmt.Errorf("%s: %w", errDetails, err), isInvoiceSigned
 		}
 		if err, isInvoiceSigned = FirsAllInOneProcess(payload, invoice, db, isSandbox); err != nil {
-			errDetails := fmt.Sprintf("failed to process invoice through all steps: %v", err)
-			return invoice, &errDetails, fmt.Errorf("%s", errDetails), isInvoiceSigned
+			errorArray := strings.Split(err.Error(), "-")
+			return invoice, nil, errors.New(errorArray[0]), isInvoiceSigned
 		}
 	}
 
