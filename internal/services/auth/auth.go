@@ -350,7 +350,7 @@ func CompleteForgotPasswordAcrossEnvironments(req dtos.CompleteForgotPasswordDto
 	}
 
 	if err != nil {
-		log.Println("unable to verify otp")
+		log.Printf("Redis GET failed for key %s: %v", key, err)
 		return errors.New("unable to verify otp")
 	}
 
