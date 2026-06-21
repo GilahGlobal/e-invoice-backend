@@ -262,11 +262,12 @@ func FindBulkUploadLogsByBusinessID(db database.DatabaseManager, businessID stri
 	}, nil
 }
 
-func GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*dtos.InvoiceStatsDto, error) {
-	var result dtos.InvoiceStatsDto
+func GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*dtos.InvoiceStatsResponseData, error) {
+	var monthlyResults []dtos.MonthlyInvoiceStatsDto
 
 	query := `
 	SELECT 
+		TO_CHAR(created_at, 'YYYYMM') AS month,
 		COUNT(*) AS total_invoices,
 		SUM(CASE WHEN current_status = 'confirmed_invoice' THEN 1 ELSE 0 END) AS successful_invoices,
 		SUM(CASE WHEN current_status IN ('signed_invoice', 'transmitted_invoice') THEN 1 ELSE 0 END) AS partial_invoices,
@@ -295,10 +296,29 @@ func GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*dt
 		args = append(args, *aggregatorID)
 	}
 
-	err := db.Raw(query, args...).Scan(&result).Error
+	query += " GROUP BY TO_CHAR(created_at, 'YYYYMM') ORDER BY month DESC"
+
+	err := db.Raw(query, args...).Scan(&monthlyResults).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return &result, nil
+	total := dtos.InvoiceStatsDto{}
+	for _, m := range monthlyResults {
+		total.TotalInvoices += m.TotalInvoices
+		total.SuccessfulInvoices += m.SuccessfulInvoices
+		total.PartialInvoices += m.PartialInvoices
+		total.FailedInvoices += m.FailedInvoices
+	}
+
+	if monthlyResults == nil {
+		monthlyResults = []dtos.MonthlyInvoiceStatsDto{}
+	}
+
+	result := &dtos.InvoiceStatsResponseData{
+		Total:   total,
+		Monthly: monthlyResults,
+	}
+
+	return result, nil
 }

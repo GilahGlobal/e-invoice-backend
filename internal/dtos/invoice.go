@@ -130,6 +130,7 @@ type InvoiceData struct {
 	IRN           string `json:"irn" example:"123e4567-e89b-12d3-a456-426614174000"`
 	QRCode        string `json:"qr_code" example:"iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."`
 	QRCode2       string `json:"qr_code_2" example:"eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."`
+	QRCodeBMP     string `json:"qr_code_bmp" example:"Qk02AAAAAAAAAAAAAAAoAAAAAQAAAAEAAAABAAEAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAP..."`
 }
 
 type InvoiceStepMetadata struct {
@@ -187,7 +188,20 @@ type InvoiceStatsDto struct {
 	FailedInvoices     int64 `json:"failed_invoices" example:"20"`
 }
 
+type MonthlyInvoiceStatsDto struct {
+	Month              string `json:"month" example:"202401"`
+	TotalInvoices      int64  `json:"total_invoices" example:"150"`
+	SuccessfulInvoices int64  `json:"successful_invoices" example:"100"`
+	PartialInvoices    int64  `json:"partial_invoices" example:"30"`
+	FailedInvoices     int64  `json:"failed_invoices" example:"20"`
+}
+
+type InvoiceStatsResponseData struct {
+	Total   InvoiceStatsDto          `json:"total"`
+	Monthly []MonthlyInvoiceStatsDto `json:"monthly"`
+}
+
 type GetInvoiceStatsResponseDto struct {
 	BaseResponseDto
-	Data InvoiceStatsDto `json:"data"`
+	Data InvoiceStatsResponseData `json:"data"`
 }
