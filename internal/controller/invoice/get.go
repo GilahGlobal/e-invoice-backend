@@ -504,13 +504,16 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 				IRN:           *req.IRN,
 				QRCode:        "",
 				QRCode2:       "",
+				QRCodeBMP:     "",
 			}
 		} else {
+			qrBmp, _ := utility.Base64PNGToBMP(invoiceExists.QrCode)
 			irnPayload = dtos.InvoiceData{
 				InvoiceNumber: req.InvoiceNumber,
 				IRN:           *req.IRN,
 				QRCode:        invoiceExists.QrCode,
 				QRCode2:       invoiceExists.EncryptedIRN,
+				QRCodeBMP:     qrBmp,
 			}
 		}
 	}
@@ -527,6 +530,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 			"irn":            irnPayload.IRN,
 			"qr_code":        irnPayload.QRCode,
 			"qr_code_2":      irnPayload.QRCode2,
+			"qr_code_bmp":    irnPayload.QRCodeBMP,
 		}
 	}
 

@@ -151,6 +151,7 @@ func IRNGeneration(db *gorm.DB, ownerID, invoiceNumber, serviceId, businessID st
 		IRN:           *generatedIRN,
 		QRCode:        signedIRNResponse.QrCodeImage,
 		QRCode2:       signedIRNResponse.EncryptedIRN,
+		QRCodeBMP:     signedIRNResponse.QrCodeImageBMP,
 	}, nil
 }
 
@@ -205,6 +206,6 @@ func ReplaceInvoiceRecord(db *gorm.DB, existing *models.Invoice, payload dtos.Up
 	return newInvoice, nil
 }
 
-func GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*dtos.InvoiceStatsDto, error) {
+func GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*dtos.InvoiceStatsResponseData, error) {
 	return repository.GetInvoiceStats(db, businessID, aggregatorID)
 }

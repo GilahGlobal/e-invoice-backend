@@ -758,7 +758,7 @@ definitions:
   dtos.GetInvoiceStatsResponseDto:
     properties:
       data:
-        $ref: '#/definitions/dtos.InvoiceStatsDto'
+        $ref: '#/definitions/dtos.InvoiceStatsResponseData'
       message:
         example: Action performed successfully
         type: string
@@ -830,6 +830,9 @@ definitions:
       qr_code_2:
         example: eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51...
         type: string
+      qr_code_bmp:
+        example: Qk02AAAAAAAAAAAAAAAoAAAAAQAAAAEAAAABAAEAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAP...
+        type: string
     type: object
   dtos.InvoiceDeliveryPeriod:
     properties:
@@ -896,6 +899,15 @@ definitions:
       total_invoices:
         example: 150
         type: integer
+    type: object
+  dtos.InvoiceStatsResponseData:
+    properties:
+      monthly:
+        items:
+          $ref: '#/definitions/dtos.MonthlyInvoiceStatsDto'
+        type: array
+      total:
+        $ref: '#/definitions/dtos.InvoiceStatsDto'
     type: object
   dtos.InvoiceStepMetadata:
     properties:
@@ -995,6 +1007,24 @@ definitions:
       status_text:
         example: success
         type: string
+    type: object
+  dtos.MonthlyInvoiceStatsDto:
+    properties:
+      failed_invoices:
+        example: 20
+        type: integer
+      month:
+        example: "202401"
+        type: string
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      total_invoices:
+        example: 150
+        type: integer
     type: object
   dtos.Party:
     properties:

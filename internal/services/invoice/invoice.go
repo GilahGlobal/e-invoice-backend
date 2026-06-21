@@ -18,6 +18,8 @@ import (
 	"image/png"
 	"log"
 	"regexp"
+
+	"golang.org/x/image/bmp"
 	"strings"
 	"time"
 
@@ -118,9 +120,16 @@ func SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IRNSigningRespo
 
 	base64QRImage := base64.StdEncoding.EncodeToString(buf.Bytes())
 
+	bmpBuf := new(bytes.Buffer)
+	if err := bmp.Encode(bmpBuf, qr.Image(256)); err != nil {
+		return nil, fmt.Errorf("failed to encode BMP QR code: %v", err)
+	}
+	base64BMPImage := base64.StdEncoding.EncodeToString(bmpBuf.Bytes())
+
 	theResp := &firs_models.IRNSigningResponse{
-		EncryptedIRN: base64Encrypted,
-		QrCodeImage:  base64QRImage,
+		EncryptedIRN:   base64Encrypted,
+		QrCodeImage:    base64QRImage,
+		QrCodeImageBMP: base64BMPImage,
 	}
 
 	//fmt.Printf("signed irn: %v", theResp)
