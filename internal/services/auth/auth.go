@@ -350,7 +350,7 @@ func CompleteForgotPasswordAcrossEnvironments(req dtos.CompleteForgotPasswordDto
 	}
 
 	if err != nil {
-		log.Println("unable to verify otp")
+		log.Println("unable to verify otp", err)
 		return errors.New("unable to verify otp")
 	}
 
