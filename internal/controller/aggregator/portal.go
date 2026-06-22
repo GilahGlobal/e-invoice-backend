@@ -643,11 +643,23 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 		irnPayload = *IRNData
 		req.IRN = &irnPayload.IRN
 	} else {
-		irnPayload = dtos.InvoiceData{
-			InvoiceNumber: req.InvoiceNumber,
-			IRN:           *req.IRN,
-			QRCode:        invoiceExists.QrCode,
-			QRCode2:       invoiceExists.EncryptedIRN,
+		if invoiceExists == nil {
+			irnPayload = dtos.InvoiceData{
+				InvoiceNumber: req.InvoiceNumber,
+				IRN:           *req.IRN,
+				QRCode:        "",
+				QRCode2:       "",
+				QRCodeBMP:     "",
+			}
+		} else {
+			qrBmp, _ := utility.Base64PNGToBMP(invoiceExists.QrCode)
+			irnPayload = dtos.InvoiceData{
+				InvoiceNumber: req.InvoiceNumber,
+				IRN:           *req.IRN,
+				QRCode:        invoiceExists.QrCode,
+				QRCode2:       invoiceExists.EncryptedIRN,
+				QRCodeBMP:     qrBmp,
+			}
 		}
 	}
 
@@ -662,6 +674,14 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	if isInvoiceSigned {
+		response["data"] = map[string]interface{}{
+			"id":             createdInvoice.ID,
+			"invoice_number": irnPayload.InvoiceNumber,
+			"irn":            irnPayload.IRN,
+			"qr_code":        irnPayload.QRCode,
+			"qr_code_2":      irnPayload.QRCode2,
+			"qr_code_bmp":    irnPayload.QRCodeBMP,
+		}
 		rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice generated successfully", response)
 		return c.Status(fiber.StatusCreated).JSON(rd)
 	}

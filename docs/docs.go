@@ -3437,7 +3437,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Invoice created successfully",
                         "schema": {
                             "$ref": "#/definitions/dtos.UploadInvoiceResponseDto"
@@ -4962,7 +4962,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dtos.InvoiceStatsDto"
+                    "$ref": "#/definitions/dtos.InvoiceStatsResponseData"
                 },
                 "message": {
                     "type": "string",
@@ -5062,6 +5062,10 @@ const docTemplate = `{
                 "qr_code_2": {
                     "type": "string",
                     "example": "eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."
+                },
+                "qr_code_bmp": {
+                    "type": "string",
+                    "example": "Qk02AAAAAAAAAAAAAAAoAAAAAQAAAAEAAAABAAEAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAP..."
                 }
             }
         },
@@ -5152,6 +5156,20 @@ const docTemplate = `{
                 "total_invoices": {
                     "type": "integer",
                     "example": 150
+                }
+            }
+        },
+        "dtos.InvoiceStatsResponseData": {
+            "type": "object",
+            "properties": {
+                "monthly": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.MonthlyInvoiceStatsDto"
+                    }
+                },
+                "total": {
+                    "$ref": "#/definitions/dtos.InvoiceStatsDto"
                 }
             }
         },
@@ -5291,6 +5309,31 @@ const docTemplate = `{
                 "status_text": {
                     "type": "string",
                     "example": "success"
+                }
+            }
+        },
+        "dtos.MonthlyInvoiceStatsDto": {
+            "type": "object",
+            "properties": {
+                "failed_invoices": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "month": {
+                    "type": "string",
+                    "example": "202401"
+                },
+                "partial_invoices": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "successful_invoices": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 150
                 }
             }
         },

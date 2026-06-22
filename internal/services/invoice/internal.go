@@ -70,8 +70,8 @@ func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNum
 
 		invoice, _ = repository.FindInvoiceByNumber(pdb, invoiceExists.InvoiceNumber)
 		if err, isInvoiceSigned = UncompletedFirsProcesses(db, invoiceExists.CurrentStatus, payload, invoiceExists, isSandbox); err != nil {
-			errDetails := fmt.Sprintf("failed to process invoice through all steps: %v", err)
-			return invoice, &errDetails, fmt.Errorf("%s", errDetails), isInvoiceSigned
+			errorArray := strings.Split(err.Error(), "-")
+			return invoice, nil, errors.New(errorArray[0]), isInvoiceSigned
 		}
 
 	} else {
@@ -95,8 +95,8 @@ func CreateInvoice(db *gorm.DB, payload dtos.UploadInvoiceRequestDto, invoiceNum
 			return nil, &errDetails, fmt.Errorf("%s: %w", errDetails, err), isInvoiceSigned
 		}
 		if err, isInvoiceSigned = FirsAllInOneProcess(payload, invoice, db, isSandbox); err != nil {
-			errDetails := fmt.Sprintf("failed to process invoice through all steps: %v", err)
-			return invoice, &errDetails, fmt.Errorf("%s", errDetails), isInvoiceSigned
+			errorArray := strings.Split(err.Error(), "-")
+			return invoice, nil, errors.New(errorArray[0]), isInvoiceSigned
 		}
 	}
 
@@ -151,6 +151,7 @@ func IRNGeneration(db *gorm.DB, ownerID, invoiceNumber, serviceId, businessID st
 		IRN:           *generatedIRN,
 		QRCode:        signedIRNResponse.QrCodeImage,
 		QRCode2:       signedIRNResponse.EncryptedIRN,
+		QRCodeBMP:     signedIRNResponse.QrCodeImageBMP,
 	}, nil
 }
 
@@ -205,6 +206,6 @@ func ReplaceInvoiceRecord(db *gorm.DB, existing *models.Invoice, payload dtos.Up
 	return newInvoice, nil
 }
 
-func GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*dtos.InvoiceStatsDto, error) {
+func GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*dtos.InvoiceStatsResponseData, error) {
 	return repository.GetInvoiceStats(db, businessID, aggregatorID)
 }

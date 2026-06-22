@@ -433,7 +433,7 @@ func (base *Controller) DeleteInvoice(c *fiber.Ctx) error {
 // @Produce json
 // @Security
 // @Param   payload  body  dtos.UploadInvoiceRequestDto  true  "Invoice Payload"
-// @Success 200 {object} dtos.UploadInvoiceResponseDto "Invoice created successfully"
+// @Success 201 {object} dtos.UploadInvoiceResponseDto "Invoice created successfully"
 // @Failure 400 {object} models.Response "Bad request"
 // @Router /invoice/upload [post]
 func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
@@ -489,7 +489,7 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	var irnPayload dtos.InvoiceData
-	if req.IRN == nil {
+	if req.IRN == nil || *req.IRN == "" {
 		IRNData, err := invoice.IRNGeneration(db, userDetails.ID, req.InvoiceNumber, setup.ServiceID, req.BusinessID, userDetails.IsSandbox)
 		if err != nil {
 			rd := *err
@@ -504,17 +504,20 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 				IRN:           *req.IRN,
 				QRCode:        "",
 				QRCode2:       "",
+				QRCodeBMP:     "",
 			}
 		} else {
+			qrBmp, _ := utility.Base64PNGToBMP(invoiceExists.QrCode)
 			irnPayload = dtos.InvoiceData{
 				InvoiceNumber: req.InvoiceNumber,
 				IRN:           *req.IRN,
 				QRCode:        invoiceExists.QrCode,
 				QRCode2:       invoiceExists.EncryptedIRN,
+				QRCodeBMP:     qrBmp,
 			}
 		}
 	}
-	log.Println("nkfknfdjn")
+
 	createdInvoice, _, err, isInvoiceSigned := invoice.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil, client)
 
 	response := map[string]interface{}{
@@ -527,12 +530,12 @@ func (base *Controller) UploadInvoice(c *fiber.Ctx) error {
 			"irn":            irnPayload.IRN,
 			"qr_code":        irnPayload.QRCode,
 			"qr_code_2":      irnPayload.QRCode2,
+			"qr_code_bmp":    irnPayload.QRCodeBMP,
 		}
 	}
 
 	if err != nil {
-		errorArray := strings.Split(err.Error(), "-")
-		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", errorArray[len(errorArray)-1], response, nil)
+		rd := utility.BuildErrorResponse(fiber.StatusBadRequest, "error", err.Error(), response, nil)
 		return c.Status(fiber.StatusBadRequest).JSON(rd)
 	}
 
