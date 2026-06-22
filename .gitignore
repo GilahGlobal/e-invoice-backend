@@ -29,3 +29,5 @@ app.env
 # Ignore certificates
 certs/
 certs-data
+
+docker-compose.yml
