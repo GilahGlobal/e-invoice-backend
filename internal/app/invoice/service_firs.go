@@ -166,8 +166,8 @@ func (s *Service) LookUpIRN(irn string) (*firs_models.FirsResponse, *string, err
 	return theResp, nil, nil
 }
 
-func (s *Service) LookUpTIN(tin string) (*firs_models.FirsResponse, *string, error) {
-	resp, err := firs.LookUpByTIN(tin)
+func (s *Service) LookUpTIN(tin string, isSandbox bool) (*firs_models.FirsResponse, *string, error) {
+	resp, err := firs.LookUpByTIN(tin, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get invoices with TIN: %w", err)
 	}

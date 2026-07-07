@@ -49,11 +49,12 @@ func (h *Handler) LookUpIRN(c *fiber.Ctx) error {
 // @Router /invoice/transmit/lookup-tin/{tin} [get]
 func (h *Handler) LookUpTIN(c *fiber.Ctx) error {
 	tin := c.Params("tin")
+	userDetails, _ := middleware.GetUserDetails(c)
 	if tin == "" {
 		return apperror.New(fiber.StatusBadRequest, "error", "tin is required", nil, nil)
 	}
 
-	respData, errDetails, err := h.svc.LookUpTIN(tin)
+	respData, errDetails, err := h.svc.LookUpTIN(tin, userDetails.IsSandbox)
 	if err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 	}

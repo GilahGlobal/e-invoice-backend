@@ -125,6 +125,39 @@ func (s *service) CreateUser(req RegisterDto, isSandbox bool) (int, error) {
 	email := strings.ToLower(req.Email)
 	name := strings.Title(strings.ToLower(req.Name))
 
+	// entityResp, err := firs.LookUpByTIN(req.TIN, isSandbox)
+	// if err != nil {
+	// 	return http.StatusBadRequest, fmt.Errorf("failed to verify entity with FIRS: %w", err)
+	// }
+
+	// if entityResp.StatusCode != http.StatusOK {
+	// 	return http.StatusBadRequest, fmt.Errorf("FIRS entity lookup failed with status code %d", entityResp.StatusCode)
+	// }
+
+	// var firsResponse firs_models.FirsResponse
+	// if err := json.Unmarshal(entityResp.Body, &firsResponse); err != nil {
+	// 	return http.StatusBadRequest, fmt.Errorf("failed to parse FIRS response: %w", err)
+	// }
+
+	// dataBytes, _ := json.Marshal(firsResponse.Data)
+	// log.Println("entity response", string(dataBytes))
+	// var detailedEntity firs_models.DetailedEntityData
+	// if err := json.Unmarshal(dataBytes, &detailedEntity); err != nil {
+	// 	return http.StatusBadRequest, fmt.Errorf("failed to parse FIRS detailed entity data: %w", err)
+	// }
+
+	// nameMatched := false
+	// for _, b := range detailedEntity.Businesses {
+	// 	if strings.EqualFold(strings.TrimSpace(b.Name), strings.TrimSpace(req.CompanyName)) {
+	// 		nameMatched = true
+	// 		break
+	// 	}
+	// }
+
+	// if !nameMatched {
+	// 	return http.StatusBadRequest, errors.New("provided company name does not match FIRS records")
+	// }
+
 	password, err := utility.HashPassword(req.Password)
 	if err != nil {
 		return http.StatusBadRequest, fmt.Errorf("failed to hash password: %w", err)

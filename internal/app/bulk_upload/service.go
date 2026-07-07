@@ -31,7 +31,6 @@ func NewServiceWithDB(db, testDB database.DatabaseManager) *Service {
 	return NewService(repo)
 }
 
-
 func (s *Service) GetBulkUploadFailedInvoices(db *gorm.DB, bulkUploadID, businessID string) (*BulkUploadFailedInvoicesDto, error) {
 	pdb := dbinit.InitDB(db, false)
 

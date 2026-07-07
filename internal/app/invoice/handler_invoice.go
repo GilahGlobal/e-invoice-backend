@@ -4,6 +4,7 @@ import (
 	"einvoice-access-point/internal/apperror"
 	"einvoice-access-point/internal/data/entities"
 	"einvoice-access-point/internal/middleware"
+	"einvoice-access-point/internal/pkg/cloudinary"
 	"einvoice-access-point/internal/pkg/firs_models"
 	"einvoice-access-point/internal/utility"
 	"strings"
@@ -217,13 +218,13 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	// qrCodeBMPURL := ""
-	// if irnPayload.QRCodeBMP != "" {
-	// 	qrCodeBMPURL, err = cloudinary.UploadBMPBase64(irnPayload.QRCodeBMP, utility.GenerateUUID())
-	// 	if err != nil {
-	// 		return apperror.New(fiber.StatusBadGateway, "error", "failed to upload qr code image", err, nil)
-	// 	}
-	// }
+	qrCodeBMPURL := ""
+	if setup.BmpUploadSelected && irnPayload.QRCodeBMP != "" {
+		qrCodeBMPURL, err = cloudinary.UploadBMPBase64(irnPayload.QRCodeBMP, utility.GenerateUUID())
+		if err != nil {
+			qrCodeBMPURL = ""
+		}
+	}
 
 	createdInvoice, _, err, isInvoiceSigned := h.svc.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil, client)
 
@@ -231,13 +232,17 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		"metadata": createdInvoice.StatusHistory,
 	}
 	if isInvoiceSigned {
-		response["data"] = map[string]interface{}{
+		dataMap := map[string]interface{}{
 			"id":             createdInvoice.ID,
 			"invoice_number": irnPayload.InvoiceNumber,
 			"irn":            irnPayload.IRN,
 			"qr_code":        irnPayload.QRCode,
 			"qr_code_2":      irnPayload.QRCode2,
 		}
+		if qrCodeBMPURL != "" {
+			dataMap["qr_code_bmp_url"] = qrCodeBMPURL
+		}
+		response["data"] = dataMap
 	}
 
 	if err != nil {
@@ -326,6 +331,14 @@ func (h *Handler) ModifyInvoice(c *fiber.Ctx) error {
 	}
 	req.IRN = &irnData.IRN
 
+	qrCodeBMPURL := ""
+	if setup.BmpUploadSelected && irnData.QRCodeBMP != "" {
+		qrCodeBMPURL, err = cloudinary.UploadBMPBase64(irnData.QRCodeBMP, utility.GenerateUUID())
+		if err != nil {
+			qrCodeBMPURL = ""
+		}
+	}
+
 	replacedInvoice, err := h.svc.ReplaceInvoiceRecord(db, existingInvoice, req, *req.IRN, irnData.QRCode, irnData.QRCode2, client)
 	if err != nil {
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
@@ -337,13 +350,17 @@ func (h *Handler) ModifyInvoice(c *fiber.Ctx) error {
 		"metadata": replacedInvoice.StatusHistory,
 	}
 	if isInvoiceSigned {
-		response["data"] = map[string]interface{}{
+		dataMap := map[string]interface{}{
 			"id":             replacedInvoice.ID,
 			"invoice_number": irnData.InvoiceNumber,
 			"irn":            irnData.IRN,
 			"qr_code":        irnData.QRCode,
 			"qr_code_2":      irnData.QRCode2,
 		}
+		if qrCodeBMPURL != "" {
+			dataMap["qr_code_bmp_url"] = qrCodeBMPURL
+		}
+		response["data"] = dataMap
 	}
 
 	if firsErr != nil {
