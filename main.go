@@ -17,12 +17,12 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
-	v1 "einvoice-access-point/api/v1"
-	"einvoice-access-point/pkg/config"
-	"einvoice-access-point/pkg/database"
-	"einvoice-access-point/pkg/database/postgresql"
-	"einvoice-access-point/pkg/migrations"
-	"einvoice-access-point/pkg/utility"
+	"einvoice-access-point/internal/config"
+	"einvoice-access-point/internal/data/database"
+	"einvoice-access-point/internal/data/database/postgresql"
+	"einvoice-access-point/internal/data/migrations"
+	"einvoice-access-point/internal/routes"
+	"einvoice-access-point/internal/utility"
 )
 
 func main() {
@@ -58,7 +58,7 @@ func main() {
 		// seed.SeedDatabase(db)
 	}
 
-	app := v1.Setup(logger, validatorRef, db, testDb, keys)
+	app := routes.Setup(logger, validatorRef, db, testDb, keys)
 
 	host := os.Getenv("HOST")
 	port := os.Getenv("PORT")

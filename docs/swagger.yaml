@@ -1,33 +1,6 @@
 basePath: /api/v1
 definitions:
-  database.PaginationResponse:
-    properties:
-      current_page:
-        type: integer
-      page_count:
-        type: integer
-      total_pages_count:
-        type: integer
-    type: object
-  dtos.AccountingPlatformConfigAuth:
-    properties:
-      api_key:
-        example: api-key-123456789
-        type: string
-      api_secret:
-        example: api-secret-123456789
-        type: string
-      auth_token:
-        example: auth-token-123456789
-        type: string
-      hmac_secret:
-        example: hmac-secret-123456789
-        type: string
-      org_id:
-        example: org-123456789
-        type: string
-    type: object
-  dtos.AggregatorActivityLogDto:
+  aggregator.AggregatorActivityLogDto:
     properties:
       action:
         example: single_invoice_upload
@@ -51,43 +24,45 @@ definitions:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
     type: object
-  dtos.AggregatorActivityLogListResponseDto:
+  aggregator.AggregatorActivityLogListResponseDto:
     properties:
       data:
         items:
-          $ref: '#/definitions/dtos.AggregatorActivityLogDto'
+          $ref: '#/definitions/aggregator.AggregatorActivityLogDto'
         type: array
+      error: {}
+      extra: {}
       message:
-        example: Action performed successfully
+        type: string
+      name:
         type: string
       pagination:
         $ref: '#/definitions/database.PaginationResponse'
       status:
-        example: success
         type: string
       status_code:
-        example: 200
         type: integer
     type: object
-  dtos.AggregatorBulkUploadListResponseDto:
+  aggregator.AggregatorBulkUploadListResponseDto:
     properties:
       data:
         items:
-          $ref: '#/definitions/models.BulkUpload'
+          $ref: '#/definitions/entities.BulkUpload'
         type: array
+      error: {}
+      extra: {}
       message:
-        example: Action performed successfully
+        type: string
+      name:
         type: string
       pagination:
         $ref: '#/definitions/database.PaginationResponse'
       status:
-        example: success
         type: string
       status_code:
-        example: 200
         type: integer
     type: object
-  dtos.AggregatorBusinessDetailDto:
+  aggregator.AggregatorBusinessDetailDto:
     properties:
       accepted_at:
         example: "2026-01-01T12:00:00Z"
@@ -120,7 +95,7 @@ definitions:
         example: TIN-123456789
         type: string
     type: object
-  dtos.AggregatorBusinessFullDetailDto:
+  aggregator.AggregatorBusinessFullDetailDto:
     properties:
       accepted_at:
         example: "2026-01-01T12:00:00Z"
@@ -150,9 +125,7 @@ definitions:
         example: 6A2BC898
         type: string
       subscription:
-        allOf:
-        - $ref: '#/definitions/dtos.BusinessSubscriptionInfoDto'
-        description: Subscription
+        $ref: '#/definitions/aggregator.BusinessSubscriptionInfoDto'
       tin:
         example: TIN-123456789
         type: string
@@ -160,29 +133,29 @@ definitions:
         example: 5
         type: integer
       total_invoices_uploaded:
-        description: Stats
         example: 120
         type: integer
     type: object
-  dtos.AggregatorBusinessListResponseDto:
+  aggregator.AggregatorBusinessListResponseDto:
     properties:
       data:
         items:
-          $ref: '#/definitions/dtos.AggregatorBusinessDetailDto'
+          $ref: '#/definitions/aggregator.AggregatorBusinessDetailDto'
         type: array
+      error: {}
+      extra: {}
       message:
-        example: Action performed successfully
+        type: string
+      name:
         type: string
       pagination:
         $ref: '#/definitions/database.PaginationResponse'
       status:
-        example: success
         type: string
       status_code:
-        example: 200
         type: integer
     type: object
-  dtos.AggregatorDashboardDto:
+  aggregator.AggregatorDashboardDto:
     properties:
       pending_invitations:
         example: 3
@@ -197,21 +170,23 @@ definitions:
         example: 500
         type: integer
     type: object
-  dtos.AggregatorDashboardResponseDto:
+  aggregator.AggregatorDashboardResponseDto:
     properties:
       data:
-        $ref: '#/definitions/dtos.AggregatorDashboardDto'
+        $ref: '#/definitions/aggregator.AggregatorDashboardDto'
+      error: {}
+      extra: {}
       message:
-        example: Action performed successfully
         type: string
+      name:
+        type: string
+      pagination: {}
       status:
-        example: success
         type: string
       status_code:
-        example: 200
         type: integer
     type: object
-  dtos.AggregatorInvitationDto:
+  aggregator.AggregatorInvitationDto:
     properties:
       business_email:
         example: business@example.com
@@ -232,75 +207,393 @@ definitions:
         example: pending
         type: string
     type: object
-  dtos.AggregatorInvitationListResponseDto:
+  aggregator.AggregatorInvitationListResponseDto:
     properties:
       data:
         items:
-          $ref: '#/definitions/dtos.AggregatorInvitationDto'
+          $ref: '#/definitions/aggregator.AggregatorInvitationDto'
         type: array
+      error: {}
+      extra: {}
       message:
-        example: Action performed successfully
         type: string
+      name:
+        type: string
+      pagination: {}
       status:
-        example: success
         type: string
       status_code:
-        example: 200
         type: integer
     type: object
-  dtos.AggregatorInvoiceListResponseDto:
+  aggregator.AggregatorInvoiceListResponseDto:
     properties:
       data:
         items:
-          $ref: '#/definitions/models.MinimalInvoiceDTO'
+          $ref: '#/definitions/entities.MinimalInvoiceDTO'
         type: array
+      error: {}
+      extra: {}
       message:
-        example: Action performed successfully
+        type: string
+      name:
         type: string
       pagination:
         $ref: '#/definitions/database.PaginationResponse'
       status:
-        example: success
         type: string
       status_code:
-        example: 200
         type: integer
     type: object
-  dtos.AggregatorSubscribeDataDto:
+  aggregator.AggregatorInvoiceUploadResponseDto:
     properties:
-      authorization_url:
-        example: https://checkout.paystack.com/...
+      data:
+        $ref: '#/definitions/aggregator.InvoiceUploadData'
+      error: {}
+      extra: {}
+      message:
         type: string
+      metadata:
+        items:
+          $ref: '#/definitions/invoice.InvoiceStepMetadata'
+        type: array
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.AggregatorTransactionListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/aggregator.TransactionDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.BusinessInvitationDto:
+    properties:
+      aggregator_email:
+        example: aggregator@example.com
+        type: string
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      aggregator_name:
+        example: Aggregator Corp
+        type: string
+      created_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      status:
+        example: pending
+        type: string
+    type: object
+  aggregator.BusinessInvitationListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/aggregator.BusinessInvitationDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.BusinessSubscriptionInfoDto:
+    properties:
+      billing_cycle_days:
+        example: 30
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      next_billing_date:
+        example: "2026-05-01T00:00:00Z"
+        type: string
+      plan_amount:
+        example: 5000
+        type: number
+      plan_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      plan_name:
+        example: Starter
+        type: string
+      remaining_invoices:
+        example: 380
+        type: integer
+      total_invoices:
+        example: 500
+        type: integer
+      used_invoices:
+        example: 120
+        type: integer
+    type: object
+  aggregator.GetBulkUploadFailedInvoicesResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/bulk_upload.BulkUploadFailedInvoicesDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.GetBulkUploadLogsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/bulk_upload.BulkUploadLogDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        items:
+          $ref: '#/definitions/database.PaginationResponse'
+        type: array
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.GetInvoiceStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/entities.InvoiceStatsResponseData'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.InvoiceUploadData:
+    properties:
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      invoice_number:
+        example: INV-1001
+        type: string
+      irn:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      qr_code:
+        example: iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN...
+        type: string
+      qr_code_2:
+        example: eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51...
+        type: string
+      qr_code_bmp_url:
+        example: https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp
+        type: string
+    type: object
+  aggregator.RespondToInvitationDto:
+    properties:
+      accept:
+        example: true
+        type: boolean
+      invitation_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    required:
+    - invitation_id
+    type: object
+  aggregator.SendAggregatorInvitationByEmailDto:
+    properties:
+      email:
+        example: aggregator@example.com
+        type: string
+    required:
+    - email
+    type: object
+  aggregator.SendAggregatorInvitationDto:
+    properties:
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    required:
+    - aggregator_id
+    type: object
+  aggregator.TransactionDto:
+    properties:
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      amount:
+        example: 5000
+        type: number
       business_id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      plan_id:
+      business_name:
+        example: Business Corp
+        type: string
+      created_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      currency:
+        example: NGN
+        type: string
+      gateway_response:
+        example: Approved
+        type: string
+      id:
         example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      plan:
+        example: Starter
+        type: string
+      plan_id:
+        example: plan_123
         type: string
       provider:
         example: paystack
         type: string
-      transaction_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
+      reference:
+        example: txn_123456789
         type: string
-      transaction_ref:
-        example: aggsub_1712345678_abcdef
+      status:
+        example: success
+        type: string
+      updated_at:
+        example: "2026-01-01T12:00:00Z"
         type: string
     type: object
-  dtos.AggregatorSubscribeRequestDto:
+  apperror.AppError:
     properties:
-      business_id:
+      data: {}
+      err: {}
+      message:
         type: string
-      plan_id:
+      status:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+  auth.AccountingPlatformConfigAuth:
+    properties:
+      api_key:
+        example: api-key-123456789
+        type: string
+      api_secret:
+        example: api-secret-123456789
+        type: string
+      auth_token:
+        example: auth-token-123456789
+        type: string
+      hmac_secret:
+        example: hmac-secret-123456789
+        type: string
+      org_id:
+        example: org-123456789
+        type: string
+    type: object
+  auth.BaseResponseDto:
+    properties:
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  auth.ChangePasswordDto:
+    properties:
+      new_password:
+        minLength: 6
+        type: string
+      old_password:
         type: string
     required:
-    - business_id
-    - plan_id
+    - new_password
+    - old_password
     type: object
-  dtos.AggregatorSubscribeResponseDto:
+  auth.CompleteForgotPasswordDto:
     properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      otp:
+        example: "123456"
+        type: string
+      password:
+        example: password123
+        minLength: 6
+        type: string
+    required:
+    - email
+    - otp
+    - password
+    type: object
+  auth.InitiateForgotPasswordDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+    required:
+    - email
+    type: object
+  auth.LoginRequestDto:
+    properties:
+      email:
+        type: string
+      is_sandbox:
+        default: true
+        type: boolean
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.LoginResponseDto:
+    properties:
+      access_token:
+        type: string
       data:
-        $ref: '#/definitions/dtos.AggregatorSubscribeDataDto'
+        $ref: '#/definitions/auth.UserResponse'
       message:
         example: Action performed successfully
         type: string
@@ -311,39 +604,51 @@ definitions:
         example: 200
         type: integer
     type: object
-  dtos.AggregatorTransactionListResponseDto:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/dtos.TransactionDto'
-        type: array
-      message:
-        example: Action performed successfully
-        type: string
-      pagination:
-        $ref: '#/definitions/database.PaginationResponse'
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
+  auth.PlatformConfigsAuth:
+    additionalProperties:
+      $ref: '#/definitions/auth.AccountingPlatformConfigAuth'
     type: object
-  dtos.AllowanceCharge:
+  auth.RegisterDto:
     properties:
-      amount:
-        example: 1500.75
-        type: number
-      charge_indicator:
+      company_name:
+        example: Acme Inc.
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      is_aggregator:
         example: true
         type: boolean
+      name:
+        example: John Doe
+        maxLength: 250
+        minLength: 2
+        type: string
+      password:
+        example: password123
+        minLength: 6
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      platform_configs:
+        $ref: '#/definitions/auth.PlatformConfigsAuth'
+      tin:
+        example: TIN-123456789
+        type: string
     required:
-    - amount
+    - company_name
+    - email
+    - is_aggregator
+    - name
+    - password
+    - phone_number
+    - tin
     type: object
-  dtos.BaseResponseDto:
+  auth.RegisterResponseDto:
     properties:
       message:
-        example: Action performed successfully
+        example: An otp has been sent to your mail, use it to verify your account
         type: string
       status:
         example: success
@@ -352,12 +657,59 @@ definitions:
         example: 200
         type: integer
     type: object
-  dtos.BulkUploadFailedInvoiceDto:
+  auth.ResendVerificationOtpDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+    required:
+    - email
+    type: object
+  auth.UserResponse:
+    properties:
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      is_aggregator:
+        example: true
+        type: boolean
+      is_sandbox:
+        example: true
+        type: boolean
+      keys_set:
+        example: true
+        type: boolean
+      name:
+        example: John Doe
+        type: string
+      service_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  auth.VerifyEmailDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      otp:
+        example: "123456"
+        type: string
+    required:
+    - email
+    - otp
+    type: object
+  bulk_upload.BulkUploadFailedInvoiceDto:
     properties:
       error:
         type: object
       invoice:
-        $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+        $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
       invoice_index:
         example: 1
         type: integer
@@ -371,7 +723,7 @@ definitions:
         example: validated_invoice
         type: string
     type: object
-  dtos.BulkUploadFailedInvoicesDto:
+  bulk_upload.BulkUploadFailedInvoicesDto:
     properties:
       aggregator_id:
         example: 4f6ec813-c898-49ce-8fc7-46f529a9354a
@@ -390,7 +742,7 @@ definitions:
         type: string
       failed_invoices:
         items:
-          $ref: '#/definitions/dtos.BulkUploadFailedInvoiceDto'
+          $ref: '#/definitions/bulk_upload.BulkUploadFailedInvoiceDto'
         type: array
       failed_invoices_count:
         example: 3
@@ -423,7 +775,7 @@ definitions:
         example: 3
         type: integer
     type: object
-  dtos.BulkUploadLogDto:
+  bulk_upload.BulkUploadLogDto:
     properties:
       business_id:
         example: ac0d4848-c898-49ce-8fc7-46f529a9354a
@@ -472,17 +824,17 @@ definitions:
         type: integer
       validation_errors:
         items:
-          $ref: '#/definitions/dtos.BulkUploadValidationErrorDto'
+          $ref: '#/definitions/bulk_upload.BulkUploadValidationErrorDto'
         type: array
     type: object
-  dtos.BulkUploadValidationErrorDto:
+  bulk_upload.BulkUploadValidationErrorDto:
     properties:
       error:
         example: 'invoice VA12239: validation failed: Key: ''UploadInvoiceRequestDto.InvoiceTypeCode''
           Error:Field validation for ''InvoiceTypeCode'' failed on the ''oneof'' tag'
         type: string
       invoice:
-        $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+        $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
       invoice_index:
         example: 1
         type: integer
@@ -493,210 +845,59 @@ definitions:
         example: validation
         type: string
     type: object
-  dtos.BusinessInvitationDto:
-    properties:
-      aggregator_email:
-        example: aggregator@example.com
-        type: string
-      aggregator_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      aggregator_name:
-        example: Aggregator Corp
-        type: string
-      created_at:
-        example: "2026-01-01T12:00:00Z"
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      status:
-        example: pending
-        type: string
-    type: object
-  dtos.BusinessInvitationListResponseDto:
+  bulk_upload.GetBulkUploadFailedInvoicesResponseDto:
     properties:
       data:
-        items:
-          $ref: '#/definitions/dtos.BusinessInvitationDto'
-        type: array
+        $ref: '#/definitions/bulk_upload.BulkUploadFailedInvoicesDto'
+      error: {}
+      extra: {}
       message:
-        example: Action performed successfully
         type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.BusinessSubscriptionInfoDto:
-    properties:
-      billing_cycle_days:
-        example: 30
-        type: integer
-      is_active:
-        example: true
-        type: boolean
-      next_billing_date:
-        example: "2026-05-01T00:00:00Z"
-        type: string
-      plan_amount:
-        example: 5000
-        type: number
-      plan_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      plan_name:
-        example: Starter
-        type: string
-      remaining_invoices:
-        example: 380
-        type: integer
-      total_invoices:
-        example: 500
-        type: integer
-      used_invoices:
-        example: 120
-        type: integer
-    type: object
-  dtos.ChangePasswordDto:
-    properties:
-      new_password:
-        example: newpassword123
-        minLength: 6
-        type: string
-      old_password:
-        example: password123
-        minLength: 6
-        type: string
-    required:
-    - new_password
-    - old_password
-    type: object
-  dtos.CompleteForgotPasswordDto:
-    properties:
-      email:
-        example: john.doe@example.com
-        type: string
-      otp:
-        example: "123456"
-        type: string
-      password:
-        example: password123
-        minLength: 6
-        type: string
-    required:
-    - email
-    - otp
-    - password
-    type: object
-  dtos.CreateSubscriptionPlanDataDto:
-    properties:
-      is_sandbox:
-        example: true
-        type: boolean
-      plan:
-        $ref: '#/definitions/models.SubscriptionPlan'
-    type: object
-  dtos.CreateSubscriptionPlanDto:
-    properties:
-      amount:
-        type: number
-      billing_cycle:
-        type: integer
-      is_sandbox:
-        type: boolean
       name:
         type: string
-      total_invoices:
-        type: integer
-    required:
-    - amount
-    - billing_cycle
-    - is_sandbox
-    - name
-    - total_invoices
-    type: object
-  dtos.CreateSubscriptionPlanResponseDto:
-    properties:
-      data:
-        $ref: '#/definitions/dtos.CreateSubscriptionPlanDataDto'
-      message:
-        example: Action performed successfully
-        type: string
+      pagination: {}
       status:
-        example: success
         type: string
       status_code:
-        example: 200
         type: integer
     type: object
-  dtos.DocumentReference:
-    properties:
-      irn:
-        example: ITW001-E9E0C0D3-20240619
-        type: string
-      issue_date:
-        example: "2026-01-16"
-        type: string
-    required:
-    - irn
-    - issue_date
-    type: object
-  dtos.GetAllInvoicesResponseDto:
+  bulk_upload.GetBulkUploadLogsResponseDto:
     properties:
       data:
         items:
-          $ref: '#/definitions/dtos.MinimalInvoiceDTO'
+          $ref: '#/definitions/bulk_upload.BulkUploadLogDto'
         type: array
+      error: {}
+      extra: {}
       message:
-        example: Action performed successfully
         type: string
-      pagination:
-        $ref: '#/definitions/database.PaginationResponse'
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.GetBulkUploadFailedInvoicesResponseDto:
-    properties:
-      data:
-        $ref: '#/definitions/dtos.BulkUploadFailedInvoicesDto'
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.GetBulkUploadLogsResponseDto:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/dtos.BulkUploadLogDto'
-        type: array
-      message:
-        example: Action performed successfully
+      name:
         type: string
       pagination:
         items:
           $ref: '#/definitions/database.PaginationResponse'
         type: array
       status:
-        example: success
         type: string
       status_code:
-        example: 200
         type: integer
     type: object
-  dtos.GetBusinessResponseDto:
+  business.AccountingPlatformConfig:
+    properties:
+      api_key:
+        example: api-key-123456789
+        type: string
+      auth_token:
+        example: auth-token-123456789
+        type: string
+      hmac_secret:
+        example: hmac-secret-123456789
+        type: string
+      org_id:
+        example: org-123456789
+        type: string
+    type: object
+  business.GetBusinessResponseDto:
     properties:
       acc_status:
         example: active
@@ -730,7 +931,7 @@ definitions:
         example: "+1234567890"
         type: string
       platform_configs:
-        $ref: '#/definitions/dtos.PlatformConfigsAuth'
+        $ref: '#/definitions/business.PlatformConfigs'
       service_id:
         example: SRV-98765
         type: string
@@ -741,592 +942,11 @@ definitions:
         example: "2026-01-16T12:30:00Z"
         type: string
     type: object
-  dtos.GetInvoiceDetailsResponseDto:
-    properties:
-      data:
-        $ref: '#/definitions/dtos.Invoice'
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.GetInvoiceStatsResponseDto:
-    properties:
-      data:
-        $ref: '#/definitions/dtos.InvoiceStatsResponseData'
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.InitiateForgotPasswordDto:
-    properties:
-      email:
-        example: john.doe@example.com
-        type: string
-    required:
-    - email
-    type: object
-  dtos.Invoice:
-    properties:
-      business_id:
-        example: business-uuid
-        type: string
-      created_at:
-        example: "2024-01-01T12:00:00Z"
-        type: string
-      current_status:
-        example: validated_irn
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      invoice_data:
-        $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
-      invoice_number:
-        example: INV-1001
-        type: string
-      irn:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      platform:
-        description: e.g., zoho, quickbooks
-        example: zoho
-        type: string
-      platform_metadata:
-        type: string
-      status_history:
-        items:
-          $ref: '#/definitions/dtos.InvoiceStepMetadata'
-        type: array
-      timestamp:
-        example: "2024-01-01T12:00:00Z"
-        type: string
-      updated_at:
-        example: "2024-01-02T12:00:00Z"
-        type: string
-    type: object
-  dtos.InvoiceData:
-    properties:
-      invoice_number:
-        example: INV-1001
-        type: string
-      irn:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      qr_code:
-        example: iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN...
-        type: string
-      qr_code_2:
-        example: eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51...
-        type: string
-      qr_code_bmp:
-        example: Qk02AAAAAAAAAAAAAAAoAAAAAQAAAAEAAAABAAEAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAP...
-        type: string
-    type: object
-  dtos.InvoiceDeliveryPeriod:
-    properties:
-      end_date:
-        example: "2026-01-16"
-        type: string
-      start_date:
-        example: "2026-01-16"
-        type: string
-    required:
-    - end_date
-    - start_date
-    type: object
-  dtos.InvoiceLine:
-    properties:
-      discount_amount:
-        example: 2500
-        type: number
-      discount_rate:
-        example: 5
-        type: number
-      fee_amount:
-        example: 450
-        type: number
-      fee_rate:
-        example: 2
-        type: number
-      hsn_code:
-        example: "1282.10"
-        type: string
-      invoiced_quantity:
-        example: 10
-        minimum: 1
-        type: integer
-      item:
-        $ref: '#/definitions/dtos.Item'
-      line_extension_amount:
-        example: 1500.75
-        type: number
-      price:
-        $ref: '#/definitions/dtos.Price'
-      product_category:
-        example: Electronics
-        type: string
-    required:
-    - hsn_code
-    - invoiced_quantity
-    - item
-    - line_extension_amount
-    - price
-    - product_category
-    type: object
-  dtos.InvoiceStatsDto:
-    properties:
-      failed_invoices:
-        example: 20
-        type: integer
-      partial_invoices:
-        example: 30
-        type: integer
-      successful_invoices:
-        example: 100
-        type: integer
-      total_invoices:
-        example: 150
-        type: integer
-    type: object
-  dtos.InvoiceStatsResponseData:
-    properties:
-      monthly:
-        items:
-          $ref: '#/definitions/dtos.MonthlyInvoiceStatsDto'
-        type: array
-      total:
-        $ref: '#/definitions/dtos.InvoiceStatsDto'
-    type: object
-  dtos.InvoiceStepMetadata:
-    properties:
-      status:
-        example: success
-        type: string
-      step:
-        example: validated_irn
-        type: string
-      timestamp:
-        example: "2024-01-01T12:00:00Z"
-        type: string
-    type: object
-  dtos.Item:
-    properties:
-      description:
-        example: A high-performance laptop suitable for gaming and work.
-        type: string
-      name:
-        example: Laptop
-        type: string
-      sellers_item_identification:
-        example: LAP-12345
-        type: string
-    required:
-    - name
-    type: object
-  dtos.LegalMonetaryTotal:
-    properties:
-      line_extension_amount:
-        example: 1500.75
-        type: number
-      payable_amount:
-        example: 1700.75
-        type: number
-      tax_exclusive_amount:
-        example: 1500.75
-        type: number
-      tax_inclusive_amount:
-        example: 1700.75
-        type: number
-    required:
-    - line_extension_amount
-    - payable_amount
-    - tax_exclusive_amount
-    - tax_inclusive_amount
-    type: object
-  dtos.LoginRequestDto:
-    properties:
-      email:
-        type: string
-      is_sandbox:
-        default: true
-        type: boolean
-      password:
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  dtos.LoginResponseDto:
-    properties:
-      access_token:
-        type: string
-      data:
-        $ref: '#/definitions/dtos.UserResponse'
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.MinimalInvoiceDTO:
-    properties:
-      created_at:
-        example: "2024-01-01T12:00:00Z"
-        type: string
-      current_status:
-        example: validated_irn
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      invoice_number:
-        example: INV-1001
-        type: string
-      irn:
-        example: INV-1001-a456-426614174000
-        type: string
-      platform:
-        example: internal
-        type: string
-      status_text:
-        example: success
-        type: string
-    type: object
-  dtos.MonthlyInvoiceStatsDto:
-    properties:
-      failed_invoices:
-        example: 20
-        type: integer
-      month:
-        example: "202401"
-        type: string
-      partial_invoices:
-        example: 30
-        type: integer
-      successful_invoices:
-        example: 100
-        type: integer
-      total_invoices:
-        example: 150
-        type: integer
-    type: object
-  dtos.Party:
-    properties:
-      business_description:
-        example: Acme Inc. is a leading technology company.
-        minLength: 5
-        type: string
-      email:
-        example: business@example.com
-        type: string
-      party_name:
-        example: Acme Inc.
-        minLength: 2
-        type: string
-      postal_address:
-        $ref: '#/definitions/dtos.PostalAddress'
-      telephone:
-        example: "+234804567890"
-        minLength: 7
-        type: string
-      tin:
-        example: "123456789012345"
-        type: string
-    required:
-    - email
-    - party_name
-    - postal_address
-    - tin
-    type: object
-  dtos.PaymentMeans:
-    properties:
-      payment_due_date:
-        example: "2026-01-16"
-        type: string
-      payment_means_code:
-        example: "10"
-        type: string
-    required:
-    - payment_due_date
-    - payment_means_code
-    type: object
-  dtos.PlatformConfigsAuth:
+  business.PlatformConfigs:
     additionalProperties:
-      $ref: '#/definitions/dtos.AccountingPlatformConfigAuth'
+      $ref: '#/definitions/business.AccountingPlatformConfig'
     type: object
-  dtos.PostalAddress:
-    properties:
-      city_name:
-        example: Ikeja
-        type: string
-      country:
-        example: NG
-        type: string
-      lga:
-        example: NG-AB-ANO
-        type: string
-      postal_zone:
-        example: "10001"
-        type: string
-      state:
-        example: NG-AB
-        type: string
-      street_name:
-        example: 123 Broad Street
-        type: string
-    required:
-    - city_name
-    - country
-    - lga
-    - postal_zone
-    - state
-    - street_name
-    type: object
-  dtos.Price:
-    properties:
-      base_quantity:
-        example: 1
-        type: integer
-      price_amount:
-        example: 5000
-        type: number
-      price_unit:
-        example: NGN per 1
-        type: string
-    required:
-    - base_quantity
-    - price_amount
-    - price_unit
-    type: object
-  dtos.RegisterDto:
-    properties:
-      company_name:
-        example: Acme Inc.
-        type: string
-      email:
-        example: john.doe@example.com
-        type: string
-      is_aggregator:
-        example: true
-        type: boolean
-      name:
-        example: John Doe
-        maxLength: 250
-        minLength: 2
-        type: string
-      password:
-        example: password123
-        minLength: 6
-        type: string
-      phone_number:
-        example: "+1234567890"
-        type: string
-      platform_configs:
-        $ref: '#/definitions/dtos.PlatformConfigsAuth'
-      tin:
-        example: TIN-123456789
-        type: string
-    required:
-    - company_name
-    - email
-    - is_aggregator
-    - name
-    - password
-    - phone_number
-    - tin
-    type: object
-  dtos.RegisterResponseDto:
-    properties:
-      message:
-        example: An otp has been sent to your mail, use it to verify your account
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.ResendVerificationOtpDto:
-    properties:
-      email:
-        example: john.doe@example.com
-        type: string
-    required:
-    - email
-    type: object
-  dtos.RespondToInvitationDto:
-    properties:
-      accept:
-        example: true
-        type: boolean
-      invitation_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-    required:
-    - invitation_id
-    type: object
-  dtos.SendAggregatorInvitationByEmailDto:
-    properties:
-      email:
-        example: aggregator@example.com
-        type: string
-    required:
-    - email
-    type: object
-  dtos.SendAggregatorInvitationDto:
-    properties:
-      aggregator_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-    required:
-    - aggregator_id
-    type: object
-  dtos.SubscriptionPlansResponseDto:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/models.SubscriptionPlan'
-        type: array
-      message:
-        example: Action performed successfully
-        type: string
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.TaxCategory:
-    properties:
-      id:
-        enum:
-        - STANDARD_GST
-        - REDUCED_GST
-        - ZERO_GST
-        - STANDARD_VAT
-        - REDUCED_VAT
-        - ZERO_VAT
-        - STATE_SALES_TAX
-        - LOCAL_SALES_TAX
-        - ALCOHOL_EXCISE_TAX
-        - TOBACCO_EXCISE_TAX
-        - FUEL_EXCISE_TAX
-        - CORPORATE_INCOME_TAX
-        - PERSONAL_INCOME_TAX
-        - SOCIAL_SECURITY_TAX
-        - MEDICARE_TAX
-        - REAL_ESTATE_TAX
-        - PERSONAL_PROPERTY_TAX
-        - CARBON_TAX
-        - PLASTIC_TAX
-        - IMPORT_DUTY
-        - EXPORT_DUTY
-        - LUXURY_TAX
-        - SERVICE_TAX
-        - TOURISM_TAX
-        - WITHHOLDING_TAX
-        - STAMP_DUTY
-        - EXEMPTED
-        example: STANDARD_VAT
-        type: string
-      percent:
-        example: 15
-        type: number
-    required:
-    - id
-    - percent
-    type: object
-  dtos.TaxSubtotal:
-    properties:
-      tax_amount:
-        example: 1500.75
-        type: number
-      tax_category:
-        $ref: '#/definitions/dtos.TaxCategory'
-      taxable_amount:
-        example: 1500.75
-        type: number
-    required:
-    - tax_amount
-    - tax_category
-    - taxable_amount
-    type: object
-  dtos.TaxTotal:
-    properties:
-      tax_amount:
-        example: 1500.75
-        type: number
-      tax_subtotal:
-        items:
-          $ref: '#/definitions/dtos.TaxSubtotal'
-        type: array
-    required:
-    - tax_amount
-    type: object
-  dtos.TransactionDto:
-    properties:
-      aggregator_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      amount:
-        example: 5000
-        type: number
-      business_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      business_name:
-        example: Business Corp
-        type: string
-      created_at:
-        example: "2026-01-01T12:00:00Z"
-        type: string
-      currency:
-        example: NGN
-        type: string
-      gateway_response:
-        example: Approved
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      plan:
-        example: Starter
-        type: string
-      plan_id:
-        example: plan_123
-        type: string
-      provider:
-        example: paystack
-        type: string
-      reference:
-        example: txn_123456789
-        type: string
-      status:
-        example: success
-        type: string
-      updated_at:
-        example: "2026-01-01T12:00:00Z"
-        type: string
-    type: object
-  dtos.UpdateBusinessDto:
+  business.UpdateBusinessDto:
     properties:
       business_id:
         example: 123e4567-e89b-12d3-a456-426614174000
@@ -1350,7 +970,7 @@ definitions:
         example: 6A2BC898
         type: string
     type: object
-  dtos.UploadBusinessIRNSigningKeysDataDto:
+  business.UploadBusinessIRNSigningKeysDataDto:
     properties:
       environment:
         example: production
@@ -1362,43 +982,521 @@ definitions:
         example: true
         type: boolean
     type: object
-  dtos.UploadBusinessIRNSigningKeysResponseDto:
+  business.UploadBusinessIRNSigningKeysResponseDto:
     properties:
       data:
-        $ref: '#/definitions/dtos.UploadBusinessIRNSigningKeysDataDto'
+        $ref: '#/definitions/business.UploadBusinessIRNSigningKeysDataDto'
+      error: {}
+      extra: {}
       message:
-        example: Action performed successfully
         type: string
+      name:
+        type: string
+      pagination: {}
       status:
-        example: success
         type: string
       status_code:
-        example: 200
         type: integer
     type: object
-  dtos.UploadInvoiceRequestDto:
+  database.PaginationResponse:
+    properties:
+      current_page:
+        type: integer
+      page_count:
+        type: integer
+      total_pages_count:
+        type: integer
+    type: object
+  entities.BulkUpload:
+    properties:
+      aggregator_id:
+        type: string
+      business_id:
+        type: string
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      duration:
+        type: string
+      file_key:
+        type: string
+      file_url:
+        type: string
+      id:
+        type: string
+      partially_successful_invoices:
+        type: integer
+      started_at:
+        type: string
+      status:
+        type: string
+      successful_invoices:
+        type: integer
+      total_records:
+        type: integer
+      unsuccessful_invoices:
+        type: integer
+      valid_records:
+        type: integer
+      validation_error_count:
+        type: integer
+      validation_errors:
+        type: object
+    type: object
+  entities.Invoice:
+    properties:
+      aggregator_id:
+        type: string
+      business_id:
+        type: string
+      created_at:
+        type: string
+      current_status:
+        type: string
+      encrypted_irn:
+        type: string
+      id:
+        type: string
+      invoice_data:
+        type: object
+      invoice_number:
+        type: string
+      irn:
+        type: string
+      platform:
+        description: e.g., zoho, quickbooks
+        type: string
+      platform_metadata:
+        type: object
+      qr_code:
+        type: string
+      status_history:
+        type: object
+      timestamp:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  entities.InvoiceStatsDto:
+    properties:
+      failed_invoices:
+        example: 20
+        type: integer
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      total_invoices:
+        example: 150
+        type: integer
+    type: object
+  entities.InvoiceStatsResponseData:
+    properties:
+      monthly:
+        items:
+          $ref: '#/definitions/entities.MonthlyInvoiceStatsDto'
+        type: array
+      total:
+        $ref: '#/definitions/entities.InvoiceStatsDto'
+    type: object
+  entities.MinimalInvoiceDTO:
+    properties:
+      created_at:
+        type: string
+      current_status:
+        type: string
+      id:
+        type: string
+      invoice_number:
+        type: string
+      irn:
+        type: string
+      platform:
+        type: string
+      status_text:
+        type: string
+    type: object
+  entities.MonthlyInvoiceStatsDto:
+    properties:
+      failed_invoices:
+        example: 20
+        type: integer
+      month:
+        example: "202401"
+        type: string
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      total_invoices:
+        example: 150
+        type: integer
+    type: object
+  entities.Ping:
+    properties:
+      message:
+        type: string
+    type: object
+  entities.Response:
+    properties:
+      data: {}
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  entities.SubscriptionPlan:
+    properties:
+      amount:
+        type: number
+      billing_cycle:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      total_invoices:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  firs_models.AllowanceCharge:
+    properties:
+      amount:
+        example: 1500.75
+        type: number
+      charge_indicator:
+        example: true
+        type: boolean
+    required:
+    - amount
+    type: object
+  firs_models.DocumentReference:
+    properties:
+      irn:
+        example: ITW001-E9E0C0D3-20240619
+        type: string
+      issue_date:
+        example: "2026-01-16"
+        type: string
+    required:
+    - irn
+    - issue_date
+    type: object
+  firs_models.FirsTransactionVatPayload:
+    properties:
+      agentTin:
+        type: string
+      baseAmount:
+        type: string
+      beneficiaryTin:
+        type: string
+      currency:
+        type: integer
+      itemDescription:
+        type: string
+      otherTaxes:
+        type: string
+      totalAmount:
+        type: string
+      transDate:
+        type: string
+      vatCalculated:
+        type: string
+      vatRate:
+        type: string
+      vatStatus:
+        type: integer
+      vendorTransactionId:
+        type: string
+    type: object
+  firs_models.GenerateIRNRequestData:
+    properties:
+      invoice_number:
+        type: string
+    required:
+    - invoice_number
+    type: object
+  firs_models.IRNSigningRequestData:
+    properties:
+      irn:
+        type: string
+    type: object
+  firs_models.IRNValidationRequest:
+    properties:
+      business_id:
+        type: string
+      invoice_reference:
+        type: string
+      irn:
+        type: string
+    required:
+    - business_id
+    - invoice_reference
+    - irn
+    type: object
+  firs_models.InvoiceDeliveryPeriod:
+    properties:
+      end_date:
+        example: "2026-01-16"
+        type: string
+      start_date:
+        example: "2026-01-16"
+        type: string
+    required:
+    - end_date
+    - start_date
+    type: object
+  firs_models.InvoiceLine:
+    properties:
+      discount_amount:
+        example: 2500
+        type: number
+      discount_rate:
+        example: 5
+        type: number
+      fee_amount:
+        example: 450
+        type: number
+      fee_rate:
+        example: 2
+        type: number
+      hsn_code:
+        example: "1282.10"
+        type: string
+      invoiced_quantity:
+        example: 10
+        minimum: 1
+        type: integer
+      item:
+        $ref: '#/definitions/firs_models.Item'
+      line_extension_amount:
+        example: 1500.75
+        type: number
+      price:
+        $ref: '#/definitions/firs_models.Price'
+      product_category:
+        example: Electronics
+        type: string
+    required:
+    - hsn_code
+    - invoiced_quantity
+    - item
+    - line_extension_amount
+    - price
+    - product_category
+    type: object
+  firs_models.Item:
+    properties:
+      description:
+        example: A high-performance laptop suitable for gaming and work.
+        type: string
+      name:
+        example: Laptop
+        type: string
+      sellers_item_identification:
+        example: LAP-12345
+        type: string
+    required:
+    - name
+    type: object
+  firs_models.LegalMonetaryTotal:
+    properties:
+      line_extension_amount:
+        example: 1500.75
+        type: number
+      payable_amount:
+        example: 1700.75
+        type: number
+      tax_exclusive_amount:
+        example: 1500.75
+        type: number
+      tax_inclusive_amount:
+        example: 1700.75
+        type: number
+    required:
+    - line_extension_amount
+    - payable_amount
+    - tax_exclusive_amount
+    - tax_inclusive_amount
+    type: object
+  firs_models.Party:
+    properties:
+      business_description:
+        example: Acme Inc. is a leading technology company.
+        minLength: 5
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      party_name:
+        example: Acme Inc.
+        minLength: 2
+        type: string
+      postal_address:
+        $ref: '#/definitions/firs_models.PostalAddress'
+      telephone:
+        example: "+234804567890"
+        minLength: 7
+        type: string
+      tin:
+        example: "123456789012345"
+        type: string
+    required:
+    - email
+    - party_name
+    - postal_address
+    - tin
+    type: object
+  firs_models.PaymentMeans:
+    properties:
+      payment_due_date:
+        example: "2026-01-16"
+        type: string
+      payment_means_code:
+        example: "10"
+        type: string
+    required:
+    - payment_due_date
+    - payment_means_code
+    type: object
+  firs_models.PostalAddress:
+    properties:
+      city_name:
+        example: Ikeja
+        type: string
+      country:
+        example: Nigeria
+        type: string
+      country_code:
+        example: NG
+        type: string
+      lga:
+        example: NG-LA-LIS
+        type: string
+      postal_zone:
+        example: "10001"
+        type: string
+      state:
+        example: NG-LA
+        type: string
+      street_name:
+        example: 123 Broad Street
+        type: string
+    required:
+    - city_name
+    - country
+    - country_code
+    - postal_zone
+    - street_name
+    type: object
+  firs_models.Price:
+    properties:
+      base_quantity:
+        example: 1
+        type: integer
+      price_amount:
+        example: 5000
+        type: number
+      price_unit:
+        example: NGN per 1
+        type: string
+    required:
+    - base_quantity
+    - price_amount
+    - price_unit
+    type: object
+  firs_models.TaxCategory:
+    properties:
+      id:
+        example: VAT
+        type: string
+      percent:
+        example: 15
+        type: number
+    required:
+    - id
+    - percent
+    type: object
+  firs_models.TaxSubtotal:
+    properties:
+      tax_amount:
+        example: 1500.75
+        type: number
+      tax_category:
+        $ref: '#/definitions/firs_models.TaxCategory'
+      taxable_amount:
+        example: 1500.75
+        type: number
+    required:
+    - tax_amount
+    - tax_category
+    - taxable_amount
+    type: object
+  firs_models.TaxTotal:
+    properties:
+      tax_amount:
+        example: 1500.75
+        type: number
+      tax_subtotal:
+        items:
+          $ref: '#/definitions/firs_models.TaxSubtotal'
+        type: array
+    required:
+    - tax_amount
+    type: object
+  firs_models.UpdateInvoice:
+    properties:
+      payment_status:
+        enum:
+        - PENDING
+        - PAID
+        - REJECTED
+        type: string
+      reference:
+        type: string
+    required:
+    - payment_status
+    type: object
+  firs_models.UploadInvoiceRequestDto:
     properties:
       accounting_cost:
         example: "2000"
         type: string
       accounting_customer_party:
-        $ref: '#/definitions/dtos.Party'
+        $ref: '#/definitions/firs_models.Party'
       accounting_supplier_party:
-        $ref: '#/definitions/dtos.Party'
+        $ref: '#/definitions/firs_models.Party'
       actual_delivery_date:
         example: "2026-01-16"
         type: string
       additional_document_reference:
         items:
-          $ref: '#/definitions/dtos.DocumentReference'
+          $ref: '#/definitions/firs_models.DocumentReference'
         type: array
       allowance_charge:
         items:
-          $ref: '#/definitions/dtos.AllowanceCharge'
+          $ref: '#/definitions/firs_models.AllowanceCharge'
         type: array
       billing_reference:
         items:
-          $ref: '#/definitions/dtos.DocumentReference'
+          $ref: '#/definitions/firs_models.DocumentReference'
         type: array
       business_id:
         example: 123e4567-e89b-12d3-a456-426614174000
@@ -1407,9 +1505,9 @@ definitions:
         example: ITW001-E9E0C0D3-20240619
         type: string
       contract_document_reference:
-        $ref: '#/definitions/dtos.DocumentReference'
+        $ref: '#/definitions/firs_models.DocumentReference'
       dispatch_document_reference:
-        $ref: '#/definitions/dtos.DocumentReference'
+        $ref: '#/definitions/firs_models.DocumentReference'
       document_currency_code:
         example: NGN
         type: string
@@ -1417,7 +1515,7 @@ definitions:
         example: "2026-01-20"
         type: string
       invoice_delivery_period:
-        $ref: '#/definitions/dtos.InvoiceDeliveryPeriod'
+        $ref: '#/definitions/firs_models.InvoiceDeliveryPeriod'
       invoice_kind:
         enum:
         - B2C
@@ -1427,7 +1525,7 @@ definitions:
         type: string
       invoice_line:
         items:
-          $ref: '#/definitions/dtos.InvoiceLine'
+          $ref: '#/definitions/firs_models.InvoiceLine'
         type: array
       invoice_number:
         example: INV-001
@@ -1467,7 +1565,7 @@ definitions:
         example: "12:00:00"
         type: string
       legal_monetary_total:
-        $ref: '#/definitions/dtos.LegalMonetaryTotal'
+        $ref: '#/definitions/firs_models.LegalMonetaryTotal'
       note:
         example: Invoice note
         type: string
@@ -1475,12 +1573,12 @@ definitions:
         example: ITW001-E9E0C0D3-20240619
         type: string
       originator_document_reference:
-        $ref: '#/definitions/dtos.DocumentReference'
+        $ref: '#/definitions/firs_models.DocumentReference'
       payee_party:
-        $ref: '#/definitions/dtos.Party'
+        $ref: '#/definitions/firs_models.Party'
       payment_means:
         items:
-          $ref: '#/definitions/dtos.PaymentMeans'
+          $ref: '#/definitions/firs_models.PaymentMeans'
         type: array
       payment_status:
         enum:
@@ -1493,7 +1591,7 @@ definitions:
         example: Payment terms note
         type: string
       receipt_document_reference:
-        $ref: '#/definitions/dtos.DocumentReference'
+        $ref: '#/definitions/firs_models.DocumentReference'
       tax_currency_code:
         example: NGN
         type: string
@@ -1501,10 +1599,10 @@ definitions:
         example: "2026-01-16"
         type: string
       tax_representative_party:
-        $ref: '#/definitions/dtos.Party'
+        $ref: '#/definitions/firs_models.Party'
       tax_total:
         items:
-          $ref: '#/definitions/dtos.TaxTotal'
+          $ref: '#/definitions/firs_models.TaxTotal'
         type: array
     required:
     - accounting_supplier_party
@@ -1518,138 +1616,6 @@ definitions:
     - tax_currency_code
     - tax_total
     type: object
-  dtos.UploadInvoiceResponseDto:
-    properties:
-      data:
-        $ref: '#/definitions/dtos.InvoiceData'
-      message:
-        example: Action performed successfully
-        type: string
-      metadata:
-        items:
-          $ref: '#/definitions/dtos.InvoiceStepMetadata'
-        type: array
-      status:
-        example: success
-        type: string
-      status_code:
-        example: 200
-        type: integer
-    type: object
-  dtos.UserResponse:
-    properties:
-      business_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      email:
-        example: john.doe@example.com
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      is_aggregator:
-        example: true
-        type: boolean
-      is_sandbox:
-        example: true
-        type: boolean
-      keys_set:
-        example: true
-        type: boolean
-      name:
-        example: John Doe
-        type: string
-      service_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-    type: object
-  dtos.VerifyEmailDto:
-    properties:
-      email:
-        example: john.doe@example.com
-        type: string
-      otp:
-        example: "123456"
-        type: string
-    required:
-    - email
-    - otp
-    type: object
-  firs_models.FirsTransactionVatPayload:
-    properties:
-      agentTin:
-        type: string
-      baseAmount:
-        type: string
-      beneficiaryTin:
-        type: string
-      currency:
-        type: integer
-      itemDescription:
-        type: string
-      otherTaxes:
-        type: string
-      totalAmount:
-        type: string
-      transDate:
-        type: string
-      vatCalculated:
-        type: string
-      vatRate:
-        type: string
-      vatStatus:
-        type: integer
-      vendorTransactionId:
-        type: string
-    type: object
-  firs_models.FirsWebhookPayload:
-    properties:
-      irn:
-        type: string
-      message:
-        type: string
-    required:
-    - irn
-    - message
-    type: object
-  firs_models.GenerateIRNRequestData:
-    properties:
-      invoice_number:
-        type: string
-    required:
-    - invoice_number
-    type: object
-  firs_models.IRNSigningRequestData:
-    properties:
-      irn:
-        type: string
-    type: object
-  firs_models.IRNValidationRequest:
-    properties:
-      business_id:
-        type: string
-      invoice_reference:
-        type: string
-      irn:
-        type: string
-    required:
-    - business_id
-    - invoice_reference
-    - irn
-    type: object
-  firs_models.UpdateInvoice:
-    properties:
-      payment_status:
-        enum:
-        - PENDING
-        - PAID
-        - REJECTED
-        type: string
-      reference:
-        type: string
-    required:
-    - payment_status
-    type: object
   firs_models.VerifyTinData:
     properties:
       tin:
@@ -1657,68 +1623,29 @@ definitions:
     required:
     - tin
     type: object
-  models.BulkUpload:
+  invoice.GetAllInvoicesResponseDto:
     properties:
-      aggregator_id:
-        type: string
-      business_id:
-        type: string
-      completed_at:
-        type: string
-      created_at:
-        type: string
-      duration:
-        type: string
-      file_key:
-        type: string
-      file_url:
-        type: string
-      id:
-        type: string
-      partially_successful_invoices:
-        type: integer
-      started_at:
-        type: string
-      status:
-        type: string
-      successful_invoices:
-        type: integer
-      total_records:
-        type: integer
-      unsuccessful_invoices:
-        type: integer
-      valid_records:
-        type: integer
-      validation_error_count:
-        type: integer
-      validation_errors:
-        type: object
-    type: object
-  models.MinimalInvoiceDTO:
-    properties:
-      created_at:
-        type: string
-      current_status:
-        type: string
-      id:
-        type: string
-      invoice_number:
-        type: string
-      irn:
-        type: string
-      platform:
-        type: string
-      status_text:
-        type: string
-    type: object
-  models.Ping:
-    properties:
+      data:
+        items:
+          $ref: '#/definitions/entities.MinimalInvoiceDTO'
+        type: array
+      error: {}
+      extra: {}
       message:
         type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
     type: object
-  models.Response:
+  invoice.GetInvoiceDetailsResponseDto:
     properties:
-      data: {}
+      data:
+        $ref: '#/definitions/entities.Invoice'
       error: {}
       extra: {}
       message:
@@ -1731,24 +1658,182 @@ definitions:
       status_code:
         type: integer
     type: object
-  models.SubscriptionPlan:
+  invoice.GetInvoiceStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/entities.InvoiceStatsResponseData'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.InvoiceStepMetadata:
+    properties:
+      status:
+        example: success
+        type: string
+      step:
+        example: validated_irn
+        type: string
+      timestamp:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+    type: object
+  invoice.InvoiceUploadData:
+    properties:
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      invoice_number:
+        example: INV-1001
+        type: string
+      irn:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      qr_code:
+        example: iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN...
+        type: string
+      qr_code_2:
+        example: eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51...
+        type: string
+      qr_code_bmp_url:
+        example: https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp
+        type: string
+    type: object
+  invoice.UploadInvoiceResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/invoice.InvoiceUploadData'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      metadata:
+        items:
+          $ref: '#/definitions/invoice.InvoiceStepMetadata'
+        type: array
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  subscription.AggregatorSubscribeDataDto:
+    properties:
+      authorization_url:
+        example: https://checkout.paystack.com/...
+        type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      plan_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      provider:
+        example: paystack
+        type: string
+      transaction_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      transaction_ref:
+        example: aggsub_1712345678_abcdef
+        type: string
+    type: object
+  subscription.AggregatorSubscribeRequestDto:
+    properties:
+      business_id:
+        type: string
+      plan_id:
+        type: string
+    required:
+    - business_id
+    - plan_id
+    type: object
+  subscription.AggregatorSubscribeResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/subscription.AggregatorSubscribeDataDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  subscription.CreateSubscriptionPlanDataDto:
+    properties:
+      is_sandbox:
+        example: true
+        type: boolean
+      plan:
+        $ref: '#/definitions/entities.SubscriptionPlan'
+    type: object
+  subscription.CreateSubscriptionPlanDto:
     properties:
       amount:
         type: number
       billing_cycle:
         type: integer
-      created_at:
-        type: string
-      id:
-        type: string
-      is_active:
+      is_sandbox:
         type: boolean
       name:
         type: string
       total_invoices:
         type: integer
-      updated_at:
+    required:
+    - amount
+    - billing_cycle
+    - is_sandbox
+    - name
+    - total_invoices
+    type: object
+  subscription.CreateSubscriptionPlanResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/subscription.CreateSubscriptionPlanDataDto'
+      error: {}
+      extra: {}
+      message:
         type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  subscription.SubscriptionPlansResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/entities.SubscriptionPlan'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
     type: object
 info:
   contact: {}
@@ -1775,15 +1860,15 @@ paths:
         "200":
           description: Activity logs fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorActivityLogListResponseDto'
+            $ref: '#/definitions/aggregator.AggregatorActivityLogListResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Activity Log
@@ -1807,15 +1892,15 @@ paths:
         "200":
           description: Bulk uploads fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorBulkUploadListResponseDto'
+            $ref: '#/definitions/aggregator.AggregatorBulkUploadListResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: List All Bulk Uploads
@@ -1837,23 +1922,23 @@ paths:
         "200":
           description: Bulk upload failed invoices fetched successfully
           schema:
-            $ref: '#/definitions/dtos.GetBulkUploadFailedInvoicesResponseDto'
+            $ref: '#/definitions/aggregator.GetBulkUploadFailedInvoicesResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "404":
           description: Bulk upload not found
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get failed invoices from a bulk upload
@@ -1888,19 +1973,19 @@ paths:
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "404":
           description: Bulk upload not found
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Download failed invoices from a bulk upload
@@ -1929,19 +2014,19 @@ paths:
         "200":
           description: Bulk uploads fetched successfully
           schema:
-            $ref: '#/definitions/dtos.GetBulkUploadLogsResponseDto'
+            $ref: '#/definitions/aggregator.GetBulkUploadLogsResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: List Bulk Uploads by Business
@@ -1969,19 +2054,19 @@ paths:
         "201":
           description: Invoice uploaded successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Bulk Upload Initializer
@@ -2009,15 +2094,15 @@ paths:
         "200":
           description: Businesses fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorBusinessListResponseDto'
+            $ref: '#/definitions/aggregator.AggregatorBusinessListResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: List Businesses
@@ -2038,19 +2123,19 @@ paths:
         "200":
           description: Business removed successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Remove Business
@@ -2070,19 +2155,19 @@ paths:
         "200":
           description: Business fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorBusinessFullDetailDto'
+            $ref: '#/definitions/aggregator.AggregatorBusinessFullDetailDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get Business Detail
@@ -2117,23 +2202,23 @@ paths:
         "200":
           description: Business setup updated successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "404":
           description: Business not found
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Update Business Setup
@@ -2158,15 +2243,15 @@ paths:
         "200":
           description: Invoice statistics fetched successfully
           schema:
-            $ref: '#/definitions/dtos.GetInvoiceStatsResponseDto'
+            $ref: '#/definitions/aggregator.GetInvoiceStatsResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get invoice statistics for a specific business under an aggregator
@@ -2181,15 +2266,15 @@ paths:
         "200":
           description: Dashboard stats fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorDashboardResponseDto'
+            $ref: '#/definitions/aggregator.AggregatorDashboardResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Dashboard Stats
@@ -2204,15 +2289,15 @@ paths:
         "200":
           description: Invitations fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorInvitationListResponseDto'
+            $ref: '#/definitions/aggregator.AggregatorInvitationListResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: List Invitations
@@ -2229,30 +2314,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.RespondToInvitationDto'
+          $ref: '#/definitions/aggregator.RespondToInvitationDto'
       produces:
       - application/json
       responses:
         "200":
           description: Responded to invitation successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request, validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Respond to Invitation
@@ -2276,15 +2361,15 @@ paths:
         "200":
           description: Invoices fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorInvoiceListResponseDto'
+            $ref: '#/definitions/aggregator.AggregatorInvoiceListResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: List All Invoices
@@ -2313,19 +2398,19 @@ paths:
         "200":
           description: Invoices fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorInvoiceListResponseDto'
+            $ref: '#/definitions/aggregator.AggregatorInvoiceListResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: List Business Invoices
@@ -2346,30 +2431,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
       produces:
       - application/json
       responses:
         "201":
           description: Invoice generated successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/aggregator.AggregatorInvoiceUploadResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Upload Invoice
@@ -2387,11 +2472,11 @@ paths:
         "200":
           description: Invoice statistics fetched successfully
           schema:
-            $ref: '#/definitions/dtos.GetInvoiceStatsResponseDto'
+            $ref: '#/definitions/aggregator.GetInvoiceStatsResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get invoice statistics for aggregator
@@ -2408,15 +2493,15 @@ paths:
         "200":
           description: Plans fetched successfully
           schema:
-            $ref: '#/definitions/dtos.SubscriptionPlansResponseDto'
+            $ref: '#/definitions/subscription.SubscriptionPlansResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: List Aggregator Subscription Plans
@@ -2434,30 +2519,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.AggregatorSubscribeRequestDto'
+          $ref: '#/definitions/subscription.AggregatorSubscribeRequestDto'
       produces:
       - application/json
       responses:
         "200":
           description: Subscription initialized successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorSubscribeResponseDto'
+            $ref: '#/definitions/subscription.AggregatorSubscribeResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "502":
           description: Bad gateway
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Subscribe A Managed Business To A Plan
@@ -2481,15 +2566,15 @@ paths:
         "200":
           description: Transactions fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorTransactionListResponseDto'
+            $ref: '#/definitions/aggregator.AggregatorTransactionListResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: List All Transactions
@@ -2507,30 +2592,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.ChangePasswordDto'
+          $ref: '#/definitions/auth.ChangePasswordDto'
       produces:
       - application/json
       responses:
         "200":
           description: password changed successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/auth.BaseResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
       security:
       - BearerAuth: []
       summary: Change Password
@@ -2547,30 +2632,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.CompleteForgotPasswordDto'
+          $ref: '#/definitions/auth.CompleteForgotPasswordDto'
       produces:
       - application/json
       responses:
         "200":
           description: forgot password complete successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/auth.BaseResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
       summary: Complete Forgot Password
       tags:
       - Auth
@@ -2585,30 +2670,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.InitiateForgotPasswordDto'
+          $ref: '#/definitions/auth.InitiateForgotPasswordDto'
       produces:
       - application/json
       responses:
         "200":
           description: forgot password initiated successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/auth.BaseResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
       summary: Initiate Forgot Password
       tags:
       - Auth
@@ -2623,30 +2708,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.LoginRequestDto'
+          $ref: '#/definitions/auth.LoginRequestDto'
       produces:
       - application/json
       responses:
         "200":
           description: Login successfully
           schema:
-            $ref: '#/definitions/dtos.LoginResponseDto'
+            $ref: '#/definitions/auth.LoginResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
       summary: Login
       tags:
       - Auth
@@ -2661,23 +2746,23 @@ paths:
         "200":
           description: user logout successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/auth.BaseResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
       security:
       - BearerAuth: []
       summary: Logout
@@ -2694,30 +2779,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.RegisterDto'
+          $ref: '#/definitions/auth.RegisterDto'
       produces:
       - application/json
       responses:
         "200":
           description: Registered successfully
           schema:
-            $ref: '#/definitions/dtos.RegisterResponseDto'
+            $ref: '#/definitions/auth.RegisterResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
       summary: Register
       tags:
       - Auth
@@ -2732,30 +2817,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.ResendVerificationOtpDto'
+          $ref: '#/definitions/auth.ResendVerificationOtpDto'
       produces:
       - application/json
       responses:
         "200":
           description: OTP sent successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/auth.BaseResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
       summary: Resend verification OTP
       tags:
       - Auth
@@ -2768,23 +2853,23 @@ paths:
         "200":
           description: Application mode toggled successfully
           schema:
-            $ref: '#/definitions/dtos.LoginResponseDto'
+            $ref: '#/definitions/auth.LoginResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
       security:
       - BearerAuth: []
       summary: Toggle Application mode
@@ -2801,30 +2886,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.VerifyEmailDto'
+          $ref: '#/definitions/auth.VerifyEmailDto'
       produces:
       - application/json
       responses:
         "200":
           description: Verified successfully
           schema:
-            $ref: '#/definitions/dtos.LoginResponseDto'
+            $ref: '#/definitions/auth.LoginResponseDto'
         "400":
           description: Bad request, validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/apperror.AppError'
       summary: Verify Email of Business Accounts
       tags:
       - Auth
@@ -2839,23 +2924,23 @@ paths:
         "200":
           description: Business retrieved successfully
           schema:
-            $ref: '#/definitions/dtos.GetBusinessResponseDto'
+            $ref: '#/definitions/business.GetBusinessResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "404":
           description: Business not found
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get Business Details
@@ -2871,30 +2956,30 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.UpdateBusinessDto'
+          $ref: '#/definitions/business.UpdateBusinessDto'
       produces:
       - application/json
       responses:
         "200":
           description: Business updated successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "404":
           description: Business not found
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Update Business Details
@@ -2909,15 +2994,15 @@ paths:
         "200":
           description: Aggregators fetched successfully
           schema:
-            $ref: '#/definitions/dtos.AggregatorInvitationListResponseDto'
+            $ref: '#/definitions/aggregator.AggregatorInvitationListResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: List Available Aggregators
@@ -2932,15 +3017,15 @@ paths:
         "200":
           description: Invitations fetched successfully
           schema:
-            $ref: '#/definitions/dtos.BusinessInvitationListResponseDto'
+            $ref: '#/definitions/aggregator.BusinessInvitationListResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: List Sent Invitations
@@ -2955,15 +3040,15 @@ paths:
         "200":
           description: Invitation revoked successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Revoke Invitation
@@ -2978,22 +3063,22 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.SendAggregatorInvitationDto'
+          $ref: '#/definitions/aggregator.SendAggregatorInvitationDto'
       produces:
       - application/json
       responses:
         "200":
           description: Invitation sent successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Send Invitation
@@ -3009,72 +3094,27 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.SendAggregatorInvitationByEmailDto'
+          $ref: '#/definitions/aggregator.SendAggregatorInvitationByEmailDto'
       produces:
       - application/json
       responses:
         "200":
           description: Invitation sent successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Send Invitation By Email
       tags:
       - Business Aggregator Portal
-  /business/change-password:
-    post:
-      consumes:
-      - application/json
-      description: Change the password of an authenticated business user by verifying
-        the old password first
-      parameters:
-      - description: Change password request payload
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.ChangePasswordDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: password changed successfully
-          schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.Response'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.Response'
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.Response'
-      security:
-      - BearerAuth: []
-      summary: Change Password
-      tags:
-      - Business
   /business/crypto-keys:
     post:
       consumes:
@@ -3093,19 +3133,19 @@ paths:
         "200":
           description: Business IRN signing keys uploaded successfully
           schema:
-            $ref: '#/definitions/dtos.UploadBusinessIRNSigningKeysResponseDto'
+            $ref: '#/definitions/business.UploadBusinessIRNSigningKeysResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Upload Business IRN Signing Keys
@@ -3138,19 +3178,19 @@ paths:
         "200":
           description: Entities retrieved successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get Entities
@@ -3173,23 +3213,23 @@ paths:
         "200":
           description: Entity retrieved successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "404":
           description: Entity not found
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get Entity by ID
@@ -3213,23 +3253,23 @@ paths:
         "200":
           description: VAT payment processed successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Post VAT Payment
@@ -3253,23 +3293,23 @@ paths:
         "200":
           description: TIN verified successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Verify TIN
@@ -3284,11 +3324,11 @@ paths:
         "200":
           description: ping successful
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: ping failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       summary: Health check (GET)
       tags:
       - Health
@@ -3302,22 +3342,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.Ping'
+          $ref: '#/definitions/entities.Ping'
       produces:
       - application/json
       responses:
         "200":
           description: ping successful
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: invalid request or validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: ping failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       summary: Health check (POST)
       tags:
       - Health
@@ -3330,11 +3370,11 @@ paths:
         "200":
           description: ping successful
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: invalid response from FIRS API
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       summary: FIRS API Health Check
       tags:
       - Health
@@ -3365,11 +3405,11 @@ paths:
         "200":
           description: invoices fetched successfully
           schema:
-            $ref: '#/definitions/dtos.GetAllInvoicesResponseDto'
+            $ref: '#/definitions/invoice.GetAllInvoicesResponseDto'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get all invoices
@@ -3393,11 +3433,11 @@ paths:
         "200":
           description: Invoice deleted successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Delete Invoice
@@ -3420,11 +3460,11 @@ paths:
         "200":
           description: invoice details fetched successfully
           schema:
-            $ref: '#/definitions/dtos.GetInvoiceDetailsResponseDto'
+            $ref: '#/definitions/invoice.GetInvoiceDetailsResponseDto'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get one invoice details
@@ -3457,15 +3497,15 @@ paths:
         "200":
           description: Bulk upload logs fetched successfully
           schema:
-            $ref: '#/definitions/dtos.GetBulkUploadLogsResponseDto'
+            $ref: '#/definitions/bulk_upload.GetBulkUploadLogsResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get bulk upload logs
@@ -3489,23 +3529,23 @@ paths:
         "200":
           description: Bulk upload failed invoices fetched successfully
           schema:
-            $ref: '#/definitions/dtos.GetBulkUploadFailedInvoicesResponseDto'
+            $ref: '#/definitions/bulk_upload.GetBulkUploadFailedInvoicesResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "404":
           description: Bulk upload not found
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get failed invoices from a bulk upload
@@ -3540,19 +3580,19 @@ paths:
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "404":
           description: Bulk upload not found
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Download failed invoices from a bulk upload
@@ -3575,11 +3615,11 @@ paths:
         "200":
           description: Invoice confirmed successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Confirm Invoice
@@ -3602,11 +3642,11 @@ paths:
         "200":
           description: Invoice created successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Create a new Invoice
@@ -3629,11 +3669,11 @@ paths:
         "200":
           description: Invoice downloaded successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Download Invoice
@@ -3657,15 +3697,15 @@ paths:
         "200":
           description: IRN generated successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Generate IRN
@@ -3682,22 +3722,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
       produces:
       - application/json
       responses:
         "201":
           description: Invoice signed successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Sign Invoice
@@ -3721,15 +3761,15 @@ paths:
         "200":
           description: IRN signed successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Sign IRN
@@ -3747,11 +3787,11 @@ paths:
         "200":
           description: Invoice statistics fetched successfully
           schema:
-            $ref: '#/definitions/dtos.GetInvoiceStatsResponseDto'
+            $ref: '#/definitions/invoice.GetInvoiceStatsResponseDto'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get invoice statistics
@@ -3774,11 +3814,11 @@ paths:
         "200":
           description: Invoice transmitted successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Transmit Invoice
@@ -3801,11 +3841,11 @@ paths:
         "200":
           description: Invoice confirmed successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Confirm Transmitted Invoice
@@ -3822,11 +3862,11 @@ paths:
         "200":
           description: Health check successful
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Debug Health Check
@@ -3849,11 +3889,11 @@ paths:
         "200":
           description: Invoice details retrieved
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Look Up IRN
@@ -3876,11 +3916,11 @@ paths:
         "200":
           description: Party ID details retrieved
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Look Up Party ID
@@ -3903,11 +3943,11 @@ paths:
         "200":
           description: TIN details retrieved
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Look Up TIN
@@ -3934,11 +3974,11 @@ paths:
         "200":
           description: Invoices pulled successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Invalid query parameters
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Pull Transmitted Invoices
@@ -3967,15 +4007,15 @@ paths:
         "200":
           description: Invoice updated successfully
           schema:
-            $ref: '#/definitions/dtos.BaseResponseDto'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Update Invoice
@@ -3993,22 +4033,22 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
       produces:
       - application/json
       responses:
         "200":
           description: Invoice modified successfully
           schema:
-            $ref: '#/definitions/dtos.UploadInvoiceResponseDto'
+            $ref: '#/definitions/invoice.UploadInvoiceResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Modify an existing invoice
@@ -4024,18 +4064,18 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
       produces:
       - application/json
       responses:
         "201":
           description: Invoice created successfully
           schema:
-            $ref: '#/definitions/dtos.UploadInvoiceResponseDto'
+            $ref: '#/definitions/invoice.UploadInvoiceResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security: []
       summary: Initializes invoice creation in one go
       tags:
@@ -4051,22 +4091,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dtos.UploadInvoiceRequestDto'
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
       produces:
       - application/json
       responses:
         "200":
           description: Invoice validated successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Validate Invoice
@@ -4090,15 +4130,15 @@ paths:
         "200":
           description: IRN validated successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Validation failed
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Validate IRN
@@ -4121,19 +4161,19 @@ paths:
         "200":
           description: Plans fetched successfully
           schema:
-            $ref: '#/definitions/dtos.SubscriptionPlansResponseDto'
+            $ref: '#/definitions/subscription.SubscriptionPlansResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       summary: List Subscription Plans
       tags:
       - Subscription
@@ -4147,59 +4187,29 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/dtos.CreateSubscriptionPlanDto'
+          $ref: '#/definitions/subscription.CreateSubscriptionPlanDto'
       produces:
       - application/json
       responses:
         "201":
           description: Plan created successfully
           schema:
-            $ref: '#/definitions/dtos.CreateSubscriptionPlanResponseDto'
+            $ref: '#/definitions/subscription.CreateSubscriptionPlanResponseDto'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       summary: Create Subscription Plan
       tags:
       - Subscription
-  /webhook/firs:
-    post:
-      consumes:
-      - application/json
-      description: Receives webhook events from FIRS (e.g., IRN status updates).
-      parameters:
-      - description: FIRS Webhook Payload
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/firs_models.FirsWebhookPayload'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Webhook processed successfully
-          schema:
-            $ref: '#/definitions/models.Response'
-        "400":
-          description: Bad request - invalid body or processing error
-          schema:
-            $ref: '#/definitions/models.Response'
-        "422":
-          description: Validation failed
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: FIRS Webhook Receiver
-      tags:
-      - Webhooks
   /zoho/auth/access-token:
     get:
       consumes:
@@ -4223,19 +4233,19 @@ paths:
         "200":
           description: Token generated successfully
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request (missing code or organisation_id)
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/models.Response'
+            $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
       summary: Get Zoho Access Token

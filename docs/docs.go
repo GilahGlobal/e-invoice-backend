@@ -49,19 +49,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Activity logs fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorActivityLogListResponseDto"
+                            "$ref": "#/definitions/aggregator.AggregatorActivityLogListResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -100,19 +100,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Bulk uploads fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorBulkUploadListResponseDto"
+                            "$ref": "#/definitions/aggregator.AggregatorBulkUploadListResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -146,31 +146,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Bulk upload failed invoices fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.GetBulkUploadFailedInvoicesResponseDto"
+                            "$ref": "#/definitions/aggregator.GetBulkUploadFailedInvoicesResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "404": {
                         "description": "Bulk upload not found",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -222,25 +222,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "404": {
                         "description": "Bulk upload not found",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -286,25 +286,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Bulk uploads fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.GetBulkUploadLogsResponseDto"
+                            "$ref": "#/definitions/aggregator.GetBulkUploadLogsResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -348,25 +348,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Invoice uploaded successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -411,19 +411,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Businesses fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorBusinessListResponseDto"
+                            "$ref": "#/definitions/aggregator.AggregatorBusinessListResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -457,25 +457,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Business fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorBusinessFullDetailDto"
+                            "$ref": "#/definitions/aggregator.AggregatorBusinessFullDetailDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -507,25 +507,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Business removed successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -578,31 +578,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Business setup updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "404": {
                         "description": "Business not found",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -640,19 +640,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice statistics fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.GetInvoiceStatsResponseDto"
+                            "$ref": "#/definitions/aggregator.GetInvoiceStatsResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -677,19 +677,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Dashboard stats fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorDashboardResponseDto"
+                            "$ref": "#/definitions/aggregator.AggregatorDashboardResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -714,19 +714,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Invitations fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorInvitationListResponseDto"
+                            "$ref": "#/definitions/aggregator.AggregatorInvitationListResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -757,7 +757,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.RespondToInvitationDto"
+                            "$ref": "#/definitions/aggregator.RespondToInvitationDto"
                         }
                     }
                 ],
@@ -765,31 +765,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Responded to invitation successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request, validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -828,19 +828,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoices fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorInvoiceListResponseDto"
+                            "$ref": "#/definitions/aggregator.AggregatorInvoiceListResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -886,25 +886,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoices fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorInvoiceListResponseDto"
+                            "$ref": "#/definitions/aggregator.AggregatorInvoiceListResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -940,7 +940,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
                         }
                     }
                 ],
@@ -948,31 +948,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Invoice generated successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/aggregator.AggregatorInvoiceUploadResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1000,13 +1000,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice statistics fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.GetInvoiceStatsResponseDto"
+                            "$ref": "#/definitions/aggregator.GetInvoiceStatsResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1034,19 +1034,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Plans fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.SubscriptionPlansResponseDto"
+                            "$ref": "#/definitions/subscription.SubscriptionPlansResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1077,7 +1077,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorSubscribeRequestDto"
+                            "$ref": "#/definitions/subscription.AggregatorSubscribeRequestDto"
                         }
                     }
                 ],
@@ -1085,31 +1085,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Subscription initialized successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorSubscribeResponseDto"
+                            "$ref": "#/definitions/subscription.AggregatorSubscribeResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "502": {
                         "description": "Bad gateway",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1148,19 +1148,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Transactions fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorTransactionListResponseDto"
+                            "$ref": "#/definitions/aggregator.AggregatorTransactionListResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1191,7 +1191,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.ChangePasswordDto"
+                            "$ref": "#/definitions/auth.ChangePasswordDto"
                         }
                     }
                 ],
@@ -1199,31 +1199,31 @@ const docTemplate = `{
                     "200": {
                         "description": "password changed successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/auth.BaseResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     }
                 }
@@ -1249,7 +1249,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.CompleteForgotPasswordDto"
+                            "$ref": "#/definitions/auth.CompleteForgotPasswordDto"
                         }
                     }
                 ],
@@ -1257,31 +1257,31 @@ const docTemplate = `{
                     "200": {
                         "description": "forgot password complete successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/auth.BaseResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request, validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     }
                 }
@@ -1307,7 +1307,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.InitiateForgotPasswordDto"
+                            "$ref": "#/definitions/auth.InitiateForgotPasswordDto"
                         }
                     }
                 ],
@@ -1315,31 +1315,31 @@ const docTemplate = `{
                     "200": {
                         "description": "forgot password initiated successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/auth.BaseResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request, validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     }
                 }
@@ -1365,7 +1365,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.LoginRequestDto"
+                            "$ref": "#/definitions/auth.LoginRequestDto"
                         }
                     }
                 ],
@@ -1373,31 +1373,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Login successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.LoginResponseDto"
+                            "$ref": "#/definitions/auth.LoginResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request, validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     }
                 }
@@ -1425,31 +1425,31 @@ const docTemplate = `{
                     "200": {
                         "description": "user logout successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/auth.BaseResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request, validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     }
                 }
@@ -1475,7 +1475,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.RegisterDto"
+                            "$ref": "#/definitions/auth.RegisterDto"
                         }
                     }
                 ],
@@ -1483,31 +1483,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Registered successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.RegisterResponseDto"
+                            "$ref": "#/definitions/auth.RegisterResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request, validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     }
                 }
@@ -1533,7 +1533,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.ResendVerificationOtpDto"
+                            "$ref": "#/definitions/auth.ResendVerificationOtpDto"
                         }
                     }
                 ],
@@ -1541,31 +1541,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OTP sent successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/auth.BaseResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request, validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     }
                 }
@@ -1590,31 +1590,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Application mode toggled successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.LoginResponseDto"
+                            "$ref": "#/definitions/auth.LoginResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request, validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     }
                 }
@@ -1640,7 +1640,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.VerifyEmailDto"
+                            "$ref": "#/definitions/auth.VerifyEmailDto"
                         }
                     }
                 ],
@@ -1648,31 +1648,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Verified successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.LoginResponseDto"
+                            "$ref": "#/definitions/auth.LoginResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request, validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     }
                 }
@@ -1700,31 +1700,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Business retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.GetBusinessResponseDto"
+                            "$ref": "#/definitions/business.GetBusinessResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "404": {
                         "description": "Business not found",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1753,7 +1753,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UpdateBusinessDto"
+                            "$ref": "#/definitions/business.UpdateBusinessDto"
                         }
                     }
                 ],
@@ -1761,31 +1761,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Business updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "404": {
                         "description": "Business not found",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1810,19 +1810,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Aggregators fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.AggregatorInvitationListResponseDto"
+                            "$ref": "#/definitions/aggregator.AggregatorInvitationListResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1847,19 +1847,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Invitations fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BusinessInvitationListResponseDto"
+                            "$ref": "#/definitions/aggregator.BusinessInvitationListResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1884,19 +1884,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Invitation revoked successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1924,7 +1924,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.SendAggregatorInvitationDto"
+                            "$ref": "#/definitions/aggregator.SendAggregatorInvitationDto"
                         }
                     }
                 ],
@@ -1932,19 +1932,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Invitation sent successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -1972,7 +1972,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.SendAggregatorInvitationByEmailDto"
+                            "$ref": "#/definitions/aggregator.SendAggregatorInvitationByEmailDto"
                         }
                     }
                 ],
@@ -1980,88 +1980,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Invitation sent successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/business/change-password": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Change the password of an authenticated business user by verifying the old password first",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Business"
-                ],
-                "summary": "Change Password",
-                "parameters": [
-                    {
-                        "description": "Change password request payload",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ChangePasswordDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "password changed successfully",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2098,25 +2029,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Business IRN signing keys uploaded successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.UploadBusinessIRNSigningKeysResponseDto"
+                            "$ref": "#/definitions/business.UploadBusinessIRNSigningKeysResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2171,25 +2102,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Entities retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2228,31 +2159,31 @@ const docTemplate = `{
                     "200": {
                         "description": "VAT payment processed successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2291,31 +2222,31 @@ const docTemplate = `{
                     "200": {
                         "description": "TIN verified successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2352,31 +2283,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Entity retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "404": {
                         "description": "Entity not found",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2396,13 +2327,13 @@ const docTemplate = `{
                     "200": {
                         "description": "ping successful",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "ping failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2426,7 +2357,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Ping"
+                            "$ref": "#/definitions/entities.Ping"
                         }
                     }
                 ],
@@ -2434,19 +2365,19 @@ const docTemplate = `{
                     "200": {
                         "description": "ping successful",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "invalid request or validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "ping failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2466,13 +2397,13 @@ const docTemplate = `{
                     "200": {
                         "description": "ping successful",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "invalid response from FIRS API",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2527,13 +2458,13 @@ const docTemplate = `{
                     "200": {
                         "description": "invoices fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.GetAllInvoicesResponseDto"
+                            "$ref": "#/definitions/invoice.GetAllInvoicesResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2588,19 +2519,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Bulk upload logs fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.GetBulkUploadLogsResponseDto"
+                            "$ref": "#/definitions/bulk_upload.GetBulkUploadLogsResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2637,31 +2568,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Bulk upload failed invoices fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.GetBulkUploadFailedInvoicesResponseDto"
+                            "$ref": "#/definitions/bulk_upload.GetBulkUploadFailedInvoicesResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "404": {
                         "description": "Bulk upload not found",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2713,25 +2644,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "404": {
                         "description": "Bulk upload not found",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2768,13 +2699,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice confirmed successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2811,13 +2742,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice created successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2854,13 +2785,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice downloaded successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2899,19 +2830,19 @@ const docTemplate = `{
                     "200": {
                         "description": "IRN generated successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -2942,7 +2873,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
                         }
                     }
                 ],
@@ -2950,19 +2881,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Invoice signed successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3001,19 +2932,19 @@ const docTemplate = `{
                     "200": {
                         "description": "IRN signed successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3041,13 +2972,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice statistics fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.GetInvoiceStatsResponseDto"
+                            "$ref": "#/definitions/invoice.GetInvoiceStatsResponseDto"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3084,13 +3015,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice confirmed successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3118,13 +3049,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Health check successful",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3161,13 +3092,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice details retrieved",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3204,13 +3135,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Party ID details retrieved",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3247,13 +3178,13 @@ const docTemplate = `{
                     "200": {
                         "description": "TIN details retrieved",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3298,13 +3229,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoices pulled successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Invalid query parameters",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3341,13 +3272,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice transmitted successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3393,19 +3324,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3432,7 +3363,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
                         }
                     }
                 ],
@@ -3440,13 +3371,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Invoice created successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.UploadInvoiceResponseDto"
+                            "$ref": "#/definitions/invoice.UploadInvoiceResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3475,7 +3406,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
                         }
                     }
                 ],
@@ -3483,19 +3414,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice modified successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.UploadInvoiceResponseDto"
+                            "$ref": "#/definitions/invoice.UploadInvoiceResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3526,7 +3457,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
                         }
                     }
                 ],
@@ -3534,19 +3465,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice validated successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3585,19 +3516,19 @@ const docTemplate = `{
                     "200": {
                         "description": "IRN validated successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Validation failed",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3635,13 +3566,13 @@ const docTemplate = `{
                     "200": {
                         "description": "invoice details fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.GetInvoiceDetailsResponseDto"
+                            "$ref": "#/definitions/invoice.GetInvoiceDetailsResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3677,13 +3608,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Invoice deleted successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.BaseResponseDto"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3715,25 +3646,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Plans fetched successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.SubscriptionPlansResponseDto"
+                            "$ref": "#/definitions/subscription.SubscriptionPlansResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3757,7 +3688,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.CreateSubscriptionPlanDto"
+                            "$ref": "#/definitions/subscription.CreateSubscriptionPlanDto"
                         }
                     }
                 ],
@@ -3765,71 +3696,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Plan created successfully",
                         "schema": {
-                            "$ref": "#/definitions/dtos.CreateSubscriptionPlanResponseDto"
+                            "$ref": "#/definitions/subscription.CreateSubscriptionPlanResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/webhook/firs": {
-            "post": {
-                "description": "Receives webhook events from FIRS (e.g., IRN status updates).",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Webhooks"
-                ],
-                "summary": "FIRS Webhook Receiver",
-                "parameters": [
-                    {
-                        "description": "FIRS Webhook Payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/firs_models.FirsWebhookPayload"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Webhook processed successfully",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request - invalid body or processing error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "Validation failed",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3873,25 +3758,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Token generated successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request (missing code or organisation_id)",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/entities.Response"
                         }
                     }
                 }
@@ -3899,46 +3784,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "database.PaginationResponse": {
-            "type": "object",
-            "properties": {
-                "current_page": {
-                    "type": "integer"
-                },
-                "page_count": {
-                    "type": "integer"
-                },
-                "total_pages_count": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dtos.AccountingPlatformConfigAuth": {
-            "type": "object",
-            "properties": {
-                "api_key": {
-                    "type": "string",
-                    "example": "api-key-123456789"
-                },
-                "api_secret": {
-                    "type": "string",
-                    "example": "api-secret-123456789"
-                },
-                "auth_token": {
-                    "type": "string",
-                    "example": "auth-token-123456789"
-                },
-                "hmac_secret": {
-                    "type": "string",
-                    "example": "hmac-secret-123456789"
-                },
-                "org_id": {
-                    "type": "string",
-                    "example": "org-123456789"
-                }
-            }
-        },
-        "dtos.AggregatorActivityLogDto": {
+        "aggregator.AggregatorActivityLogDto": {
             "type": "object",
             "properties": {
                 "action": {
@@ -3971,59 +3817,63 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.AggregatorActivityLogListResponseDto": {
+        "aggregator.AggregatorActivityLogListResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dtos.AggregatorActivityLogDto"
+                        "$ref": "#/definitions/aggregator.AggregatorActivityLogDto"
                     }
                 },
+                "error": {},
+                "extra": {},
                 "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "pagination": {
                     "$ref": "#/definitions/database.PaginationResponse"
                 },
                 "status": {
-                    "type": "string",
-                    "example": "success"
+                    "type": "string"
                 },
                 "status_code": {
-                    "type": "integer",
-                    "example": 200
+                    "type": "integer"
                 }
             }
         },
-        "dtos.AggregatorBulkUploadListResponseDto": {
+        "aggregator.AggregatorBulkUploadListResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.BulkUpload"
+                        "$ref": "#/definitions/entities.BulkUpload"
                     }
                 },
+                "error": {},
+                "extra": {},
                 "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "pagination": {
                     "$ref": "#/definitions/database.PaginationResponse"
                 },
                 "status": {
-                    "type": "string",
-                    "example": "success"
+                    "type": "string"
                 },
                 "status_code": {
-                    "type": "integer",
-                    "example": 200
+                    "type": "integer"
                 }
             }
         },
-        "dtos.AggregatorBusinessDetailDto": {
+        "aggregator.AggregatorBusinessDetailDto": {
             "type": "object",
             "properties": {
                 "accepted_at": {
@@ -4068,7 +3918,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.AggregatorBusinessFullDetailDto": {
+        "aggregator.AggregatorBusinessFullDetailDto": {
             "type": "object",
             "properties": {
                 "accepted_at": {
@@ -4108,12 +3958,7 @@ const docTemplate = `{
                     "example": "6A2BC898"
                 },
                 "subscription": {
-                    "description": "Subscription",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dtos.BusinessSubscriptionInfoDto"
-                        }
-                    ]
+                    "$ref": "#/definitions/aggregator.BusinessSubscriptionInfoDto"
                 },
                 "tin": {
                     "type": "string",
@@ -4124,39 +3969,40 @@ const docTemplate = `{
                     "example": 5
                 },
                 "total_invoices_uploaded": {
-                    "description": "Stats",
                     "type": "integer",
                     "example": 120
                 }
             }
         },
-        "dtos.AggregatorBusinessListResponseDto": {
+        "aggregator.AggregatorBusinessListResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dtos.AggregatorBusinessDetailDto"
+                        "$ref": "#/definitions/aggregator.AggregatorBusinessDetailDto"
                     }
                 },
+                "error": {},
+                "extra": {},
                 "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "pagination": {
                     "$ref": "#/definitions/database.PaginationResponse"
                 },
                 "status": {
-                    "type": "string",
-                    "example": "success"
+                    "type": "string"
                 },
                 "status_code": {
-                    "type": "integer",
-                    "example": 200
+                    "type": "integer"
                 }
             }
         },
-        "dtos.AggregatorDashboardDto": {
+        "aggregator.AggregatorDashboardDto": {
             "type": "object",
             "properties": {
                 "pending_invitations": {
@@ -4177,27 +4023,30 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.AggregatorDashboardResponseDto": {
+        "aggregator.AggregatorDashboardResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dtos.AggregatorDashboardDto"
+                    "$ref": "#/definitions/aggregator.AggregatorDashboardDto"
                 },
+                "error": {},
+                "extra": {},
                 "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
+                    "type": "string"
                 },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
                 "status": {
-                    "type": "string",
-                    "example": "success"
+                    "type": "string"
                 },
                 "status_code": {
-                    "type": "integer",
-                    "example": 200
+                    "type": "integer"
                 }
             }
         },
-        "dtos.AggregatorInvitationDto": {
+        "aggregator.AggregatorInvitationDto": {
             "type": "object",
             "properties": {
                 "business_email": {
@@ -4226,186 +4075,716 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.AggregatorInvitationListResponseDto": {
+        "aggregator.AggregatorInvitationListResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dtos.AggregatorInvitationDto"
+                        "$ref": "#/definitions/aggregator.AggregatorInvitationDto"
                     }
                 },
+                "error": {},
+                "extra": {},
                 "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
+                    "type": "string"
                 },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
                 "status": {
-                    "type": "string",
-                    "example": "success"
+                    "type": "string"
                 },
                 "status_code": {
-                    "type": "integer",
-                    "example": 200
+                    "type": "integer"
                 }
             }
         },
-        "dtos.AggregatorInvoiceListResponseDto": {
+        "aggregator.AggregatorInvoiceListResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.MinimalInvoiceDTO"
+                        "$ref": "#/definitions/entities.MinimalInvoiceDTO"
                     }
                 },
+                "error": {},
+                "extra": {},
                 "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "pagination": {
                     "$ref": "#/definitions/database.PaginationResponse"
                 },
                 "status": {
-                    "type": "string",
-                    "example": "success"
+                    "type": "string"
                 },
                 "status_code": {
-                    "type": "integer",
-                    "example": 200
+                    "type": "integer"
                 }
             }
         },
-        "dtos.AggregatorSubscribeDataDto": {
+        "aggregator.AggregatorInvoiceUploadResponseDto": {
             "type": "object",
             "properties": {
-                "authorization_url": {
+                "data": {
+                    "$ref": "#/definitions/aggregator.InvoiceUploadData"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/invoice.InvoiceStepMetadata"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "aggregator.AggregatorTransactionListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/aggregator.TransactionDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/database.PaginationResponse"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "aggregator.BusinessInvitationDto": {
+            "type": "object",
+            "properties": {
+                "aggregator_email": {
                     "type": "string",
-                    "example": "https://checkout.paystack.com/..."
+                    "example": "aggregator@example.com"
+                },
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "aggregator_name": {
+                    "type": "string",
+                    "example": "Aggregator Corp"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "pending"
+                }
+            }
+        },
+        "aggregator.BusinessInvitationListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/aggregator.BusinessInvitationDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "aggregator.BusinessSubscriptionInfoDto": {
+            "type": "object",
+            "properties": {
+                "billing_cycle_days": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "next_billing_date": {
+                    "type": "string",
+                    "example": "2026-05-01T00:00:00Z"
+                },
+                "plan_amount": {
+                    "type": "number",
+                    "example": 5000
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "plan_name": {
+                    "type": "string",
+                    "example": "Starter"
+                },
+                "remaining_invoices": {
+                    "type": "integer",
+                    "example": 380
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "used_invoices": {
+                    "type": "integer",
+                    "example": 120
+                }
+            }
+        },
+        "aggregator.GetBulkUploadFailedInvoicesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/bulk_upload.BulkUploadFailedInvoicesDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "aggregator.GetBulkUploadLogsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/bulk_upload.BulkUploadLogDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.PaginationResponse"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "aggregator.GetInvoiceStatsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/entities.InvoiceStatsResponseData"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "aggregator.InvoiceUploadData": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "invoice_number": {
+                    "type": "string",
+                    "example": "INV-1001"
+                },
+                "irn": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "qr_code": {
+                    "type": "string",
+                    "example": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."
+                },
+                "qr_code_2": {
+                    "type": "string",
+                    "example": "eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."
+                },
+                "qr_code_bmp_url": {
+                    "type": "string",
+                    "example": "https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"
+                }
+            }
+        },
+        "aggregator.RespondToInvitationDto": {
+            "type": "object",
+            "required": [
+                "invitation_id"
+            ],
+            "properties": {
+                "accept": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "invitation_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "aggregator.SendAggregatorInvitationByEmailDto": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "aggregator@example.com"
+                }
+            }
+        },
+        "aggregator.SendAggregatorInvitationDto": {
+            "type": "object",
+            "required": [
+                "aggregator_id"
+            ],
+            "properties": {
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "aggregator.TransactionDto": {
+            "type": "object",
+            "properties": {
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "amount": {
+                    "type": "number",
+                    "example": 5000
                 },
                 "business_id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "plan_id": {
+                "business_name": {
+                    "type": "string",
+                    "example": "Business Corp"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "NGN"
+                },
+                "gateway_response": {
+                    "type": "string",
+                    "example": "Approved"
+                },
+                "id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "plan": {
+                    "type": "string",
+                    "example": "Starter"
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "plan_123"
                 },
                 "provider": {
                     "type": "string",
                     "example": "paystack"
                 },
-                "transaction_id": {
+                "reference": {
+                    "type": "string",
+                    "example": "txn_123456789"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-01-01T12:00:00Z"
+                }
+            }
+        },
+        "apperror.AppError": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "err": {},
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "statusCode": {
+                    "type": "integer"
+                }
+            }
+        },
+        "auth.AccountingPlatformConfigAuth": {
+            "type": "object",
+            "properties": {
+                "api_key": {
+                    "type": "string",
+                    "example": "api-key-123456789"
+                },
+                "api_secret": {
+                    "type": "string",
+                    "example": "api-secret-123456789"
+                },
+                "auth_token": {
+                    "type": "string",
+                    "example": "auth-token-123456789"
+                },
+                "hmac_secret": {
+                    "type": "string",
+                    "example": "hmac-secret-123456789"
+                },
+                "org_id": {
+                    "type": "string",
+                    "example": "org-123456789"
+                }
+            }
+        },
+        "auth.BaseResponseDto": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "auth.ChangePasswordDto": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "old_password"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "old_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.CompleteForgotPasswordDto": {
+            "type": "object",
+            "required": [
+                "email",
+                "otp",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                },
+                "otp": {
+                    "type": "string",
+                    "example": "123456"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "password123"
+                }
+            }
+        },
+        "auth.InitiateForgotPasswordDto": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                }
+            }
+        },
+        "auth.LoginRequestDto": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "is_sandbox": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.LoginResponseDto": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/auth.UserResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Action performed successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "auth.PlatformConfigsAuth": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/auth.AccountingPlatformConfigAuth"
+            }
+        },
+        "auth.RegisterDto": {
+            "type": "object",
+            "required": [
+                "company_name",
+                "email",
+                "is_aggregator",
+                "name",
+                "password",
+                "phone_number",
+                "tin"
+            ],
+            "properties": {
+                "company_name": {
+                    "type": "string",
+                    "example": "Acme Inc."
+                },
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                },
+                "is_aggregator": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 2,
+                    "example": "John Doe"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "password123"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
+                "platform_configs": {
+                    "$ref": "#/definitions/auth.PlatformConfigsAuth"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "TIN-123456789"
+                }
+            }
+        },
+        "auth.RegisterResponseDto": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "An otp has been sent to your mail, use it to verify your account"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "auth.ResendVerificationOtpDto": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                }
+            }
+        },
+        "auth.UserResponse": {
+            "type": "object",
+            "properties": {
+                "business_id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "transaction_ref": {
+                "email": {
                     "type": "string",
-                    "example": "aggsub_1712345678_abcdef"
-                }
-            }
-        },
-        "dtos.AggregatorSubscribeRequestDto": {
-            "type": "object",
-            "required": [
-                "business_id",
-                "plan_id"
-            ],
-            "properties": {
-                "business_id": {
-                    "type": "string"
+                    "example": "john.doe@example.com"
                 },
-                "plan_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.AggregatorSubscribeResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dtos.AggregatorSubscribeDataDto"
-                },
-                "message": {
+                "id": {
                     "type": "string",
-                    "example": "Action performed successfully"
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.AggregatorTransactionListResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.TransactionDto"
-                    }
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "pagination": {
-                    "$ref": "#/definitions/database.PaginationResponse"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.AllowanceCharge": {
-            "type": "object",
-            "required": [
-                "amount"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "charge_indicator": {
+                "is_aggregator": {
                     "type": "boolean",
                     "example": true
+                },
+                "is_sandbox": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "keys_set": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "service_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         },
-        "dtos.BaseResponseDto": {
+        "auth.VerifyEmailDto": {
             "type": "object",
+            "required": [
+                "email",
+                "otp"
+            ],
             "properties": {
-                "message": {
+                "email": {
                     "type": "string",
-                    "example": "Action performed successfully"
+                    "example": "john.doe@example.com"
                 },
-                "status": {
+                "otp": {
                     "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
+                    "example": "123456"
                 }
             }
         },
-        "dtos.BulkUploadFailedInvoiceDto": {
+        "bulk_upload.BulkUploadFailedInvoiceDto": {
             "type": "object",
             "properties": {
                 "error": {
                     "type": "object"
                 },
                 "invoice": {
-                    "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                    "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
                 },
                 "invoice_index": {
                     "type": "integer",
@@ -4425,7 +4804,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.BulkUploadFailedInvoicesDto": {
+        "bulk_upload.BulkUploadFailedInvoicesDto": {
             "type": "object",
             "properties": {
                 "aggregator_id": {
@@ -4451,7 +4830,7 @@ const docTemplate = `{
                 "failed_invoices": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dtos.BulkUploadFailedInvoiceDto"
+                        "$ref": "#/definitions/bulk_upload.BulkUploadFailedInvoiceDto"
                     }
                 },
                 "failed_invoices_count": {
@@ -4496,7 +4875,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.BulkUploadLogDto": {
+        "bulk_upload.BulkUploadLogDto": {
             "type": "object",
             "properties": {
                 "business_id": {
@@ -4562,12 +4941,12 @@ const docTemplate = `{
                 "validation_errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dtos.BulkUploadValidationErrorDto"
+                        "$ref": "#/definitions/bulk_upload.BulkUploadValidationErrorDto"
                     }
                 }
             }
         },
-        "dtos.BulkUploadValidationErrorDto": {
+        "bulk_upload.BulkUploadValidationErrorDto": {
             "type": "object",
             "properties": {
                 "error": {
@@ -4575,7 +4954,7 @@ const docTemplate = `{
                     "example": "invoice VA12239: validation failed: Key: 'UploadInvoiceRequestDto.InvoiceTypeCode' Error:Field validation for 'InvoiceTypeCode' failed on the 'oneof' tag"
                 },
                 "invoice": {
-                    "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
+                    "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
                 },
                 "invoice_index": {
                     "type": "integer",
@@ -4591,275 +4970,45 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.BusinessInvitationDto": {
-            "type": "object",
-            "properties": {
-                "aggregator_email": {
-                    "type": "string",
-                    "example": "aggregator@example.com"
-                },
-                "aggregator_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "aggregator_name": {
-                    "type": "string",
-                    "example": "Aggregator Corp"
-                },
-                "created_at": {
-                    "type": "string",
-                    "example": "2026-01-01T12:00:00Z"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "pending"
-                }
-            }
-        },
-        "dtos.BusinessInvitationListResponseDto": {
+        "bulk_upload.GetBulkUploadFailedInvoicesResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.BusinessInvitationDto"
-                    }
+                    "$ref": "#/definitions/bulk_upload.BulkUploadFailedInvoicesDto"
                 },
+                "error": {},
+                "extra": {},
                 "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.BusinessSubscriptionInfoDto": {
-            "type": "object",
-            "properties": {
-                "billing_cycle_days": {
-                    "type": "integer",
-                    "example": 30
-                },
-                "is_active": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "next_billing_date": {
-                    "type": "string",
-                    "example": "2026-05-01T00:00:00Z"
-                },
-                "plan_amount": {
-                    "type": "number",
-                    "example": 5000
-                },
-                "plan_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "plan_name": {
-                    "type": "string",
-                    "example": "Starter"
-                },
-                "remaining_invoices": {
-                    "type": "integer",
-                    "example": 380
-                },
-                "total_invoices": {
-                    "type": "integer",
-                    "example": 500
-                },
-                "used_invoices": {
-                    "type": "integer",
-                    "example": 120
-                }
-            }
-        },
-        "dtos.ChangePasswordDto": {
-            "type": "object",
-            "required": [
-                "new_password",
-                "old_password"
-            ],
-            "properties": {
-                "new_password": {
-                    "type": "string",
-                    "minLength": 6,
-                    "example": "newpassword123"
-                },
-                "old_password": {
-                    "type": "string",
-                    "minLength": 6,
-                    "example": "password123"
-                }
-            }
-        },
-        "dtos.CompleteForgotPasswordDto": {
-            "type": "object",
-            "required": [
-                "email",
-                "otp",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "john.doe@example.com"
-                },
-                "otp": {
-                    "type": "string",
-                    "example": "123456"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6,
-                    "example": "password123"
-                }
-            }
-        },
-        "dtos.CreateSubscriptionPlanDataDto": {
-            "type": "object",
-            "properties": {
-                "is_sandbox": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "plan": {
-                    "$ref": "#/definitions/models.SubscriptionPlan"
-                }
-            }
-        },
-        "dtos.CreateSubscriptionPlanDto": {
-            "type": "object",
-            "required": [
-                "amount",
-                "billing_cycle",
-                "is_sandbox",
-                "name",
-                "total_invoices"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "billing_cycle": {
-                    "type": "integer"
-                },
-                "is_sandbox": {
-                    "type": "boolean"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "total_invoices": {
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
                     "type": "integer"
                 }
             }
         },
-        "dtos.CreateSubscriptionPlanResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dtos.CreateSubscriptionPlanDataDto"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.DocumentReference": {
-            "type": "object",
-            "required": [
-                "irn",
-                "issue_date"
-            ],
-            "properties": {
-                "irn": {
-                    "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
-                },
-                "issue_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                }
-            }
-        },
-        "dtos.GetAllInvoicesResponseDto": {
+        "bulk_upload.GetBulkUploadLogsResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dtos.MinimalInvoiceDTO"
+                        "$ref": "#/definitions/bulk_upload.BulkUploadLogDto"
                     }
                 },
+                "error": {},
+                "extra": {},
                 "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
+                    "type": "string"
                 },
-                "pagination": {
-                    "$ref": "#/definitions/database.PaginationResponse"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.GetBulkUploadFailedInvoicesResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dtos.BulkUploadFailedInvoicesDto"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.GetBulkUploadLogsResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.BulkUploadLogDto"
-                    }
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
+                "name": {
+                    "type": "string"
                 },
                 "pagination": {
                     "type": "array",
@@ -4868,16 +5017,35 @@ const docTemplate = `{
                     }
                 },
                 "status": {
-                    "type": "string",
-                    "example": "success"
+                    "type": "string"
                 },
                 "status_code": {
-                    "type": "integer",
-                    "example": 200
+                    "type": "integer"
                 }
             }
         },
-        "dtos.GetBusinessResponseDto": {
+        "business.AccountingPlatformConfig": {
+            "type": "object",
+            "properties": {
+                "api_key": {
+                    "type": "string",
+                    "example": "api-key-123456789"
+                },
+                "auth_token": {
+                    "type": "string",
+                    "example": "auth-token-123456789"
+                },
+                "hmac_secret": {
+                    "type": "string",
+                    "example": "hmac-secret-123456789"
+                },
+                "org_id": {
+                    "type": "string",
+                    "example": "org-123456789"
+                }
+            }
+        },
+        "business.GetBusinessResponseDto": {
             "type": "object",
             "properties": {
                 "acc_status": {
@@ -4922,7 +5090,7 @@ const docTemplate = `{
                     "example": "+1234567890"
                 },
                 "platform_configs": {
-                    "$ref": "#/definitions/dtos.PlatformConfigsAuth"
+                    "$ref": "#/definitions/business.PlatformConfigs"
                 },
                 "service_id": {
                     "type": "string",
@@ -4938,811 +5106,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.GetInvoiceDetailsResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dtos.Invoice"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.GetInvoiceStatsResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dtos.InvoiceStatsResponseData"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.InitiateForgotPasswordDto": {
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "john.doe@example.com"
-                }
-            }
-        },
-        "dtos.Invoice": {
-            "type": "object",
-            "properties": {
-                "business_id": {
-                    "type": "string",
-                    "example": "business-uuid"
-                },
-                "created_at": {
-                    "type": "string",
-                    "example": "2024-01-01T12:00:00Z"
-                },
-                "current_status": {
-                    "type": "string",
-                    "example": "validated_irn"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "invoice_data": {
-                    "$ref": "#/definitions/dtos.UploadInvoiceRequestDto"
-                },
-                "invoice_number": {
-                    "type": "string",
-                    "example": "INV-1001"
-                },
-                "irn": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "platform": {
-                    "description": "e.g., zoho, quickbooks",
-                    "type": "string",
-                    "example": "zoho"
-                },
-                "platform_metadata": {
-                    "type": "string"
-                },
-                "status_history": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.InvoiceStepMetadata"
-                    }
-                },
-                "timestamp": {
-                    "type": "string",
-                    "example": "2024-01-01T12:00:00Z"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2024-01-02T12:00:00Z"
-                }
-            }
-        },
-        "dtos.InvoiceData": {
-            "type": "object",
-            "properties": {
-                "invoice_number": {
-                    "type": "string",
-                    "example": "INV-1001"
-                },
-                "irn": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "qr_code": {
-                    "type": "string",
-                    "example": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."
-                },
-                "qr_code_2": {
-                    "type": "string",
-                    "example": "eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."
-                },
-                "qr_code_bmp": {
-                    "type": "string",
-                    "example": "Qk02AAAAAAAAAAAAAAAoAAAAAQAAAAEAAAABAAEAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAP..."
-                }
-            }
-        },
-        "dtos.InvoiceDeliveryPeriod": {
-            "type": "object",
-            "required": [
-                "end_date",
-                "start_date"
-            ],
-            "properties": {
-                "end_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                },
-                "start_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                }
-            }
-        },
-        "dtos.InvoiceLine": {
-            "type": "object",
-            "required": [
-                "hsn_code",
-                "invoiced_quantity",
-                "item",
-                "line_extension_amount",
-                "price",
-                "product_category"
-            ],
-            "properties": {
-                "discount_amount": {
-                    "type": "number",
-                    "example": 2500
-                },
-                "discount_rate": {
-                    "type": "number",
-                    "example": 5
-                },
-                "fee_amount": {
-                    "type": "number",
-                    "example": 450
-                },
-                "fee_rate": {
-                    "type": "number",
-                    "example": 2
-                },
-                "hsn_code": {
-                    "type": "string",
-                    "example": "1282.10"
-                },
-                "invoiced_quantity": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "example": 10
-                },
-                "item": {
-                    "$ref": "#/definitions/dtos.Item"
-                },
-                "line_extension_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "price": {
-                    "$ref": "#/definitions/dtos.Price"
-                },
-                "product_category": {
-                    "type": "string",
-                    "example": "Electronics"
-                }
-            }
-        },
-        "dtos.InvoiceStatsDto": {
-            "type": "object",
-            "properties": {
-                "failed_invoices": {
-                    "type": "integer",
-                    "example": 20
-                },
-                "partial_invoices": {
-                    "type": "integer",
-                    "example": 30
-                },
-                "successful_invoices": {
-                    "type": "integer",
-                    "example": 100
-                },
-                "total_invoices": {
-                    "type": "integer",
-                    "example": 150
-                }
-            }
-        },
-        "dtos.InvoiceStatsResponseData": {
-            "type": "object",
-            "properties": {
-                "monthly": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.MonthlyInvoiceStatsDto"
-                    }
-                },
-                "total": {
-                    "$ref": "#/definitions/dtos.InvoiceStatsDto"
-                }
-            }
-        },
-        "dtos.InvoiceStepMetadata": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "step": {
-                    "type": "string",
-                    "example": "validated_irn"
-                },
-                "timestamp": {
-                    "type": "string",
-                    "example": "2024-01-01T12:00:00Z"
-                }
-            }
-        },
-        "dtos.Item": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "example": "A high-performance laptop suitable for gaming and work."
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Laptop"
-                },
-                "sellers_item_identification": {
-                    "type": "string",
-                    "example": "LAP-12345"
-                }
-            }
-        },
-        "dtos.LegalMonetaryTotal": {
-            "type": "object",
-            "required": [
-                "line_extension_amount",
-                "payable_amount",
-                "tax_exclusive_amount",
-                "tax_inclusive_amount"
-            ],
-            "properties": {
-                "line_extension_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "payable_amount": {
-                    "type": "number",
-                    "example": 1700.75
-                },
-                "tax_exclusive_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "tax_inclusive_amount": {
-                    "type": "number",
-                    "example": 1700.75
-                }
-            }
-        },
-        "dtos.LoginRequestDto": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "is_sandbox": {
-                    "type": "boolean",
-                    "default": true
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.LoginResponseDto": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/dtos.UserResponse"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.MinimalInvoiceDTO": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string",
-                    "example": "2024-01-01T12:00:00Z"
-                },
-                "current_status": {
-                    "type": "string",
-                    "example": "validated_irn"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "invoice_number": {
-                    "type": "string",
-                    "example": "INV-1001"
-                },
-                "irn": {
-                    "type": "string",
-                    "example": "INV-1001-a456-426614174000"
-                },
-                "platform": {
-                    "type": "string",
-                    "example": "internal"
-                },
-                "status_text": {
-                    "type": "string",
-                    "example": "success"
-                }
-            }
-        },
-        "dtos.MonthlyInvoiceStatsDto": {
-            "type": "object",
-            "properties": {
-                "failed_invoices": {
-                    "type": "integer",
-                    "example": 20
-                },
-                "month": {
-                    "type": "string",
-                    "example": "202401"
-                },
-                "partial_invoices": {
-                    "type": "integer",
-                    "example": 30
-                },
-                "successful_invoices": {
-                    "type": "integer",
-                    "example": 100
-                },
-                "total_invoices": {
-                    "type": "integer",
-                    "example": 150
-                }
-            }
-        },
-        "dtos.Party": {
-            "type": "object",
-            "required": [
-                "email",
-                "party_name",
-                "postal_address",
-                "tin"
-            ],
-            "properties": {
-                "business_description": {
-                    "type": "string",
-                    "minLength": 5,
-                    "example": "Acme Inc. is a leading technology company."
-                },
-                "email": {
-                    "type": "string",
-                    "example": "business@example.com"
-                },
-                "party_name": {
-                    "type": "string",
-                    "minLength": 2,
-                    "example": "Acme Inc."
-                },
-                "postal_address": {
-                    "$ref": "#/definitions/dtos.PostalAddress"
-                },
-                "telephone": {
-                    "type": "string",
-                    "minLength": 7,
-                    "example": "+234804567890"
-                },
-                "tin": {
-                    "type": "string",
-                    "example": "123456789012345"
-                }
-            }
-        },
-        "dtos.PaymentMeans": {
-            "type": "object",
-            "required": [
-                "payment_due_date",
-                "payment_means_code"
-            ],
-            "properties": {
-                "payment_due_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                },
-                "payment_means_code": {
-                    "type": "string",
-                    "example": "10"
-                }
-            }
-        },
-        "dtos.PlatformConfigsAuth": {
+        "business.PlatformConfigs": {
             "type": "object",
             "additionalProperties": {
-                "$ref": "#/definitions/dtos.AccountingPlatformConfigAuth"
+                "$ref": "#/definitions/business.AccountingPlatformConfig"
             }
         },
-        "dtos.PostalAddress": {
-            "type": "object",
-            "required": [
-                "city_name",
-                "country",
-                "lga",
-                "postal_zone",
-                "state",
-                "street_name"
-            ],
-            "properties": {
-                "city_name": {
-                    "type": "string",
-                    "example": "Ikeja"
-                },
-                "country": {
-                    "type": "string",
-                    "example": "NG"
-                },
-                "lga": {
-                    "type": "string",
-                    "example": "NG-AB-ANO"
-                },
-                "postal_zone": {
-                    "type": "string",
-                    "example": "10001"
-                },
-                "state": {
-                    "type": "string",
-                    "example": "NG-AB"
-                },
-                "street_name": {
-                    "type": "string",
-                    "example": "123 Broad Street"
-                }
-            }
-        },
-        "dtos.Price": {
-            "type": "object",
-            "required": [
-                "base_quantity",
-                "price_amount",
-                "price_unit"
-            ],
-            "properties": {
-                "base_quantity": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "price_amount": {
-                    "type": "number",
-                    "example": 5000
-                },
-                "price_unit": {
-                    "type": "string",
-                    "example": "NGN per 1"
-                }
-            }
-        },
-        "dtos.RegisterDto": {
-            "type": "object",
-            "required": [
-                "company_name",
-                "email",
-                "is_aggregator",
-                "name",
-                "password",
-                "phone_number",
-                "tin"
-            ],
-            "properties": {
-                "company_name": {
-                    "type": "string",
-                    "example": "Acme Inc."
-                },
-                "email": {
-                    "type": "string",
-                    "example": "john.doe@example.com"
-                },
-                "is_aggregator": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 250,
-                    "minLength": 2,
-                    "example": "John Doe"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6,
-                    "example": "password123"
-                },
-                "phone_number": {
-                    "type": "string",
-                    "example": "+1234567890"
-                },
-                "platform_configs": {
-                    "$ref": "#/definitions/dtos.PlatformConfigsAuth"
-                },
-                "tin": {
-                    "type": "string",
-                    "example": "TIN-123456789"
-                }
-            }
-        },
-        "dtos.RegisterResponseDto": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "An otp has been sent to your mail, use it to verify your account"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.ResendVerificationOtpDto": {
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "john.doe@example.com"
-                }
-            }
-        },
-        "dtos.RespondToInvitationDto": {
-            "type": "object",
-            "required": [
-                "invitation_id"
-            ],
-            "properties": {
-                "accept": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "invitation_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                }
-            }
-        },
-        "dtos.SendAggregatorInvitationByEmailDto": {
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "aggregator@example.com"
-                }
-            }
-        },
-        "dtos.SendAggregatorInvitationDto": {
-            "type": "object",
-            "required": [
-                "aggregator_id"
-            ],
-            "properties": {
-                "aggregator_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                }
-            }
-        },
-        "dtos.SubscriptionPlansResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.SubscriptionPlan"
-                    }
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.TaxCategory": {
-            "type": "object",
-            "required": [
-                "id",
-                "percent"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "enum": [
-                        "STANDARD_GST",
-                        "REDUCED_GST",
-                        "ZERO_GST",
-                        "STANDARD_VAT",
-                        "REDUCED_VAT",
-                        "ZERO_VAT",
-                        "STATE_SALES_TAX",
-                        "LOCAL_SALES_TAX",
-                        "ALCOHOL_EXCISE_TAX",
-                        "TOBACCO_EXCISE_TAX",
-                        "FUEL_EXCISE_TAX",
-                        "CORPORATE_INCOME_TAX",
-                        "PERSONAL_INCOME_TAX",
-                        "SOCIAL_SECURITY_TAX",
-                        "MEDICARE_TAX",
-                        "REAL_ESTATE_TAX",
-                        "PERSONAL_PROPERTY_TAX",
-                        "CARBON_TAX",
-                        "PLASTIC_TAX",
-                        "IMPORT_DUTY",
-                        "EXPORT_DUTY",
-                        "LUXURY_TAX",
-                        "SERVICE_TAX",
-                        "TOURISM_TAX",
-                        "WITHHOLDING_TAX",
-                        "STAMP_DUTY",
-                        "EXEMPTED"
-                    ],
-                    "example": "STANDARD_VAT"
-                },
-                "percent": {
-                    "type": "number",
-                    "example": 15
-                }
-            }
-        },
-        "dtos.TaxSubtotal": {
-            "type": "object",
-            "required": [
-                "tax_amount",
-                "tax_category",
-                "taxable_amount"
-            ],
-            "properties": {
-                "tax_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "tax_category": {
-                    "$ref": "#/definitions/dtos.TaxCategory"
-                },
-                "taxable_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                }
-            }
-        },
-        "dtos.TaxTotal": {
-            "type": "object",
-            "required": [
-                "tax_amount"
-            ],
-            "properties": {
-                "tax_amount": {
-                    "type": "number",
-                    "example": 1500.75
-                },
-                "tax_subtotal": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.TaxSubtotal"
-                    }
-                }
-            }
-        },
-        "dtos.TransactionDto": {
-            "type": "object",
-            "properties": {
-                "aggregator_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "amount": {
-                    "type": "number",
-                    "example": 5000
-                },
-                "business_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "business_name": {
-                    "type": "string",
-                    "example": "Business Corp"
-                },
-                "created_at": {
-                    "type": "string",
-                    "example": "2026-01-01T12:00:00Z"
-                },
-                "currency": {
-                    "type": "string",
-                    "example": "NGN"
-                },
-                "gateway_response": {
-                    "type": "string",
-                    "example": "Approved"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "plan": {
-                    "type": "string",
-                    "example": "Starter"
-                },
-                "plan_id": {
-                    "type": "string",
-                    "example": "plan_123"
-                },
-                "provider": {
-                    "type": "string",
-                    "example": "paystack"
-                },
-                "reference": {
-                    "type": "string",
-                    "example": "txn_123456789"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2026-01-01T12:00:00Z"
-                }
-            }
-        },
-        "dtos.UpdateBusinessDto": {
+        "business.UpdateBusinessDto": {
             "type": "object",
             "properties": {
                 "business_id": {
@@ -5774,7 +5144,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.UploadBusinessIRNSigningKeysDataDto": {
+        "business.UploadBusinessIRNSigningKeysDataDto": {
             "type": "object",
             "properties": {
                 "environment": {
@@ -5791,419 +5161,44 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.UploadBusinessIRNSigningKeysResponseDto": {
+        "business.UploadBusinessIRNSigningKeysResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dtos.UploadBusinessIRNSigningKeysDataDto"
+                    "$ref": "#/definitions/business.UploadBusinessIRNSigningKeysDataDto"
                 },
+                "error": {},
+                "extra": {},
                 "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.UploadInvoiceRequestDto": {
-            "type": "object",
-            "required": [
-                "accounting_supplier_party",
-                "business_id",
-                "document_currency_code",
-                "invoice_kind",
-                "invoice_line",
-                "invoice_type_code",
-                "issue_date",
-                "legal_monetary_total",
-                "tax_currency_code",
-                "tax_total"
-            ],
-            "properties": {
-                "accounting_cost": {
-                    "type": "string",
-                    "example": "2000"
-                },
-                "accounting_customer_party": {
-                    "$ref": "#/definitions/dtos.Party"
-                },
-                "accounting_supplier_party": {
-                    "$ref": "#/definitions/dtos.Party"
-                },
-                "actual_delivery_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                },
-                "additional_document_reference": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.DocumentReference"
-                    }
-                },
-                "allowance_charge": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.AllowanceCharge"
-                    }
-                },
-                "billing_reference": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.DocumentReference"
-                    }
-                },
-                "business_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "buyer_reference": {
-                    "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
-                },
-                "contract_document_reference": {
-                    "$ref": "#/definitions/dtos.DocumentReference"
-                },
-                "dispatch_document_reference": {
-                    "$ref": "#/definitions/dtos.DocumentReference"
-                },
-                "document_currency_code": {
-                    "type": "string",
-                    "example": "NGN"
-                },
-                "due_date": {
-                    "type": "string",
-                    "example": "2026-01-20"
-                },
-                "invoice_delivery_period": {
-                    "$ref": "#/definitions/dtos.InvoiceDeliveryPeriod"
-                },
-                "invoice_kind": {
-                    "type": "string",
-                    "enum": [
-                        "B2C",
-                        "B2B",
-                        "B2G"
-                    ],
-                    "example": "B2B"
-                },
-                "invoice_line": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.InvoiceLine"
-                    }
-                },
-                "invoice_number": {
-                    "type": "string",
-                    "minLength": 1,
-                    "example": "INV-001"
-                },
-                "invoice_type_code": {
-                    "type": "string",
-                    "enum": [
-                        "380",
-                        "381",
-                        "384",
-                        "385",
-                        "386",
-                        "388",
-                        "389",
-                        "390",
-                        "392",
-                        "393",
-                        "394",
-                        "395",
-                        "396",
-                        "397",
-                        "399",
-                        "400",
-                        "402",
-                        "404",
-                        "406",
-                        "408"
-                    ],
-                    "example": "381"
-                },
-                "irn": {
-                    "type": "string",
-                    "example": "IRN-001-20122345"
-                },
-                "issue_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                },
-                "issue_time": {
-                    "type": "string",
-                    "example": "12:00:00"
-                },
-                "legal_monetary_total": {
-                    "$ref": "#/definitions/dtos.LegalMonetaryTotal"
-                },
-                "note": {
-                    "type": "string",
-                    "example": "Invoice note"
-                },
-                "order_reference": {
-                    "type": "string",
-                    "example": "ITW001-E9E0C0D3-20240619"
-                },
-                "originator_document_reference": {
-                    "$ref": "#/definitions/dtos.DocumentReference"
-                },
-                "payee_party": {
-                    "$ref": "#/definitions/dtos.Party"
-                },
-                "payment_means": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.PaymentMeans"
-                    }
-                },
-                "payment_status": {
-                    "type": "string",
-                    "enum": [
-                        "PENDING",
-                        "PAID",
-                        "REJECTED"
-                    ],
-                    "example": "PENDING"
-                },
-                "payment_terms_note": {
-                    "type": "string",
-                    "example": "Payment terms note"
-                },
-                "receipt_document_reference": {
-                    "$ref": "#/definitions/dtos.DocumentReference"
-                },
-                "tax_currency_code": {
-                    "type": "string",
-                    "example": "NGN"
-                },
-                "tax_point_date": {
-                    "type": "string",
-                    "example": "2026-01-16"
-                },
-                "tax_representative_party": {
-                    "$ref": "#/definitions/dtos.Party"
-                },
-                "tax_total": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.TaxTotal"
-                    }
-                }
-            }
-        },
-        "dtos.UploadInvoiceResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dtos.InvoiceData"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Action performed successfully"
-                },
-                "metadata": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.InvoiceStepMetadata"
-                    }
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
-                }
-            }
-        },
-        "dtos.UserResponse": {
-            "type": "object",
-            "properties": {
-                "business_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "john.doe@example.com"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "is_aggregator": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "is_sandbox": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "keys_set": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "string"
                 },
                 "name": {
-                    "type": "string",
-                    "example": "John Doe"
+                    "type": "string"
                 },
-                "service_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
                 }
             }
         },
-        "dtos.VerifyEmailDto": {
-            "type": "object",
-            "required": [
-                "email",
-                "otp"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "john.doe@example.com"
-                },
-                "otp": {
-                    "type": "string",
-                    "example": "123456"
-                }
-            }
-        },
-        "firs_models.FirsTransactionVatPayload": {
+        "database.PaginationResponse": {
             "type": "object",
             "properties": {
-                "agentTin": {
-                    "type": "string"
-                },
-                "baseAmount": {
-                    "type": "string"
-                },
-                "beneficiaryTin": {
-                    "type": "string"
-                },
-                "currency": {
+                "current_page": {
                     "type": "integer"
                 },
-                "itemDescription": {
-                    "type": "string"
-                },
-                "otherTaxes": {
-                    "type": "string"
-                },
-                "totalAmount": {
-                    "type": "string"
-                },
-                "transDate": {
-                    "type": "string"
-                },
-                "vatCalculated": {
-                    "type": "string"
-                },
-                "vatRate": {
-                    "type": "string"
-                },
-                "vatStatus": {
+                "page_count": {
                     "type": "integer"
                 },
-                "vendorTransactionId": {
-                    "type": "string"
+                "total_pages_count": {
+                    "type": "integer"
                 }
             }
         },
-        "firs_models.FirsWebhookPayload": {
-            "type": "object",
-            "required": [
-                "irn",
-                "message"
-            ],
-            "properties": {
-                "irn": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "firs_models.GenerateIRNRequestData": {
-            "type": "object",
-            "required": [
-                "invoice_number"
-            ],
-            "properties": {
-                "invoice_number": {
-                    "type": "string"
-                }
-            }
-        },
-        "firs_models.IRNSigningRequestData": {
-            "type": "object",
-            "properties": {
-                "irn": {
-                    "type": "string"
-                }
-            }
-        },
-        "firs_models.IRNValidationRequest": {
-            "type": "object",
-            "required": [
-                "business_id",
-                "invoice_reference",
-                "irn"
-            ],
-            "properties": {
-                "business_id": {
-                    "type": "string"
-                },
-                "invoice_reference": {
-                    "type": "string"
-                },
-                "irn": {
-                    "type": "string"
-                }
-            }
-        },
-        "firs_models.UpdateInvoice": {
-            "type": "object",
-            "required": [
-                "payment_status"
-            ],
-            "properties": {
-                "payment_status": {
-                    "type": "string",
-                    "enum": [
-                        "PENDING",
-                        "PAID",
-                        "REJECTED"
-                    ]
-                },
-                "reference": {
-                    "type": "string"
-                }
-            }
-        },
-        "firs_models.VerifyTinData": {
-            "type": "object",
-            "required": [
-                "tin"
-            ],
-            "properties": {
-                "tin": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.BulkUpload": {
+        "entities.BulkUpload": {
             "type": "object",
             "properties": {
                 "aggregator_id": {
@@ -6259,7 +5254,93 @@ const docTemplate = `{
                 }
             }
         },
-        "models.MinimalInvoiceDTO": {
+        "entities.Invoice": {
+            "type": "object",
+            "properties": {
+                "aggregator_id": {
+                    "type": "string"
+                },
+                "business_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "current_status": {
+                    "type": "string"
+                },
+                "encrypted_irn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "invoice_data": {
+                    "type": "object"
+                },
+                "invoice_number": {
+                    "type": "string"
+                },
+                "irn": {
+                    "type": "string"
+                },
+                "platform": {
+                    "description": "e.g., zoho, quickbooks",
+                    "type": "string"
+                },
+                "platform_metadata": {
+                    "type": "object"
+                },
+                "qr_code": {
+                    "type": "string"
+                },
+                "status_history": {
+                    "type": "object"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.InvoiceStatsDto": {
+            "type": "object",
+            "properties": {
+                "failed_invoices": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "partial_invoices": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "successful_invoices": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 150
+                }
+            }
+        },
+        "entities.InvoiceStatsResponseData": {
+            "type": "object",
+            "properties": {
+                "monthly": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.MonthlyInvoiceStatsDto"
+                    }
+                },
+                "total": {
+                    "$ref": "#/definitions/entities.InvoiceStatsDto"
+                }
+            }
+        },
+        "entities.MinimalInvoiceDTO": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -6285,7 +5366,32 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Ping": {
+        "entities.MonthlyInvoiceStatsDto": {
+            "type": "object",
+            "properties": {
+                "failed_invoices": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "month": {
+                    "type": "string",
+                    "example": "202401"
+                },
+                "partial_invoices": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "successful_invoices": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 150
+                }
+            }
+        },
+        "entities.Ping": {
             "type": "object",
             "properties": {
                 "message": {
@@ -6293,7 +5399,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Response": {
+        "entities.Response": {
             "type": "object",
             "properties": {
                 "data": {},
@@ -6314,7 +5420,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SubscriptionPlan": {
+        "entities.SubscriptionPlan": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -6340,6 +5446,928 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "firs_models.AllowanceCharge": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 1500.75
+                },
+                "charge_indicator": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "firs_models.DocumentReference": {
+            "type": "object",
+            "required": [
+                "irn",
+                "issue_date"
+            ],
+            "properties": {
+                "irn": {
+                    "type": "string",
+                    "example": "ITW001-E9E0C0D3-20240619"
+                },
+                "issue_date": {
+                    "type": "string",
+                    "example": "2026-01-16"
+                }
+            }
+        },
+        "firs_models.FirsTransactionVatPayload": {
+            "type": "object",
+            "properties": {
+                "agentTin": {
+                    "type": "string"
+                },
+                "baseAmount": {
+                    "type": "string"
+                },
+                "beneficiaryTin": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "integer"
+                },
+                "itemDescription": {
+                    "type": "string"
+                },
+                "otherTaxes": {
+                    "type": "string"
+                },
+                "totalAmount": {
+                    "type": "string"
+                },
+                "transDate": {
+                    "type": "string"
+                },
+                "vatCalculated": {
+                    "type": "string"
+                },
+                "vatRate": {
+                    "type": "string"
+                },
+                "vatStatus": {
+                    "type": "integer"
+                },
+                "vendorTransactionId": {
+                    "type": "string"
+                }
+            }
+        },
+        "firs_models.GenerateIRNRequestData": {
+            "type": "object",
+            "required": [
+                "invoice_number"
+            ],
+            "properties": {
+                "invoice_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "firs_models.IRNSigningRequestData": {
+            "type": "object",
+            "properties": {
+                "irn": {
+                    "type": "string"
+                }
+            }
+        },
+        "firs_models.IRNValidationRequest": {
+            "type": "object",
+            "required": [
+                "business_id",
+                "invoice_reference",
+                "irn"
+            ],
+            "properties": {
+                "business_id": {
+                    "type": "string"
+                },
+                "invoice_reference": {
+                    "type": "string"
+                },
+                "irn": {
+                    "type": "string"
+                }
+            }
+        },
+        "firs_models.InvoiceDeliveryPeriod": {
+            "type": "object",
+            "required": [
+                "end_date",
+                "start_date"
+            ],
+            "properties": {
+                "end_date": {
+                    "type": "string",
+                    "example": "2026-01-16"
+                },
+                "start_date": {
+                    "type": "string",
+                    "example": "2026-01-16"
+                }
+            }
+        },
+        "firs_models.InvoiceLine": {
+            "type": "object",
+            "required": [
+                "hsn_code",
+                "invoiced_quantity",
+                "item",
+                "line_extension_amount",
+                "price",
+                "product_category"
+            ],
+            "properties": {
+                "discount_amount": {
+                    "type": "number",
+                    "example": 2500
+                },
+                "discount_rate": {
+                    "type": "number",
+                    "example": 5
+                },
+                "fee_amount": {
+                    "type": "number",
+                    "example": 450
+                },
+                "fee_rate": {
+                    "type": "number",
+                    "example": 2
+                },
+                "hsn_code": {
+                    "type": "string",
+                    "example": "1282.10"
+                },
+                "invoiced_quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 10
+                },
+                "item": {
+                    "$ref": "#/definitions/firs_models.Item"
+                },
+                "line_extension_amount": {
+                    "type": "number",
+                    "example": 1500.75
+                },
+                "price": {
+                    "$ref": "#/definitions/firs_models.Price"
+                },
+                "product_category": {
+                    "type": "string",
+                    "example": "Electronics"
+                }
+            }
+        },
+        "firs_models.Item": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "A high-performance laptop suitable for gaming and work."
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Laptop"
+                },
+                "sellers_item_identification": {
+                    "type": "string",
+                    "example": "LAP-12345"
+                }
+            }
+        },
+        "firs_models.LegalMonetaryTotal": {
+            "type": "object",
+            "required": [
+                "line_extension_amount",
+                "payable_amount",
+                "tax_exclusive_amount",
+                "tax_inclusive_amount"
+            ],
+            "properties": {
+                "line_extension_amount": {
+                    "type": "number",
+                    "example": 1500.75
+                },
+                "payable_amount": {
+                    "type": "number",
+                    "example": 1700.75
+                },
+                "tax_exclusive_amount": {
+                    "type": "number",
+                    "example": 1500.75
+                },
+                "tax_inclusive_amount": {
+                    "type": "number",
+                    "example": 1700.75
+                }
+            }
+        },
+        "firs_models.Party": {
+            "type": "object",
+            "required": [
+                "email",
+                "party_name",
+                "postal_address",
+                "tin"
+            ],
+            "properties": {
+                "business_description": {
+                    "type": "string",
+                    "minLength": 5,
+                    "example": "Acme Inc. is a leading technology company."
+                },
+                "email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                },
+                "party_name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "example": "Acme Inc."
+                },
+                "postal_address": {
+                    "$ref": "#/definitions/firs_models.PostalAddress"
+                },
+                "telephone": {
+                    "type": "string",
+                    "minLength": 7,
+                    "example": "+234804567890"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "123456789012345"
+                }
+            }
+        },
+        "firs_models.PaymentMeans": {
+            "type": "object",
+            "required": [
+                "payment_due_date",
+                "payment_means_code"
+            ],
+            "properties": {
+                "payment_due_date": {
+                    "type": "string",
+                    "example": "2026-01-16"
+                },
+                "payment_means_code": {
+                    "type": "string",
+                    "example": "10"
+                }
+            }
+        },
+        "firs_models.PostalAddress": {
+            "type": "object",
+            "required": [
+                "city_name",
+                "country",
+                "country_code",
+                "postal_zone",
+                "street_name"
+            ],
+            "properties": {
+                "city_name": {
+                    "type": "string",
+                    "example": "Ikeja"
+                },
+                "country": {
+                    "type": "string",
+                    "example": "Nigeria"
+                },
+                "country_code": {
+                    "type": "string",
+                    "example": "NG"
+                },
+                "lga": {
+                    "type": "string",
+                    "example": "NG-LA-LIS"
+                },
+                "postal_zone": {
+                    "type": "string",
+                    "example": "10001"
+                },
+                "state": {
+                    "type": "string",
+                    "example": "NG-LA"
+                },
+                "street_name": {
+                    "type": "string",
+                    "example": "123 Broad Street"
+                }
+            }
+        },
+        "firs_models.Price": {
+            "type": "object",
+            "required": [
+                "base_quantity",
+                "price_amount",
+                "price_unit"
+            ],
+            "properties": {
+                "base_quantity": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "price_amount": {
+                    "type": "number",
+                    "example": 5000
+                },
+                "price_unit": {
+                    "type": "string",
+                    "example": "NGN per 1"
+                }
+            }
+        },
+        "firs_models.TaxCategory": {
+            "type": "object",
+            "required": [
+                "id",
+                "percent"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "VAT"
+                },
+                "percent": {
+                    "type": "number",
+                    "example": 15
+                }
+            }
+        },
+        "firs_models.TaxSubtotal": {
+            "type": "object",
+            "required": [
+                "tax_amount",
+                "tax_category",
+                "taxable_amount"
+            ],
+            "properties": {
+                "tax_amount": {
+                    "type": "number",
+                    "example": 1500.75
+                },
+                "tax_category": {
+                    "$ref": "#/definitions/firs_models.TaxCategory"
+                },
+                "taxable_amount": {
+                    "type": "number",
+                    "example": 1500.75
+                }
+            }
+        },
+        "firs_models.TaxTotal": {
+            "type": "object",
+            "required": [
+                "tax_amount"
+            ],
+            "properties": {
+                "tax_amount": {
+                    "type": "number",
+                    "example": 1500.75
+                },
+                "tax_subtotal": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/firs_models.TaxSubtotal"
+                    }
+                }
+            }
+        },
+        "firs_models.UpdateInvoice": {
+            "type": "object",
+            "required": [
+                "payment_status"
+            ],
+            "properties": {
+                "payment_status": {
+                    "type": "string",
+                    "enum": [
+                        "PENDING",
+                        "PAID",
+                        "REJECTED"
+                    ]
+                },
+                "reference": {
+                    "type": "string"
+                }
+            }
+        },
+        "firs_models.UploadInvoiceRequestDto": {
+            "type": "object",
+            "required": [
+                "accounting_supplier_party",
+                "business_id",
+                "document_currency_code",
+                "invoice_kind",
+                "invoice_line",
+                "invoice_type_code",
+                "issue_date",
+                "legal_monetary_total",
+                "tax_currency_code",
+                "tax_total"
+            ],
+            "properties": {
+                "accounting_cost": {
+                    "type": "string",
+                    "example": "2000"
+                },
+                "accounting_customer_party": {
+                    "$ref": "#/definitions/firs_models.Party"
+                },
+                "accounting_supplier_party": {
+                    "$ref": "#/definitions/firs_models.Party"
+                },
+                "actual_delivery_date": {
+                    "type": "string",
+                    "example": "2026-01-16"
+                },
+                "additional_document_reference": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/firs_models.DocumentReference"
+                    }
+                },
+                "allowance_charge": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/firs_models.AllowanceCharge"
+                    }
+                },
+                "billing_reference": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/firs_models.DocumentReference"
+                    }
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "buyer_reference": {
+                    "type": "string",
+                    "example": "ITW001-E9E0C0D3-20240619"
+                },
+                "contract_document_reference": {
+                    "$ref": "#/definitions/firs_models.DocumentReference"
+                },
+                "dispatch_document_reference": {
+                    "$ref": "#/definitions/firs_models.DocumentReference"
+                },
+                "document_currency_code": {
+                    "type": "string",
+                    "example": "NGN"
+                },
+                "due_date": {
+                    "type": "string",
+                    "example": "2026-01-20"
+                },
+                "invoice_delivery_period": {
+                    "$ref": "#/definitions/firs_models.InvoiceDeliveryPeriod"
+                },
+                "invoice_kind": {
+                    "type": "string",
+                    "enum": [
+                        "B2C",
+                        "B2B",
+                        "B2G"
+                    ],
+                    "example": "B2B"
+                },
+                "invoice_line": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/firs_models.InvoiceLine"
+                    }
+                },
+                "invoice_number": {
+                    "type": "string",
+                    "minLength": 1,
+                    "example": "INV-001"
+                },
+                "invoice_type_code": {
+                    "type": "string",
+                    "enum": [
+                        "380",
+                        "381",
+                        "384",
+                        "385",
+                        "386",
+                        "388",
+                        "389",
+                        "390",
+                        "392",
+                        "393",
+                        "394",
+                        "395",
+                        "396",
+                        "397",
+                        "399",
+                        "400",
+                        "402",
+                        "404",
+                        "406",
+                        "408"
+                    ],
+                    "example": "381"
+                },
+                "irn": {
+                    "type": "string",
+                    "example": "IRN-001-20122345"
+                },
+                "issue_date": {
+                    "type": "string",
+                    "example": "2026-01-16"
+                },
+                "issue_time": {
+                    "type": "string",
+                    "example": "12:00:00"
+                },
+                "legal_monetary_total": {
+                    "$ref": "#/definitions/firs_models.LegalMonetaryTotal"
+                },
+                "note": {
+                    "type": "string",
+                    "example": "Invoice note"
+                },
+                "order_reference": {
+                    "type": "string",
+                    "example": "ITW001-E9E0C0D3-20240619"
+                },
+                "originator_document_reference": {
+                    "$ref": "#/definitions/firs_models.DocumentReference"
+                },
+                "payee_party": {
+                    "$ref": "#/definitions/firs_models.Party"
+                },
+                "payment_means": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/firs_models.PaymentMeans"
+                    }
+                },
+                "payment_status": {
+                    "type": "string",
+                    "enum": [
+                        "PENDING",
+                        "PAID",
+                        "REJECTED"
+                    ],
+                    "example": "PENDING"
+                },
+                "payment_terms_note": {
+                    "type": "string",
+                    "example": "Payment terms note"
+                },
+                "receipt_document_reference": {
+                    "$ref": "#/definitions/firs_models.DocumentReference"
+                },
+                "tax_currency_code": {
+                    "type": "string",
+                    "example": "NGN"
+                },
+                "tax_point_date": {
+                    "type": "string",
+                    "example": "2026-01-16"
+                },
+                "tax_representative_party": {
+                    "$ref": "#/definitions/firs_models.Party"
+                },
+                "tax_total": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/firs_models.TaxTotal"
+                    }
+                }
+            }
+        },
+        "firs_models.VerifyTinData": {
+            "type": "object",
+            "required": [
+                "tin"
+            ],
+            "properties": {
+                "tin": {
+                    "type": "string"
+                }
+            }
+        },
+        "invoice.GetAllInvoicesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.MinimalInvoiceDTO"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/database.PaginationResponse"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "invoice.GetInvoiceDetailsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/entities.Invoice"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "invoice.GetInvoiceStatsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/entities.InvoiceStatsResponseData"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "invoice.InvoiceStepMetadata": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "step": {
+                    "type": "string",
+                    "example": "validated_irn"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                }
+            }
+        },
+        "invoice.InvoiceUploadData": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "invoice_number": {
+                    "type": "string",
+                    "example": "INV-1001"
+                },
+                "irn": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "qr_code": {
+                    "type": "string",
+                    "example": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."
+                },
+                "qr_code_2": {
+                    "type": "string",
+                    "example": "eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."
+                },
+                "qr_code_bmp_url": {
+                    "type": "string",
+                    "example": "https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"
+                }
+            }
+        },
+        "invoice.UploadInvoiceResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/invoice.InvoiceUploadData"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/invoice.InvoiceStepMetadata"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "subscription.AggregatorSubscribeDataDto": {
+            "type": "object",
+            "properties": {
+                "authorization_url": {
+                    "type": "string",
+                    "example": "https://checkout.paystack.com/..."
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "provider": {
+                    "type": "string",
+                    "example": "paystack"
+                },
+                "transaction_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "transaction_ref": {
+                    "type": "string",
+                    "example": "aggsub_1712345678_abcdef"
+                }
+            }
+        },
+        "subscription.AggregatorSubscribeRequestDto": {
+            "type": "object",
+            "required": [
+                "business_id",
+                "plan_id"
+            ],
+            "properties": {
+                "business_id": {
+                    "type": "string"
+                },
+                "plan_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "subscription.AggregatorSubscribeResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/subscription.AggregatorSubscribeDataDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "subscription.CreateSubscriptionPlanDataDto": {
+            "type": "object",
+            "properties": {
+                "is_sandbox": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "plan": {
+                    "$ref": "#/definitions/entities.SubscriptionPlan"
+                }
+            }
+        },
+        "subscription.CreateSubscriptionPlanDto": {
+            "type": "object",
+            "required": [
+                "amount",
+                "billing_cycle",
+                "is_sandbox",
+                "name",
+                "total_invoices"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "billing_cycle": {
+                    "type": "integer"
+                },
+                "is_sandbox": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "total_invoices": {
+                    "type": "integer"
+                }
+            }
+        },
+        "subscription.CreateSubscriptionPlanResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/subscription.CreateSubscriptionPlanDataDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "subscription.SubscriptionPlansResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.SubscriptionPlan"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
                 }
             }
         }
