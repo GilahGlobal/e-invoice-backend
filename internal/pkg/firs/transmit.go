@@ -29,20 +29,34 @@ func LookUpByIRN(irn string) (*utility.Response, error) {
 	return utility.GetRequest(utility.DefaultHTTPClient, config, theResp)
 }
 
-func LookUpByTIN(tin string) (*utility.Response, error) {
+func LookUpByTIN(tin string, isSandbox bool) (*utility.Response, error) {
 
 	var (
 		configs = config.GetConfig()
-		apiURL  = fmt.Sprintf("%v/invoice/transmit/lookup/tin/%s", configs.Firs.FirsApiUrl, tin)
+		apiURL  string
+		config  utility.RequestConfig
 	)
 
-	config := utility.RequestConfig{
-		URL: apiURL,
-		Headers: map[string]string{
-			"x-api-key":    configs.Firs.FirsApiKey,
-			"x-api-secret": configs.Firs.FirsClientKey,
-		},
-		Body: nil,
+	if isSandbox {
+		apiURL = fmt.Sprintf("%v/invoice/transmit/lookup/tin/%s", configs.FirsSandbox.FirsApiUrl, tin)
+		config = utility.RequestConfig{
+			URL: apiURL,
+			Headers: map[string]string{
+				"x-api-key":    configs.FirsSandbox.FirsApiKey,
+				"x-api-secret": configs.FirsSandbox.FirsClientKey,
+			},
+			Body: nil,
+		}
+	} else {
+		apiURL = fmt.Sprintf("%v/invoice/transmit/lookup/tin/%s", configs.Firs.FirsApiUrl, tin)
+		config = utility.RequestConfig{
+			URL: apiURL,
+			Headers: map[string]string{
+				"x-api-key":    configs.Firs.FirsApiKey,
+				"x-api-secret": configs.Firs.FirsClientKey,
+			},
+			Body: nil,
+		}
 	}
 
 	theResp := &firs_models.FirsResponse{}

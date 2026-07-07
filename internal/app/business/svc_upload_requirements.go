@@ -8,8 +8,9 @@ import (
 )
 
 type InvoiceUploadSetup struct {
-	BusinessID string
-	ServiceID  string
+	BusinessID        string
+	ServiceID         string
+	BmpUploadSelected bool
 }
 
 func (s *Service) ValidateInvoiceUploadSetup(db *gorm.DB, ownerID string) (*InvoiceUploadSetup, error) {
@@ -47,7 +48,8 @@ func (s *Service) ValidateInvoiceUploadSetup(db *gorm.DB, ownerID string) (*Invo
 	}
 
 	return &InvoiceUploadSetup{
-		BusinessID: businessID,
-		ServiceID:  serviceID,
+		BusinessID:        businessID,
+		ServiceID:         serviceID,
+		BmpUploadSelected: business.BmpUploadSelected,
 	}, nil
 }
