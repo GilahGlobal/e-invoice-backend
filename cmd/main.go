@@ -1,12 +1,12 @@
 package main
 
 import (
-	"einvoice-access-point/pkg/config"
-	"einvoice-access-point/pkg/database"
-	"einvoice-access-point/pkg/database/postgresql"
-	"einvoice-access-point/pkg/utility"
-	"einvoice-access-point/pkg/workers/consumer"
-	"einvoice-access-point/pkg/workers/scheduler"
+	"einvoice-access-point/internal/config"
+	"einvoice-access-point/internal/data/database"
+	"einvoice-access-point/internal/data/database/postgresql"
+	"einvoice-access-point/internal/utility"
+	"einvoice-access-point/internal/workers/consumer"
+	"einvoice-access-point/internal/workers/scheduler"
 	"fmt"
 
 	"github.com/hibiken/asynq"
