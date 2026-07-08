@@ -5294,6 +5294,9 @@ const docTemplate = `{
                 "qr_code": {
                     "type": "string"
                 },
+                "qr_code_bmp_url": {
+                    "type": "string"
+                },
                 "status_history": {
                     "type": "object"
                 },
@@ -5359,6 +5362,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "platform": {
+                    "type": "string"
+                },
+                "qr_code_bmp_url": {
                     "type": "string"
                 },
                 "status_text": {
@@ -5736,8 +5742,9 @@ const docTemplate = `{
             "required": [
                 "city_name",
                 "country",
-                "country_code",
+                "lga",
                 "postal_zone",
+                "state",
                 "street_name"
             ],
             "properties": {
@@ -5747,15 +5754,11 @@ const docTemplate = `{
                 },
                 "country": {
                     "type": "string",
-                    "example": "Nigeria"
-                },
-                "country_code": {
-                    "type": "string",
                     "example": "NG"
                 },
                 "lga": {
                     "type": "string",
-                    "example": "NG-LA-LIS"
+                    "example": "NG-AB-ANO"
                 },
                 "postal_zone": {
                     "type": "string",
@@ -5763,7 +5766,7 @@ const docTemplate = `{
                 },
                 "state": {
                     "type": "string",
-                    "example": "NG-LA"
+                    "example": "NG-AB"
                 },
                 "street_name": {
                     "type": "string",
@@ -5802,7 +5805,36 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string",
-                    "example": "VAT"
+                    "enum": [
+                        "STANDARD_GST",
+                        "REDUCED_GST",
+                        "ZERO_GST",
+                        "STANDARD_VAT",
+                        "REDUCED_VAT",
+                        "ZERO_VAT",
+                        "STATE_SALES_TAX",
+                        "LOCAL_SALES_TAX",
+                        "ALCOHOL_EXCISE_TAX",
+                        "TOBACCO_EXCISE_TAX",
+                        "FUEL_EXCISE_TAX",
+                        "CORPORATE_INCOME_TAX",
+                        "PERSONAL_INCOME_TAX",
+                        "SOCIAL_SECURITY_TAX",
+                        "MEDICARE_TAX",
+                        "REAL_ESTATE_TAX",
+                        "PERSONAL_PROPERTY_TAX",
+                        "CARBON_TAX",
+                        "PLASTIC_TAX",
+                        "IMPORT_DUTY",
+                        "EXPORT_DUTY",
+                        "LUXURY_TAX",
+                        "SERVICE_TAX",
+                        "TOURISM_TAX",
+                        "WITHHOLDING_TAX",
+                        "STAMP_DUTY",
+                        "EXEMPTED"
+                    ],
+                    "example": "STANDARD_VAT"
                 },
                 "percent": {
                     "type": "number",
