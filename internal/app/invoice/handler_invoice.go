@@ -226,7 +226,7 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	createdInvoice, _, err, isInvoiceSigned := h.svc.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil, client)
+	createdInvoice, _, err, isInvoiceSigned := h.svc.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, qrCodeBMPURL, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil, client)
 
 	response := map[string]interface{}{
 		"metadata": createdInvoice.StatusHistory,
@@ -339,7 +339,7 @@ func (h *Handler) ModifyInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	replacedInvoice, err := h.svc.ReplaceInvoiceRecord(db, existingInvoice, req, *req.IRN, irnData.QRCode, irnData.QRCode2, client)
+	replacedInvoice, err := h.svc.ReplaceInvoiceRecord(db, existingInvoice, req, *req.IRN, irnData.QRCode, qrCodeBMPURL, irnData.QRCode2, client)
 	if err != nil {
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
 	}

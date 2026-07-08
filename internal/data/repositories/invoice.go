@@ -154,6 +154,7 @@ func (r *invoiceRepository) FindMinimalInvoicesByBusinessID(db database.Database
 		irn,
 		platform,
 		current_status,
+		qr_code_bmp_url,
 		CASE
 			WHEN current_status IN ('signed_invoice', 'transmitted_invoice')
 				THEN 'partial_success'

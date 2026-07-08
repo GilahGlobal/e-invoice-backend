@@ -33,7 +33,7 @@ func (s *Service) GetInvoiceDetails(db *gorm.DB, businessID, invoiceID string) (
 	return s.repo.FindInvoiceByBusinessAndID(pdb, businessID, invoiceID)
 }
 
-func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode, encryptedIRN string, invoiceExists *entities.Invoice, isSandbox bool, aggregatorID *string, client string) (*entities.Invoice, *string, error, bool) {
+func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode, qrCodeBMPURL, encryptedIRN string, invoiceExists *entities.Invoice, isSandbox bool, aggregatorID *string, client string) (*entities.Invoice, *string, error, bool) {
 	pdb := dbinit.InitDB(db, false)
 	isInvoiceSigned := false
 	var invoice *entities.Invoice
@@ -72,6 +72,7 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 			InvoiceNumber:    invoiceNumber,
 			IRN:              *payload.IRN,
 			QrCode:           qrCode,
+			QrCodeBmpUrl:     qrCodeBMPURL,
 			BusinessID:       businessID,
 			Platform:         platform,
 			PlatformMetadata: datatypes.JSON(platformMetadata),
@@ -147,7 +148,7 @@ func (s *Service) DeprecateInvoiceOnNRS(oldIRN string, isSandbox bool) error {
 	return err
 }
 
-func (s *Service) ReplaceInvoiceRecord(db *gorm.DB, existing *entities.Invoice, payload firs_models.UploadInvoiceRequestDto, newIRN, qrCode, encryptedIRN, client string) (*entities.Invoice, error) {
+func (s *Service) ReplaceInvoiceRecord(db *gorm.DB, existing *entities.Invoice, payload firs_models.UploadInvoiceRequestDto, newIRN, qrCode, qrCodeBMPURL, encryptedIRN, client string) (*entities.Invoice, error) {
 	pdb := dbinit.InitDB(db, false)
 
 	invoiceData, err := json.Marshal(payload)
@@ -173,6 +174,7 @@ func (s *Service) ReplaceInvoiceRecord(db *gorm.DB, existing *entities.Invoice, 
 		CreatedAt:        existing.CreatedAt,
 		IRN:              newIRN,
 		QrCode:           qrCode,
+		QrCodeBmpUrl:     qrCodeBMPURL,
 		EncryptedIRN:     encryptedIRN,
 		InvoiceData:      invoiceData,
 		CurrentStatus:    currentStatus,

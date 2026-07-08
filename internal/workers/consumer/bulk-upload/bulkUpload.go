@@ -9,6 +9,7 @@ import (
 	"einvoice-access-point/internal/data/entities"
 	"einvoice-access-point/internal/middleware"
 	"einvoice-access-point/internal/pkg/s3"
+	"einvoice-access-point/internal/pkg/cloudinary"
 	"einvoice-access-point/internal/utility"
 	"einvoice-access-point/internal/workers"
 	"einvoice-access-point/internal/workers/consumer/bulk-upload/dtos"
@@ -344,7 +345,14 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		}
 		invoicePayload.IRN = &invoiceExists.IRN
 	}
-	createdInvoice, _, err, invoiceSigned := qc.invoiceSvc.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, isSandbox, aggregatorID, "internal")
+
+	qrCodeBMPURL := ""
+	setup, errSetup := qc.invoiceSvc.BusinessSvc().ValidateInvoiceUploadSetup(db, id)
+	if errSetup == nil && setup.BmpUploadSelected && irnPayload.QRCodeBMP != "" {
+		qrCodeBMPURL, _ = cloudinary.UploadBMPBase64(irnPayload.QRCodeBMP, utility.GenerateUUID())
+	}
+
+	createdInvoice, _, err, invoiceSigned := qc.invoiceSvc.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, qrCodeBMPURL, irnPayload.QRCode2, invoiceExists, isSandbox, aggregatorID, "internal")
 	if reservedSubscriptionID != "" && createdInvoice == nil {
 		_ = qc.subSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
 	}

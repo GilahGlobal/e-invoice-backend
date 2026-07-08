@@ -21,3 +21,7 @@ func NewServiceWithDB(prodDb, testDb database.DatabaseManager, tokenSvc *token.S
 	repo := repositories.NewInvoiceRepository(prodDb, testDb)
 	return NewService(repo, tokenSvc, businessSvc)
 }
+
+func (s *Service) BusinessSvc() *business.Service {
+	return s.businessSvc
+}

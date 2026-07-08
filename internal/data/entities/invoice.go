@@ -33,6 +33,7 @@ type Invoice struct {
 	InvoiceNumber    string         `gorm:"column:invoice_number;type:varchar(50);not null;index" json:"invoice_number"`
 	IRN              string         `gorm:"column:irn;type:varchar(50);null" json:"irn"`
 	QrCode           string         `gorm:"column:qr_code;type:text;null" json:"qr_code"`
+	QrCodeBmpUrl     string         `gorm:"column:qr_code_bmp_url;type:text;null" json:"qr_code_bmp_url"`
 	EncryptedIRN     string         `gorm:"column:encrypted_irn;type:text;null" json:"encrypted_irn"`
 	BusinessID       string         `gorm:"column:business_id;type:uuid;not null" json:"business_id"`
 	AggregatorID     *string        `gorm:"column:aggregator_id;type:uuid;index" json:"aggregator_id,omitempty"`
@@ -66,6 +67,7 @@ type MinimalInvoiceDTO struct {
 	Platform      string    `json:"platform"`
 	CurrentStatus string    `json:"current_status"`
 	StatusText    string    `json:"status_text"`
+	QrCodeBmpUrl  string    `json:"qr_code_bmp_url"`
 	CreatedAt     time.Time `json:"created_at"`
 }
 

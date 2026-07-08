@@ -653,7 +653,7 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	createdInvoice, _, err, isInvoiceSigned := invoiceSvc.CreateInvoice(db, req, req.InvoiceNumber, businessID, irnPayload.QRCode, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, &userDetails.ID, client)
+	createdInvoice, _, err, isInvoiceSigned := invoiceSvc.CreateInvoice(db, req, req.InvoiceNumber, businessID, irnPayload.QRCode, qrCodeBMPURL, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, &userDetails.ID, client)
 	if reservedSubscriptionID != "" && createdInvoice == nil {
 		_ = h.subSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
 	}
