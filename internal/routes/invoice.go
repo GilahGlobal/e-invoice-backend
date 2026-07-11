@@ -15,14 +15,14 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.A
 	invoiceUrlSec := app.Group(fmt.Sprintf("%v/invoice", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()), middleware.SelectDatabaseFromClaims(c.DB, c.TestDB))
 	// invoiceUrlSec := app.Group(fmt.Sprintf("%v/invoice", ApiVersion), middleware.Authorize(nil, testDb.Postgresql.DB()))
 
-	{
-		invoiceUrlUnSec := app.Group(fmt.Sprintf("%v/zoho", ApiVersion), middleware.SelectSandboxDatabase(c.DB, c.TestDB))
-		invoiceUrlUnSec.Post("/webhook", invoiceController.HandleZohoWebhook)
-	}
-
 	webhookUrl := app.Group(fmt.Sprintf("%v/webhook", ApiVersion))
 	{
 		webhookUrl.Post("/firs", invoiceController.FirsWebhook)
+	}
+
+	invoiceUrlUnSec := app.Group(fmt.Sprintf("%v/zoho", ApiVersion), middleware.SelectSandboxDatabase(c.DB, c.TestDB))
+	{
+		invoiceUrlUnSec.Post("/webhook", invoiceController.HandleZohoWebhook)
 	}
 	{
 		invoiceUrlSec.Get("/stats", invoiceController.GetInvoiceStats)
