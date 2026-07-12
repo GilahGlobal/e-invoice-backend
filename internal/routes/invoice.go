@@ -38,6 +38,7 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.A
 		invoiceUrlSec.Post("/sign", invoiceController.SignInvoice)
 		invoiceUrlSec.Post("/sign-irn", invoiceController.SignIRN)
 		invoiceUrlSec.Post("/generate-irn", invoiceController.GenerateIRN)
+		invoiceUrlSec.Patch("/update", invoiceController.BulkUpdateInvoice)
 		invoiceUrlSec.Patch("/update/:irn", invoiceController.UpdateInvoice)
 		invoiceUrlSec.Get("/confirm/:irn", invoiceController.ConfirmInvoice)
 		invoiceUrlSec.Get("/download/:irn", invoiceController.DownloadInvoice)
