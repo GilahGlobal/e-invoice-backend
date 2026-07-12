@@ -70,3 +70,8 @@ type GetInvoiceResponseDto struct {
 	entities.Response
 	Data InvoiceResponse `json:"data"`
 }
+
+type BulkUpdateInvoiceResponseDto struct {
+	entities.Response
+	Data firs_models.BulkUpdateInvoiceResponse `json:"data"`
+}

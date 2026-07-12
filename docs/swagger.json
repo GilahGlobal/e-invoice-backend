@@ -3277,6 +3277,57 @@
                 }
             }
         },
+        "/invoice/update": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates multiple invoices.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invoice"
+                ],
+                "summary": "Bulk Update Invoice",
+                "parameters": [
+                    {
+                        "description": "Bulk Update Invoice Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/firs_models.BulkUpdateInvoiceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bulk update completed",
+                        "schema": {
+                            "$ref": "#/definitions/invoice.BulkUpdateInvoiceResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/invoice/update/{irn}": {
             "patch": {
                 "security": [
@@ -5464,6 +5515,72 @@
                 }
             }
         },
+        "firs_models.BulkUpdateFailedItem": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "irn": {
+                    "type": "string"
+                }
+            }
+        },
+        "firs_models.BulkUpdateInvoiceItem": {
+            "type": "object",
+            "required": [
+                "irn",
+                "payment_status"
+            ],
+            "properties": {
+                "irn": {
+                    "type": "string"
+                },
+                "payment_status": {
+                    "type": "string",
+                    "enum": [
+                        "PENDING",
+                        "PAID",
+                        "REJECTED"
+                    ]
+                },
+                "reference": {
+                    "type": "string"
+                }
+            }
+        },
+        "firs_models.BulkUpdateInvoiceRequest": {
+            "type": "object",
+            "required": [
+                "invoices"
+            ],
+            "properties": {
+                "invoices": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/firs_models.BulkUpdateInvoiceItem"
+                    }
+                }
+            }
+        },
+        "firs_models.BulkUpdateInvoiceResponse": {
+            "type": "object",
+            "properties": {
+                "failed": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/firs_models.BulkUpdateFailedItem"
+                    }
+                },
+                "successful": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "firs_models.DocumentReference": {
             "type": "object",
             "required": [
@@ -6089,6 +6206,29 @@
             "properties": {
                 "tin": {
                     "type": "string"
+                }
+            }
+        },
+        "invoice.BulkUpdateInvoiceResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/firs_models.BulkUpdateInvoiceResponse"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
                 }
             }
         },

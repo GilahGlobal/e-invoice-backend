@@ -27,11 +27,6 @@ import (
 	qrcode "github.com/skip2/go-qrcode"
 )
 
-func (s *Service) PrepareIRN(irn string) string {
-	timestamp := time.Now().UnixMilli()
-	return fmt.Sprintf("%s.%d", irn, timestamp)
-}
-
 func (s *Service) GenerateIRNumber(invoiceNumber, serviceID string, timestamp time.Time) (string, error) {
 	if !regexp.MustCompile(`^[A-Za-z0-9]+$`).MatchString(invoiceNumber) {
 		return "", fmt.Errorf("invalid invoice number: only alphanumeric characters allowed")
@@ -80,10 +75,9 @@ func (s *Service) ValidateInvoice(invoiceReq firs_models.UploadInvoiceRequestDto
 }
 
 func (s *Service) SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IRNSigningResponse, error) {
-	formattedIRN := s.PrepareIRN(irn)
 
 	payload := firs_models.IRNSigningData{
-		IRN:         formattedIRN,
+		IRN:         irn,
 		Certificate: keys.Certificate,
 	}
 

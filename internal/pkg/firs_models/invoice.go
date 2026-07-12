@@ -44,3 +44,23 @@ type FirsWebhookPayload struct {
 	IRN     string `json:"irn" validate:"required"`
 	Message string `json:"message" validate:"required"`
 }
+
+type BulkUpdateInvoiceItem struct {
+	IRN           string  `json:"irn" validate:"required"`
+	PaymentStatus string  `json:"payment_status" validate:"required,oneof=PENDING PAID REJECTED"`
+	Reference     *string `json:"reference,omitempty"`
+}
+
+type BulkUpdateInvoiceRequest struct {
+	Invoices []BulkUpdateInvoiceItem `json:"invoices" validate:"required,min=1,dive"`
+}
+
+type BulkUpdateFailedItem struct {
+	IRN   string `json:"irn"`
+	Error string `json:"error"`
+}
+
+type BulkUpdateInvoiceResponse struct {
+	Successful []string               `json:"successful"`
+	Failed     []BulkUpdateFailedItem `json:"failed"`
+}
