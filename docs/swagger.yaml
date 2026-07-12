@@ -1191,6 +1191,50 @@ definitions:
     required:
     - amount
     type: object
+  firs_models.BulkUpdateFailedItem:
+    properties:
+      error:
+        type: string
+      irn:
+        type: string
+    type: object
+  firs_models.BulkUpdateInvoiceItem:
+    properties:
+      irn:
+        type: string
+      payment_status:
+        enum:
+        - PENDING
+        - PAID
+        - REJECTED
+        type: string
+      reference:
+        type: string
+    required:
+    - irn
+    - payment_status
+    type: object
+  firs_models.BulkUpdateInvoiceRequest:
+    properties:
+      invoices:
+        items:
+          $ref: '#/definitions/firs_models.BulkUpdateInvoiceItem'
+        minItems: 1
+        type: array
+    required:
+    - invoices
+    type: object
+  firs_models.BulkUpdateInvoiceResponse:
+    properties:
+      failed:
+        items:
+          $ref: '#/definitions/firs_models.BulkUpdateFailedItem'
+        type: array
+      successful:
+        items:
+          type: string
+        type: array
+    type: object
   firs_models.DocumentReference:
     properties:
       irn:
@@ -1652,6 +1696,22 @@ definitions:
         type: string
     required:
     - tin
+    type: object
+  invoice.BulkUpdateInvoiceResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/firs_models.BulkUpdateInvoiceResponse'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
     type: object
   invoice.GetAllInvoicesResponseDto:
     properties:
@@ -4012,6 +4072,38 @@ paths:
       security:
       - BearerAuth: []
       summary: Pull Transmitted Invoices
+      tags:
+      - Invoice
+  /invoice/update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates multiple invoices.
+      parameters:
+      - description: Bulk Update Invoice Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.BulkUpdateInvoiceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk update completed
+          schema:
+            $ref: '#/definitions/invoice.BulkUpdateInvoiceResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Validation failed
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Bulk Update Invoice
       tags:
       - Invoice
   /invoice/update/{irn}:

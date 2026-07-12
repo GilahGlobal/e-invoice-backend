@@ -328,3 +328,46 @@ func (h *Handler) DownloadInvoice(c *fiber.Ctx) error {
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice downloaded with irn successfully", respData)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
+
+// BulkUpdateInvoice godoc
+// @Summary Bulk Update Invoice
+// @Description Updates multiple invoices.
+// @Tags Invoice
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body firs_models.BulkUpdateInvoiceRequest true "Bulk Update Invoice Request"
+// @Success 200 {object} BulkUpdateInvoiceResponseDto "Bulk update completed"
+// @Failure 400 {object} entities.Response "Bad request"
+// @Failure 422 {object} entities.Response "Validation failed"
+// @Router /invoice/update [patch]
+func (h *Handler) BulkUpdateInvoice(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	var req firs_models.BulkUpdateInvoiceRequest
+	if err = c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err = h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	respData, err := h.svc.BulkUpdateInvoice(db, userDetails.ID, req, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	h.Logger.Info("Bulk update completed")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Bulk update completed", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}

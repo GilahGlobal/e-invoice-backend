@@ -227,3 +227,42 @@ func (s *Service) UpdateStoredInvoicePaymentStatus(db *gorm.DB, businessID, irn,
 
 	return nil
 }
+
+func (s *Service) BulkUpdateInvoice(db *gorm.DB, userID string, req firs_models.BulkUpdateInvoiceRequest, isSandbox bool) (*firs_models.BulkUpdateInvoiceResponse, error) {
+	response := &firs_models.BulkUpdateInvoiceResponse{
+		Successful: make([]string, 0),
+		Failed:     make([]firs_models.BulkUpdateFailedItem, 0),
+	}
+
+	for _, item := range req.Invoices {
+		updateReq := firs_models.UpdateInvoice{
+			PaymentStatus: item.PaymentStatus,
+			Reference:     item.Reference,
+		}
+
+		_, errDetails, err := s.UpdateInvoice(updateReq, item.IRN, isSandbox)
+		if err != nil {
+			errMsg := err.Error()
+			if errDetails != nil {
+				errMsg = fmt.Sprintf("%s: %s", errMsg, *errDetails)
+			}
+			response.Failed = append(response.Failed, firs_models.BulkUpdateFailedItem{
+				IRN:   item.IRN,
+				Error: errMsg,
+			})
+			continue
+		}
+
+		if err := s.UpdateStoredInvoicePaymentStatus(db, userID, item.IRN, item.PaymentStatus); err != nil {
+			response.Failed = append(response.Failed, firs_models.BulkUpdateFailedItem{
+				IRN:   item.IRN,
+				Error: fmt.Sprintf("invoice updated on FIRS but failed to update local record: %v", err),
+			})
+			continue
+		}
+
+		response.Successful = append(response.Successful, item.IRN)
+	}
+
+	return response, nil
+}
