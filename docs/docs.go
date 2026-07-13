@@ -4429,10 +4429,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."
                 },
-                "qr_code_2": {
-                    "type": "string",
-                    "example": "eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."
-                },
                 "qr_code_bmp_url": {
                     "type": "string",
                     "example": "https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"
@@ -5415,6 +5411,9 @@ const docTemplate = `{
                 "platform": {
                     "type": "string"
                 },
+                "qr_code": {
+                    "type": "string"
+                },
                 "qr_code_bmp_url": {
                     "type": "string"
                 },
@@ -6348,10 +6347,6 @@ const docTemplate = `{
                 "qr_code": {
                     "type": "string",
                     "example": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."
-                },
-                "qr_code_2": {
-                    "type": "string",
-                    "example": "eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."
                 },
                 "qr_code_bmp_url": {
                     "type": "string",

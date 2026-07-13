@@ -25,7 +25,6 @@ type InvoiceUploadData struct {
 	InvoiceNumber string `json:"invoice_number" example:"INV-1001"`
 	IRN           string `json:"irn" example:"123e4567-e89b-12d3-a456-426614174000"`
 	QRCode        string `json:"qr_code" example:"iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."`
-	QRCode2       string `json:"qr_code_2" example:"eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."`
 	QRCodeBMPURL  string `json:"qr_code_bmp_url" example:"https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"`
 }
 

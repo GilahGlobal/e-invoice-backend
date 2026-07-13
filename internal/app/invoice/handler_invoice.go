@@ -236,8 +236,7 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 			"id":             createdInvoice.ID,
 			"invoice_number": irnPayload.InvoiceNumber,
 			"irn":            irnPayload.IRN,
-			"qr_code":        irnPayload.QRCode,
-			"qr_code_2":      irnPayload.QRCode2,
+			"qr_code":        irnPayload.QRCode2,
 		}
 		if qrCodeBMPURL != "" {
 			dataMap["qr_code_bmp_url"] = qrCodeBMPURL
@@ -354,8 +353,7 @@ func (h *Handler) ModifyInvoice(c *fiber.Ctx) error {
 			"id":             replacedInvoice.ID,
 			"invoice_number": irnData.InvoiceNumber,
 			"irn":            irnData.IRN,
-			"qr_code":        irnData.QRCode,
-			"qr_code_2":      irnData.QRCode2,
+			"qr_code":        irnData.QRCode2,
 		}
 		if qrCodeBMPURL != "" {
 			dataMap["qr_code_bmp_url"] = qrCodeBMPURL
