@@ -68,6 +68,7 @@ type MinimalInvoiceDTO struct {
 	CurrentStatus string    `json:"current_status"`
 	StatusText    string    `json:"status_text"`
 	QrCodeBmpUrl  string    `json:"qr_code_bmp_url"`
+	QrCode        string    `json:"qr_code"`
 	CreatedAt     time.Time `json:"created_at"`
 }
 
