@@ -3797,6 +3797,132 @@ paths:
       summary: Generate IRN
       tags:
       - Invoice
+  /invoice/resources/currencies:
+    get:
+      consumes:
+      - application/json
+      description: Fetches currencies resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Currencies
+      tags:
+      - Resources
+  /invoice/resources/invoice-types:
+    get:
+      consumes:
+      - application/json
+      description: Fetches invoice types resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Invoice Types
+      tags:
+      - Resources
+  /invoice/resources/payment-means:
+    get:
+      consumes:
+      - application/json
+      description: Fetches payment means resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Payment Means
+      tags:
+      - Resources
+  /invoice/resources/product-codes:
+    get:
+      consumes:
+      - application/json
+      description: Fetches product codes resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Product Codes
+      tags:
+      - Resources
+  /invoice/resources/service-codes:
+    get:
+      consumes:
+      - application/json
+      description: Fetches service codes resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Service Codes
+      tags:
+      - Resources
+  /invoice/resources/tax-categories:
+    get:
+      consumes:
+      - application/json
+      description: Fetches tax categories resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Tax Categories
+      tags:
+      - Resources
   /invoice/sign:
     post:
       consumes:
@@ -4262,6 +4388,69 @@ paths:
       summary: Validate IRN
       tags:
       - Invoice
+  /resources/countries:
+    get:
+      consumes:
+      - application/json
+      description: Fetches countries resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Countries
+      tags:
+      - Resources
+  /resources/lgas:
+    get:
+      consumes:
+      - application/json
+      description: Fetches LGAs resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get LGAs
+      tags:
+      - Resources
+  /resources/states:
+    get:
+      consumes:
+      - application/json
+      description: Fetches states resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get States
+      tags:
+      - Resources
   /subscription/plans:
     get:
       consumes:
