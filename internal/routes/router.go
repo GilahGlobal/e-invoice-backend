@@ -72,6 +72,7 @@ func Setup(logger *utility.Logger, validator *validator.Validate, db, testDb *da
 	CallbackRoute(r, ApiVersion, container)
 	BulkUploadRoute(r, ApiVersion, container)
 	InvoiceRoute(r, ApiVersion, container)
+	ResourcesRoute(r, ApiVersion, container)
 	RegisterBaseRoutes(r, ApiVersion)
 
 	return r

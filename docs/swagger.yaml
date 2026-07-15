@@ -1541,6 +1541,7 @@ definitions:
         - PENDING
         - PAID
         - REJECTED
+        - PARTIAL
         type: string
       reference:
         type: string
@@ -1712,6 +1713,102 @@ definitions:
       status_code:
         type: integer
     type: object
+  invoice.CountriesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/invoice.CountryItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.CountryItemDto:
+    properties:
+      alpha_2:
+        example: AF
+        type: string
+      alpha_3:
+        example: AFG
+        type: string
+      country_code:
+        example: "004"
+        type: string
+      intermediate_region:
+        example: ""
+        type: string
+      intermediate_region_code:
+        example: ""
+        type: string
+      iso_3166_2:
+        example: ISO 3166-2:AF
+        type: string
+      name:
+        example: Afghanistan
+        type: string
+      region:
+        example: Asia
+        type: string
+      region_code:
+        example: "142"
+        type: string
+      sub_region:
+        example: Southern Asia
+        type: string
+      sub_region_code:
+        example: "034"
+        type: string
+    type: object
+  invoice.CurrenciesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/invoice.CurrencyItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.CurrencyItemDto:
+    properties:
+      code:
+        example: USD
+        type: string
+      decimal_digits:
+        example: 2
+        type: integer
+      name:
+        example: US Dollar
+        type: string
+      name_plural:
+        example: US dollars
+        type: string
+      rounding:
+        example: 0
+        type: integer
+      symbol:
+        example: $
+        type: string
+      symbol_native:
+        example: $
+        type: string
+    type: object
   invoice.GetAllInvoicesResponseDto:
     properties:
       data:
@@ -1763,6 +1860,33 @@ definitions:
       status_code:
         type: integer
     type: object
+  invoice.HSNCodesItemDto:
+    properties:
+      description:
+        example: Horses; live, pure-bred breeding animals
+        type: string
+      hscode:
+        example: "0101.21"
+        type: string
+    type: object
+  invoice.HSNCodesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/invoice.HSNCodesItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
   invoice.InvoiceStepMetadata:
     properties:
       status:
@@ -1791,6 +1915,147 @@ definitions:
         type: string
       qr_code_bmp_url:
         example: https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp
+        type: string
+    type: object
+  invoice.LGAItemDto:
+    properties:
+      code:
+        example: NG-AB-ANO
+        type: string
+      name:
+        example: Aba North
+        type: string
+      state_code:
+        example: NG-AB
+        type: string
+    type: object
+  invoice.LGAsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/invoice.LGAItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.ResourceItemDto:
+    properties:
+      code:
+        example: "380"
+        type: string
+      value:
+        example: Credit Note
+        type: string
+    type: object
+  invoice.ResourcesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/invoice.ResourceItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.ServiceCodesItemDto:
+    properties:
+      code:
+        example: "0111"
+        type: string
+      description:
+        example: Growing of cereals (except rice), leguminous crops and oil seeds
+        type: string
+    type: object
+  invoice.ServiceCodesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/invoice.ServiceCodesItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.StateItemDto:
+    properties:
+      code:
+        example: NG-AB
+        type: string
+      name:
+        example: Abia
+        type: string
+    type: object
+  invoice.StatesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/invoice.StateItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.TaxCategoriesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/invoice.TaxCategoryItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.TaxCategoryItemDto:
+    properties:
+      code:
+        example: STANDARD_GST
+        type: string
+      percent:
+        example: Not Available
+        type: string
+      value:
+        example: Standard Goods and Services Tax
         type: string
     type: object
   invoice.UploadInvoiceResponseDto:
@@ -4262,6 +4527,174 @@ paths:
       summary: Validate IRN
       tags:
       - Invoice
+  /resources/countries:
+    get:
+      consumes:
+      - application/json
+      description: Fetches countries resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/invoice.CountriesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Countries
+      tags:
+      - Resources
+  /resources/currencies:
+    get:
+      consumes:
+      - application/json
+      description: Fetches currencies resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/invoice.CurrenciesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Currencies
+      tags:
+      - Resources
+  /resources/hsn-codes:
+    get:
+      consumes:
+      - application/json
+      description: Fetches hsn codes resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/invoice.HSNCodesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get HSN Codes
+      tags:
+      - Resources
+  /resources/invoice-types:
+    get:
+      consumes:
+      - application/json
+      description: Fetches invoice types resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/invoice.ResourcesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Invoice Types
+      tags:
+      - Resources
+  /resources/lgas:
+    get:
+      consumes:
+      - application/json
+      description: Fetches LGAs resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/invoice.LGAsResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get LGAs
+      tags:
+      - Resources
+  /resources/service-codes:
+    get:
+      consumes:
+      - application/json
+      description: Fetches service codes resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/invoice.ServiceCodesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Service Codes
+      tags:
+      - Resources
+  /resources/states:
+    get:
+      consumes:
+      - application/json
+      description: Fetches states resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/invoice.StatesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get States
+      tags:
+      - Resources
+  /resources/tax-categories:
+    get:
+      consumes:
+      - application/json
+      description: Fetches tax categories resource from FIRS.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/invoice.TaxCategoriesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Tax Categories
+      tags:
+      - Resources
   /subscription/plans:
     get:
       consumes:
