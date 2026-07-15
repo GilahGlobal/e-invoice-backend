@@ -44,6 +44,19 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.A
 		invoiceUrlSec.Get("/download/:irn", invoiceController.DownloadInvoice)
 	}
 
+	resources := invoiceUrlSec.Group("/resources")
+	{
+		resources.Get("/invoice-types", invoiceController.GetInvoiceTypes)
+		resources.Get("/payment-means", invoiceController.GetPaymentMeans)
+		resources.Get("/tax-categories", invoiceController.GetTaxCategories)
+		resources.Get("/product-codes", invoiceController.GetProductCodes)
+		resources.Get("/service-codes", invoiceController.GetServiceCodes)
+		resources.Get("/currencies", invoiceController.GetCurrencies)
+		resources.Get("/lgas", invoiceController.GetLGA)
+		resources.Get("/countries", invoiceController.GetCountries)
+		resources.Get("/states", invoiceController.GetStates)
+	}
+
 	transmit := invoiceUrlSec.Group("/transmit")
 	{
 		transmit.Post("/:irn", invoiceController.TransmitInvoice)
