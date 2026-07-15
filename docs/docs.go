@@ -2848,210 +2848,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/invoice/resources/currencies": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches currencies resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Currencies",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/invoice/resources/invoice-types": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches invoice types resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Invoice Types",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/invoice/resources/payment-means": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches payment means resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Payment Means",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/invoice/resources/product-codes": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches product codes resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Product Codes",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/invoice/resources/service-codes": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches service codes resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Service Codes",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/invoice/resources/tax-categories": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches tax categories resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Tax Categories",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/invoice/sign": {
             "post": {
                 "security": [
@@ -3897,7 +3693,109 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
+                            "$ref": "#/definitions/invoice.CountriesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
                             "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/currencies": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetches currencies resource from FIRS.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Get Currencies",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/invoice.CurrenciesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/hsn-codes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetches hsn codes resource from FIRS.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Get HSN Codes",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/invoice.HSNCodesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/invoice-types": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetches invoice types resource from FIRS.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Get Invoice Types",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/invoice.ResourcesResponseDto"
                         }
                     },
                     "400": {
@@ -3931,7 +3829,41 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
+                            "$ref": "#/definitions/invoice.LGAsResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
                             "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/service-codes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetches service codes resource from FIRS.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Get Service Codes",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/invoice.ServiceCodesResponseDto"
                         }
                     },
                     "400": {
@@ -3965,7 +3897,41 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
+                            "$ref": "#/definitions/invoice.StatesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
                             "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/tax-categories": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetches tax categories resource from FIRS.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Get Tax Categories",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/invoice.TaxCategoriesResponseDto"
                         }
                     },
                     "400": {
@@ -6314,7 +6280,8 @@ const docTemplate = `{
                     "enum": [
                         "PENDING",
                         "PAID",
-                        "REJECTED"
+                        "REJECTED",
+                        "PARTIAL"
                     ]
                 },
                 "reference": {
@@ -6544,6 +6511,140 @@ const docTemplate = `{
                 }
             }
         },
+        "invoice.CountriesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/invoice.CountryItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "invoice.CountryItemDto": {
+            "type": "object",
+            "properties": {
+                "alpha_2": {
+                    "type": "string",
+                    "example": "AF"
+                },
+                "alpha_3": {
+                    "type": "string",
+                    "example": "AFG"
+                },
+                "country_code": {
+                    "type": "string",
+                    "example": "004"
+                },
+                "intermediate_region": {
+                    "type": "string",
+                    "example": ""
+                },
+                "intermediate_region_code": {
+                    "type": "string",
+                    "example": ""
+                },
+                "iso_3166_2": {
+                    "type": "string",
+                    "example": "ISO 3166-2:AF"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Afghanistan"
+                },
+                "region": {
+                    "type": "string",
+                    "example": "Asia"
+                },
+                "region_code": {
+                    "type": "string",
+                    "example": "142"
+                },
+                "sub_region": {
+                    "type": "string",
+                    "example": "Southern Asia"
+                },
+                "sub_region_code": {
+                    "type": "string",
+                    "example": "034"
+                }
+            }
+        },
+        "invoice.CurrenciesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/invoice.CurrencyItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "invoice.CurrencyItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "USD"
+                },
+                "decimal_digits": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "name": {
+                    "type": "string",
+                    "example": "US Dollar"
+                },
+                "name_plural": {
+                    "type": "string",
+                    "example": "US dollars"
+                },
+                "rounding": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "symbol": {
+                    "type": "string",
+                    "example": "$"
+                },
+                "symbol_native": {
+                    "type": "string",
+                    "example": "$"
+                }
+            }
+        },
         "invoice.GetAllInvoicesResponseDto": {
             "type": "object",
             "properties": {
@@ -6618,6 +6719,45 @@ const docTemplate = `{
                 }
             }
         },
+        "invoice.HSNCodesItemDto": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Horses; live, pure-bred breeding animals"
+                },
+                "hscode": {
+                    "type": "string",
+                    "example": "0101.21"
+                }
+            }
+        },
+        "invoice.HSNCodesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/invoice.HSNCodesItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
         "invoice.InvoiceStepMetadata": {
             "type": "object",
             "properties": {
@@ -6657,6 +6797,209 @@ const docTemplate = `{
                 "qr_code_bmp_url": {
                     "type": "string",
                     "example": "https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"
+                }
+            }
+        },
+        "invoice.LGAItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "NG-AB-ANO"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Aba North"
+                },
+                "state_code": {
+                    "type": "string",
+                    "example": "NG-AB"
+                }
+            }
+        },
+        "invoice.LGAsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/invoice.LGAItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "invoice.ResourceItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "380"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "Credit Note"
+                }
+            }
+        },
+        "invoice.ResourcesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/invoice.ResourceItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "invoice.ServiceCodesItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "0111"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Growing of cereals (except rice), leguminous crops and oil seeds"
+                }
+            }
+        },
+        "invoice.ServiceCodesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/invoice.ServiceCodesItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "invoice.StateItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "NG-AB"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Abia"
+                }
+            }
+        },
+        "invoice.StatesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/invoice.StateItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "invoice.TaxCategoriesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/invoice.TaxCategoryItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "invoice.TaxCategoryItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "STANDARD_GST"
+                },
+                "percent": {
+                    "type": "string",
+                    "example": "Not Available"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "Standard Goods and Services Tax"
                 }
             }
         },

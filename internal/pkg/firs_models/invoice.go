@@ -36,7 +36,7 @@ type VerifyTinData struct {
 }
 
 type UpdateInvoice struct {
-	PaymentStatus string  `json:"payment_status" validate:"required,oneof=PENDING PAID REJECTED"`
+	PaymentStatus string  `json:"payment_status" validate:"required,oneof=PENDING PAID REJECTED PARTIAL"`
 	Reference     *string `json:"reference,omitempty"`
 }
 

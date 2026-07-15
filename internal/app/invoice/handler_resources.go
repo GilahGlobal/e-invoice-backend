@@ -14,9 +14,9 @@ import (
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} entities.Response "Success"
+// @Success 200 {object} ResourcesResponseDto "Success"
 // @Failure 400 {object} entities.Response "Bad request"
-// @Router /invoice/resources/invoice-types [get]
+// @Router /resources/invoice-types [get]
 func (h *Handler) GetInvoiceTypes(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetInvoiceTypes()
 	if err != nil {
@@ -24,20 +24,10 @@ func (h *Handler) GetInvoiceTypes(c *fiber.Ctx) error {
 	}
 
 	h.Logger.Info("Fetched invoice types successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// GetPaymentMeans godoc
-// @Summary Get Payment Means
-// @Description Fetches payment means resource from FIRS.
-// @Tags Resources
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Success 200 {object} entities.Response "Success"
-// @Failure 400 {object} entities.Response "Bad request"
-// @Router /invoice/resources/payment-means [get]
 func (h *Handler) GetPaymentMeans(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetPaymentMeans()
 	if err != nil {
@@ -45,7 +35,7 @@ func (h *Handler) GetPaymentMeans(c *fiber.Ctx) error {
 	}
 
 	h.Logger.Info("Fetched payment means successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
@@ -56,9 +46,9 @@ func (h *Handler) GetPaymentMeans(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} entities.Response "Success"
+// @Success 200 {object} TaxCategoriesResponseDto "Success"
 // @Failure 400 {object} entities.Response "Bad request"
-// @Router /invoice/resources/tax-categories [get]
+// @Router /resources/tax-categories [get]
 func (h *Handler) GetTaxCategories(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetTaxCategories()
 	if err != nil {
@@ -66,28 +56,28 @@ func (h *Handler) GetTaxCategories(c *fiber.Ctx) error {
 	}
 
 	h.Logger.Info("Fetched tax categories successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
 // GetProductCodes godoc
-// @Summary Get Product Codes
-// @Description Fetches product codes resource from FIRS.
+// @Summary Get HSN Codes
+// @Description Fetches hsn codes resource from FIRS.
 // @Tags Resources
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} entities.Response "Success"
+// @Success 200 {object} HSNCodesResponseDto "Success"
 // @Failure 400 {object} entities.Response "Bad request"
-// @Router /invoice/resources/product-codes [get]
-func (h *Handler) GetProductCodes(c *fiber.Ctx) error {
+// @Router /resources/hsn-codes [get]
+func (h *Handler) GetHSNCodes(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetProductCodes()
 	if err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
 	}
 
 	h.Logger.Info("Fetched product codes successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
@@ -98,9 +88,9 @@ func (h *Handler) GetProductCodes(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} entities.Response "Success"
+// @Success 200 {object} ServiceCodesResponseDto "Success"
 // @Failure 400 {object} entities.Response "Bad request"
-// @Router /invoice/resources/service-codes [get]
+// @Router /resources/service-codes [get]
 func (h *Handler) GetServiceCodes(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetServiceCodes()
 	if err != nil {
@@ -108,7 +98,7 @@ func (h *Handler) GetServiceCodes(c *fiber.Ctx) error {
 	}
 
 	h.Logger.Info("Fetched service codes successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
@@ -119,9 +109,9 @@ func (h *Handler) GetServiceCodes(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} entities.Response "Success"
+// @Success 200 {object} CurrenciesResponseDto "Success"
 // @Failure 400 {object} entities.Response "Bad request"
-// @Router /invoice/resources/currencies [get]
+// @Router /resources/currencies [get]
 func (h *Handler) GetCurrencies(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetCurrencies()
 	if err != nil {
@@ -129,7 +119,7 @@ func (h *Handler) GetCurrencies(c *fiber.Ctx) error {
 	}
 
 	h.Logger.Info("Fetched currencies successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
@@ -140,7 +130,7 @@ func (h *Handler) GetCurrencies(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} entities.Response "Success"
+// @Success 200 {object} LGAsResponseDto "Success"
 // @Failure 400 {object} entities.Response "Bad request"
 // @Router /resources/lgas [get]
 func (h *Handler) GetLGA(c *fiber.Ctx) error {
@@ -150,7 +140,7 @@ func (h *Handler) GetLGA(c *fiber.Ctx) error {
 	}
 
 	h.Logger.Info("Fetched LGAs successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
@@ -161,7 +151,7 @@ func (h *Handler) GetLGA(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} entities.Response "Success"
+// @Success 200 {object} CountriesResponseDto "Success"
 // @Failure 400 {object} entities.Response "Bad request"
 // @Router /resources/countries [get]
 func (h *Handler) GetCountries(c *fiber.Ctx) error {
@@ -171,7 +161,7 @@ func (h *Handler) GetCountries(c *fiber.Ctx) error {
 	}
 
 	h.Logger.Info("Fetched countries successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
@@ -182,7 +172,7 @@ func (h *Handler) GetCountries(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} entities.Response "Success"
+// @Success 200 {object} StatesResponseDto "Success"
 // @Failure 400 {object} entities.Response "Bad request"
 // @Router /resources/states [get]
 func (h *Handler) GetStates(c *fiber.Ctx) error {
@@ -192,6 +182,6 @@ func (h *Handler) GetStates(c *fiber.Ctx) error {
 	}
 
 	h.Logger.Info("Fetched states successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
