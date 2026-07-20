@@ -108,8 +108,8 @@ func (s *Service) SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IR
 
 	theResp := &firs_models.IRNSigningResponse{
 		EncryptedIRN:   base64Encrypted,
-		QrCodeImage:    base64QRImage,
-		QrCodeImageBMP: base64BMPImage,
+		QrCodeImage:    "data:image/png;base64," + base64QRImage,
+		QrCodeImageBMP: "data:image/bmp;base64," + base64BMPImage,
 	}
 
 	return theResp, nil
