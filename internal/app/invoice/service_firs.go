@@ -76,12 +76,12 @@ func (s *Service) ValidateInvoice(invoiceReq firs_models.UploadInvoiceRequestDto
 
 func (s *Service) SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IRNSigningResponse, error) {
 
-	timestamp := time.Now().Unix()
-	payload := fmt.Sprintf("%s.%d", irn, timestamp)
+	// timestamp := time.Now().Unix()
+	// payload := fmt.Sprintf("%s.%d", irn, timestamp)
 
-	log.Println("sign irn payload: ", payload)
+	// log.Println("sign irn payload: ", payload)
 
-	encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, keys.PublicKey, []byte(payload))
+	encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, keys.PublicKey, []byte(irn))
 	if err != nil {
 		return nil, fmt.Errorf("encryption failed: %v", err)
 	}
@@ -108,8 +108,8 @@ func (s *Service) SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IR
 
 	theResp := &firs_models.IRNSigningResponse{
 		EncryptedIRN:   base64Encrypted,
-		QrCodeImage:    "data:image/png;base64," + base64QRImage,
-		QrCodeImageBMP: "data:image/bmp;base64," + base64BMPImage,
+		QrCodeImage:    base64QRImage,
+		QrCodeImageBMP: base64BMPImage,
 	}
 
 	return theResp, nil
