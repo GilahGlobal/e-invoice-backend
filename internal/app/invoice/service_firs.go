@@ -79,9 +79,20 @@ func (s *Service) SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IR
 	timestamp := time.Now().UnixMilli()
 	formattedIRN := fmt.Sprintf("%s.%d", irn, timestamp)
 
-	log.Println("sign irn payload: ", formattedIRN)
+	payload := firs_models.IRNSigningData{
+		IRN:         formattedIRN,
+		Certificate: keys.Certificate,
+	}
 
-	encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, keys.PublicKey, []byte(formattedIRN))
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal JSON: %v", err)
+	}
+
+	log.Println("sign irn payload: ", string(jsonData))
+
+	//encrypted, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, keys.PublicKey, jsonData, nil)
+	encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, keys.PublicKey, jsonData)
 	if err != nil {
 		return nil, fmt.Errorf("encryption failed: %v", err)
 	}
