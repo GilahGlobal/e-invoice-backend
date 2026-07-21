@@ -42,3 +42,35 @@ func CreateToken(user entities.Business, isSandbox bool) (*TokenDetailDTO, error
 
 	return tokenData, err
 }
+
+func CreateAdminToken(admin entities.Admin, isSandbox bool) (*TokenDetailDTO, error) {
+	var (
+		configs   = config.GetConfig()
+		tokenData = &TokenDetailDTO{}
+		err       error
+	)
+
+	tokenData.AccessUuid = utility.GenerateUUID()
+	expireDuration := configs.Server.AccessTokenExpireDuration
+	tokenData.ExpiresAt = time.Now().Add(time.Duration(expireDuration) * time.Hour)
+
+	theClaims := AdminDataClaims{
+		ID:         admin.ID,
+		Name:       admin.Name,
+		Email:      admin.Email,
+		Role:       string(admin.Role),
+		AccessUuid: tokenData.AccessUuid,
+		IsSandbox:  isSandbox,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    admin.Email,
+			ExpiresAt: jwt.NewNumericDate(tokenData.ExpiresAt),
+		},
+	}
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS512, theClaims)
+	tokenData.AccessToken, err = claims.SignedString([]byte(configs.Server.Secret))
+	if err != nil {
+		return tokenData, err
+	}
+
+	return tokenData, err
+}

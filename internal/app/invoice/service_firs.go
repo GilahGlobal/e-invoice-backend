@@ -76,8 +76,11 @@ func (s *Service) ValidateInvoice(invoiceReq firs_models.UploadInvoiceRequestDto
 
 func (s *Service) SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IRNSigningResponse, error) {
 
+	timestamp := time.Now().UnixMilli()
+	formattedIRN := fmt.Sprintf("%s.%d", irn, timestamp)
+
 	payload := firs_models.IRNSigningData{
-		IRN:         irn,
+		IRN:         formattedIRN,
 		Certificate: keys.Certificate,
 	}
 
@@ -88,6 +91,7 @@ func (s *Service) SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IR
 
 	log.Println("sign irn payload: ", string(jsonData))
 
+	//encrypted, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, keys.PublicKey, jsonData, nil)
 	encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, keys.PublicKey, jsonData)
 	if err != nil {
 		return nil, fmt.Errorf("encryption failed: %v", err)

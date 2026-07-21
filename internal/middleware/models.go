@@ -22,6 +22,16 @@ type UserDataClaims struct {
 	jwt.RegisteredClaims
 }
 
+type AdminDataClaims struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Email      string `json:"email"`
+	Role       string `json:"role"`
+	AccessUuid string `json:"access_uuid"`
+	IsSandbox  bool   `json:"is_sandbox"`
+	jwt.RegisteredClaims
+}
+
 type TokenDetailDTO struct {
 	AccessUuid  string `json:"access_uuid"`
 	AccessToken string `json:"access_token"`

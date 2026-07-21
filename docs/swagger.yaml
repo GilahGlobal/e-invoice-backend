@@ -1,5 +1,53 @@
-basePath: /api/v1
 definitions:
+  admin.AdminLoginRequestDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  admin.AdminLoginResponseDto:
+    properties:
+      access_token:
+        type: string
+      data:
+        $ref: '#/definitions/admin.AdminResponse'
+    type: object
+  admin.AdminRegisterDto:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/entities.AdminRole'
+        enum:
+        - superadmin
+        - admin
+    required:
+    - email
+    - name
+    - password
+    - role
+    type: object
+  admin.AdminResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/entities.AdminRole'
+    type: object
   aggregator.AggregatorActivityLogDto:
     properties:
       action:
@@ -1004,6 +1052,14 @@ definitions:
       total_pages_count:
         type: integer
     type: object
+  entities.AdminRole:
+    enum:
+    - superadmin
+    - admin
+    type: string
+    x-enum-varnames:
+    - RoleSuperAdmin
+    - RoleAdmin
   entities.BulkUpload:
     properties:
       aggregator_id:
@@ -2186,13 +2242,123 @@ definitions:
       status_code:
         type: integer
     type: object
+  utility.Response:
+    properties:
+      body:
+        items:
+          format: int32
+          type: integer
+        type: array
+      statusCode:
+        type: integer
+    type: object
 info:
   contact: {}
-  description: This is the e-invoicing service API documentation.
-  termsOfService: http://swagger.io/terms/
-  title: Gention E-invoicing Service API
-  version: "1.0"
 paths:
+  /admin/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login for admins
+      parameters:
+      - description: Login request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminLoginRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: '#/definitions/admin.AdminLoginResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Login Admin
+      tags:
+      - Admin Auth
+  /admin/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new admin (Requires SuperAdmin privileges)
+      parameters:
+      - description: Register request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminRegisterDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Admin created successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Register Admin
+      tags:
+      - Admin Auth
+  /admin/auth/setup-initial:
+    post:
+      consumes:
+      - application/json
+      description: Creates the first Super Admin if no admins exist in the system
+      parameters:
+      - description: Initial setup request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminRegisterDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Admin created successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "403":
+          description: Forbidden, initial setup already complete
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Setup Initial Super Admin
+      tags:
+      - Admin Auth
   /aggregator/activity-log:
     get:
       description: Fetch the activity logs sequence for the aggregator
@@ -4802,10 +4968,4 @@ paths:
       summary: Get Zoho Access Token
       tags:
       - Zoho
-securityDefinitions:
-  BearerAuth:
-    description: Type "Bearer" followed by a space and JWT token.
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"
