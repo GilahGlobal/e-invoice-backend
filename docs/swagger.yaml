@@ -1,3 +1,4 @@
+basePath: /api/v1
 definitions:
   admin.AdminLoginRequestDto:
     properties:
@@ -2254,6 +2255,10 @@ definitions:
     type: object
 info:
   contact: {}
+  description: This is the e-invoicing service API documentation.
+  termsOfService: http://swagger.io/terms/
+  title: Gention E-invoicing Service API
+  version: "1.0"
 paths:
   /admin/auth/login:
     post:
@@ -4968,4 +4973,10 @@ paths:
       summary: Get Zoho Access Token
       tags:
       - Zoho
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
