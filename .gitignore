@@ -31,3 +31,4 @@ certs/
 certs-data
 
 docker-compose.yml
+main
