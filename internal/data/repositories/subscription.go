@@ -24,6 +24,7 @@ type SubscriptionRepository interface {
 	CreateTransaction(record *entities.Transaction, db database.DatabaseManager) error
 	GetTransactionByReference(reference string, db database.DatabaseManager) (*entities.Transaction, error)
 	SaveTransaction(record *entities.Transaction, db database.DatabaseManager) error
+	ListAllTransactions(db database.DatabaseManager, page, size int) ([]entities.Transaction, int64, error)
 }
 
 type subscriptionRepository struct {
@@ -164,4 +165,22 @@ func (r *subscriptionRepository) GetTransactionByReference(reference string, db 
 
 func (r *subscriptionRepository) SaveTransaction(record *entities.Transaction, db database.DatabaseManager) error {
 	return db.DB().Save(record).Error
+}
+
+func (r *subscriptionRepository) ListAllTransactions(db database.DatabaseManager, page, size int) ([]entities.Transaction, int64, error) {
+	var transactions []entities.Transaction
+	var total int64
+
+	query := db.DB().Model(&entities.Transaction{})
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * size
+	if err := query.Offset(offset).Limit(size).Order("created_at DESC").Find(&transactions).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return transactions, total, nil
 }

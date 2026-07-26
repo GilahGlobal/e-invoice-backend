@@ -1,13 +1,154 @@
 basePath: /api/v1
 definitions:
+  admin.AdminAggregatorInvoiceListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/entities.Invoice'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminAggregatorListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminBusinessResponseDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminBusinessListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminBusinessResponseDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminBusinessResponseDto:
+    properties:
+      bmp_upload_selected:
+        type: boolean
+      business_id:
+        type: string
+      company_name:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      phone_number:
+        type: string
+      service_id:
+        type: string
+      tin:
+        type: string
+    type: object
+  admin.AdminBusinessStatsDto:
+    properties:
+      total_aggregators:
+        type: integer
+      total_businesses:
+        type: integer
+    type: object
+  admin.AdminBusinessStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminBusinessStatsDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminInvoiceListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/entities.MinimalInvoiceDTO'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminInvoiceStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/entities.InvoiceStatsResponseData'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
   admin.AdminLoginRequestDto:
     properties:
       email:
         type: string
+      is_sandbox:
+        type: boolean
       password:
         type: string
     required:
     - email
+    - is_sandbox
     - password
     type: object
   admin.AdminLoginResponseDto:
@@ -48,6 +189,50 @@ definitions:
         type: string
       role:
         $ref: '#/definitions/entities.AdminRole'
+    type: object
+  admin.AdminTransactionDto:
+    properties:
+      aggregator_id:
+        type: string
+      amount:
+        type: number
+      business_id:
+        type: string
+      created_at:
+        type: string
+      currency:
+        type: string
+      id:
+        type: string
+      plan:
+        type: string
+      plan_id:
+        type: string
+      provider:
+        type: string
+      reference:
+        type: string
+      status:
+        type: string
+    type: object
+  admin.AdminTransactionListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminTransactionDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
     type: object
   aggregator.AggregatorActivityLogDto:
     properties:
@@ -2260,6 +2445,72 @@ info:
   title: Gention E-invoicing Service API
   version: "1.0"
 paths:
+  /admin/aggregators:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of all aggregators in the system.
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Search query
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminAggregatorListResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: List Aggregators
+      tags:
+      - Admin Queries
+  /admin/aggregators/invoices/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of invoices for a specific aggregator
+        ID.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminAggregatorInvoiceListResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: List Invoices by Aggregator
+      tags:
+      - Admin Queries
   /admin/auth/login:
     post:
       consumes:
@@ -2330,40 +2581,138 @@ paths:
       summary: Register Admin
       tags:
       - Admin Auth
-  /admin/auth/setup-initial:
-    post:
+  /admin/businesses:
+    get:
       consumes:
       - application/json
-      description: Creates the first Super Admin if no admins exist in the system
+      description: Returns a paginated list of all businesses in the system.
       parameters:
-      - description: Initial setup request payload
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/admin.AdminRegisterDto'
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Search query
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
-        "201":
-          description: Admin created successfully
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/utility.Response'
-        "400":
-          description: Bad request, validation failed
-          schema:
-            $ref: '#/definitions/apperror.AppError'
-        "403":
-          description: Forbidden, initial setup already complete
-          schema:
-            $ref: '#/definitions/apperror.AppError'
+            $ref: '#/definitions/admin.AdminBusinessListResponseDto'
         "500":
-          description: Internal server error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/apperror.AppError'
-      summary: Setup Initial Super Admin
+      summary: List Businesses
       tags:
-      - Admin Auth
+      - Admin Queries
+  /admin/businesses/invoices/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of invoices for a specific business ID.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminInvoiceListResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: List Invoices by Business
+      tags:
+      - Admin Queries
+  /admin/stats/businesses:
+    get:
+      consumes:
+      - application/json
+      description: Returns system-wide business statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessStatsResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: System Business Stats
+      tags:
+      - Admin Queries
+  /admin/stats/invoices:
+    get:
+      consumes:
+      - application/json
+      description: Returns system-wide invoice statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminInvoiceStatsResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: System Invoice Stats
+      tags:
+      - Admin Queries
+  /admin/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of all subscription transactions in the
+        system.
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminTransactionListResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: List Transactions
+      tags:
+      - Admin Queries
   /aggregator/activity-log:
     get:
       description: Fetch the activity logs sequence for the aggregator

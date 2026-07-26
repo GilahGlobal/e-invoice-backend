@@ -16,10 +16,25 @@ func AdminRoute(router fiber.Router, version string, container *core.Container) 
 
 	// Public / Unauthenticated
 	adminGroup.Post("/auth/login", handler.Login)
-	adminGroup.Post("/auth/setup-initial", handler.SetupInitial)
 
 	// Protected endpoints (Requires SuperAdmin)
-	adminAuthSuper := adminGroup.Group("/auth", middleware.AuthorizeAdmin(container.DB.Postgresql.DB(), container.TestDB.Postgresql.DB(), entities.RoleSuperAdmin))
+	adminAuthSuper := adminGroup.Group("/auth",
+		middleware.AuthorizeAdmin(container.DB.Postgresql.DB(), container.TestDB.Postgresql.DB(), entities.RoleSuperAdmin),
+		middleware.SelectDatabaseFromClaims(container.DB, container.TestDB),
+	)
 	adminAuthSuper.Post("/register", handler.Register)
 
+	// Protected endpoints (Requires Admin or SuperAdmin)
+	adminAuthAll := adminGroup.Group("",
+		middleware.AuthorizeAdmin(container.DB.Postgresql.DB(), container.TestDB.Postgresql.DB(), entities.RoleAdmin, entities.RoleSuperAdmin),
+		middleware.SelectDatabaseFromClaims(container.DB, container.TestDB),
+	)
+
+	adminAuthAll.Get("/businesses", handler.GetBusinesses)
+	adminAuthAll.Get("/aggregators", handler.GetAggregators)
+	adminAuthAll.Get("/businesses/invoices/:id", handler.GetInvoicesByBusiness)
+	adminAuthAll.Get("/aggregators/invoices/:id", handler.GetInvoicesByAggregator)
+	adminAuthAll.Get("/transactions", handler.GetTransactions)
+	adminAuthAll.Get("/stats/invoices", handler.GetInvoiceStats)
+	adminAuthAll.Get("/stats/businesses", handler.GetBusinessStats)
 }
