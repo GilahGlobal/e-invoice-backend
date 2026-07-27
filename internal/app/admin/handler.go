@@ -16,6 +16,8 @@ type Handler struct {
 	validator *validator.Validate
 	logger    *utility.Logger
 	svc       Service
+	Db        *database.Database
+	TestDB    *database.Database
 }
 
 func NewHandler(validator *validator.Validate, logger *utility.Logger, cfg *config.Configuration, db, testDb *database.Database) *Handler {
@@ -26,6 +28,8 @@ func NewHandler(validator *validator.Validate, logger *utility.Logger, cfg *conf
 		validator: validator,
 		logger:    logger,
 		svc:       svc,
+		Db:        db,
+		TestDB:    testDb,
 	}
 }
 

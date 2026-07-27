@@ -41,6 +41,7 @@ type Invoice struct {
 	PlatformMetadata datatypes.JSON `gorm:"type:jsonb;not null;default:'{}'" json:"platform_metadata" swaggertype:"object"`
 	InvoiceData      datatypes.JSON `gorm:"type:jsonb;not null;default:'{}'" json:"invoice_data" swaggertype:"object"`
 	CurrentStatus    string         `gorm:"column:current_status;type:varchar(50);not null;default:'created'" json:"current_status"`
+	PaymentStatus    string         `gorm:"column:payment_status;type:varchar(50);not null;default:'PENDING'" json:"payment_status"`
 	StatusHistory    datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'" json:"status_history" swaggertype:"object"`
 	Timestamp        time.Time      `gorm:"column:timestamp;not null" json:"timestamp"`
 	CreatedAt        time.Time      `gorm:"column:created_at;not null;autoCreateTime" json:"created_at"`
@@ -66,6 +67,7 @@ type MinimalInvoiceDTO struct {
 	IRN           string    `json:"irn"`
 	Platform      string    `json:"platform"`
 	CurrentStatus string    `json:"current_status"`
+	PaymentStatus string    `json:"payment_status"`
 	StatusText    string    `json:"status_text"`
 	QrCodeBmpUrl  string    `json:"qr_code_bmp_url"`
 	QrCode        string    `json:"qr_code"`

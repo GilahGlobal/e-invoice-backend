@@ -6371,6 +6371,9 @@ const docTemplate = `{
                 "irn": {
                     "type": "string"
                 },
+                "payment_status": {
+                    "type": "string"
+                },
                 "platform": {
                     "description": "e.g., zoho, quickbooks",
                     "type": "string"
@@ -6446,6 +6449,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "irn": {
+                    "type": "string"
+                },
+                "payment_status": {
                     "type": "string"
                 },
                 "platform": {

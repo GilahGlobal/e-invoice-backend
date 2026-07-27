@@ -618,7 +618,8 @@ func (cp *CSVProcessor) parseField(fieldName, value string, invoice *dtos.Upload
 
 	// Optional string pointer fields
 	case "payment_status":
-		invoice.PaymentStatus = stringPtr(value)
+		val := strings.ToUpper(value)
+		invoice.PaymentStatus = stringPtr(val)
 	case "irn":
 		invoice.IRN = stringPtr(value)
 	case "invoice_kind":
