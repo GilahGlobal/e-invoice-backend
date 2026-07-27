@@ -1303,6 +1303,8 @@ definitions:
         type: string
       irn:
         type: string
+      payment_status:
+        type: string
       platform:
         description: e.g., zoho, quickbooks
         type: string
@@ -1354,6 +1356,8 @@ definitions:
       invoice_number:
         type: string
       irn:
+        type: string
+      payment_status:
         type: string
       platform:
         type: string

@@ -154,6 +154,7 @@ func (r *invoiceRepository) FindMinimalInvoicesByBusinessID(db database.Database
 		irn,
 		platform,
 		current_status,
+		payment_status,
 		qr_code_bmp_url,
 		encrypted_irn AS qr_code,
 		CASE
@@ -263,25 +264,22 @@ func (r *invoiceRepository) GetInvoiceStats(db *gorm.DB, businessID *string, agg
 		args = append(args, *aggregatorID)
 	}
 
-	query += " GROUP BY TO_CHAR(created_at, 'YYYYMM') ORDER BY month DESC"
+	query += " GROUP BY TO_CHAR(created_at, 'YYYYMM') ORDER BY month DESC;"
 
-	err := db.Raw(query, args...).Scan(&monthlyResults).Error
-	if err != nil {
+	if err := db.Raw(query, args...).Scan(&monthlyResults).Error; err != nil {
 		return nil, err
 	}
 
-	total := entities.InvoiceStatsDto{}
+	totalStats := entities.InvoiceStatsDto{}
 	for _, m := range monthlyResults {
-		total.TotalInvoices += m.TotalInvoices
-		total.SuccessfulInvoices += m.SuccessfulInvoices
-		total.PartialInvoices += m.PartialInvoices
-		total.FailedInvoices += m.FailedInvoices
+		totalStats.TotalInvoices += m.TotalInvoices
+		totalStats.SuccessfulInvoices += m.SuccessfulInvoices
+		totalStats.PartialInvoices += m.PartialInvoices
+		totalStats.FailedInvoices += m.FailedInvoices
 	}
 
-	result := &entities.InvoiceStatsResponseData{
-		Total:   total,
+	return &entities.InvoiceStatsResponseData{
+		Total:   totalStats,
 		Monthly: monthlyResults,
-	}
-
-	return result, nil
+	}, nil
 }

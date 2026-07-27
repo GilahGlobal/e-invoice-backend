@@ -6364,6 +6364,9 @@
                 "irn": {
                     "type": "string"
                 },
+                "payment_status": {
+                    "type": "string"
+                },
                 "platform": {
                     "description": "e.g., zoho, quickbooks",
                     "type": "string"
@@ -6439,6 +6442,9 @@
                     "type": "string"
                 },
                 "irn": {
+                    "type": "string"
+                },
+                "payment_status": {
                     "type": "string"
                 },
                 "platform": {

@@ -68,6 +68,11 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 			return invoice, nil, errors.New(errorArray[0]), isInvoiceSigned
 		}
 	} else {
+		paymentStatus := "PENDING"
+		if payload.PaymentStatus != nil && *payload.PaymentStatus != "" {
+			paymentStatus = strings.ToUpper(*payload.PaymentStatus)
+		}
+
 		invoice = &entities.Invoice{
 			InvoiceNumber:    invoiceNumber,
 			IRN:              *payload.IRN,
@@ -78,6 +83,7 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 			PlatformMetadata: datatypes.JSON(platformMetadata),
 			InvoiceData:      invoiceData,
 			CurrentStatus:    currentStatus,
+			PaymentStatus:    paymentStatus,
 			StatusHistory:    datatypes.JSON(statusHistory),
 			Timestamp:        time.Now(),
 			EncryptedIRN:     encryptedIRN,

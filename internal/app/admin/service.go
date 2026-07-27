@@ -17,7 +17,6 @@ import (
 )
 
 type Service interface {
-
 	RegisterAdmin(req AdminRegisterDto, isSandbox bool) (int, error)
 	LoginAdmin(req AdminLoginRequestDto, isSandbox bool) (map[string]interface{}, int, error)
 	GetBusinesses(db database.DatabaseManager, search string, page, size int) ([]AdminBusinessResponseDto, *database.PaginationResponse, error)
@@ -46,7 +45,7 @@ func NewServiceWithDB(prodDB, testDB database.DatabaseManager, cfg *config.Confi
 	aggregatorRepo := repositories.NewAggregatorRepository(prodDB, testDB)
 	invoiceRepo := repositories.NewInvoiceRepository(prodDB, testDB)
 	subscriptionRepo := repositories.NewSubscriptionRepository(prodDB, testDB)
-	
+
 	return &service{
 		adminRepo:        adminRepo,
 		authRepo:         authRepo,
@@ -57,7 +56,6 @@ func NewServiceWithDB(prodDB, testDB database.DatabaseManager, cfg *config.Confi
 		cfg:              cfg,
 	}
 }
-
 
 func (s *service) RegisterAdmin(req AdminRegisterDto, isSandbox bool) (int, error) {
 	db := s.authRepo.GetDB(isSandbox)
