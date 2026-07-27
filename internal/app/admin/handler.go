@@ -7,7 +7,6 @@ import (
 	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/middleware"
 	"einvoice-access-point/internal/utility"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -17,6 +16,8 @@ type Handler struct {
 	validator *validator.Validate
 	logger    *utility.Logger
 	svc       Service
+	Db        *database.Database
+	TestDB    *database.Database
 }
 
 func NewHandler(validator *validator.Validate, logger *utility.Logger, cfg *config.Configuration, db, testDb *database.Database) *Handler {
@@ -27,42 +28,9 @@ func NewHandler(validator *validator.Validate, logger *utility.Logger, cfg *conf
 		validator: validator,
 		logger:    logger,
 		svc:       svc,
+		Db:        db,
+		TestDB:    testDb,
 	}
-}
-
-// @Summary Setup Initial Super Admin
-// @Description Creates the first Super Admin if no admins exist in the system
-// @Tags Admin Auth
-// @Accept json
-// @Produce json
-// @Param data body AdminRegisterDto true "Initial setup request payload"
-// @Success 201 {object} utility.Response "Admin created successfully"
-// @Failure 400 {object} apperror.AppError "Bad request, validation failed"
-// @Failure 403 {object} apperror.AppError "Forbidden, initial setup already complete"
-// @Failure 500 {object} apperror.AppError "Internal server error"
-// @Router /admin/auth/setup-initial [post]
-func (h *Handler) SetupInitial(c *fiber.Ctx) error {
-	var req AdminRegisterDto
-	if err := c.BodyParser(&req); err != nil {
-		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
-	}
-
-	if err := h.validator.Struct(&req); err != nil {
-		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.validator), nil)
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
-	}
-
-	code, err := h.svc.SetupInitialSuperAdmin(req, false)
-	if err != nil {
-		return apperror.New(code, "error", err.Error(), err, nil)
-	}
-
-	// create sandbox as well
-	_, _ = h.svc.SetupInitialSuperAdmin(req, true)
-
-	h.logger.Info("Initial SuperAdmin created successfully")
-	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Initial SuperAdmin created successfully", nil)
-	return c.Status(code).JSON(rd)
 }
 
 // @Summary Register Admin
@@ -89,15 +57,12 @@ func (h *Handler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	authHeader := c.Get("Authorization")
-	isSandbox := strings.Contains(authHeader, "sandbox") // basic check or rely on claims
-	// Let's rely on claims since it's protected by AuthorizeAdmin
 	claims, ok := c.Locals("adminClaims").(*middleware.AdminDataClaims)
 	if !ok {
-		isSandbox = false
-	} else {
-		isSandbox = claims.IsSandbox
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", nil, nil)
 	}
+
+	isSandbox := claims.IsSandbox
 
 	code, err := h.svc.RegisterAdmin(req, isSandbox)
 	if err != nil {
@@ -130,12 +95,7 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
-	isSandbox := false // Defaults to prod, or you can send it in headers
-	if c.Get("X-Sandbox-Mode") == "true" {
-		isSandbox = true
-	}
-
-	respData, code, err := h.svc.LoginAdmin(req, isSandbox)
+	respData, code, err := h.svc.LoginAdmin(req, req.IsSandbox)
 	if err != nil {
 		return apperror.New(code, "error", err.Error(), err, nil)
 	}

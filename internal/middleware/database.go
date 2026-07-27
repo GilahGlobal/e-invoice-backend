@@ -15,12 +15,15 @@ const selectedDBKey = "selected_db"
 
 func SelectDatabaseFromClaims(prodDB, sandboxDB *database.Database) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		claims, ok := c.Locals("userClaims").(*UserDataClaims)
-		if !ok || claims == nil {
-			return fiber.NewError(fiber.StatusUnauthorized, "user claims not found")
+		if claims, ok := c.Locals("userClaims").(*UserDataClaims); ok && claims != nil {
+			return setSelectedDatabase(c, claims.IsSandbox, prodDB, sandboxDB)
 		}
 
-		return setSelectedDatabase(c, claims.IsSandbox, prodDB, sandboxDB)
+		if adminClaims, ok := c.Locals("adminClaims").(*AdminDataClaims); ok && adminClaims != nil {
+			return setSelectedDatabase(c, adminClaims.IsSandbox, prodDB, sandboxDB)
+		}
+
+		return fiber.NewError(fiber.StatusUnauthorized, "user or admin claims not found")
 	}
 }
 

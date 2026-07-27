@@ -20,7 +20,9 @@ import (
 	"einvoice-access-point/internal/config"
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/database/postgresql"
+	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/data/migrations"
+	"einvoice-access-point/internal/data/seed"
 	"einvoice-access-point/internal/routes"
 	"einvoice-access-point/internal/utility"
 )
@@ -50,12 +52,16 @@ func main() {
 
 	if configuration.TestDatabase.Migrate {
 		migrations.RunAllMigrations(testDb)
-		// seed.SeedDatabase(testDb)
+		if err := seed.SeedSuperAdmin(dbinit.InitDB(testDb.Postgresql.DB(), false)); err != nil {
+			utility.LogAndPrint(logger, fmt.Sprintf("Failed to seed sandbox super admin: %v\n", err))
+		}
 	}
 
 	if configuration.Database.Migrate {
 		migrations.RunAllMigrations(db)
-		// seed.SeedDatabase(db)
+		if err := seed.SeedSuperAdmin(dbinit.InitDB(db.Postgresql.DB(), false)); err != nil {
+			utility.LogAndPrint(logger, fmt.Sprintf("Failed to seed production super admin: %v\n", err))
+		}
 	}
 
 	app := routes.Setup(logger, validatorRef, db, testDb, keys)

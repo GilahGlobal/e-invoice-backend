@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"strings"
 
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/entities"
@@ -20,6 +21,8 @@ type BusinessRepository interface {
 	FindByEmailAndAPIKey(db database.DatabaseManager, username, apiKey string) (*entities.Business, error)
 	FindBusinessByPlatformOrgID(db database.DatabaseManager, platform, orgID string) (*entities.Business, error)
 	FindAllBusinesses(db database.DatabaseManager) ([]entities.Business, error)
+	ListAllBusinesses(db database.DatabaseManager, search string, page, size int) ([]entities.Business, int64, error)
+	GetSystemBusinessStats(db database.DatabaseManager) (int64, int64, error)
 	FindBusinessByID(db database.DatabaseManager, id string) (*entities.Business, error)
 	CreateBusiness(b *entities.Business, db database.DatabaseManager) error
 	UpdateAUser(b *entities.Business, db database.DatabaseManager) error
@@ -166,6 +169,35 @@ func (r *businessRepository) FindAllBusinesses(db database.DatabaseManager) ([]e
 	return businesses, nil
 }
 
+func (r *businessRepository) ListAllBusinesses(db database.DatabaseManager, search string, page, size int) ([]entities.Business, int64, error) {
+	var businesses []entities.Business
+	var total int64
+
+	query := db.DB().Where("acc_status = ? AND is_aggregator = ?", 0, false)
+
+	if search != "" {
+		searchPattern := "%" + strings.ToLower(search) + "%"
+		query = query.Where("LOWER(name) LIKE ? OR LOWER(company_name) LIKE ? OR LOWER(email) LIKE ?", searchPattern, searchPattern, searchPattern)
+	}
+
+	if err := query.Model(&entities.Business{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * size
+	if err := query.Offset(offset).Limit(size).Order("created_at DESC").Find(&businesses).Error; err != nil {
+		return nil, 0, err
+	}
+
+	for i := range businesses {
+		if err := businesses[i].APIKey.AfterFind(db.DB()); err != nil {
+			return nil, 0, fmt.Errorf("failed to decrypt API key for business %s: %w", businesses[i].ID, err)
+		}
+	}
+
+	return businesses, total, nil
+}
+
 func (r *businessRepository) FindBusinessByID(db database.DatabaseManager, id string) (*entities.Business, error) {
 	var business entities.Business
 	query := db.DB().Where("id = ? AND acc_status = ?", id, 0)
@@ -189,4 +221,18 @@ func (r *businessRepository) GetBusinessByIDForAggregator(db database.DatabaseMa
 		return nil, err
 	}
 	return &business, nil
+}
+
+func (r *businessRepository) GetSystemBusinessStats(db database.DatabaseManager) (int64, int64, error) {
+	var totalBusinesses, totalAggregators int64
+
+	if err := db.DB().Model(&entities.Business{}).Where("is_aggregator = ?", false).Count(&totalBusinesses).Error; err != nil {
+		return 0, 0, err
+	}
+
+	if err := db.DB().Model(&entities.Business{}).Where("is_aggregator = ?", true).Count(&totalAggregators).Error; err != nil {
+		return 0, 0, err
+	}
+
+	return totalBusinesses, totalAggregators, nil
 }
