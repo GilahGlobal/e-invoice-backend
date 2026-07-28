@@ -184,7 +184,24 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 			entities.StatusConfirmed:     true,
 		}
 		if blockedStatuses[invoiceExists.CurrentStatus] {
-			return apperror.New(fiber.StatusBadRequest, "error", "invoice with the same invoice number already exists and cannot be overwritten", nil, nil)
+			response := map[string]interface{}{
+				"metadata": invoiceExists.StatusHistory,
+			}
+			
+			dataMap := map[string]interface{}{
+				"id":             invoiceExists.ID,
+				"invoice_number": invoiceExists.InvoiceNumber,
+				"irn":            invoiceExists.IRN,
+				"qr_code":        invoiceExists.QrCode,
+				"qr_code_2":      invoiceExists.EncryptedIRN,
+			}
+			if invoiceExists.QrCodeBmpUrl != "" {
+				dataMap["qr_code_bmp_url"] = invoiceExists.QrCodeBmpUrl
+			}
+			response["data"] = dataMap
+
+			rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice previously uploaded successfully", response)
+			return c.Status(fiber.StatusOK).JSON(rd)
 		}
 	}
 
