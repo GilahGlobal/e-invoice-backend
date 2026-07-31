@@ -263,6 +263,9 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	if err != nil {
+		if isInvoiceSigned {
+			return apperror.New(fiber.StatusCreated, "partial_success", err.Error(), response, nil)
+		}
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), response, nil)
 	}
 
@@ -381,6 +384,9 @@ func (h *Handler) ModifyInvoice(c *fiber.Ctx) error {
 
 	if firsErr != nil {
 		errorArray := strings.Split(firsErr.Error(), "-")
+		if isInvoiceSigned {
+			return apperror.New(fiber.StatusCreated, "partial_success", errorArray[len(errorArray)-1], response, nil)
+		}
 		return apperror.New(fiber.StatusBadRequest, "error", errorArray[len(errorArray)-1], response, nil)
 	}
 
