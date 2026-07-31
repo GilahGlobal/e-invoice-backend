@@ -5,6 +5,12 @@ import (
 	"einvoice-access-point/internal/data/entities"
 	"einvoice-access-point/internal/data/repositories"
 
+	"crypto/sha256"
+	"einvoice-access-point/internal/common"
+	"encoding/hex"
+	"errors"
+	"strings"
+
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/utility"
@@ -53,6 +59,9 @@ func (s *Service) GetBusinessDetail(aggregatorID, businessID string, db *gorm.DB
 	bRepo := repositories.NewBusinessRepository(pdb, pdb)
 	business, err := bRepo.GetBusinessByIDForAggregator(pdb, aggregatorID, businessID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, http.StatusNotFound, fmt.Errorf("business not found or not managed by this aggregator")
+		}
 		return nil, http.StatusInternalServerError, fmt.Errorf("failed to fetch business: %w", err)
 	}
 	if business == nil {
@@ -72,29 +81,29 @@ func (s *Service) GetBusinessDetail(aggregatorID, businessID string, db *gorm.DB
 	}
 
 	// Fetch subscription info (best-effort, won't fail the request)
-	subscription, _, _ := s.subSvc.RequireAggregatorBusinessSubscription(db, aggregatorID, businessID)
-	if subscription != nil {
-		subInfo := &BusinessSubscriptionInfoDto{
-			IsActive:          subscription.IsActive,
-			PlanID:            subscription.PlanID,
-			PlanName:          subscription.Plan,
-			TotalInvoices:     subscription.TotalInvoices,
-			UsedInvoices:      subscription.UsedInvoices,
-			RemainingInvoices: subscription.RemainingInvoices,
-			NextBillingDate:   subscription.NextBillingDate.Format(time.RFC3339),
-		}
+	// subscription, _, _ := s.subSvc.RequireAggregatorBusinessSubscription(db, aggregatorID, businessID)
+	// if subscription != nil {
+	// 	subInfo := &BusinessSubscriptionInfoDto{
+	// 		IsActive:          subscription.IsActive,
+	// 		PlanID:            subscription.PlanID,
+	// 		PlanName:          subscription.Plan,
+	// 		TotalInvoices:     subscription.TotalInvoices,
+	// 		UsedInvoices:      subscription.UsedInvoices,
+	// 		RemainingInvoices: subscription.RemainingInvoices,
+	// 		NextBillingDate:   subscription.NextBillingDate.Format(time.RFC3339),
+	// 	}
 
-		// Enrich with plan details
-		if subscription.PlanID != "" {
-			plan, found, _ := s.subSvc.GetPlanByID(subscription.PlanID, db)
-			if found && plan != nil {
-				subInfo.PlanAmount = plan.Amount
-				subInfo.BillingCycleDays = plan.BillingCycle
-			}
-		}
+	// 	// Enrich with plan details
+	// 	if subscription.PlanID != "" {
+	// 		plan, found, _ := s.subSvc.GetPlanByID(subscription.PlanID, db)
+	// 		if found && plan != nil {
+	// 			subInfo.PlanAmount = plan.Amount
+	// 			subInfo.BillingCycleDays = plan.BillingCycle
+	// 		}
+	// 	}
 
-		result.Subscription = subInfo
-	}
+	// 	result.Subscription = subInfo
+	// }
 
 	// Fetch usage stats (best-effort)
 	totalInvoices, totalBulkUploads, _ := s.repo.GetBusinessStatsForAggregator(db, aggregatorID, businessID)
@@ -159,6 +168,10 @@ func (s *Service) ListInvoicesByBusiness(aggregatorID, businessID string, page, 
 			IRN:           inv.IRN,
 			Platform:      inv.Platform,
 			CurrentStatus: inv.CurrentStatus,
+			PaymentStatus: inv.PaymentStatus,
+			StatusText:    inv.CurrentStatus,
+			QrCodeBmpUrl:  inv.QrCodeBmpUrl,
+			QrCode:        inv.QrCode,
 			CreatedAt:     inv.CreatedAt,
 		})
 	}
@@ -180,6 +193,10 @@ func (s *Service) ListAllInvoices(aggregatorID string, page, size int, db *gorm.
 			IRN:           inv.IRN,
 			Platform:      inv.Platform,
 			CurrentStatus: inv.CurrentStatus,
+			PaymentStatus: inv.PaymentStatus,
+			StatusText:    inv.CurrentStatus,
+			QrCodeBmpUrl:  inv.QrCodeBmpUrl,
+			QrCode:        inv.QrCode,
 			CreatedAt:     inv.CreatedAt,
 		})
 	}
@@ -342,4 +359,96 @@ func (s *Service) LogActivity(db *gorm.DB, aggregatorID, businessID, action, det
 		Action:       action,
 		Details:      details,
 	}, db)
+}
+
+func (s *Service) CreateBusiness(db *gorm.DB, req CreateBusinessDto, aggregatorID string) error {
+	serverSecret := s.cfg.Server.Secret
+	email := strings.ToLower(req.Email)
+	name := strings.Title(strings.ToLower(req.Name))
+
+	var existingBusiness entities.Business
+	if err := db.Where("email = ?", email).First(&existingBusiness).Error; err == nil {
+		return fmt.Errorf("business already exists with the given email")
+	}
+
+	if err := db.Where("LOWER(company_name) = LOWER(?)", req.CompanyName).First(&existingBusiness).Error; err == nil {
+		return fmt.Errorf("business already exists with the given company name")
+	}
+
+	password, err := utility.HashPassword(req.Password)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	apiKey, err := utility.GenerateSecureToken(32, serverSecret)
+	if err != nil {
+		return fmt.Errorf("failed to generate api key: %w", err)
+	}
+
+	encryptedAPIKey, err := common.EncryptAES(apiKey)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt API key: %w", err)
+	}
+
+	apiKeyHash := sha256.Sum256([]byte(apiKey))
+	apiKeyHashStr := hex.EncodeToString(apiKeyHash[:])
+
+	business := entities.Business{
+		ID:            utility.GenerateUUID(),
+		Name:          name,
+		Email:         email,
+		Password:      password,
+		APIKey:        common.EncryptedString(encryptedAPIKey),
+		APIKeyHash:    apiKeyHashStr,
+		CompanyName:   req.CompanyName,
+		PhoneNumber:   req.PhoneNumber,
+		TIN:           req.TIN,
+		IsAggregator:  false,
+		EmailVerified: true,
+		AggregatorID:  &aggregatorID,
+	}
+
+	if err := db.Create(&business).Error; err != nil {
+		return fmt.Errorf("failed to create business: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) UpdateBusinessProfile(db *gorm.DB, businessID string, req UpdateBusinessProfileDto, aggregatorID string) error {
+	var business entities.Business
+	if err := db.Where("id = ? AND aggregator_id = ?", businessID, aggregatorID).First(&business).Error; err != nil {
+		return fmt.Errorf("business not found or not managed by this aggregator")
+	}
+
+	encryptedPublicKey, err := common.EncryptAES(req.IRNPublicKey)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt IRN public key: %w", err)
+	}
+
+	encryptedCertificate, err := common.EncryptAES(req.IRNCertificate)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt IRN certificate: %w", err)
+	}
+
+	updateData := map[string]interface{}{
+		"service_id":      req.ServiceID,
+		"irn_public_key":  common.EncryptedString(encryptedPublicKey),
+		"irn_certificate": common.EncryptedString(encryptedCertificate),
+		"keys_set":        true,
+	}
+
+	if err := db.Model(&business).Updates(updateData).Error; err != nil {
+		return fmt.Errorf("failed to update business profile: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) GetInvoiceDetail(aggregatorID, invoiceID string, db *gorm.DB) (*entities.Invoice, error) {
+	var invoice entities.Invoice
+	if err := db.Where("id = ? AND aggregator_id = ?", invoiceID, aggregatorID).First(&invoice).Error; err != nil {
+		return nil, fmt.Errorf("invoice not found or does not belong to this aggregator")
+	}
+	return &invoice, nil
 }

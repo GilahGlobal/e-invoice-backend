@@ -15,36 +15,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type InvoiceRepository interface {
-	GenerateUniqueInvoiceID(businessID string, db *gorm.DB) string
-	CreateInvoice(db database.DatabaseManager, invoice *entities.Invoice) error
-	FindInvoiceByNumber(db database.DatabaseManager, invoiceNumber string) (*entities.Invoice, error)
-	FindInvoiceByNumberAndBusinessID(db database.DatabaseManager, invoiceNumber string, businessID string) (*entities.Invoice, error)
-	FindInvoiceByIRNAndBusinessID(db database.DatabaseManager, irn string, businessID string) (*entities.Invoice, error)
-	UpdateInvoiceStatus(db database.DatabaseManager, invoice *entities.Invoice, step string, status string) error
-	UpdateInvoiceIRN(db database.DatabaseManager, invoice *entities.Invoice, irn string) error
-	FindMinimalInvoicesByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]entities.MinimalInvoiceDTO, database.PaginationResponse, error)
-	FindInvoiceByBusinessAndID(db database.DatabaseManager, businessID, invoiceID string) (*entities.Invoice, error)
-	DeleteInvoiceByBusinessAndID(db database.DatabaseManager, businessID, invoiceID string) error
-	UpdateInvoice(db database.DatabaseManager, invoiceNumber string, invoiceData []byte) error
-	UpdateInvoiceDataByID(db database.DatabaseManager, invoiceID string, invoiceData []byte) error
-	SaveInvoice(db database.DatabaseManager, invoice *entities.Invoice) error
-	GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*entities.InvoiceStatsResponseData, error)
-}
-
-type invoiceRepository struct {
+type InvoiceRepository struct {
 	db     database.DatabaseManager
 	testDB database.DatabaseManager
 }
 
-func NewInvoiceRepository(db, testDB database.DatabaseManager) InvoiceRepository {
-	return &invoiceRepository{
+func NewInvoiceRepository(db, testDB database.DatabaseManager) *InvoiceRepository {
+	return &InvoiceRepository{
 		db:     db,
 		testDB: testDB,
 	}
 }
 
-func (r *invoiceRepository) GenerateUniqueInvoiceID(businessID string, db *gorm.DB) string {
+func (r *InvoiceRepository) GenerateUniqueInvoiceID(businessID string, db *gorm.DB) string {
 	var lastInvoice entities.Invoice
 	var newInvoiceNumber string
 
@@ -67,11 +50,11 @@ func (r *invoiceRepository) GenerateUniqueInvoiceID(businessID string, db *gorm.
 	return newInvoiceNumber
 }
 
-func (r *invoiceRepository) CreateInvoice(db database.DatabaseManager, invoice *entities.Invoice) error {
+func (r *InvoiceRepository) CreateInvoice(db database.DatabaseManager, invoice *entities.Invoice) error {
 	return db.DB().Create(invoice).Error
 }
 
-func (r *invoiceRepository) FindInvoiceByNumber(db database.DatabaseManager, invoiceNumber string) (*entities.Invoice, error) {
+func (r *InvoiceRepository) FindInvoiceByNumber(db database.DatabaseManager, invoiceNumber string) (*entities.Invoice, error) {
 	var invoice entities.Invoice
 	err := db.DB().Where("invoice_number = ?", invoiceNumber).First(&invoice).Error
 	if err != nil {
@@ -80,7 +63,7 @@ func (r *invoiceRepository) FindInvoiceByNumber(db database.DatabaseManager, inv
 	return &invoice, nil
 }
 
-func (r *invoiceRepository) FindInvoiceByNumberAndBusinessID(db database.DatabaseManager, invoiceNumber string, businessID string) (*entities.Invoice, error) {
+func (r *InvoiceRepository) FindInvoiceByNumberAndBusinessID(db database.DatabaseManager, invoiceNumber string, businessID string) (*entities.Invoice, error) {
 	var invoice entities.Invoice
 	err := db.DB().Where("invoice_number = ? AND business_id = ?", invoiceNumber, businessID).First(&invoice).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -89,7 +72,7 @@ func (r *invoiceRepository) FindInvoiceByNumberAndBusinessID(db database.Databas
 	return &invoice, err
 }
 
-func (r *invoiceRepository) FindInvoiceByIRNAndBusinessID(db database.DatabaseManager, irn string, businessID string) (*entities.Invoice, error) {
+func (r *InvoiceRepository) FindInvoiceByIRNAndBusinessID(db database.DatabaseManager, irn string, businessID string) (*entities.Invoice, error) {
 	var invoice entities.Invoice
 	err := db.DB().Where("irn = ? AND business_id = ?", irn, businessID).First(&invoice).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -98,7 +81,7 @@ func (r *invoiceRepository) FindInvoiceByIRNAndBusinessID(db database.DatabaseMa
 	return &invoice, err
 }
 
-func (r *invoiceRepository) UpdateInvoiceStatus(db database.DatabaseManager, invoice *entities.Invoice, step string, status string) error {
+func (r *InvoiceRepository) UpdateInvoiceStatus(db database.DatabaseManager, invoice *entities.Invoice, step string, status string) error {
 	var history []entities.StatusHistoryEntry
 
 	if len(invoice.StatusHistory) > 0 {
@@ -120,12 +103,12 @@ func (r *invoiceRepository) UpdateInvoiceStatus(db database.DatabaseManager, inv
 	return db.DB().Save(invoice).Error
 }
 
-func (r *invoiceRepository) UpdateInvoiceIRN(db database.DatabaseManager, invoice *entities.Invoice, irn string) error {
+func (r *InvoiceRepository) UpdateInvoiceIRN(db database.DatabaseManager, invoice *entities.Invoice, irn string) error {
 	invoice.IRN = irn
 	return db.DB().Save(invoice).Error
 }
 
-func (r *invoiceRepository) FindMinimalInvoicesByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]entities.MinimalInvoiceDTO, database.PaginationResponse, error) {
+func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]entities.MinimalInvoiceDTO, database.PaginationResponse, error) {
 	var result []entities.MinimalInvoiceDTO
 
 	if pagination.Page <= 0 {
@@ -190,7 +173,7 @@ func (r *invoiceRepository) FindMinimalInvoicesByBusinessID(db database.Database
 	}, nil
 }
 
-func (r *invoiceRepository) FindInvoiceByBusinessAndID(db database.DatabaseManager, businessID, invoiceID string) (*entities.Invoice, error) {
+func (r *InvoiceRepository) FindInvoiceByBusinessAndID(db database.DatabaseManager, businessID, invoiceID string) (*entities.Invoice, error) {
 	var invoice entities.Invoice
 	if err := db.DB().
 		Where("business_id = ? AND id = ?", businessID, invoiceID).
@@ -200,7 +183,7 @@ func (r *invoiceRepository) FindInvoiceByBusinessAndID(db database.DatabaseManag
 	return &invoice, nil
 }
 
-func (r *invoiceRepository) DeleteInvoiceByBusinessAndID(db database.DatabaseManager, businessID, invoiceID string) error {
+func (r *InvoiceRepository) DeleteInvoiceByBusinessAndID(db database.DatabaseManager, businessID, invoiceID string) error {
 	result := db.DB().
 		Where("business_id = ? AND id = ?", businessID, invoiceID).
 		Delete(&entities.Invoice{})
@@ -216,21 +199,21 @@ func (r *invoiceRepository) DeleteInvoiceByBusinessAndID(db database.DatabaseMan
 	return nil
 }
 
-func (r *invoiceRepository) UpdateInvoice(db database.DatabaseManager, invoiceNumber string, invoiceData []byte) error {
+func (r *InvoiceRepository) UpdateInvoice(db database.DatabaseManager, invoiceNumber string, invoiceData []byte) error {
 	result := db.DB().Model(&entities.Invoice{}).Where("invoice_number = ?", invoiceNumber).Update("invoice_data", invoiceData)
 	return result.Error
 }
 
-func (r *invoiceRepository) UpdateInvoiceDataByID(db database.DatabaseManager, invoiceID string, invoiceData []byte) error {
+func (r *InvoiceRepository) UpdateInvoiceDataByID(db database.DatabaseManager, invoiceID string, invoiceData []byte) error {
 	result := db.DB().Model(&entities.Invoice{}).Where("id = ?", invoiceID).Update("invoice_data", invoiceData)
 	return result.Error
 }
 
-func (r *invoiceRepository) SaveInvoice(db database.DatabaseManager, invoice *entities.Invoice) error {
+func (r *InvoiceRepository) SaveInvoice(db database.DatabaseManager, invoice *entities.Invoice) error {
 	return db.DB().Save(invoice).Error
 }
 
-func (r *invoiceRepository) GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*entities.InvoiceStatsResponseData, error) {
+func (r *InvoiceRepository) GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*entities.InvoiceStatsResponseData, error) {
 	var monthlyResults []entities.MonthlyInvoiceStatsDto
 
 	query := `

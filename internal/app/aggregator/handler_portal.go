@@ -588,12 +588,13 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
 	}
 
-	if _, status, err = h.subSvc.RequireAggregatorBusinessSubscription(db, userDetails.ID, businessID); err != nil {
-		return apperror.New(status, "error", err.Error(), err, nil)
-	}
+	// if _, status, err = h.subSvc.RequireAggregatorBusinessSubscription(db, userDetails.ID, businessID); err != nil {
+	// 	return apperror.New(status, "error", err.Error(), err, nil)
+	// }
 
 	invoiceSvc := h.invoiceSvc
 	invoiceExists, _ := invoiceSvc.GetInvoiceByInvoiceNumber(db, req.InvoiceNumber, businessID)
+
 	if invoiceExists != nil {
 		blockedStatuses := map[string]bool{
 			entities.StatusSignedInvoice: true,
@@ -601,16 +602,33 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 			entities.StatusConfirmed:     true,
 		}
 		if blockedStatuses[invoiceExists.CurrentStatus] {
-			return apperror.New(fiber.StatusBadRequest, "error", "invoice with the same invoice number already exists and cannot be overwritten", nil, nil)
+			response := map[string]interface{}{
+				"metadata": invoiceExists.StatusHistory,
+			}
+
+			dataMap := map[string]interface{}{
+				"id":             invoiceExists.ID,
+				"invoice_number": invoiceExists.InvoiceNumber,
+				"irn":            invoiceExists.IRN,
+				"qr_code":        invoiceExists.QrCode,
+				"qr_code_2":      invoiceExists.EncryptedIRN,
+			}
+			if invoiceExists.QrCodeBmpUrl != "" {
+				dataMap["qr_code_bmp_url"] = invoiceExists.QrCodeBmpUrl
+			}
+			response["data"] = dataMap
+
+			rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice previously uploaded successfully", response)
+			return c.Status(fiber.StatusOK).JSON(rd)
 		}
 	}
 
 	reservedSubscriptionID := ""
 	if invoiceExists == nil {
-		reservedSubscriptionID, status, err = h.subSvc.ReserveAggregatorInvoiceQuota(db, userDetails.ID, businessID, 1)
-		if err != nil {
-			return apperror.New(status, "error", err.Error(), err, nil)
-		}
+		// reservedSubscriptionID, status, err = h.subSvc.ReserveAggregatorInvoiceQuota(db, userDetails.ID, businessID, 1)
+		// if err != nil {
+		// 	return apperror.New(status, "error", err.Error(), err, nil)
+		// }
 	}
 
 	var irnPayload InvoiceData
@@ -658,7 +676,7 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		_ = h.subSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
 	}
 
-	response := map[string]interface{}{"irn": irnPayload}
+	response := map[string]interface{}{}
 	if createdInvoice != nil {
 		response["metadata"] = createdInvoice.StatusHistory
 	}
@@ -969,5 +987,134 @@ func (h *Handler) GetBusinessInvoiceStats(c *fiber.Ctx) error {
 	}
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business invoice statistics fetched successfully", stats)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// CreateBusiness godoc
+// @Summary Create a business under aggregator
+// @Description Creates a new business and associates it with the calling aggregator
+// @Tags Aggregator Portal
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param data body CreateBusinessDto true "Business details"
+// @Success 201 {object} CreateBusinessResponseDto "Business created successfully"
+// @Failure 400 {object} entities.Response "Bad request"
+// @Failure 401 {object} entities.Response "Unauthorized"
+// @Failure 500 {object} entities.Response "Internal server error"
+// @Router /aggregator/businesses [post]
+func (h *Handler) CreateBusiness(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	var req CreateBusinessDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationErrorsToJSON(err, CreateBusinessDto{}), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if err := h.svc.CreateBusiness(db, req, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Business created successfully", nil)
+	return c.Status(fiber.StatusCreated).JSON(rd)
+}
+
+// UpdateBusinessProfile godoc
+// @Summary Update business profile under aggregator
+// @Description Updates the cryptographic keys and service ID for a specific business managed by the aggregator
+// @Tags Aggregator Portal
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param business_id path string true "Business ID"
+// @Param data body UpdateBusinessProfileDto true "Updated profile details"
+// @Success 200 {object} UpdateBusinessProfileResponseDto "Business profile updated successfully"
+// @Failure 400 {object} entities.Response "Bad request"
+// @Failure 401 {object} entities.Response "Unauthorized"
+// @Failure 500 {object} entities.Response "Internal server error"
+// @Router /aggregator/businesses/{business_id}/profile [put]
+func (h *Handler) UpdateBusinessProfile(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	businessID := c.Params("business_id")
+	if businessID == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "business_id is required", nil, nil)
+	}
+
+	var req UpdateBusinessProfileDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationErrorsToJSON(err, UpdateBusinessProfileDto{}), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if err := h.svc.UpdateBusinessProfile(db, businessID, req, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business profile updated successfully", nil)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// GetInvoiceDetail godoc
+// @Summary Get specific invoice details for aggregator
+// @Description Fetches the full details of a specific invoice uploaded by the aggregator
+// @Tags Aggregator Portal
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param invoice_id path string true "Invoice ID"
+// @Success 200 {object} AggregatorGetInvoiceResponseDto "Invoice details fetched successfully"
+// @Failure 400 {object} entities.Response "Bad request"
+// @Failure 401 {object} entities.Response "Unauthorized"
+// @Failure 404 {object} entities.Response "Not found"
+// @Failure 500 {object} entities.Response "Internal server error"
+// @Router /aggregator/invoices/single/{invoice_id} [get]
+func (h *Handler) GetInvoiceDetail(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	invoiceID := c.Params("invoice_id")
+	if invoiceID == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "invoice_id is required", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	invoice, err := h.svc.GetInvoiceDetail(userDetails.ID, invoiceID, db)
+	if err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", err.Error(), nil, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice details fetched successfully", invoice)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }

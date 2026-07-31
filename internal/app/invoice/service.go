@@ -8,12 +8,12 @@ import (
 )
 
 type Service struct {
-	repo        repositories.InvoiceRepository
+	repo        *repositories.InvoiceRepository
 	tokenSvc    *token.Service
 	businessSvc *business.Service
 }
 
-func NewService(repo repositories.InvoiceRepository, tokenSvc *token.Service, businessSvc *business.Service) *Service {
+func NewService(repo *repositories.InvoiceRepository, tokenSvc *token.Service, businessSvc *business.Service) *Service {
 	return &Service{repo: repo, tokenSvc: tokenSvc, businessSvc: businessSvc}
 }
 

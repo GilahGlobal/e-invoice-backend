@@ -23,13 +23,20 @@ var (
 	ErrInvalidSignature     = errors.New("invalid webhook signature")
 )
 
+func formatFirsError(msg string, theErr *string, err error) error {
+	if theErr != nil {
+		return fmt.Errorf("%s: %s - %v", msg, *theErr, err)
+	}
+	return fmt.Errorf("%s: %v", msg, err)
+}
+
 func (s *Service) FirsAllInOneProcess(payload firs_models.UploadInvoiceRequestDto, invoiceModel *entities.Invoice, db *gorm.DB, isSandbox bool) (error, bool) {
 	pdb := dbinit.InitDB(db, false)
 
 	_, theErr, err := s.ValidateInvoice(payload, isSandbox)
 	if err != nil {
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed")
-		return fmt.Errorf("failed to validate invoice: %v - %v", *theErr, err), false
+		return formatFirsError("failed to validate invoice", theErr, err), false
 	}
 
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
@@ -37,21 +44,21 @@ func (s *Service) FirsAllInOneProcess(payload firs_models.UploadInvoiceRequestDt
 	_, theErr, err = s.SignInvoice(payload, isSandbox)
 	if err != nil {
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "failed")
-		return fmt.Errorf("failed to sign invoice: %v - %v", *theErr, err), false
+		return formatFirsError("failed to sign invoice", theErr, err), false
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "success")
 
 	_, theErr, err = s.TransmitInvoice(*payload.IRN, isSandbox)
 	if err != nil {
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "failed")
-		return fmt.Errorf("failed to transmit invoice: %v - %v", *theErr, err), true
+		return formatFirsError("failed to transmit invoice", theErr, err), true
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "success")
 
 	confirmInvoiceResp, theErr, err := s.ConfirmInvoice(*payload.IRN, isSandbox)
 	if err != nil {
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed")
-		return fmt.Errorf("failed to confirm invoice: %v - %v", *theErr, err), true
+		return formatFirsError("failed to confirm invoice", theErr, err), true
 	}
 
 	if confirmInvoiceResp.Code != 200 {
@@ -71,7 +78,7 @@ func (s *Service) UncompletedFirsProcesses(db *gorm.DB, currentStatus string, pa
 		_, theErr, err := s.ValidateInvoice(payload, isSandbox)
 		if err != nil {
 			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed")
-			return fmt.Errorf("failed to validate invoice: %v - %v", *theErr, err), false
+			return formatFirsError("failed to validate invoice", theErr, err), false
 		}
 
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
@@ -79,21 +86,21 @@ func (s *Service) UncompletedFirsProcesses(db *gorm.DB, currentStatus string, pa
 		_, theErr, err = s.SignInvoice(payload, isSandbox)
 		if err != nil {
 			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "failed")
-			return fmt.Errorf("failed to sign invoice: %v - %v", *theErr, err), false
+			return formatFirsError("failed to sign invoice", theErr, err), false
 		}
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "success")
 
 		_, theErr, err = s.TransmitInvoice(*payload.IRN, isSandbox)
 		if err != nil {
 			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "failed")
-			return fmt.Errorf("failed to transmit invoice: %v - %v", *theErr, err), true
+			return formatFirsError("failed to transmit invoice", theErr, err), true
 		}
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "success")
 
 		confirmInvoiceResp, theErr, err := s.ConfirmInvoice(*payload.IRN, isSandbox)
 		if err != nil {
 			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed")
-			return fmt.Errorf("failed to confirm invoice: %v - %v", *theErr, err), true
+			return formatFirsError("failed to confirm invoice", theErr, err), true
 		}
 
 		if confirmInvoiceResp.Code != 200 {
@@ -162,27 +169,27 @@ func (s *Service) otherFirsProcesses(payload zoho.WebhookPayload, business *enti
 	_, theErr, err := s.ValidateInvoice(newInvoiceResp, isSandBox)
 	if err != nil {
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed")
-		return fmt.Errorf("failed to validate invoice: %v - %v", *theErr, err)
+		return formatFirsError("failed to validate invoice", theErr, err)
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
 
 	_, theErr, err = s.SignInvoice(newInvoiceResp, isSandBox)
 	if err != nil {
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "failed")
-		return fmt.Errorf("failed to sign invoice: %v - %v", *theErr, err)
+		return formatFirsError("failed to sign invoice", theErr, err)
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "success")
 
 	_, theErr, err = s.TransmitInvoice(*newInvoiceResp.IRN, isSandBox)
 	if err != nil {
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "failed")
-		return fmt.Errorf("failed to transmit invoice: %v - %v", *theErr, err)
+		return formatFirsError("failed to transmit invoice", theErr, err)
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "success")
 
 	confirmInvoiceResp, theErr, err := s.ConfirmInvoice(theIRN, isSandBox)
 	if err != nil {
-		return fmt.Errorf("failed to confirm invoice: %v - %v", *theErr, err)
+		return formatFirsError("failed to confirm invoice", theErr, err)
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "success")
 

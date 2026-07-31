@@ -835,6 +835,125 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new business and associates it with the calling aggregator",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Create a business under aggregator",
+                "parameters": [
+                    {
+                        "description": "Business details",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aggregator.CreateBusinessDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Business created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/aggregator.CreateBusinessResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/businesses/{business_id}/profile": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates the cryptographic keys and service ID for a specific business managed by the aggregator",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Update business profile under aggregator",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "business_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated profile details",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aggregator.UpdateBusinessProfileDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business profile updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/aggregator.UpdateBusinessProfileResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
             }
         },
         "/aggregator/businesses/{id}": {
@@ -1241,6 +1360,67 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/invoices/single/{invoice_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetches the full details of a specific invoice uploaded by the aggregator",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Get specific invoice details for aggregator",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Invoice ID",
+                        "name": "invoice_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice details fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/aggregator.AggregatorGetInvoiceResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -5126,6 +5306,26 @@ const docTemplate = `{
                 }
             }
         },
+        "aggregator.AggregatorGetInvoiceResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/entities.Invoice"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Invoice details fetched successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
         "aggregator.AggregatorInvitationDto": {
             "type": "object",
             "properties": {
@@ -5362,6 +5562,65 @@ const docTemplate = `{
                 }
             }
         },
+        "aggregator.CreateBusinessDto": {
+            "type": "object",
+            "required": [
+                "company_name",
+                "email",
+                "name",
+                "password",
+                "phone_number",
+                "tin"
+            ],
+            "properties": {
+                "company_name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 2,
+                    "example": "Acme Inc."
+                },
+                "email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 2,
+                    "example": "John Doe"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "Password123!"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "123456789"
+                }
+            }
+        },
+        "aggregator.CreateBusinessResponseDto": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Business created successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 201
+                }
+            }
+        },
         "aggregator.GetBulkUploadFailedInvoicesResponseDto": {
             "type": "object",
             "properties": {
@@ -5562,6 +5821,45 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string",
                     "example": "2026-01-01T12:00:00Z"
+                }
+            }
+        },
+        "aggregator.UpdateBusinessProfileDto": {
+            "type": "object",
+            "required": [
+                "irn_certificate",
+                "irn_public_key",
+                "service_id"
+            ],
+            "properties": {
+                "irn_certificate": {
+                    "type": "string",
+                    "example": "MIIFj..."
+                },
+                "irn_public_key": {
+                    "type": "string",
+                    "example": "MIIBI..."
+                },
+                "service_id": {
+                    "type": "string",
+                    "example": "6A2BC898"
+                }
+            }
+        },
+        "aggregator.UpdateBusinessProfileResponseDto": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Business profile updated successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
                 }
             }
         },

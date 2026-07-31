@@ -15,7 +15,7 @@ import (
 type Handler struct {
 	validator *validator.Validate
 	logger    *utility.Logger
-	svc       Service
+	svc       *Service
 	Db        *database.Database
 	TestDB    *database.Database
 }

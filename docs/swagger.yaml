@@ -420,6 +420,20 @@ definitions:
       status_code:
         type: integer
     type: object
+  aggregator.AggregatorGetInvoiceResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/entities.Invoice'
+      message:
+        example: Invoice details fetched successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
   aggregator.AggregatorInvitationDto:
     properties:
       business_email:
@@ -586,6 +600,51 @@ definitions:
         example: 120
         type: integer
     type: object
+  aggregator.CreateBusinessDto:
+    properties:
+      company_name:
+        example: Acme Inc.
+        maxLength: 250
+        minLength: 2
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      name:
+        example: John Doe
+        maxLength: 250
+        minLength: 2
+        type: string
+      password:
+        example: Password123!
+        minLength: 6
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      tin:
+        example: "123456789"
+        type: string
+    required:
+    - company_name
+    - email
+    - name
+    - password
+    - phone_number
+    - tin
+    type: object
+  aggregator.CreateBusinessResponseDto:
+    properties:
+      message:
+        example: Business created successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 201
+        type: integer
+    type: object
   aggregator.GetBulkUploadFailedInvoicesResponseDto:
     properties:
       data:
@@ -728,6 +787,34 @@ definitions:
       updated_at:
         example: "2026-01-01T12:00:00Z"
         type: string
+    type: object
+  aggregator.UpdateBusinessProfileDto:
+    properties:
+      irn_certificate:
+        example: MIIFj...
+        type: string
+      irn_public_key:
+        example: MIIBI...
+        type: string
+      service_id:
+        example: 6A2BC898
+        type: string
+    required:
+    - irn_certificate
+    - irn_public_key
+    - service_id
+    type: object
+  aggregator.UpdateBusinessProfileResponseDto:
+    properties:
+      message:
+        example: Business profile updated successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
     type: object
   apperror.AppError:
     properties:
@@ -2983,6 +3070,83 @@ paths:
       summary: List Businesses
       tags:
       - Aggregator Portal
+    post:
+      consumes:
+      - application/json
+      description: Creates a new business and associates it with the calling aggregator
+      parameters:
+      - description: Business details
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/aggregator.CreateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Business created successfully
+          schema:
+            $ref: '#/definitions/aggregator.CreateBusinessResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a business under aggregator
+      tags:
+      - Aggregator Portal
+  /aggregator/businesses/{business_id}/profile:
+    put:
+      consumes:
+      - application/json
+      description: Updates the cryptographic keys and service ID for a specific business
+        managed by the aggregator
+      parameters:
+      - description: Business ID
+        in: path
+        name: business_id
+        required: true
+        type: string
+      - description: Updated profile details
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/aggregator.UpdateBusinessProfileDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business profile updated successfully
+          schema:
+            $ref: '#/definitions/aggregator.UpdateBusinessProfileResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Update business profile under aggregator
+      tags:
+      - Aggregator Portal
   /aggregator/businesses/{id}:
     delete:
       description: Remove an accepted business from the aggregator
@@ -3333,6 +3497,46 @@ paths:
       security:
       - BearerAuth: []
       summary: Upload Invoice
+      tags:
+      - Aggregator Portal
+  /aggregator/invoices/single/{invoice_id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the full details of a specific invoice uploaded by the
+        aggregator
+      parameters:
+      - description: Invoice ID
+        in: path
+        name: invoice_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice details fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorGetInvoiceResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get specific invoice details for aggregator
       tags:
       - Aggregator Portal
   /aggregator/stats:
