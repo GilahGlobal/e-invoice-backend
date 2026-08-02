@@ -588,9 +588,9 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
 	}
 
-	// if _, status, err = h.subSvc.RequireAggregatorBusinessSubscription(db, userDetails.ID, businessID); err != nil {
-	// 	return apperror.New(status, "error", err.Error(), err, nil)
-	// }
+	if _, status, err = h.subSvc.RequireAggregatorBusinessSubscription(db, userDetails.ID, businessID); err != nil {
+		return apperror.New(status, "error", err.Error(), err, nil)
+	}
 
 	invoiceSvc := h.invoiceSvc
 	invoiceExists, _ := invoiceSvc.GetInvoiceByInvoiceNumber(db, req.InvoiceNumber, businessID)

@@ -81,29 +81,29 @@ func (s *Service) GetBusinessDetail(aggregatorID, businessID string, db *gorm.DB
 	}
 
 	// Fetch subscription info (best-effort, won't fail the request)
-	// subscription, _, _ := s.subSvc.RequireAggregatorBusinessSubscription(db, aggregatorID, businessID)
-	// if subscription != nil {
-	// 	subInfo := &BusinessSubscriptionInfoDto{
-	// 		IsActive:          subscription.IsActive,
-	// 		PlanID:            subscription.PlanID,
-	// 		PlanName:          subscription.Plan,
-	// 		TotalInvoices:     subscription.TotalInvoices,
-	// 		UsedInvoices:      subscription.UsedInvoices,
-	// 		RemainingInvoices: subscription.RemainingInvoices,
-	// 		NextBillingDate:   subscription.NextBillingDate.Format(time.RFC3339),
-	// 	}
+	subscription, _, _ := s.subSvc.RequireAggregatorBusinessSubscription(db, aggregatorID, businessID)
+	if subscription != nil {
+		subInfo := &BusinessSubscriptionInfoDto{
+			IsActive:          subscription.IsActive,
+			PlanID:            subscription.PlanID,
+			PlanName:          subscription.Plan,
+			TotalInvoices:     subscription.TotalInvoices,
+			UsedInvoices:      subscription.UsedInvoices,
+			RemainingInvoices: subscription.RemainingInvoices,
+			NextBillingDate:   subscription.NextBillingDate.Format(time.RFC3339),
+		}
 
-	// 	// Enrich with plan details
-	// 	if subscription.PlanID != "" {
-	// 		plan, found, _ := s.subSvc.GetPlanByID(subscription.PlanID, db)
-	// 		if found && plan != nil {
-	// 			subInfo.PlanAmount = plan.Amount
-	// 			subInfo.BillingCycleDays = plan.BillingCycle
-	// 		}
-	// 	}
+		// Enrich with plan details
+		if subscription.PlanID != "" {
+			plan, found, _ := s.subSvc.GetPlanByID(subscription.PlanID, db)
+			if found && plan != nil {
+				subInfo.PlanAmount = plan.Amount
+				subInfo.BillingCycleDays = plan.BillingCycle
+			}
+		}
 
-	// 	result.Subscription = subInfo
-	// }
+		result.Subscription = subInfo
+	}
 
 	// Fetch usage stats (best-effort)
 	totalInvoices, totalBulkUploads, _ := s.repo.GetBusinessStatsForAggregator(db, aggregatorID, businessID)
