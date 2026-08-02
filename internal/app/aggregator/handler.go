@@ -6,6 +6,7 @@ import (
 	"einvoice-access-point/internal/app/invoice"
 	"einvoice-access-point/internal/app/subscription"
 	"einvoice-access-point/internal/app/token"
+	"einvoice-access-point/internal/config"
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/utility"
@@ -25,7 +26,7 @@ type Handler struct {
 	TestDb        *database.Database
 }
 
-func NewHandler(validator *validator.Validate, logger *utility.Logger, db, testDb *database.Database) *Handler {
+func NewHandler(validator *validator.Validate, logger *utility.Logger, db, testDb *database.Database, cfg *config.Configuration) *Handler {
 	prodDB := dbinit.InitDB(db.Postgresql.DB(), false)
 	testDBConn := dbinit.InitDB(testDb.Postgresql.DB(), false)
 
@@ -35,7 +36,7 @@ func NewHandler(validator *validator.Validate, logger *utility.Logger, db, testD
 	invoiceSvc := invoice.NewServiceWithDB(prodDB, testDBConn, tokenSvc, businessSvc)
 	subSvc := subscription.NewServiceWithDB(prodDB, testDBConn)
 
-	svc := NewServiceWithDB(prodDB, testDBConn, subSvc, businessSvc, bulkUploadSvc)
+	svc := NewServiceWithDB(prodDB, testDBConn, subSvc, businessSvc, bulkUploadSvc, cfg)
 
 	return &Handler{
 		svc:           svc,

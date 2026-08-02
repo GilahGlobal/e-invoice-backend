@@ -10,7 +10,7 @@ import (
 )
 
 func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
-	controller := aggregator.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB)
+	controller := aggregator.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB, c.Config)
 	subHandler := subscription.NewAggregatorHandler(c.Validator, c.Logger, c.DB, c.TestDB)
 
 	aggregatorRoute := r.Group(ApiVersion + "/aggregator")
@@ -39,6 +39,7 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
 	businesses := protected.Group("/businesses")
 	{
 		businesses.Get("/", controller.ListBusinesses)
+		businesses.Post("/", controller.CreateBusiness)
 		businesses.Get("/:id", controller.GetBusinessDetail)
 		businesses.Get("/:id/stats", controller.GetBusinessInvoiceStats)
 		businesses.Delete("/:id", controller.RemoveBusiness)
@@ -49,6 +50,7 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
 	invoices := protected.Group("/invoices")
 	{
 		invoices.Get("/", controller.ListAllInvoices)
+		invoices.Get("/single/:invoice_id", controller.GetInvoiceDetail)
 		invoices.Get("/:id", controller.ListBusinessInvoices)
 		invoices.Post("/:id", controller.UploadInvoice)
 	}

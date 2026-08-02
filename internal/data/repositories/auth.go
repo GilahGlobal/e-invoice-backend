@@ -7,37 +7,27 @@ import (
 	"net/http"
 )
 
-type AuthRepository interface {
-	GetDB(isSandbox bool) database.DatabaseManager
-	GetAccessTokens(a *entities.AccessToken, isSandbox bool) error
-	GetByOwnerID(a *entities.AccessToken, isSandbox bool) (int, error)
-	GetByID(ID string, isSandbox bool) (entities.AccessToken, error)
-	GetByIDBoolean(a *entities.AccessToken, isSandbox bool) (int, error)
-	GetLatestByOwnerIDAndIsLive(a *entities.AccessToken, isSandbox bool) (int, error)
-	CreateAccessToken(a *entities.AccessToken, isSandbox bool, tokenData interface{}) error
-	RevokeAccessToken(a *entities.AccessToken, isSandbox bool) error
-}
 
-type authRepository struct {
+type AuthRepository struct {
 	prodDB database.DatabaseManager
 	testDB database.DatabaseManager
 }
 
-func NewAuthRepository(prodDB, testDB database.DatabaseManager) AuthRepository {
-	return &authRepository{
+func NewAuthRepository(prodDB, testDB database.DatabaseManager) *AuthRepository {
+	return &AuthRepository{
 		prodDB: prodDB,
 		testDB: testDB,
 	}
 }
 
-func (r *authRepository) GetDB(isSandbox bool) database.DatabaseManager {
+func (r *AuthRepository) GetDB(isSandbox bool) database.DatabaseManager {
 	if isSandbox {
 		return r.testDB
 	}
 	return r.prodDB
 }
 
-func (r *authRepository) GetAccessTokens(a *entities.AccessToken, isSandbox bool) error {
+func (r *AuthRepository) GetAccessTokens(a *entities.AccessToken, isSandbox bool) error {
 	db := r.GetDB(isSandbox)
 	err := db.SelectFirstFromDb(&a)
 	if err != nil {
@@ -46,7 +36,7 @@ func (r *authRepository) GetAccessTokens(a *entities.AccessToken, isSandbox bool
 	return nil
 }
 
-func (r *authRepository) GetByOwnerID(a *entities.AccessToken, isSandbox bool) (int, error) {
+func (r *AuthRepository) GetByOwnerID(a *entities.AccessToken, isSandbox bool) (int, error) {
 	db := r.GetDB(isSandbox)
 	err, nilErr := db.SelectOneFromDb(db, &a, "owner_id = ? ", a.OwnerID)
 	if nilErr != nil {
@@ -59,7 +49,7 @@ func (r *authRepository) GetByOwnerID(a *entities.AccessToken, isSandbox bool) (
 	return http.StatusOK, nil
 }
 
-func (r *authRepository) GetByID(ID string, isSandbox bool) (entities.AccessToken, error) {
+func (r *AuthRepository) GetByID(ID string, isSandbox bool) (entities.AccessToken, error) {
 	db := r.GetDB(isSandbox)
 	var accessT entities.AccessToken
 
@@ -72,7 +62,7 @@ func (r *authRepository) GetByID(ID string, isSandbox bool) (entities.AccessToke
 	return accessT, nil
 }
 
-func (r *authRepository) GetByIDBoolean(a *entities.AccessToken, isSandbox bool) (int, error) {
+func (r *AuthRepository) GetByIDBoolean(a *entities.AccessToken, isSandbox bool) (int, error) {
 	db := r.GetDB(isSandbox)
 	err, nilErr := db.SelectOneFromDb(&a, "id = ? ", a.ID)
 	if nilErr != nil {
@@ -85,7 +75,7 @@ func (r *authRepository) GetByIDBoolean(a *entities.AccessToken, isSandbox bool)
 	return http.StatusOK, nil
 }
 
-func (r *authRepository) GetLatestByOwnerIDAndIsLive(a *entities.AccessToken, isSandbox bool) (int, error) {
+func (r *AuthRepository) GetLatestByOwnerIDAndIsLive(a *entities.AccessToken, isSandbox bool) (int, error) {
 	db := r.GetDB(isSandbox)
 	err, nilErr := db.SelectLatestFromDb(&a, "owner_id = ? and is_live = ? ", a.OwnerID, a.IsLive)
 	if nilErr != nil {
@@ -98,7 +88,7 @@ func (r *authRepository) GetLatestByOwnerIDAndIsLive(a *entities.AccessToken, is
 	return http.StatusOK, nil
 }
 
-func (r *authRepository) CreateAccessToken(a *entities.AccessToken, isSandbox bool, tokenData interface{}) error {
+func (r *AuthRepository) CreateAccessToken(a *entities.AccessToken, isSandbox bool, tokenData interface{}) error {
 	db := r.GetDB(isSandbox)
 	if a.OwnerID == "" {
 		return fmt.Errorf("owner id not provided to create access token")
@@ -123,7 +113,7 @@ func (r *authRepository) CreateAccessToken(a *entities.AccessToken, isSandbox bo
 	return nil
 }
 
-func (r *authRepository) RevokeAccessToken(a *entities.AccessToken, isSandbox bool) error {
+func (r *AuthRepository) RevokeAccessToken(a *entities.AccessToken, isSandbox bool) error {
 	db := r.GetDB(isSandbox)
 	if a.ID == "" {
 		return fmt.Errorf("access token id not provided to revoke access token")

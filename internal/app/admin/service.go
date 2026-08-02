@@ -16,29 +16,17 @@ import (
 	"strings"
 )
 
-type Service interface {
-	RegisterAdmin(req AdminRegisterDto, isSandbox bool) (int, error)
-	LoginAdmin(req AdminLoginRequestDto, isSandbox bool) (map[string]interface{}, int, error)
-	GetBusinesses(db database.DatabaseManager, search string, page, size int) ([]AdminBusinessResponseDto, *database.PaginationResponse, error)
-	GetAggregators(db database.DatabaseManager, search string, page, size int) ([]AdminBusinessResponseDto, *database.PaginationResponse, error)
-	GetInvoicesByBusiness(db database.DatabaseManager, businessID string, page, size int) ([]entities.MinimalInvoiceDTO, database.PaginationResponse, error)
-	GetInvoicesByAggregator(db database.DatabaseManager, aggregatorID string, page, size int) ([]entities.Invoice, *database.PaginationResponse, error)
-	GetTransactions(db database.DatabaseManager, page, size int) ([]AdminTransactionDto, *database.PaginationResponse, error)
-	GetInvoiceStats(db database.DatabaseManager) (*entities.InvoiceStatsResponseData, error)
-	GetBusinessStats(db database.DatabaseManager) (AdminBusinessStatsDto, error)
-}
-
-type service struct {
-	adminRepo        repositories.AdminRepository
-	authRepo         repositories.AuthRepository
-	businessRepo     repositories.BusinessRepository
-	aggregatorRepo   repositories.AggregatorRepository
-	invoiceRepo      repositories.InvoiceRepository
-	subscriptionRepo repositories.SubscriptionRepository
+type Service struct {
+	adminRepo        *repositories.AdminRepository
+	authRepo         *repositories.AuthRepository
+	businessRepo     *repositories.BusinessRepository
+	aggregatorRepo   *repositories.AggregatorRepository
+	invoiceRepo      *repositories.InvoiceRepository
+	subscriptionRepo *repositories.SubscriptionRepository
 	cfg              *config.Configuration
 }
 
-func NewServiceWithDB(prodDB, testDB database.DatabaseManager, cfg *config.Configuration) Service {
+func NewServiceWithDB(prodDB, testDB database.DatabaseManager, cfg *config.Configuration) *Service {
 	adminRepo := repositories.NewAdminRepository()
 	authRepo := repositories.NewAuthRepository(prodDB, testDB)
 	businessRepo := repositories.NewBusinessRepository(prodDB, testDB)
@@ -46,7 +34,7 @@ func NewServiceWithDB(prodDB, testDB database.DatabaseManager, cfg *config.Confi
 	invoiceRepo := repositories.NewInvoiceRepository(prodDB, testDB)
 	subscriptionRepo := repositories.NewSubscriptionRepository(prodDB, testDB)
 
-	return &service{
+	return &Service{
 		adminRepo:        adminRepo,
 		authRepo:         authRepo,
 		businessRepo:     businessRepo,
@@ -57,7 +45,7 @@ func NewServiceWithDB(prodDB, testDB database.DatabaseManager, cfg *config.Confi
 	}
 }
 
-func (s *service) RegisterAdmin(req AdminRegisterDto, isSandbox bool) (int, error) {
+func (s *Service) RegisterAdmin(req AdminRegisterDto, isSandbox bool) (int, error) {
 	db := s.authRepo.GetDB(isSandbox)
 
 	email := strings.ToLower(req.Email)
@@ -89,7 +77,7 @@ func (s *service) RegisterAdmin(req AdminRegisterDto, isSandbox bool) (int, erro
 	return http.StatusCreated, nil
 }
 
-func (s *service) LoginAdmin(req AdminLoginRequestDto, isSandbox bool) (map[string]interface{}, int, error) {
+func (s *Service) LoginAdmin(req AdminLoginRequestDto, isSandbox bool) (map[string]interface{}, int, error) {
 	db := s.authRepo.GetDB(isSandbox)
 
 	email := strings.ToLower(req.Email)
@@ -165,7 +153,7 @@ func buildPagination(page, size int, total int64) *database.PaginationResponse {
 	}
 }
 
-func (s *service) GetBusinesses(db database.DatabaseManager, search string, page, size int) ([]AdminBusinessResponseDto, *database.PaginationResponse, error) {
+func (s *Service) GetBusinesses(db database.DatabaseManager, search string, page, size int) ([]AdminBusinessResponseDto, *database.PaginationResponse, error) {
 	businesses, total, err := s.businessRepo.ListAllBusinesses(db, search, page, size)
 	if err != nil {
 		return nil, nil, err
@@ -173,7 +161,7 @@ func (s *service) GetBusinesses(db database.DatabaseManager, search string, page
 	return mapBusinessesToDto(businesses), buildPagination(page, size, total), nil
 }
 
-func (s *service) GetAggregators(db database.DatabaseManager, search string, page, size int) ([]AdminBusinessResponseDto, *database.PaginationResponse, error) {
+func (s *Service) GetAggregators(db database.DatabaseManager, search string, page, size int) ([]AdminBusinessResponseDto, *database.PaginationResponse, error) {
 	aggregators, total, err := s.aggregatorRepo.ListAllAggregators(db.DB(), search, page, size)
 	if err != nil {
 		return nil, nil, err
@@ -201,7 +189,7 @@ func mapTransactionsToDto(transactions []entities.Transaction) []AdminTransactio
 	return dtos
 }
 
-func (s *service) GetInvoicesByBusiness(db database.DatabaseManager, businessID string, page, size int) ([]entities.MinimalInvoiceDTO, database.PaginationResponse, error) {
+func (s *Service) GetInvoicesByBusiness(db database.DatabaseManager, businessID string, page, size int) ([]entities.MinimalInvoiceDTO, database.PaginationResponse, error) {
 	paginationQuery := database.Pagination{
 		Page:  page,
 		Limit: size,
@@ -209,7 +197,7 @@ func (s *service) GetInvoicesByBusiness(db database.DatabaseManager, businessID 
 	return s.invoiceRepo.FindMinimalInvoicesByBusinessID(db, businessID, paginationQuery)
 }
 
-func (s *service) GetInvoicesByAggregator(db database.DatabaseManager, aggregatorID string, page, size int) ([]entities.Invoice, *database.PaginationResponse, error) {
+func (s *Service) GetInvoicesByAggregator(db database.DatabaseManager, aggregatorID string, page, size int) ([]entities.Invoice, *database.PaginationResponse, error) {
 	invoices, total, err := s.aggregatorRepo.GetAllInvoicesByAggregator(db.DB(), aggregatorID, page, size)
 	if err != nil {
 		return nil, nil, err
@@ -217,7 +205,7 @@ func (s *service) GetInvoicesByAggregator(db database.DatabaseManager, aggregato
 	return invoices, buildPagination(page, size, total), nil
 }
 
-func (s *service) GetTransactions(db database.DatabaseManager, page, size int) ([]AdminTransactionDto, *database.PaginationResponse, error) {
+func (s *Service) GetTransactions(db database.DatabaseManager, page, size int) ([]AdminTransactionDto, *database.PaginationResponse, error) {
 	transactions, total, err := s.subscriptionRepo.ListAllTransactions(db, page, size)
 	if err != nil {
 		return nil, nil, err
@@ -225,11 +213,11 @@ func (s *service) GetTransactions(db database.DatabaseManager, page, size int) (
 	return mapTransactionsToDto(transactions), buildPagination(page, size, total), nil
 }
 
-func (s *service) GetInvoiceStats(db database.DatabaseManager) (*entities.InvoiceStatsResponseData, error) {
+func (s *Service) GetInvoiceStats(db database.DatabaseManager) (*entities.InvoiceStatsResponseData, error) {
 	return s.invoiceRepo.GetInvoiceStats(db.DB(), nil, nil)
 }
 
-func (s *service) GetBusinessStats(db database.DatabaseManager) (AdminBusinessStatsDto, error) {
+func (s *Service) GetBusinessStats(db database.DatabaseManager) (AdminBusinessStatsDto, error) {
 	var dto AdminBusinessStatsDto
 	totalBiz, totalAgg, err := s.businessRepo.GetSystemBusinessStats(db)
 	if err != nil {
