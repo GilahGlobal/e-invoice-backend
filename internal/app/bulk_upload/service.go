@@ -19,10 +19,10 @@ import (
 )
 
 type Service struct {
-	repo repositories.BulkUploadRepository
+	repo *repositories.BulkUploadRepository
 }
 
-func NewService(repo repositories.BulkUploadRepository) *Service {
+func NewService(repo *repositories.BulkUploadRepository) *Service {
 	return &Service{repo: repo}
 }
 

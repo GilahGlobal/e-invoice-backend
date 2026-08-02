@@ -835,6 +835,61 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new business and associates it with the calling aggregator",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Create a business under aggregator",
+                "parameters": [
+                    {
+                        "description": "Business details",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aggregator.CreateBusinessDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Business created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/aggregator.CreateBusinessResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
             }
         },
         "/aggregator/businesses/{id}": {
@@ -967,6 +1022,18 @@ const docTemplate = `{
                         "type": "file",
                         "description": "Crypto keys document (optional)",
                         "name": "file",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "IRN Public Key as string (optional)",
+                        "name": "irn_public_key",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "IRN Certificate as string (optional)",
+                        "name": "irn_certificate",
                         "in": "formData"
                     },
                     {
@@ -1241,6 +1308,67 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/aggregator/invoices/single/{invoice_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetches the full details of a specific invoice uploaded by the aggregator",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Aggregator Portal"
+                ],
+                "summary": "Get specific invoice details for aggregator",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Invoice ID",
+                        "name": "invoice_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice details fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/aggregator.AggregatorGetInvoiceResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -5126,6 +5254,26 @@ const docTemplate = `{
                 }
             }
         },
+        "aggregator.AggregatorGetInvoiceResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/entities.Invoice"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Invoice details fetched successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
         "aggregator.AggregatorInvitationDto": {
             "type": "object",
             "properties": {
@@ -5359,6 +5507,65 @@ const docTemplate = `{
                 "used_invoices": {
                     "type": "integer",
                     "example": 120
+                }
+            }
+        },
+        "aggregator.CreateBusinessDto": {
+            "type": "object",
+            "required": [
+                "company_name",
+                "email",
+                "name",
+                "password",
+                "phone_number",
+                "tin"
+            ],
+            "properties": {
+                "company_name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 2,
+                    "example": "Acme Inc."
+                },
+                "email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 2,
+                    "example": "John Doe"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "Password123!"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "123456789"
+                }
+            }
+        },
+        "aggregator.CreateBusinessResponseDto": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Business created successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 201
                 }
             }
         },

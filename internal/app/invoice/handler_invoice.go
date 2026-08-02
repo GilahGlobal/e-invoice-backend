@@ -187,7 +187,7 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 			response := map[string]interface{}{
 				"metadata": invoiceExists.StatusHistory,
 			}
-			
+
 			dataMap := map[string]interface{}{
 				"id":             invoiceExists.ID,
 				"invoice_number": invoiceExists.InvoiceNumber,
