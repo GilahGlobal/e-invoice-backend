@@ -892,70 +892,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/aggregator/businesses/{business_id}/profile": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Updates the cryptographic keys and service ID for a specific business managed by the aggregator",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Aggregator Portal"
-                ],
-                "summary": "Update business profile under aggregator",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Business ID",
-                        "name": "business_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Updated profile details",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/aggregator.UpdateBusinessProfileDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Business profile updated successfully",
-                        "schema": {
-                            "$ref": "#/definitions/aggregator.UpdateBusinessProfileResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/aggregator/businesses/{id}": {
             "get": {
                 "security": [
@@ -1086,6 +1022,18 @@ const docTemplate = `{
                         "type": "file",
                         "description": "Crypto keys document (optional)",
                         "name": "file",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "IRN Public Key as string (optional)",
+                        "name": "irn_public_key",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "IRN Certificate as string (optional)",
+                        "name": "irn_certificate",
                         "in": "formData"
                     },
                     {
@@ -5821,45 +5769,6 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string",
                     "example": "2026-01-01T12:00:00Z"
-                }
-            }
-        },
-        "aggregator.UpdateBusinessProfileDto": {
-            "type": "object",
-            "required": [
-                "irn_certificate",
-                "irn_public_key",
-                "service_id"
-            ],
-            "properties": {
-                "irn_certificate": {
-                    "type": "string",
-                    "example": "MIIFj..."
-                },
-                "irn_public_key": {
-                    "type": "string",
-                    "example": "MIIBI..."
-                },
-                "service_id": {
-                    "type": "string",
-                    "example": "6A2BC898"
-                }
-            }
-        },
-        "aggregator.UpdateBusinessProfileResponseDto": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "Business profile updated successfully"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "success"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 200
                 }
             }
         },

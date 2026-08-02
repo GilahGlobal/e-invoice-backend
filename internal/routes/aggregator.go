@@ -44,7 +44,6 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
 		businesses.Get("/:id/stats", controller.GetBusinessInvoiceStats)
 		businesses.Delete("/:id", controller.RemoveBusiness)
 		businesses.Patch("/:id", controller.UpdateBusinessSetup)
-		businesses.Put("/crypto-keys/:business_id", controller.UpdateBusinessProfile)
 	}
 
 	// Invoices

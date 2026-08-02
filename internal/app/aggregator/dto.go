@@ -21,23 +21,12 @@ type CreateBusinessDto struct {
 	TIN         string `json:"tin" example:"123456789" validate:"required,numeric"`
 }
 
-type UpdateBusinessProfileDto struct {
-	ServiceID      string `json:"service_id" example:"6A2BC898" validate:"required"`
-	IRNPublicKey   string `json:"irn_public_key" example:"MIIBI..." validate:"required"`
-	IRNCertificate string `json:"irn_certificate" example:"MIIFj..." validate:"required"`
-}
-
 type CreateBusinessResponseDto struct {
 	Status     string `json:"status" example:"success"`
 	StatusCode int    `json:"status_code" example:"201"`
 	Message    string `json:"message" example:"Business created successfully"`
 }
 
-type UpdateBusinessProfileResponseDto struct {
-	Status     string `json:"status" example:"success"`
-	StatusCode int    `json:"status_code" example:"200"`
-	Message    string `json:"message" example:"Business profile updated successfully"`
-}
 
 type RespondToInvitationDto struct {
 	InvitationID string `json:"invitation_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"required,uuid"`
@@ -219,8 +208,10 @@ type AggregatorTransactionListResponseDto struct {
 }
 
 type AggregatorUpdateBusinessSetupDto struct {
-	ServiceID  *string `json:"service_id" example:"6A2BC898" validate:"omitempty"`
-	BusinessID *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"omitempty,uuid"`
+	ServiceID      *string `json:"service_id" example:"6A2BC898" validate:"omitempty"`
+	BusinessID     *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"omitempty,uuid"`
+	IRNPublicKey   *string `json:"irn_public_key" example:"public-key-content" validate:"omitempty"`
+	IRNCertificate *string `json:"irn_certificate" example:"certificate-content" validate:"omitempty"`
 }
 
 type SendAggregatorInvitationByEmailDto struct {

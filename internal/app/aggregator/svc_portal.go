@@ -330,7 +330,7 @@ func (s *Service) ListAllTransactions(aggregatorID string, page, size int, db *g
 	return result, buildPagination(page, size, total), nil
 }
 
-func (s *Service) UpdateBusinessSetup(db *gorm.DB, businessID string, req AggregatorUpdateBusinessSetupDto) error {
+func (s *Service) UpdateBusinessSetup(db *gorm.DB, businessID string, req AggregatorUpdateBusinessSetupDto, aggregatorID string) error {
 	updates := make(map[string]interface{})
 
 	if req.ServiceID != nil {
@@ -339,13 +339,34 @@ func (s *Service) UpdateBusinessSetup(db *gorm.DB, businessID string, req Aggreg
 	if req.BusinessID != nil {
 		updates["business_id"] = *req.BusinessID
 	}
+	if req.IRNPublicKey != nil {
+		encryptedPublicKey, err := common.EncryptAES(*req.IRNPublicKey)
+		if err != nil {
+			return fmt.Errorf("failed to encrypt IRN public key: %w", err)
+		}
+		updates["irn_public_key"] = common.EncryptedString(encryptedPublicKey)
+		updates["keys_set"] = true
+	}
+	if req.IRNCertificate != nil {
+		encryptedCertificate, err := common.EncryptAES(*req.IRNCertificate)
+		if err != nil {
+			return fmt.Errorf("failed to encrypt IRN certificate: %w", err)
+		}
+		updates["irn_certificate"] = common.EncryptedString(encryptedCertificate)
+		updates["keys_set"] = true
+	}
 
 	if len(updates) == 0 {
 		return nil
 	}
 
-	if err := db.Model(&entities.Business{}).Where("id = ?", businessID).Updates(updates).Error; err != nil {
-		return fmt.Errorf("failed to update business setup: %w", err)
+	result := db.Model(&entities.Business{}).Where("id = ? AND aggregator_id = ? AND created_by_aggregator = ?", businessID, aggregatorID, true).Updates(updates)
+	if result.Error != nil {
+		return fmt.Errorf("failed to update business setup: %w", result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("business not found or you do not have permission to update its setup (only businesses created by you can be updated)")
 	}
 
 	return nil
@@ -401,45 +422,16 @@ func (s *Service) CreateBusiness(db *gorm.DB, req CreateBusinessDto, aggregatorI
 		APIKey:        common.EncryptedString(encryptedAPIKey),
 		APIKeyHash:    apiKeyHashStr,
 		CompanyName:   req.CompanyName,
-		PhoneNumber:   req.PhoneNumber,
-		TIN:           req.TIN,
-		IsAggregator:  false,
-		EmailVerified: true,
-		AggregatorID:  &aggregatorID,
+		PhoneNumber:         req.PhoneNumber,
+		TIN:                 req.TIN,
+		IsAggregator:        false,
+		CreatedByAggregator: true,
+		EmailVerified:       true,
+		AggregatorID:        &aggregatorID,
 	}
 
 	if err := db.Create(&business).Error; err != nil {
 		return fmt.Errorf("failed to create business: %w", err)
-	}
-
-	return nil
-}
-
-func (s *Service) UpdateBusinessProfile(db *gorm.DB, businessID string, req UpdateBusinessProfileDto, aggregatorID string) error {
-	var business entities.Business
-	if err := db.Where("id = ? AND aggregator_id = ?", businessID, aggregatorID).First(&business).Error; err != nil {
-		return fmt.Errorf("business not found or not managed by this aggregator")
-	}
-
-	encryptedPublicKey, err := common.EncryptAES(req.IRNPublicKey)
-	if err != nil {
-		return fmt.Errorf("failed to encrypt IRN public key: %w", err)
-	}
-
-	encryptedCertificate, err := common.EncryptAES(req.IRNCertificate)
-	if err != nil {
-		return fmt.Errorf("failed to encrypt IRN certificate: %w", err)
-	}
-
-	updateData := map[string]interface{}{
-		"service_id":      req.ServiceID,
-		"irn_public_key":  common.EncryptedString(encryptedPublicKey),
-		"irn_certificate": common.EncryptedString(encryptedCertificate),
-		"keys_set":        true,
-	}
-
-	if err := db.Model(&business).Updates(updateData).Error; err != nil {
-		return fmt.Errorf("failed to update business profile: %w", err)
 	}
 
 	return nil
