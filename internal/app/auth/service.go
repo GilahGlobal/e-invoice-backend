@@ -24,34 +24,18 @@ import (
 	"gorm.io/gorm"
 )
 
-type Service interface {
-	ResendVerificationOTP(email string, isSandbox bool) error
-	ValidateCreateUserRequest(req RegisterDto) (RegisterDto, error)
-	CreateUser(req RegisterDto, isSandbox bool) (int, error)
-	LoginUser(req LoginRequestDto, isSandbox bool) (map[string]interface{}, int, error)
-	LogoutUser(accessUuid, ownerId string, isSandbox bool) (map[string]interface{}, int, error)
-	InitiateForgotPassword(req InitiateForgotPasswordDto, isSandbox bool) error
-	InitiateForgotPasswordAcrossEnvironments(req InitiateForgotPasswordDto) error
-	ChangePassword(userID string, req ChangePasswordDto, isSandbox bool) error
-	CompleteForgotPasswordAcrossEnvironments(req CompleteForgotPasswordDto) error
-	ToggleApplicationMode(email string, isSandbox bool) (map[string]interface{}, int, error)
-	SynchronizeSandboxToProduction(email string) error
-	VerifyBusinessAccount(req VerifyEmailDto, isSandbox bool) (map[string]interface{}, error)
-	VerifyProdBuisnessAccount(req VerifyEmailDto) error
-	SendOtp(email, key string)
-}
 
-type service struct {
-	repo         repositories.AuthRepository
-	businessRepo repositories.BusinessRepository
+type Service struct {
+	repo         *repositories.AuthRepository
+	businessRepo *repositories.BusinessRepository
 	cfg          *config.Configuration
 }
 
-func NewService(repo repositories.AuthRepository, businessRepo repositories.BusinessRepository, cfg *config.Configuration) Service {
-	return &service{repo: repo, businessRepo: businessRepo, cfg: cfg}
+func NewService(repo *repositories.AuthRepository, businessRepo *repositories.BusinessRepository, cfg *config.Configuration) *Service {
+	return &Service{repo: repo, businessRepo: businessRepo, cfg: cfg}
 }
 
-func NewServiceWithDB(prodDB, testDB database.DatabaseManager, cfg *config.Configuration) Service {
+func NewServiceWithDB(prodDB, testDB database.DatabaseManager, cfg *config.Configuration) *Service {
 	repo := repositories.NewAuthRepository(prodDB, testDB)
 	businessRepo := repositories.NewBusinessRepository(prodDB, testDB)
 	return NewService(repo, businessRepo, cfg)
@@ -65,7 +49,7 @@ func VerifyEmailKey(email string) string {
 	return "verify_email_otp_" + email
 }
 
-func (s *service) ResendVerificationOTP(email string, isSandbox bool) error {
+func (s *Service) ResendVerificationOTP(email string, isSandbox bool) error {
 	db := s.repo.GetDB(isSandbox)
 	normalizedEmail := strings.ToLower(strings.TrimSpace(email))
 	user := entities.Business{}
@@ -86,7 +70,7 @@ func (s *service) ResendVerificationOTP(email string, isSandbox bool) error {
 	return nil
 }
 
-func (s *service) ValidateCreateUserRequest(req RegisterDto) (RegisterDto, error) {
+func (s *Service) ValidateCreateUserRequest(req RegisterDto) (RegisterDto, error) {
 	devDb := s.repo.GetDB(true)
 	prodDb := s.repo.GetDB(false)
 	business := entities.Business{}
@@ -119,7 +103,7 @@ func (s *service) ValidateCreateUserRequest(req RegisterDto) (RegisterDto, error
 	return req, nil
 }
 
-func (s *service) CreateUser(req RegisterDto, isSandbox bool) (int, error) {
+func (s *Service) CreateUser(req RegisterDto, isSandbox bool) (int, error) {
 	db := s.repo.GetDB(isSandbox)
 	serverSecret := s.cfg.Server.Secret
 	email := strings.ToLower(req.Email)
@@ -225,7 +209,7 @@ func (s *service) CreateUser(req RegisterDto, isSandbox bool) (int, error) {
 	return http.StatusCreated, nil
 }
 
-func (s *service) LoginUser(req LoginRequestDto, isSandbox bool) (map[string]interface{}, int, error) {
+func (s *Service) LoginUser(req LoginRequestDto, isSandbox bool) (map[string]interface{}, int, error) {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
 	db := s.repo.GetDB(isSandbox)
@@ -287,7 +271,7 @@ func (s *service) LoginUser(req LoginRequestDto, isSandbox bool) (map[string]int
 	return responseData, http.StatusOK, nil
 }
 
-func (s *service) LogoutUser(accessUuid, ownerId string, isSandbox bool) (map[string]interface{}, int, error) {
+func (s *Service) LogoutUser(accessUuid, ownerId string, isSandbox bool) (map[string]interface{}, int, error) {
 	var responseData map[string]interface{}
 	accessToken := entities.AccessToken{ID: accessUuid, OwnerID: ownerId}
 
@@ -300,7 +284,7 @@ func (s *service) LogoutUser(accessUuid, ownerId string, isSandbox bool) (map[st
 	return responseData, http.StatusOK, nil
 }
 
-func (s *service) InitiateForgotPassword(req InitiateForgotPasswordDto, isSandbox bool) error {
+func (s *Service) InitiateForgotPassword(req InitiateForgotPasswordDto, isSandbox bool) error {
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	db := s.repo.GetDB(isSandbox)
 	user := entities.Business{}
@@ -318,7 +302,7 @@ func (s *service) InitiateForgotPassword(req InitiateForgotPasswordDto, isSandbo
 	return nil
 }
 
-func (s *service) InitiateForgotPasswordAcrossEnvironments(req InitiateForgotPasswordDto) error {
+func (s *Service) InitiateForgotPasswordAcrossEnvironments(req InitiateForgotPasswordDto) error {
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 
 	for _, isSandbox := range []bool{false, true} {
@@ -347,7 +331,7 @@ func (s *service) InitiateForgotPasswordAcrossEnvironments(req InitiateForgotPas
 	return fmt.Errorf("account details cannot be retrieved")
 }
 
-func (s *service) ChangePassword(userID string, req ChangePasswordDto, isSandbox bool) error {
+func (s *Service) ChangePassword(userID string, req ChangePasswordDto, isSandbox bool) error {
 	db := s.repo.GetDB(isSandbox)
 	user, err := s.businessRepo.FindUserByID(db, userID)
 	if err != nil {
@@ -375,7 +359,7 @@ func (s *service) ChangePassword(userID string, req ChangePasswordDto, isSandbox
 	return nil
 }
 
-func (s *service) CompleteForgotPasswordAcrossEnvironments(req CompleteForgotPasswordDto) error {
+func (s *Service) CompleteForgotPasswordAcrossEnvironments(req CompleteForgotPasswordDto) error {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
 	email := strings.ToLower(strings.TrimSpace(req.Email))
@@ -437,7 +421,7 @@ func (s *service) CompleteForgotPasswordAcrossEnvironments(req CompleteForgotPas
 	return nil
 }
 
-func (s *service) ToggleApplicationMode(email string, isSandbox bool) (map[string]interface{}, int, error) {
+func (s *Service) ToggleApplicationMode(email string, isSandbox bool) (map[string]interface{}, int, error) {
 	db := s.repo.GetDB(isSandbox)
 	userData, err := s.businessRepo.GetUserByEmail(db, email)
 	if err != nil {
@@ -477,7 +461,7 @@ func (s *service) ToggleApplicationMode(email string, isSandbox bool) (map[strin
 	return responseData, http.StatusOK, nil
 }
 
-func (s *service) SynchronizeSandboxToProduction(email string) error {
+func (s *Service) SynchronizeSandboxToProduction(email string) error {
 	pDB := s.repo.GetDB(false)
 	sDB := s.repo.GetDB(true)
 
@@ -569,7 +553,7 @@ func (s *service) SynchronizeSandboxToProduction(email string) error {
 	return nil
 }
 
-func (s *service) VerifyBusinessAccount(req VerifyEmailDto, isSandbox bool) (map[string]interface{}, error) {
+func (s *Service) VerifyBusinessAccount(req VerifyEmailDto, isSandbox bool) (map[string]interface{}, error) {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
 	db := s.repo.GetDB(isSandbox)
@@ -641,7 +625,7 @@ func (s *service) VerifyBusinessAccount(req VerifyEmailDto, isSandbox bool) (map
 	return responseData, nil
 }
 
-func (s *service) VerifyProdBuisnessAccount(req VerifyEmailDto) error {
+func (s *Service) VerifyProdBuisnessAccount(req VerifyEmailDto) error {
 	db := s.repo.GetDB(false)
 
 	email := strings.ToLower(strings.TrimSpace(req.Email))
@@ -663,7 +647,7 @@ func (s *service) VerifyProdBuisnessAccount(req VerifyEmailDto) error {
 	return nil
 }
 
-func (s *service) SendOtp(email, key string) {
+func (s *Service) SendOtp(email, key string) {
 	redisClient := redis.NewClient()
 	ctx := redisClient.Context()
 	otp, _ := utility.GenerateOTP(6)

@@ -10,40 +10,16 @@ import (
 	"gorm.io/gorm"
 )
 
-type AggregatorRepository interface {
-	GetAggregatorByID(db *gorm.DB, id string) (*entities.Business, error)
-	ListAllAggregators(db *gorm.DB, search string, page, size int) ([]entities.Business, int64, error)
-	CreateInvitation(invitation *entities.AggregatorInvitation, db *gorm.DB) error
-	GetInvitationByID(db *gorm.DB, id string) (*entities.AggregatorInvitation, error)
-	GetInvitationByToken(db *gorm.DB, token string) (*entities.AggregatorInvitation, error)
-	UpdateInvitation(invitation *entities.AggregatorInvitation, db *gorm.DB) error
-	ListPendingInvitationsByAggregator(db *gorm.DB, aggregatorID string) ([]entities.AggregatorInvitation, error)
-	ListInvitationsByBusiness(db *gorm.DB, businessID string) ([]entities.AggregatorInvitation, error)
-	CheckExistingActiveInvitation(db *gorm.DB, businessID, aggregatorID string) (*entities.AggregatorInvitation, error)
-	CheckBusinessHasAggregator(db *gorm.DB, businessID string) (bool, error)
-	GetAcceptedBusinesses(db *gorm.DB, aggregatorID string, page, size int, search string) ([]entities.Business, int64, error)
-	GetBusinessStatsForAggregator(db *gorm.DB, aggregatorID, businessID string) (totalInvoices, totalBulkUploads int64, err error)
-	GetInvoicesByAggregatorAndBusiness(db *gorm.DB, aggregatorID, businessID string, page, size int) ([]entities.Invoice, int64, error)
-	GetAllInvoicesByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]entities.Invoice, int64, error)
-	GetBulkUploadsByAggregatorAndBusiness(db *gorm.DB, aggregatorID, businessID string, page, size int) ([]entities.BulkUpload, int64, error)
-	GetAllBulkUploadsByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]entities.BulkUpload, int64, error)
-	GetBulkUploadByIDForAggregator(db *gorm.DB, aggregatorID, bulkUploadID string) (*entities.BulkUpload, error)
-	CreateActivityLog(log *entities.AggregatorActivityLog, db *gorm.DB) error
-	GetActivityLogs(db *gorm.DB, aggregatorID string, page, size int) ([]entities.AggregatorActivityLog, int64, error)
-	GetDashboardStats(db *gorm.DB, aggregatorID string) (totalBiz, pendingInvites, totalInvoices, totalBulkUploads int64, err error)
-	GetTransactionsByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]entities.Transaction, int64, error)
-}
-
-type aggregatorRepository struct {
+type AggregatorRepository struct {
 	prodDb database.DatabaseManager
 	testDb database.DatabaseManager
 }
 
-func NewAggregatorRepository(prodDb, testDb database.DatabaseManager) AggregatorRepository {
-	return &aggregatorRepository{prodDb: prodDb, testDb: testDb}
+func NewAggregatorRepository(prodDb, testDb database.DatabaseManager) *AggregatorRepository {
+	return &AggregatorRepository{prodDb: prodDb, testDb: testDb}
 }
 
-func (r *aggregatorRepository) GetAggregatorByID(db *gorm.DB, id string) (*entities.Business, error) {
+func (r *AggregatorRepository) GetAggregatorByID(db *gorm.DB, id string) (*entities.Business, error) {
 	var aggregator entities.Business
 	err := db.Where("id = ?", id).First(&aggregator).Error
 	if err != nil {
@@ -52,7 +28,7 @@ func (r *aggregatorRepository) GetAggregatorByID(db *gorm.DB, id string) (*entit
 	return &aggregator, nil
 }
 
-func (r *aggregatorRepository) ListAllAggregators(db *gorm.DB, search string, page, size int) ([]entities.Business, int64, error) {
+func (r *AggregatorRepository) ListAllAggregators(db *gorm.DB, search string, page, size int) ([]entities.Business, int64, error) {
 	var aggregators []entities.Business
 	var total int64
 
@@ -75,11 +51,11 @@ func (r *aggregatorRepository) ListAllAggregators(db *gorm.DB, search string, pa
 	return aggregators, total, nil
 }
 
-func (r *aggregatorRepository) CreateInvitation(invitation *entities.AggregatorInvitation, db *gorm.DB) error {
+func (r *AggregatorRepository) CreateInvitation(invitation *entities.AggregatorInvitation, db *gorm.DB) error {
 	return db.Create(invitation).Error
 }
 
-func (r *aggregatorRepository) GetInvitationByID(db *gorm.DB, id string) (*entities.AggregatorInvitation, error) {
+func (r *AggregatorRepository) GetInvitationByID(db *gorm.DB, id string) (*entities.AggregatorInvitation, error) {
 	var invitation entities.AggregatorInvitation
 	err := db.Where("id = ?", id).First(&invitation).Error
 	if err != nil {
@@ -91,7 +67,7 @@ func (r *aggregatorRepository) GetInvitationByID(db *gorm.DB, id string) (*entit
 	return &invitation, nil
 }
 
-func (r *aggregatorRepository) GetInvitationByToken(db *gorm.DB, token string) (*entities.AggregatorInvitation, error) {
+func (r *AggregatorRepository) GetInvitationByToken(db *gorm.DB, token string) (*entities.AggregatorInvitation, error) {
 	var invitation entities.AggregatorInvitation
 	err := db.Preload("Business").Where("invite_token = ?", token).First(&invitation).Error
 	if err != nil {
@@ -103,11 +79,11 @@ func (r *aggregatorRepository) GetInvitationByToken(db *gorm.DB, token string) (
 	return &invitation, nil
 }
 
-func (r *aggregatorRepository) UpdateInvitation(invitation *entities.AggregatorInvitation, db *gorm.DB) error {
+func (r *AggregatorRepository) UpdateInvitation(invitation *entities.AggregatorInvitation, db *gorm.DB) error {
 	return db.Save(invitation).Error
 }
 
-func (r *aggregatorRepository) ListPendingInvitationsByAggregator(db *gorm.DB, aggregatorID string) ([]entities.AggregatorInvitation, error) {
+func (r *AggregatorRepository) ListPendingInvitationsByAggregator(db *gorm.DB, aggregatorID string) ([]entities.AggregatorInvitation, error) {
 	var invitations []entities.AggregatorInvitation
 	err := db.Where("aggregator_id = ? AND status = ?", aggregatorID, entities.InvitationStatusPending).
 		Order("created_at DESC").
@@ -115,7 +91,7 @@ func (r *aggregatorRepository) ListPendingInvitationsByAggregator(db *gorm.DB, a
 	return invitations, err
 }
 
-func (r *aggregatorRepository) ListInvitationsByBusiness(db *gorm.DB, businessID string) ([]entities.AggregatorInvitation, error) {
+func (r *AggregatorRepository) ListInvitationsByBusiness(db *gorm.DB, businessID string) ([]entities.AggregatorInvitation, error) {
 	var invitations []entities.AggregatorInvitation
 	err := db.Where("business_id = ?", businessID).
 		Order("created_at DESC").
@@ -123,7 +99,7 @@ func (r *aggregatorRepository) ListInvitationsByBusiness(db *gorm.DB, businessID
 	return invitations, err
 }
 
-func (r *aggregatorRepository) CheckExistingActiveInvitation(db *gorm.DB, businessID, aggregatorID string) (*entities.AggregatorInvitation, error) {
+func (r *AggregatorRepository) CheckExistingActiveInvitation(db *gorm.DB, businessID, aggregatorID string) (*entities.AggregatorInvitation, error) {
 	var invitation entities.AggregatorInvitation
 	err := db.Where("business_id = ? AND aggregator_id = ? AND status IN ?", businessID, aggregatorID,
 		[]string{entities.InvitationStatusPending, entities.InvitationStatusAccepted}).
@@ -137,7 +113,7 @@ func (r *aggregatorRepository) CheckExistingActiveInvitation(db *gorm.DB, busine
 	return &invitation, nil
 }
 
-func (r *aggregatorRepository) CheckBusinessHasAggregator(db *gorm.DB, businessID string) (bool, error) {
+func (r *AggregatorRepository) CheckBusinessHasAggregator(db *gorm.DB, businessID string) (bool, error) {
 	var count int64
 	err := db.Model(&entities.AggregatorInvitation{}).
 		Where("business_id = ? AND status = ?", businessID, entities.InvitationStatusAccepted).
@@ -145,7 +121,7 @@ func (r *aggregatorRepository) CheckBusinessHasAggregator(db *gorm.DB, businessI
 	return count > 0, err
 }
 
-func (r *aggregatorRepository) GetAcceptedBusinesses(db *gorm.DB, aggregatorID string, page, size int, search string) ([]entities.Business, int64, error) {
+func (r *AggregatorRepository) GetAcceptedBusinesses(db *gorm.DB, aggregatorID string, page, size int, search string) ([]entities.Business, int64, error) {
 	var businesses []entities.Business
 	var total int64
 
@@ -168,7 +144,7 @@ func (r *aggregatorRepository) GetAcceptedBusinesses(db *gorm.DB, aggregatorID s
 	return businesses, total, nil
 }
 
-func (r *aggregatorRepository) GetBusinessStatsForAggregator(db *gorm.DB, aggregatorID, businessID string) (totalInvoices, totalBulkUploads int64, err error) {
+func (r *AggregatorRepository) GetBusinessStatsForAggregator(db *gorm.DB, aggregatorID, businessID string) (totalInvoices, totalBulkUploads int64, err error) {
 	invoiceQuery := db.Model(&entities.Invoice{}).Where("aggregator_id = ? AND business_id = ?", aggregatorID, businessID)
 	bulkUploadQuery := db.Model(&entities.BulkUpload{}).Where("aggregator_id = ? AND business_id = ?", aggregatorID, businessID)
 
@@ -191,7 +167,7 @@ func (r *aggregatorRepository) GetBusinessStatsForAggregator(db *gorm.DB, aggreg
 	return
 }
 
-func (r *aggregatorRepository) GetInvoicesByAggregatorAndBusiness(db *gorm.DB, aggregatorID, businessID string, page, size int) ([]entities.Invoice, int64, error) {
+func (r *AggregatorRepository) GetInvoicesByAggregatorAndBusiness(db *gorm.DB, aggregatorID, businessID string, page, size int) ([]entities.Invoice, int64, error) {
 	var invoices []entities.Invoice
 	var total int64
 
@@ -209,7 +185,7 @@ func (r *aggregatorRepository) GetInvoicesByAggregatorAndBusiness(db *gorm.DB, a
 	return invoices, total, nil
 }
 
-func (r *aggregatorRepository) GetAllInvoicesByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]entities.Invoice, int64, error) {
+func (r *AggregatorRepository) GetAllInvoicesByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]entities.Invoice, int64, error) {
 	var invoices []entities.Invoice
 	var total int64
 
@@ -227,7 +203,7 @@ func (r *aggregatorRepository) GetAllInvoicesByAggregator(db *gorm.DB, aggregato
 	return invoices, total, nil
 }
 
-func (r *aggregatorRepository) GetBulkUploadsByAggregatorAndBusiness(db *gorm.DB, aggregatorID, businessID string, page, size int) ([]entities.BulkUpload, int64, error) {
+func (r *AggregatorRepository) GetBulkUploadsByAggregatorAndBusiness(db *gorm.DB, aggregatorID, businessID string, page, size int) ([]entities.BulkUpload, int64, error) {
 	var uploads []entities.BulkUpload
 	var total int64
 
@@ -245,7 +221,7 @@ func (r *aggregatorRepository) GetBulkUploadsByAggregatorAndBusiness(db *gorm.DB
 	return uploads, total, nil
 }
 
-func (r *aggregatorRepository) GetAllBulkUploadsByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]entities.BulkUpload, int64, error) {
+func (r *AggregatorRepository) GetAllBulkUploadsByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]entities.BulkUpload, int64, error) {
 	var uploads []entities.BulkUpload
 	var total int64
 
@@ -263,7 +239,7 @@ func (r *aggregatorRepository) GetAllBulkUploadsByAggregator(db *gorm.DB, aggreg
 	return uploads, total, nil
 }
 
-func (r *aggregatorRepository) GetBulkUploadByIDForAggregator(db *gorm.DB, aggregatorID, bulkUploadID string) (*entities.BulkUpload, error) {
+func (r *AggregatorRepository) GetBulkUploadByIDForAggregator(db *gorm.DB, aggregatorID, bulkUploadID string) (*entities.BulkUpload, error) {
 	var bulkUpload entities.BulkUpload
 	err := db.Where("id = ? AND aggregator_id = ?", bulkUploadID, aggregatorID).First(&bulkUpload).Error
 	if err != nil {
@@ -276,11 +252,11 @@ func (r *aggregatorRepository) GetBulkUploadByIDForAggregator(db *gorm.DB, aggre
 	return &bulkUpload, nil
 }
 
-func (r *aggregatorRepository) CreateActivityLog(log *entities.AggregatorActivityLog, db *gorm.DB) error {
+func (r *AggregatorRepository) CreateActivityLog(log *entities.AggregatorActivityLog, db *gorm.DB) error {
 	return db.Create(log).Error
 }
 
-func (r *aggregatorRepository) GetActivityLogs(db *gorm.DB, aggregatorID string, page, size int) ([]entities.AggregatorActivityLog, int64, error) {
+func (r *AggregatorRepository) GetActivityLogs(db *gorm.DB, aggregatorID string, page, size int) ([]entities.AggregatorActivityLog, int64, error) {
 	var logs []entities.AggregatorActivityLog
 	var total int64
 
@@ -298,7 +274,7 @@ func (r *aggregatorRepository) GetActivityLogs(db *gorm.DB, aggregatorID string,
 	return logs, total, nil
 }
 
-func (r *aggregatorRepository) GetDashboardStats(db *gorm.DB, aggregatorID string) (totalBiz, pendingInvites, totalInvoices, totalBulkUploads int64, err error) {
+func (r *AggregatorRepository) GetDashboardStats(db *gorm.DB, aggregatorID string) (totalBiz, pendingInvites, totalInvoices, totalBulkUploads int64, err error) {
 	if err = db.Model(&entities.Business{}).Where("aggregator_id = ?", aggregatorID).Count(&totalBiz).Error; err != nil {
 		return
 	}
@@ -314,7 +290,7 @@ func (r *aggregatorRepository) GetDashboardStats(db *gorm.DB, aggregatorID strin
 	return
 }
 
-func (r *aggregatorRepository) GetTransactionsByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]entities.Transaction, int64, error) {
+func (r *AggregatorRepository) GetTransactionsByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]entities.Transaction, int64, error) {
 	var transactions []entities.Transaction
 	var total int64
 

@@ -7,22 +7,16 @@ import (
 	"einvoice-access-point/internal/data/entities"
 )
 
-type TokenRepository interface {
-	FindToken(db database.DatabaseManager, provider, orgID string) (*entities.TokenManager, error)
-	SaveNewZohoToken(db database.DatabaseManager, provider, orgID, accessToken, refreshToken string, expiresIn int) error
-	UpdateZohoToken(db database.DatabaseManager, provider, orgID, accessToken, refreshToken string, expiresIn int) error
-}
-
-type tokenRepository struct {
+type TokenRepository struct {
 	prodDb database.DatabaseManager
 	testDb database.DatabaseManager
 }
 
-func NewTokenRepository(prodDb, testDb database.DatabaseManager) TokenRepository {
-	return &tokenRepository{prodDb: prodDb, testDb: testDb}
+func NewTokenRepository(prodDb, testDb database.DatabaseManager) *TokenRepository {
+	return &TokenRepository{prodDb: prodDb, testDb: testDb}
 }
 
-func (r *tokenRepository) FindToken(db database.DatabaseManager, provider, orgID string) (*entities.TokenManager, error) {
+func (r *TokenRepository) FindToken(db database.DatabaseManager, provider, orgID string) (*entities.TokenManager, error) {
 	var token entities.TokenManager
 	if err := db.DB().Where("provider = ? AND organization_id = ?", provider, orgID).
 		First(&token).Error; err != nil {
@@ -31,7 +25,7 @@ func (r *tokenRepository) FindToken(db database.DatabaseManager, provider, orgID
 	return &token, nil
 }
 
-func (r *tokenRepository) SaveNewZohoToken(db database.DatabaseManager, provider, orgID, accessToken, refreshToken string, expiresIn int) error {
+func (r *TokenRepository) SaveNewZohoToken(db database.DatabaseManager, provider, orgID, accessToken, refreshToken string, expiresIn int) error {
 	zohoToken := entities.TokenManager{
 		Provider:       provider,
 		OrganizationID: orgID,
@@ -43,7 +37,7 @@ func (r *tokenRepository) SaveNewZohoToken(db database.DatabaseManager, provider
 	return db.DB().Create(&zohoToken).Error
 }
 
-func (r *tokenRepository) UpdateZohoToken(db database.DatabaseManager, provider, orgID, accessToken, refreshToken string, expiresIn int) error {
+func (r *TokenRepository) UpdateZohoToken(db database.DatabaseManager, provider, orgID, accessToken, refreshToken string, expiresIn int) error {
 	var zohoToken entities.TokenManager
 	if err := db.DB().Where("provider = ? AND organization_id = ?", provider, orgID).First(&zohoToken).Error; err != nil {
 		return err

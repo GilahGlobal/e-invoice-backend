@@ -13,36 +13,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type BusinessRepository interface {
-	FindUserByID(db database.DatabaseManager, id string) (*entities.Business, error)
-	GetBusinessByIDForAggregator(db database.DatabaseManager, aggregatorID, businessID string) (*entities.Business, error)
-	GetUserByEmail(db database.DatabaseManager, userEmail string) (entities.Business, error)
-	FindUserByKey(db database.DatabaseManager, apiKey string) (*entities.Business, error)
-	FindByEmailAndAPIKey(db database.DatabaseManager, username, apiKey string) (*entities.Business, error)
-	FindBusinessByPlatformOrgID(db database.DatabaseManager, platform, orgID string) (*entities.Business, error)
-	FindAllBusinesses(db database.DatabaseManager) ([]entities.Business, error)
-	ListAllBusinesses(db database.DatabaseManager, search string, page, size int) ([]entities.Business, int64, error)
-	GetSystemBusinessStats(db database.DatabaseManager) (int64, int64, error)
-	FindBusinessByID(db database.DatabaseManager, id string) (*entities.Business, error)
-	CreateBusiness(b *entities.Business, db database.DatabaseManager) error
-	UpdateAUser(b *entities.Business, db database.DatabaseManager) error
-	DeleteAUser(b *entities.Business, db database.DatabaseManager) error
-	GenerateUniqueServiceID(db *gorm.DB) string
-}
-
-type businessRepository struct {
+type BusinessRepository struct {
 	prodDB database.DatabaseManager
 	testDB database.DatabaseManager
 }
 
-func NewBusinessRepository(prodDB, testDB database.DatabaseManager) BusinessRepository {
-	return &businessRepository{
+func NewBusinessRepository(prodDB, testDB database.DatabaseManager) *BusinessRepository {
+	return &BusinessRepository{
 		prodDB: prodDB,
 		testDB: testDB,
 	}
 }
 
-func (r *businessRepository) CreateBusiness(b *entities.Business, db database.DatabaseManager) error {
+func (r *BusinessRepository) CreateBusiness(b *entities.Business, db database.DatabaseManager) error {
 	err := db.CreateOneRecord(&b)
 	if err != nil {
 		return err
@@ -50,12 +33,12 @@ func (r *businessRepository) CreateBusiness(b *entities.Business, db database.Da
 	return nil
 }
 
-func (r *businessRepository) UpdateAUser(b *entities.Business, db database.DatabaseManager) error {
+func (r *BusinessRepository) UpdateAUser(b *entities.Business, db database.DatabaseManager) error {
 	_, err := db.SaveAllFields(&b)
 	return err
 }
 
-func (r *businessRepository) DeleteAUser(b *entities.Business, db database.DatabaseManager) error {
+func (r *BusinessRepository) DeleteAUser(b *entities.Business, db database.DatabaseManager) error {
 	err := db.DeleteRecordFromDb(&b)
 
 	if err != nil {
@@ -65,7 +48,7 @@ func (r *businessRepository) DeleteAUser(b *entities.Business, db database.Datab
 	return nil
 }
 
-func (r *businessRepository) GenerateUniqueServiceID(db *gorm.DB) string {
+func (r *BusinessRepository) GenerateUniqueServiceID(db *gorm.DB) string {
 	var existingCount int64
 	serviceID := utility.GenerateRandomServiceID()
 
@@ -80,7 +63,7 @@ func (r *businessRepository) GenerateUniqueServiceID(db *gorm.DB) string {
 	return serviceID
 }
 
-func (r *businessRepository) FindUserByID(db database.DatabaseManager, id string) (*entities.Business, error) {
+func (r *BusinessRepository) FindUserByID(db database.DatabaseManager, id string) (*entities.Business, error) {
 	var user entities.Business
 	err := db.DB().Where("id = ? AND acc_status = ?", id, 0).First(&user).Error
 	if err != nil {
@@ -92,7 +75,7 @@ func (r *businessRepository) FindUserByID(db database.DatabaseManager, id string
 	return &user, nil
 }
 
-func (r *businessRepository) GetUserByEmail(db database.DatabaseManager, userEmail string) (entities.Business, error) {
+func (r *BusinessRepository) GetUserByEmail(db database.DatabaseManager, userEmail string) (entities.Business, error) {
 	var user entities.Business
 
 	query := db.DB().Where("email = ?", userEmail)
@@ -107,7 +90,7 @@ func (r *businessRepository) GetUserByEmail(db database.DatabaseManager, userEma
 	return user, nil
 }
 
-func (r *businessRepository) FindUserByKey(db database.DatabaseManager, apiKey string) (*entities.Business, error) {
+func (r *BusinessRepository) FindUserByKey(db database.DatabaseManager, apiKey string) (*entities.Business, error) {
 	apiKeyHash := sha256.Sum256([]byte(apiKey))
 	apiKeyHashStr := hex.EncodeToString(apiKeyHash[:])
 
@@ -121,7 +104,7 @@ func (r *businessRepository) FindUserByKey(db database.DatabaseManager, apiKey s
 	return &user, nil
 }
 
-func (r *businessRepository) FindByEmailAndAPIKey(db database.DatabaseManager, username, apiKey string) (*entities.Business, error) {
+func (r *BusinessRepository) FindByEmailAndAPIKey(db database.DatabaseManager, username, apiKey string) (*entities.Business, error) {
 	apiKeyHash := sha256.Sum256([]byte(apiKey))
 	apiKeyHashStr := hex.EncodeToString(apiKeyHash[:])
 
@@ -136,7 +119,7 @@ func (r *businessRepository) FindByEmailAndAPIKey(db database.DatabaseManager, u
 	return &user, nil
 }
 
-func (r *businessRepository) FindBusinessByPlatformOrgID(db database.DatabaseManager, platform, orgID string) (*entities.Business, error) {
+func (r *BusinessRepository) FindBusinessByPlatformOrgID(db database.DatabaseManager, platform, orgID string) (*entities.Business, error) {
 	var business entities.Business
 	fmt.Printf("plat: %s, org: %s\n", platform, orgID)
 	err := db.DB().Debug().Raw(
@@ -151,7 +134,7 @@ func (r *businessRepository) FindBusinessByPlatformOrgID(db database.DatabaseMan
 	return &business, nil
 }
 
-func (r *businessRepository) FindAllBusinesses(db database.DatabaseManager) ([]entities.Business, error) {
+func (r *BusinessRepository) FindAllBusinesses(db database.DatabaseManager) ([]entities.Business, error) {
 	var businesses []entities.Business
 	query := db.DB().Where("acc_status = ?", 0)
 	query = db.PreloadEntities(query, &entities.Business{}, "Invoices")
@@ -169,7 +152,7 @@ func (r *businessRepository) FindAllBusinesses(db database.DatabaseManager) ([]e
 	return businesses, nil
 }
 
-func (r *businessRepository) ListAllBusinesses(db database.DatabaseManager, search string, page, size int) ([]entities.Business, int64, error) {
+func (r *BusinessRepository) ListAllBusinesses(db database.DatabaseManager, search string, page, size int) ([]entities.Business, int64, error) {
 	var businesses []entities.Business
 	var total int64
 
@@ -198,7 +181,7 @@ func (r *businessRepository) ListAllBusinesses(db database.DatabaseManager, sear
 	return businesses, total, nil
 }
 
-func (r *businessRepository) FindBusinessByID(db database.DatabaseManager, id string) (*entities.Business, error) {
+func (r *BusinessRepository) FindBusinessByID(db database.DatabaseManager, id string) (*entities.Business, error) {
 	var business entities.Business
 	query := db.DB().Where("id = ? AND acc_status = ?", id, 0)
 	query = db.PreloadEntities(query, &entities.Business{}, "Invoices")
@@ -214,7 +197,7 @@ func (r *businessRepository) FindBusinessByID(db database.DatabaseManager, id st
 	return &business, nil
 }
 
-func (r *businessRepository) GetBusinessByIDForAggregator(db database.DatabaseManager, aggregatorID, businessID string) (*entities.Business, error) {
+func (r *BusinessRepository) GetBusinessByIDForAggregator(db database.DatabaseManager, aggregatorID, businessID string) (*entities.Business, error) {
 	var business entities.Business
 	err := db.DB().Where("id = ? AND aggregator_id = ?", businessID, aggregatorID).First(&business).Error
 	if err != nil {
@@ -223,7 +206,7 @@ func (r *businessRepository) GetBusinessByIDForAggregator(db database.DatabaseMa
 	return &business, nil
 }
 
-func (r *businessRepository) GetSystemBusinessStats(db database.DatabaseManager) (int64, int64, error) {
+func (r *BusinessRepository) GetSystemBusinessStats(db database.DatabaseManager) (int64, int64, error) {
 	var totalBusinesses, totalAggregators int64
 
 	if err := db.DB().Model(&entities.Business{}).Where("is_aggregator = ?", false).Count(&totalBusinesses).Error; err != nil {

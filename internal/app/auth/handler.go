@@ -17,7 +17,7 @@ import (
 type Handler struct {
 	validator *validator.Validate
 	logger    *utility.Logger
-	svc       Service
+	svc       *Service
 }
 
 func NewHandler(validator *validator.Validate, logger *utility.Logger, cfg *config.Configuration, db, testDb *database.Database) *Handler {

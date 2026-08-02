@@ -10,7 +10,6 @@ import (
 	"einvoice-access-point/internal/utility"
 	"einvoice-access-point/internal/workers"
 	"einvoice-access-point/internal/workers/producer"
-	"io"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -594,6 +593,7 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 
 	invoiceSvc := h.invoiceSvc
 	invoiceExists, _ := invoiceSvc.GetInvoiceByInvoiceNumber(db, req.InvoiceNumber, businessID)
+
 	if invoiceExists != nil {
 		blockedStatuses := map[string]bool{
 			entities.StatusSignedInvoice: true,
@@ -601,16 +601,33 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 			entities.StatusConfirmed:     true,
 		}
 		if blockedStatuses[invoiceExists.CurrentStatus] {
-			return apperror.New(fiber.StatusBadRequest, "error", "invoice with the same invoice number already exists and cannot be overwritten", nil, nil)
+			response := map[string]interface{}{
+				"metadata": invoiceExists.StatusHistory,
+			}
+
+			dataMap := map[string]interface{}{
+				"id":             invoiceExists.ID,
+				"invoice_number": invoiceExists.InvoiceNumber,
+				"irn":            invoiceExists.IRN,
+				"qr_code":        invoiceExists.QrCode,
+				"qr_code_2":      invoiceExists.EncryptedIRN,
+			}
+			if invoiceExists.QrCodeBmpUrl != "" {
+				dataMap["qr_code_bmp_url"] = invoiceExists.QrCodeBmpUrl
+			}
+			response["data"] = dataMap
+
+			rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice previously uploaded successfully", response)
+			return c.Status(fiber.StatusOK).JSON(rd)
 		}
 	}
 
 	reservedSubscriptionID := ""
 	if invoiceExists == nil {
-		reservedSubscriptionID, status, err = h.subSvc.ReserveAggregatorInvoiceQuota(db, userDetails.ID, businessID, 1)
-		if err != nil {
-			return apperror.New(status, "error", err.Error(), err, nil)
-		}
+		// reservedSubscriptionID, status, err = h.subSvc.ReserveAggregatorInvoiceQuota(db, userDetails.ID, businessID, 1)
+		// if err != nil {
+		// 	return apperror.New(status, "error", err.Error(), err, nil)
+		// }
 	}
 
 	var irnPayload InvoiceData
@@ -658,7 +675,7 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		_ = h.subSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
 	}
 
-	response := map[string]interface{}{"irn": irnPayload}
+	response := map[string]interface{}{}
 	if createdInvoice != nil {
 		response["metadata"] = createdInvoice.StatusHistory
 	}
@@ -824,86 +841,7 @@ func (h *Handler) ListAllTransactions(c *fiber.Ctx) error {
 // @Failure 404 {object} entities.Response "Business not found"
 // @Failure 500 {object} entities.Response "Internal server error"
 // @Router /aggregator/businesses/{id} [patch]
-func (h *Handler) UpdateBusinessSetup(c *fiber.Ctx) error {
-	userDetails, err := middleware.GetUserDetails(c)
-	if err != nil {
-		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
-	}
 
-	businessID := c.Params("id")
-	if businessID == "" {
-		return apperror.New(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
-	}
-
-	// Parse optional form fields
-	serviceID := c.FormValue("service_id")
-	fBusinessID := c.FormValue("business_id")
-	file, fileErr := c.FormFile("file")
-
-	hasFile := fileErr == nil && file != nil
-	hasServiceID := serviceID != ""
-	hasBusinessID := fBusinessID != ""
-
-	if !hasFile && !hasServiceID && !hasBusinessID {
-		return apperror.New(fiber.StatusBadRequest, "error", "at least one of file, service_id, or business_id must be provided", nil, nil)
-	}
-
-	db, err := middleware.GetDatabase(c)
-	if err != nil {
-		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
-	}
-
-	// Verify that this business belongs to the aggregator
-	business, status, err := h.svc.GetBusinessDetail(userDetails.ID, businessID, db)
-	if err != nil {
-		return apperror.New(status, "error", err.Error(), err, nil)
-	}
-
-	activityDetails := "Updated setup for business " + business.CompanyName + ":"
-
-	// Handle crypto keys upload
-	if hasFile {
-		openedFile, err := file.Open()
-		if err != nil {
-			return apperror.New(fiber.StatusBadRequest, "error", "failed to open crypto keys file", err, nil)
-		}
-		defer openedFile.Close()
-
-		fileContent, err := io.ReadAll(openedFile)
-		if err != nil {
-			return apperror.New(fiber.StatusBadRequest, "error", "failed to read crypto keys file", err, nil)
-		}
-
-		if err := h.businessSvc.SaveBusinessIRNSigningKeys(db, businessID, fileContent); err != nil {
-			return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
-		}
-
-		activityDetails += " crypto_keys=uploaded"
-	}
-
-	// Handle service_id and business_id updates
-	if hasServiceID || hasBusinessID {
-		var req AggregatorUpdateBusinessSetupDto
-		if hasServiceID {
-			req.ServiceID = &serviceID
-			activityDetails += " service_id=" + serviceID
-		}
-		if hasBusinessID {
-			req.BusinessID = &fBusinessID
-			activityDetails += " business_id=" + fBusinessID
-		}
-
-		if err := h.svc.UpdateBusinessSetup(db, businessID, req); err != nil {
-			return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
-		}
-	}
-
-	// Log activity
-	h.svc.LogActivity(db, userDetails.ID, businessID, entities.ActivityBusinessSetupUpdate, activityDetails)
-
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business setup updated successfully", nil)
-	return c.Status(fiber.StatusOK).JSON(rd)
-}
 
 // GetInvoiceStats godoc
 // @Summary Get invoice statistics for aggregator
@@ -969,5 +907,44 @@ func (h *Handler) GetBusinessInvoiceStats(c *fiber.Ctx) error {
 	}
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business invoice statistics fetched successfully", stats)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// GetInvoiceDetail godoc
+// @Summary Get specific invoice details for aggregator
+// @Description Fetches the full details of a specific invoice uploaded by the aggregator
+// @Tags Aggregator Portal
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param invoice_id path string true "Invoice ID"
+// @Success 200 {object} AggregatorGetInvoiceResponseDto "Invoice details fetched successfully"
+// @Failure 400 {object} entities.Response "Bad request"
+// @Failure 401 {object} entities.Response "Unauthorized"
+// @Failure 404 {object} entities.Response "Not found"
+// @Failure 500 {object} entities.Response "Internal server error"
+// @Router /aggregator/invoices/single/{invoice_id} [get]
+func (h *Handler) GetInvoiceDetail(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	invoiceID := c.Params("invoice_id")
+	if invoiceID == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "invoice_id is required", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	invoice, err := h.svc.GetInvoiceDetail(userDetails.ID, invoiceID, db)
+	if err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", err.Error(), nil, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice details fetched successfully", invoice)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }

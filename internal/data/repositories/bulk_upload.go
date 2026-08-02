@@ -10,31 +10,23 @@ import (
 	"gorm.io/gorm"
 )
 
-type BulkUploadRepository interface {
-	CreateBulkUploadLog(db database.DatabaseManager, payload *entities.BulkUpload) error
-	GetBulkUploadLogByID(db database.DatabaseManager, id, businessID string) (*entities.BulkUpload, error)
-	UpdateBulkUploadLog(db database.DatabaseManager, bulkID, businessID string, payload *entities.BulkUpload) error
-	FindBulkUploadLogsByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]entities.BulkUpload, database.PaginationResponse, error)
-	FindInvoiceByNumberAndBusinessID(db database.DatabaseManager, invoiceNumber string, businessID string) (*entities.Invoice, error)
-}
-
-type bulkUploadRepository struct {
+type BulkUploadRepository struct {
 	db     database.DatabaseManager
 	testDB database.DatabaseManager
 }
 
-func NewBulkUploadRepository(db, testDB database.DatabaseManager) BulkUploadRepository {
-	return &bulkUploadRepository{
+func NewBulkUploadRepository(db, testDB database.DatabaseManager) *BulkUploadRepository {
+	return &BulkUploadRepository{
 		db:     db,
 		testDB: testDB,
 	}
 }
 
-func (r *bulkUploadRepository) CreateBulkUploadLog(db database.DatabaseManager, payload *entities.BulkUpload) error {
+func (r *BulkUploadRepository) CreateBulkUploadLog(db database.DatabaseManager, payload *entities.BulkUpload) error {
 	return db.DB().Create(payload).Error
 }
 
-func (r *bulkUploadRepository) GetBulkUploadLogByID(db database.DatabaseManager, id, businessID string) (*entities.BulkUpload, error) {
+func (r *BulkUploadRepository) GetBulkUploadLogByID(db database.DatabaseManager, id, businessID string) (*entities.BulkUpload, error) {
 	var bulkUpload entities.BulkUpload
 	err := db.DB().Where("id = ? AND business_id = ?", id, businessID).First(&bulkUpload).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -46,12 +38,12 @@ func (r *bulkUploadRepository) GetBulkUploadLogByID(db database.DatabaseManager,
 	return &bulkUpload, nil
 }
 
-func (r *bulkUploadRepository) UpdateBulkUploadLog(db database.DatabaseManager, bulkID, businessID string, payload *entities.BulkUpload) error {
+func (r *BulkUploadRepository) UpdateBulkUploadLog(db database.DatabaseManager, bulkID, businessID string, payload *entities.BulkUpload) error {
 	result := db.DB().Model(&entities.BulkUpload{}).Where("id = ? AND business_id = ?", bulkID, businessID).Updates(payload)
 	return result.Error
 }
 
-func (r *bulkUploadRepository) FindBulkUploadLogsByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]entities.BulkUpload, database.PaginationResponse, error) {
+func (r *BulkUploadRepository) FindBulkUploadLogsByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]entities.BulkUpload, database.PaginationResponse, error) {
 	var result []entities.BulkUpload
 
 	if pagination.Page <= 0 {
@@ -93,7 +85,7 @@ func (r *bulkUploadRepository) FindBulkUploadLogsByBusinessID(db database.Databa
 	}, nil
 }
 
-func (r *bulkUploadRepository) FindInvoiceByNumberAndBusinessID(db database.DatabaseManager, invoiceNumber string, businessID string) (*entities.Invoice, error) {
+func (r *BulkUploadRepository) FindInvoiceByNumberAndBusinessID(db database.DatabaseManager, invoiceNumber string, businessID string) (*entities.Invoice, error) {
 	var invoice entities.Invoice
 	err := db.DB().Where("invoice_number = ? AND business_id = ?", invoiceNumber, businessID).First(&invoice).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
