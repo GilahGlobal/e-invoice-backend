@@ -945,6 +945,10 @@ func (h *Handler) GetInvoiceDetail(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusNotFound, "error", err.Error(), nil, nil)
 	}
 
+	if invoice != nil && invoice.EncryptedIRN != "" {
+		invoice.QrCode = invoice.EncryptedIRN
+	}
+
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice details fetched successfully", invoice)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }

@@ -171,7 +171,7 @@ func (s *Service) ListInvoicesByBusiness(aggregatorID, businessID string, page, 
 			PaymentStatus: inv.PaymentStatus,
 			StatusText:    inv.CurrentStatus,
 			QrCodeBmpUrl:  inv.QrCodeBmpUrl,
-			QrCode:        inv.QrCode,
+			QrCode:        inv.EncryptedIRN,
 			CreatedAt:     inv.CreatedAt,
 		})
 	}
@@ -196,7 +196,7 @@ func (s *Service) ListAllInvoices(aggregatorID string, page, size int, db *gorm.
 			PaymentStatus: inv.PaymentStatus,
 			StatusText:    inv.CurrentStatus,
 			QrCodeBmpUrl:  inv.QrCodeBmpUrl,
-			QrCode:        inv.QrCode,
+			QrCode:        inv.EncryptedIRN,
 			CreatedAt:     inv.CreatedAt,
 		})
 	}
@@ -415,13 +415,13 @@ func (s *Service) CreateBusiness(db *gorm.DB, req CreateBusinessDto, aggregatorI
 	apiKeyHashStr := hex.EncodeToString(apiKeyHash[:])
 
 	business := entities.Business{
-		ID:            utility.GenerateUUID(),
-		Name:          name,
-		Email:         email,
-		Password:      password,
-		APIKey:        common.EncryptedString(encryptedAPIKey),
-		APIKeyHash:    apiKeyHashStr,
-		CompanyName:   req.CompanyName,
+		ID:                  utility.GenerateUUID(),
+		Name:                name,
+		Email:               email,
+		Password:            password,
+		APIKey:              common.EncryptedString(encryptedAPIKey),
+		APIKeyHash:          apiKeyHashStr,
+		CompanyName:         req.CompanyName,
 		PhoneNumber:         req.PhoneNumber,
 		TIN:                 req.TIN,
 		IsAggregator:        false,

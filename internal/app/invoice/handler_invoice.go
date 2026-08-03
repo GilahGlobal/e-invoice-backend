@@ -88,6 +88,10 @@ func (h *Handler) GetInvoiceDetails(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 	}
 
+	if invoice != nil && invoice.EncryptedIRN != "" {
+		invoice.QrCode = invoice.EncryptedIRN
+	}
+
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice details fetched successfully", invoice)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
@@ -192,7 +196,7 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 				"id":             invoiceExists.ID,
 				"invoice_number": invoiceExists.InvoiceNumber,
 				"irn":            invoiceExists.IRN,
-				"qr_code":        invoiceExists.QrCode,
+				"qr_code":        invoiceExists.EncryptedIRN,
 				"qr_code_2":      invoiceExists.EncryptedIRN,
 			}
 			if invoiceExists.QrCodeBmpUrl != "" {
@@ -228,7 +232,7 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 			irnPayload = InvoiceData{
 				InvoiceNumber: req.InvoiceNumber,
 				IRN:           *req.IRN,
-				QRCode:        invoiceExists.QrCode,
+				QRCode:        invoiceExists.EncryptedIRN,
 				QRCode2:       invoiceExists.EncryptedIRN,
 				QRCodeBMP:     "",
 			}
@@ -374,7 +378,7 @@ func (h *Handler) ModifyInvoice(c *fiber.Ctx) error {
 			"id":             replacedInvoice.ID,
 			"invoice_number": irnData.InvoiceNumber,
 			"irn":            irnData.IRN,
-			"qr_code":        irnData.QRCode2,
+			"qr_code":        irnData.QRCode,
 		}
 		if qrCodeBMPURL != "" {
 			dataMap["qr_code_bmp_url"] = qrCodeBMPURL

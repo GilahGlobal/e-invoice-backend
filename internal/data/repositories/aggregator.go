@@ -178,7 +178,7 @@ func (r *AggregatorRepository) GetInvoicesByAggregatorAndBusiness(db *gorm.DB, a
 	}
 
 	offset := (page - 1) * size
-	if err := query.Offset(offset).Limit(size).Order("created_at DESC").Find(&invoices).Error; err != nil {
+	if err := query.Select("*, encrypted_irn AS qr_code").Offset(offset).Limit(size).Order("created_at DESC").Find(&invoices).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -196,7 +196,7 @@ func (r *AggregatorRepository) GetAllInvoicesByAggregator(db *gorm.DB, aggregato
 	}
 
 	offset := (page - 1) * size
-	if err := query.Offset(offset).Limit(size).Order("created_at DESC").Find(&invoices).Error; err != nil {
+	if err := query.Select("*, encrypted_irn AS qr_code").Offset(offset).Limit(size).Order("created_at DESC").Find(&invoices).Error; err != nil {
 		return nil, 0, err
 	}
 
