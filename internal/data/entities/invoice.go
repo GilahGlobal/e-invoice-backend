@@ -69,9 +69,9 @@ type MinimalInvoiceDTO struct {
 	CurrentStatus string    `json:"current_status"`
 	PaymentStatus string    `json:"payment_status"`
 	StatusText    string    `json:"status_text"`
-	QrCodeBmpUrl  string    `json:"qr_code_bmp_url"`
-	QrCode        string    `json:"qr_code"`
-	CreatedAt     time.Time `json:"created_at"`
+	QrCodeBmpUrl  string    `json:"qr_code_bmp_url" gorm:"column:qr_code_bmp_url"`
+	QrCode        string    `json:"qr_code" gorm:"column:qr_code"`
+	CreatedAt     time.Time `json:"created_at" gorm:"column:created_at"`
 }
 
 type InvoiceStatsDto struct {
