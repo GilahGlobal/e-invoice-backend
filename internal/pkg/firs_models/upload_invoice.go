@@ -25,7 +25,7 @@ type UploadInvoiceRequestDto struct {
 	ContractDocumentReference   *DocumentReference     `json:"contract_document_reference" validate:"omitempty"`
 	AdditionalDocumentReference []DocumentReference    `json:"additional_document_reference" validate:"omitempty,dive"`
 	AccountingSupplierParty     Party                  `json:"accounting_supplier_party" validate:"required"`
-	AccountingCustomerParty     *Party                 `json:"accounting_customer_party" validate:"omitempty"`
+	AccountingCustomerParty     *Party                 `json:"accounting_customer_party" validate:"-"`
 	PayeeParty                  *Party                 `json:"payee_party" validate:"omitempty"`
 	TaxRepresentativeParty      *Party                 `json:"tax_representative_party" validate:"omitempty"`
 	ActualDeliveryDate          *string                `json:"actual_delivery_date" example:"2026-01-16" validate:"omitempty,nrsdate"`
