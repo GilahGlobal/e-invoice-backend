@@ -139,7 +139,7 @@ func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(db database.Database
 		current_status,
 		payment_status,
 		qr_code_bmp_url,
-		encrypted_irn AS qr_code,
+		qr_code,
 		CASE
 			WHEN current_status IN ('signed_invoice', 'transmitted_invoice')
 				THEN 'partial_success'
@@ -206,6 +206,14 @@ func (r *InvoiceRepository) UpdateInvoice(db database.DatabaseManager, invoiceNu
 
 func (r *InvoiceRepository) UpdateInvoiceDataByID(db database.DatabaseManager, invoiceID string, invoiceData []byte) error {
 	result := db.DB().Model(&entities.Invoice{}).Where("id = ?", invoiceID).Update("invoice_data", invoiceData)
+	return result.Error
+}
+
+func (r *InvoiceRepository) UpdateInvoiceDataAndPaymentStatusByID(db database.DatabaseManager, invoiceID string, invoiceData []byte, paymentStatus string) error {
+	result := db.DB().Model(&entities.Invoice{}).Where("id = ?", invoiceID).Updates(map[string]interface{}{
+		"invoice_data":   invoiceData,
+		"payment_status": paymentStatus,
+	})
 	return result.Error
 }
 

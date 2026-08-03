@@ -140,7 +140,7 @@ func (s *Service) IRNGeneration(db *gorm.DB, ownerID, invoiceNumber, serviceId, 
 		InvoiceNumber: invoiceNumber,
 		IRN:           *generatedIRN,
 		QRCode:        signedIRNResponse.EncryptedIRN,
-		QRCode2:       signedIRNResponse.QrCodeImage,
+		QRCode2:       signedIRNResponse.EncryptedIRN,
 		QRCodeBMP:     signedIRNResponse.QrCodeImageBMP,
 	}, nil
 }
@@ -227,7 +227,7 @@ func (s *Service) UpdateStoredInvoicePaymentStatus(db *gorm.DB, businessID, irn,
 		return fmt.Errorf("failed to marshal invoice data: %w", err)
 	}
 
-	if err := s.repo.UpdateInvoiceDataByID(pdb, invoiceRecord.ID, updatedInvoiceData); err != nil {
+	if err := s.repo.UpdateInvoiceDataAndPaymentStatusByID(pdb, invoiceRecord.ID, updatedInvoiceData, paymentStatus); err != nil {
 		return fmt.Errorf("failed to update local invoice record: %w", err)
 	}
 

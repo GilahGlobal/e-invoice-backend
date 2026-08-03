@@ -339,7 +339,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		invoicePayload.IRN = &irnPayload.IRN
 	} else {
 		irnPayload = dtos.InvoiceData{
-			QRCode:  invoiceExists.QrCode,
+			QRCode:  invoiceExists.EncryptedIRN,
 			QRCode2: invoiceExists.EncryptedIRN,
 		}
 		invoicePayload.IRN = &invoiceExists.IRN
