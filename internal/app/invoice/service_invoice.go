@@ -139,8 +139,8 @@ func (s *Service) IRNGeneration(db *gorm.DB, ownerID, invoiceNumber, serviceId, 
 	return &InvoiceData{
 		InvoiceNumber: invoiceNumber,
 		IRN:           *generatedIRN,
-		QRCode:        signedIRNResponse.QrCodeImage,
-		QRCode2:       signedIRNResponse.EncryptedIRN,
+		QRCode:        signedIRNResponse.EncryptedIRN,
+		QRCode2:       signedIRNResponse.QrCodeImage,
 		QRCodeBMP:     signedIRNResponse.QrCodeImageBMP,
 	}, nil
 }
