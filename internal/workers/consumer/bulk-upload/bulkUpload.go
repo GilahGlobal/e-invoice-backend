@@ -8,7 +8,6 @@ import (
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/entities"
 	"einvoice-access-point/internal/middleware"
-	"einvoice-access-point/internal/pkg/s3"
 	"einvoice-access-point/internal/pkg/cloudinary"
 	"einvoice-access-point/internal/utility"
 	"einvoice-access-point/internal/workers"
@@ -88,11 +87,11 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 
 	var fileBytes []byte
 	var downloadErr error
-	fileBytes, downloadErr = s3.DownloadFileFromS3(ctx, payload.FileKey)
+	fileBytes, downloadErr = cloudinary.DownloadRawFile(ctx, payload.FileKey)
 
 	if downloadErr != nil {
 		log.Println(downloadErr)
-		return fmt.Errorf("failed to download file from S3 after %d attempts: %w", maxRetries, downloadErr)
+		return fmt.Errorf("failed to download file from Cloudinary after %d attempts: %w", maxRetries, downloadErr)
 	}
 
 	// 3. Parse file content

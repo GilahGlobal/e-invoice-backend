@@ -8,7 +8,7 @@ import (
 	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/data/entities"
 	"einvoice-access-point/internal/middleware"
-	"einvoice-access-point/internal/pkg/s3"
+	"einvoice-access-point/internal/pkg/cloudinary"
 	"einvoice-access-point/internal/utility"
 	"einvoice-access-point/internal/workers"
 	"einvoice-access-point/internal/workers/producer"
@@ -228,9 +228,9 @@ func (h *Handler) CreateInvoice(c *fiber.Ctx) error {
 	defer fileContent.Close()
 
 	ctx := context.Background()
-	fileURL, fileKey, err := s3.UploadFileToS3(ctx, fileContent, file)
+	fileURL, fileKey, err := cloudinary.UploadRawFile(ctx, fileContent, file.Filename)
 	if err != nil {
-		log.Println("S3 upload failed:", err)
+		log.Println("Cloudinary upload failed:", err)
 		return c.Status(500).JSON(fiber.Map{"error": "upload failed"})
 	}
 
