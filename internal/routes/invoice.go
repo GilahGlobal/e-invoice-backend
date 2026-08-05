@@ -9,21 +9,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.App {
+func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	invoiceController := invoice.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB, c.Keys)
 
 	invoiceUrlSec := app.Group(fmt.Sprintf("%v/invoice", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()), middleware.SelectDatabaseFromClaims(c.DB, c.TestDB))
 	// invoiceUrlSec := app.Group(fmt.Sprintf("%v/invoice", ApiVersion), middleware.Authorize(nil, testDb.Postgresql.DB()))
-
-	webhookUrl := app.Group(fmt.Sprintf("%v/webhook", ApiVersion))
-	{
-		webhookUrl.Post("/firs", invoiceController.FirsWebhook)
-	}
-
-	invoiceUrlUnSec := app.Group(fmt.Sprintf("%v/zoho", ApiVersion), middleware.SelectSandboxDatabase(c.DB, c.TestDB))
-	{
-		invoiceUrlUnSec.Post("/webhook", invoiceController.HandleZohoWebhook)
-	}
 	{
 		invoiceUrlSec.Get("/stats", invoiceController.GetInvoiceStats)
 		invoiceUrlSec.Get("", invoiceController.GetAllInvoices)
@@ -55,6 +45,4 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.A
 		transmit.Get("/health-check", invoiceController.DebugHealthCheck)
 
 	}
-
-	return app
 }

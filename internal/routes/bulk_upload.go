@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func BulkUploadRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.App {
+func BulkUploadRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	handler := bulk_upload.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB)
 
 	bulkUrlSec := app.Group(fmt.Sprintf("%v/invoice", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()), middleware.SelectDatabaseFromClaims(c.DB, c.TestDB))
@@ -20,6 +20,4 @@ func BulkUploadRoute(app *fiber.App, ApiVersion string, c *core.Container) *fibe
 		bulkUpload.Get("/:bulk_id/failed/download", handler.DownloadBulkUploadFailedInvoices)
 	}
 	bulkUrlSec.Post("/create", handler.CreateInvoice)
-
-	return app
 }

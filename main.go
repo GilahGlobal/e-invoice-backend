@@ -15,20 +15,25 @@ import (
 	"log"
 	"os"
 
-	"github.com/go-playground/validator/v10"
-
 	"einvoice-access-point/internal/config"
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/database/postgresql"
 	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/data/migrations"
 	"einvoice-access-point/internal/data/seed"
+	"einvoice-access-point/internal/middleware"
 	"einvoice-access-point/internal/routes"
 	"einvoice-access-point/internal/utility"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/goccy/go-json"
+	"github.com/gofiber/adaptor/v2"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
-
 	logger := utility.NewLogger()
 	if !logger.IsInitialized() {
 		panic("Logger initialization failed: logger is nil")
@@ -64,7 +69,40 @@ func main() {
 		}
 	}
 
-	app := routes.Setup(logger, validatorRef, db, testDb, keys)
+	app := fiber.New(fiber.Config{
+		Prefork:                 false,
+		AppName:                 "eInvoice Firs Backend",
+		JSONEncoder:             json.Marshal,
+		JSONDecoder:             json.Unmarshal,
+		ServerHeader:            "Golang Fiber",
+		EnableTrustedProxyCheck: true,
+		BodyLimit:               3 << 20,
+		ErrorHandler:            middleware.GlobalErrorHandler,
+	})
+
+	app.Use(recover.New(recover.Config{
+		EnableStackTrace: false,
+		StackTraceHandler: func(c *fiber.Ctx, e interface{}) {
+			errMsg := "Unknown error"
+			if err, ok := e.(error); ok {
+				errMsg = err.Error()
+			} else if msg, ok := e.(string); ok {
+				errMsg = msg
+			}
+
+			rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "Internal Server Error", errMsg, nil, nil)
+
+			_ = c.Status(fiber.StatusInternalServerError).JSON(rd)
+		},
+	}))
+
+	app.Use(middleware.CORS())
+	app.Use(middleware.Security())
+	app.Use(middleware.Logger())
+	app.Use(middleware.Metrics(configuration))
+	app.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
+
+	routes.Setup(app, logger, validatorRef, db, testDb, keys)
 
 	host := os.Getenv("HOST")
 	port := os.Getenv("PORT")

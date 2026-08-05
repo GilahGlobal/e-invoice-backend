@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func AuthRoute(app *fiber.App, ApiVersion string, container *core.Container) *fiber.App {
+func AuthRoute(app *fiber.App, ApiVersion string, container *core.Container) {
 	authController := auth.NewHandler(container.Validator, container.Logger, container.Config, container.DB, container.TestDB)
 
 	authGroup := app.Group(fmt.Sprintf("%v/auth", ApiVersion))
@@ -27,6 +27,4 @@ func AuthRoute(app *fiber.App, ApiVersion string, container *core.Container) *fi
 		authUrlSec.Get("/toggle-mode", authController.ToggleApplicationMode)
 		authUrlSec.Post("/change-password", authController.ChangePassword)
 	}
-
-	return app
 }

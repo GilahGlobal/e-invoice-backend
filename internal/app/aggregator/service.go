@@ -1,12 +1,28 @@
 package aggregator
 
 import (
+	"crypto/sha256"
 	"einvoice-access-point/internal/app/bulk_upload"
 	"einvoice-access-point/internal/app/business"
 	"einvoice-access-point/internal/app/subscription"
+	"einvoice-access-point/internal/common"
 	"einvoice-access-point/internal/config"
 	"einvoice-access-point/internal/data/database"
+	"einvoice-access-point/internal/data/dbinit"
+	"einvoice-access-point/internal/data/entities"
 	"einvoice-access-point/internal/data/repositories"
+	"einvoice-access-point/internal/pkg/resend_email"
+	"einvoice-access-point/internal/utility"
+	"encoding/hex"
+	"errors"
+	"fmt"
+	"math"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type Service struct {
@@ -24,4 +40,717 @@ func NewService(repo *repositories.AggregatorRepository, subSvc *subscription.Se
 func NewServiceWithDB(prodDb, testDb database.DatabaseManager, subSvc *subscription.Service, businessSvc *business.Service, bulkUploadSvc *bulk_upload.Service, cfg *config.Configuration) *Service {
 	repo := repositories.NewAggregatorRepository(prodDb, testDb)
 	return NewService(repo, subSvc, businessSvc, bulkUploadSvc, cfg)
+}
+
+func buildPagination(page, size int, total int64) *database.PaginationResponse {
+	return &database.PaginationResponse{
+		CurrentPage:     page,
+		PageCount:       size,
+		TotalPagesCount: int(math.Ceil(float64(total) / float64(size))),
+	}
+}
+
+func (s *Service) SendInvitation(businessID, aggregatorID string, db *gorm.DB) (int, error) {
+	var business entities.Business
+	if err := db.Where("id = ?", businessID).First(&business).Error; err != nil {
+		return http.StatusNotFound, fmt.Errorf("business not found")
+	}
+
+	if business.BusinessID == nil {
+		return fiber.StatusForbidden, fmt.Errorf("Business ID has not been updated")
+	}
+	if business.AggregatorID != nil && *business.AggregatorID != "" {
+		return http.StatusBadRequest, fmt.Errorf("business already has an aggregator assigned")
+	}
+
+	aggregator, err := s.repo.GetAggregatorByID(db, aggregatorID)
+	if err != nil {
+		return http.StatusNotFound, fmt.Errorf("aggregator not found")
+	}
+
+	existing, err := s.repo.CheckExistingActiveInvitation(db, businessID, aggregatorID)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to check existing invitations: %w", err)
+	}
+	if existing != nil {
+		resend_email.SendAggregatorInvitationEmail(aggregator.Email, business.CompanyName)
+		return http.StatusOK, nil
+	}
+
+	inviteToken := utility.GenerateUUID()
+	invitation := &entities.AggregatorInvitation{
+		ID:           utility.GenerateUUID(),
+		BusinessID:   businessID,
+		AggregatorID: aggregatorID,
+		Status:       entities.InvitationStatusPending,
+		InviteToken:  inviteToken,
+	}
+
+	if err := s.repo.CreateInvitation(invitation, db); err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to create invitation: %w", err)
+	}
+
+	resend_email.SendAggregatorInvitationEmail(aggregator.Email, business.CompanyName)
+
+	return http.StatusCreated, nil
+}
+
+func (s *Service) RespondToInvitation(invitationID, aggregatorID string, accept bool, db *gorm.DB) (int, error) {
+	invitation, err := s.repo.GetInvitationByID(db, invitationID)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to fetch invitation: %w", err)
+	}
+	if invitation == nil {
+		return http.StatusNotFound, fmt.Errorf("invitation not found")
+	}
+
+	if invitation.AggregatorID != aggregatorID {
+		return http.StatusForbidden, fmt.Errorf("this invitation does not belong to you")
+	}
+
+	if invitation.Status != entities.InvitationStatusPending {
+		return http.StatusBadRequest, fmt.Errorf("invitation has already been %s", invitation.Status)
+	}
+
+	now := time.Now()
+
+	if accept {
+		var business entities.Business
+		if err := db.Where("id = ?", invitation.BusinessID).First(&business).Error; err != nil {
+			return http.StatusInternalServerError, fmt.Errorf("failed to fetch business: %w", err)
+		}
+		if business.AggregatorID != nil && *business.AggregatorID != "" {
+			return http.StatusBadRequest, fmt.Errorf("business already has an aggregator assigned")
+		}
+
+		invitation.Status = entities.InvitationStatusAccepted
+		invitation.AcceptedAt = &now
+
+		if err := db.Model(&entities.Business{}).Where("id = ?", invitation.BusinessID).
+			Update("aggregator_id", aggregatorID).Error; err != nil {
+			return http.StatusInternalServerError, fmt.Errorf("failed to link business to aggregator: %w", err)
+		}
+
+		s.repo.CreateActivityLog(&entities.AggregatorActivityLog{
+			ID:           utility.GenerateUUID(),
+			AggregatorID: aggregatorID,
+			BusinessID:   invitation.BusinessID,
+			Action:       entities.ActivityInvitationAccepted,
+		}, db)
+	} else {
+		invitation.Status = entities.InvitationStatusRejected
+		invitation.RejectedAt = &now
+
+		s.repo.CreateActivityLog(&entities.AggregatorActivityLog{
+			ID:           utility.GenerateUUID(),
+			AggregatorID: aggregatorID,
+			BusinessID:   invitation.BusinessID,
+			Action:       entities.ActivityInvitationRejected,
+		}, db)
+	}
+
+	if err := s.repo.UpdateInvitation(invitation, db); err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to update invitation: %w", err)
+	}
+
+	return http.StatusOK, nil
+}
+
+func (s *Service) RevokeInvitation(invitationID, businessID string, db *gorm.DB) (int, error) {
+	invitation, err := s.repo.GetInvitationByID(db, invitationID)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to fetch invitation: %w", err)
+	}
+	if invitation == nil {
+		return http.StatusNotFound, fmt.Errorf("invitation not found")
+	}
+	if invitation.BusinessID != businessID {
+		return http.StatusForbidden, fmt.Errorf("this invitation does not belong to your business")
+	}
+	if invitation.Status == entities.InvitationStatusRevoked {
+		return http.StatusBadRequest, fmt.Errorf("invitation is already revoked")
+	}
+
+	if invitation.Status == entities.InvitationStatusAccepted {
+		if err := db.Model(&entities.Business{}).Where("id = ?", businessID).
+			Update("aggregator_id", nil).Error; err != nil {
+			return http.StatusInternalServerError, fmt.Errorf("failed to unlink aggregator: %w", err)
+		}
+	}
+
+	invitation.Status = entities.InvitationStatusRevoked
+	if err := s.repo.UpdateInvitation(invitation, db); err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to revoke invitation: %w", err)
+	}
+
+	return http.StatusOK, nil
+}
+
+func (s *Service) ListAggregatorInvitations(aggregatorID string, db *gorm.DB) ([]AggregatorInvitationDto, error) {
+	pdb := dbinit.InitDB(db, false)
+	invitations, err := s.repo.ListPendingInvitationsByAggregator(db, aggregatorID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch invitations: %w", err)
+	}
+
+	result := make([]AggregatorInvitationDto, 0, len(invitations))
+	for _, inv := range invitations {
+		bRepo := repositories.NewBusinessRepository(pdb, pdb)
+		business, _ := bRepo.FindUserByID(pdb, inv.BusinessID)
+
+		bizName := "Unknown Business"
+		bizEmail := "unknown"
+		if business != nil {
+			bizName = business.CompanyName
+			bizEmail = business.Email
+		}
+
+		result = append(result, AggregatorInvitationDto{
+			ID:            inv.ID,
+			BusinessID:    inv.BusinessID,
+			BusinessName:  bizName,
+			BusinessEmail: bizEmail,
+			Status:        inv.Status,
+			CreatedAt:     inv.CreatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return result, nil
+}
+
+func (s *Service) ListBusinessInvitations(businessID string, db *gorm.DB) ([]BusinessInvitationDto, error) {
+	pdb := dbinit.InitDB(db, false)
+	invitations, err := s.repo.ListInvitationsByBusiness(db, businessID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch invitations: %w", err)
+	}
+
+	result := make([]BusinessInvitationDto, 0, len(invitations))
+	for _, inv := range invitations {
+		bRepo := repositories.NewBusinessRepository(pdb, pdb)
+		aggregator, _ := bRepo.FindUserByID(pdb, inv.AggregatorID)
+
+		aggName := "Pending Aggregator"
+		aggEmail := "Pending"
+		if aggregator != nil {
+			aggName = aggregator.CompanyName
+			aggEmail = aggregator.Email
+		} else {
+			var fallbackAgg entities.Business
+			if err := db.Unscoped().Where("id = ?", inv.AggregatorID).First(&fallbackAgg).Error; err == nil {
+				aggName = fallbackAgg.CompanyName
+				aggEmail = fallbackAgg.Email
+			}
+		}
+
+		result = append(result, BusinessInvitationDto{
+			ID:              inv.ID,
+			AggregatorID:    inv.AggregatorID,
+			AggregatorName:  aggName,
+			AggregatorEmail: aggEmail,
+			Status:          inv.Status,
+			CreatedAt:       inv.CreatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return result, nil
+}
+
+func (s *Service) ListAvailableAggregators(search string, page, size int, db *gorm.DB) ([]AvailableAggregatorDto, int64, error) {
+	aggregators, total, err := s.repo.ListAllAggregators(db, search, page, size)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to fetch aggregators: %w", err)
+	}
+
+	result := make([]AvailableAggregatorDto, 0, len(aggregators))
+	for _, agg := range aggregators {
+		result = append(result, AvailableAggregatorDto{
+			ID:          agg.ID,
+			Name:        agg.Name,
+			Email:       agg.Email,
+			CompanyName: agg.CompanyName,
+			PhoneNumber: agg.PhoneNumber,
+		})
+	}
+
+	return result, total, nil
+}
+
+func (s *Service) SendInvitationByEmail(businessID, email string, db *gorm.DB) (int, error) {
+	var business entities.Business
+	if err := db.Where("id = ?", businessID).First(&business).Error; err != nil {
+		return http.StatusNotFound, fmt.Errorf("business not found")
+	}
+
+	if business.BusinessID == nil {
+		return fiber.StatusForbidden, fmt.Errorf("Business ID has not been updated")
+	}
+	if business.AggregatorID != nil && *business.AggregatorID != "" {
+		return http.StatusBadRequest, fmt.Errorf("business already has an aggregator assigned")
+	}
+
+	var existingAggregator entities.Business
+	err := db.Where("email = ? AND is_aggregator = ?", email, true).First(&existingAggregator).Error
+
+	if err == nil {
+		if existingAggregator.Name == "Pending Aggregator" || !existingAggregator.EmailVerified {
+			existingInvite, _ := s.repo.CheckExistingActiveInvitation(db, businessID, existingAggregator.ID)
+			if existingInvite != nil {
+				appUrl := config.GetConfig().App.Url
+				signupLink := fmt.Sprintf("%s/aggregator/signup?invite=%s&email=%s", appUrl, existingInvite.InviteToken, email)
+				resend_email.SendNewAggregatorInvitationEmail(email, business.CompanyName, signupLink)
+				return http.StatusOK, nil
+			}
+		}
+		return s.SendInvitation(businessID, existingAggregator.ID, db)
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return http.StatusInternalServerError, fmt.Errorf("database error checking for aggregator: %w", err)
+	}
+
+	newAggregatorID := utility.GenerateUUID()
+	hashPassword, _ := utility.HashPassword(utility.GenerateUUID() + utility.GenerateUUID())
+
+	newAggregator := entities.Business{
+		ID:            newAggregatorID,
+		Name:          "Pending Aggregator",
+		CompanyName:   "Pending Aggregator",
+		Email:         email,
+		Password:      hashPassword,
+		IsAggregator:  true,
+		EmailVerified: false,
+		AccStatus:     0,
+		ServiceID:     business.ServiceID,
+	}
+
+	if err := db.Create(&newAggregator).Error; err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to create pending aggregator profile: %w", err)
+	}
+
+	inviteToken := utility.GenerateUUID()
+	invitation := &entities.AggregatorInvitation{
+		ID:           utility.GenerateUUID(),
+		BusinessID:   businessID,
+		AggregatorID: newAggregatorID,
+		Status:       entities.InvitationStatusPending,
+		InviteToken:  inviteToken,
+	}
+
+	if err := s.repo.CreateInvitation(invitation, db); err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to create invitation: %w", err)
+	}
+
+	appUrl := config.GetConfig().App.Url
+	signupLink := fmt.Sprintf("%s/aggregator/signup?invite=%s&email=%s", appUrl, inviteToken, email)
+	resend_email.SendNewAggregatorInvitationEmail(email, business.CompanyName, signupLink)
+
+	return http.StatusCreated, nil
+}
+
+func (s *Service) ListBusinesses(aggregatorID string, page, size int, search string, db *gorm.DB) ([]AggregatorBusinessDetailDto, *database.PaginationResponse, error) {
+	businesses, total, err := s.repo.GetAcceptedBusinesses(db, aggregatorID, page, size, search)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch businesses: %w", err)
+	}
+
+	result := make([]AggregatorBusinessDetailDto, 0, len(businesses))
+	for _, b := range businesses {
+		result = append(result, AggregatorBusinessDetailDto{
+			ID:          b.ID,
+			Name:        b.Name,
+			Email:       b.Email,
+			CompanyName: b.CompanyName,
+			TIN:         b.TIN,
+			PhoneNumber: b.PhoneNumber,
+			ServiceID:   b.ServiceID,
+			BusinessID:  b.BusinessID,
+			KeysSet:     b.KeysSet,
+		})
+	}
+
+	return result, buildPagination(page, size, total), nil
+}
+
+func (s *Service) GetBusinessDetail(aggregatorID, businessID string, db *gorm.DB) (*AggregatorBusinessFullDetailDto, int, error) {
+	pdb := dbinit.InitDB(db, false)
+	bRepo := repositories.NewBusinessRepository(pdb, pdb)
+	business, err := bRepo.GetBusinessByIDForAggregator(pdb, aggregatorID, businessID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, http.StatusNotFound, fmt.Errorf("business not found or not managed by this aggregator")
+		}
+		return nil, http.StatusInternalServerError, fmt.Errorf("failed to fetch business: %w", err)
+	}
+	if business == nil {
+		return nil, http.StatusNotFound, fmt.Errorf("business not found or not managed by this aggregator")
+	}
+
+	result := &AggregatorBusinessFullDetailDto{
+		ID:          business.ID,
+		Name:        business.Name,
+		Email:       business.Email,
+		CompanyName: business.CompanyName,
+		TIN:         business.TIN,
+		PhoneNumber: business.PhoneNumber,
+		ServiceID:   business.ServiceID,
+		BusinessID:  business.BusinessID,
+		KeysSet:     business.KeysSet,
+	}
+
+	subscription, _, _ := s.subSvc.RequireAggregatorBusinessSubscription(db, aggregatorID, businessID)
+	if subscription != nil {
+		subInfo := &BusinessSubscriptionInfoDto{
+			IsActive:          subscription.IsActive,
+			PlanID:            subscription.PlanID,
+			PlanName:          subscription.Plan,
+			TotalInvoices:     subscription.TotalInvoices,
+			UsedInvoices:      subscription.UsedInvoices,
+			RemainingInvoices: subscription.RemainingInvoices,
+			NextBillingDate:   subscription.NextBillingDate.Format(time.RFC3339),
+		}
+
+		if subscription.PlanID != "" {
+			plan, found, _ := s.subSvc.GetPlanByID(subscription.PlanID, db)
+			if found && plan != nil {
+				subInfo.PlanAmount = plan.Amount
+				subInfo.BillingCycleDays = plan.BillingCycle
+			}
+		}
+
+		result.Subscription = subInfo
+	}
+
+	totalInvoices, totalBulkUploads, _ := s.repo.GetBusinessStatsForAggregator(db, aggregatorID, businessID)
+	result.TotalInvoicesUploaded = totalInvoices
+	result.TotalBulkUploads = totalBulkUploads
+
+	return result, http.StatusOK, nil
+}
+
+func (s *Service) RemoveBusiness(aggregatorID, businessID string, db *gorm.DB) (int, error) {
+	pdb := dbinit.InitDB(db, false)
+	bRepo := repositories.NewBusinessRepository(pdb, pdb)
+	business, err := bRepo.GetBusinessByIDForAggregator(pdb, aggregatorID, businessID)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to fetch business: %w", err)
+	}
+	if business == nil {
+		return http.StatusNotFound, fmt.Errorf("business not found or not managed by this aggregator")
+	}
+
+	if err := db.Model(&entities.Business{}).Where("id = ?", businessID).
+		Update("aggregator_id", nil).Error; err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to unlink business: %w", err)
+	}
+
+	db.Model(&entities.AggregatorInvitation{}).
+		Where("business_id = ? AND aggregator_id = ? AND status = ?", businessID, aggregatorID, entities.InvitationStatusAccepted).
+		Update("status", entities.InvitationStatusRevoked)
+
+	s.repo.CreateActivityLog(&entities.AggregatorActivityLog{
+		ID:           utility.GenerateUUID(),
+		AggregatorID: aggregatorID,
+		BusinessID:   businessID,
+		Action:       entities.ActivityBusinessRemoved,
+		Details:      fmt.Sprintf("Removed business %s", business.CompanyName),
+	}, db)
+
+	return http.StatusOK, nil
+}
+
+func (s *Service) ListInvoicesByBusiness(aggregatorID, businessID string, page, size int, db *gorm.DB) ([]entities.MinimalInvoiceDTO, *database.PaginationResponse, error) {
+	pdb := dbinit.InitDB(db, false)
+	bRepo := repositories.NewBusinessRepository(pdb, pdb)
+	business, err := bRepo.GetBusinessByIDForAggregator(pdb, aggregatorID, businessID)
+	if err != nil || business == nil {
+		return nil, nil, fmt.Errorf("business not found or not managed by this aggregator")
+	}
+
+	invoices, total, err := s.repo.GetInvoicesByAggregatorAndBusiness(db, aggregatorID, businessID, page, size)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch invoices: %w", err)
+	}
+
+	result := make([]entities.MinimalInvoiceDTO, 0, len(invoices))
+	for _, inv := range invoices {
+		result = append(result, entities.MinimalInvoiceDTO{
+			ID:            inv.ID,
+			InvoiceNumber: inv.InvoiceNumber,
+			IRN:           inv.IRN,
+			Platform:      inv.Platform,
+			CurrentStatus: inv.CurrentStatus,
+			PaymentStatus: inv.PaymentStatus,
+			StatusText:    inv.CurrentStatus,
+			QrCodeBmpUrl:  inv.QrCodeBmpUrl,
+			QrCode:        inv.QrCode,
+			CreatedAt:     inv.CreatedAt,
+		})
+	}
+
+	return result, buildPagination(page, size, total), nil
+}
+
+func (s *Service) ListAllInvoices(aggregatorID string, page, size int, db *gorm.DB) ([]entities.MinimalInvoiceDTO, *database.PaginationResponse, error) {
+	invoices, total, err := s.repo.GetAllInvoicesByAggregator(db, aggregatorID, page, size)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch invoices: %w", err)
+	}
+
+	result := make([]entities.MinimalInvoiceDTO, 0, len(invoices))
+	for _, inv := range invoices {
+		result = append(result, entities.MinimalInvoiceDTO{
+			ID:            inv.ID,
+			InvoiceNumber: inv.InvoiceNumber,
+			IRN:           inv.IRN,
+			Platform:      inv.Platform,
+			CurrentStatus: inv.CurrentStatus,
+			PaymentStatus: inv.PaymentStatus,
+			StatusText:    inv.CurrentStatus,
+			QrCodeBmpUrl:  inv.QrCodeBmpUrl,
+			QrCode:        inv.QrCode,
+			CreatedAt:     inv.CreatedAt,
+		})
+	}
+
+	return result, buildPagination(page, size, total), nil
+}
+
+func (s *Service) ListBulkUploadsByBusiness(aggregatorID, businessID string, page, size int, db *gorm.DB) ([]entities.BulkUpload, *database.PaginationResponse, error) {
+	pdb := dbinit.InitDB(db, false)
+	bRepo := repositories.NewBusinessRepository(pdb, pdb)
+	business, err := bRepo.GetBusinessByIDForAggregator(pdb, aggregatorID, businessID)
+	if err != nil || business == nil {
+		return nil, nil, fmt.Errorf("business not found or not managed by this aggregator")
+	}
+
+	repo := repositories.NewBulkUploadRepository(pdb, pdb)
+	bulkUploadSvc := bulk_upload.NewService(repo)
+	uploads, pagination, err := bulkUploadSvc.GetBulkUploadLogsByBusinessID(db, businessID, page, size)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch bulk uploads: %w", err)
+	}
+
+	return uploads, &pagination, nil
+}
+
+func (s *Service) ListAllBulkUploads(aggregatorID string, page, size int, db *gorm.DB) ([]entities.BulkUpload, *database.PaginationResponse, error) {
+	uploads, total, err := s.repo.GetAllBulkUploadsByAggregator(db, aggregatorID, page, size)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch bulk uploads: %w", err)
+	}
+
+	return uploads, buildPagination(page, size, total), nil
+}
+
+func (s *Service) GetBulkUploadFailedInvoices(aggregatorID, bulkUploadID string, db *gorm.DB) (*BulkUploadFailedInvoicesDto, int, error) {
+	bulkUpload, err := s.repo.GetBulkUploadByIDForAggregator(db, aggregatorID, bulkUploadID)
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("failed to fetch bulk upload: %w", err)
+	}
+	if bulkUpload == nil {
+		return nil, http.StatusNotFound, fmt.Errorf("bulk upload not found or not uploaded by this aggregator")
+	}
+
+	pdb := dbinit.InitDB(db, false)
+	repo := repositories.NewBulkUploadRepository(pdb, pdb)
+	bulkUploadSvc := bulk_upload.NewService(repo)
+	failedInvoices, err := bulkUploadSvc.BuildBulkUploadFailedInvoicesResponse(db, bulkUpload)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	return failedInvoices, http.StatusOK, nil
+}
+
+func (s *Service) GetDashboard(aggregatorID string, db *gorm.DB) (*AggregatorDashboardDto, error) {
+	totalBiz, pendingInvites, totalInvoices, totalBulkUploads, err := s.repo.GetDashboardStats(db, aggregatorID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch dashboard stats: %w", err)
+	}
+
+	return &AggregatorDashboardDto{
+		TotalBusinesses:    totalBiz,
+		PendingInvitations: pendingInvites,
+		TotalInvoices:      totalInvoices,
+		TotalBulkUploads:   totalBulkUploads,
+	}, nil
+}
+
+func (s *Service) GetActivityLog(aggregatorID string, page, size int, db *gorm.DB) ([]AggregatorActivityLogDto, *database.PaginationResponse, error) {
+	logs, total, err := s.repo.GetActivityLogs(db, aggregatorID, page, size)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch activity logs: %w", err)
+	}
+
+	result := make([]AggregatorActivityLogDto, 0, len(logs))
+	for _, l := range logs {
+		result = append(result, AggregatorActivityLogDto{
+			ID:           l.ID,
+			AggregatorID: l.AggregatorID,
+			BusinessID:   l.BusinessID,
+			Action:       l.Action,
+			Details:      l.Details,
+			CreatedAt:    l.CreatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return result, buildPagination(page, size, total), nil
+}
+
+func (s *Service) ListAllTransactions(aggregatorID string, page, size int, db *gorm.DB) ([]TransactionDto, *database.PaginationResponse, error) {
+	transactions, total, err := s.repo.GetTransactionsByAggregator(db, aggregatorID, page, size)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch transactions: %w", err)
+	}
+
+	result := make([]TransactionDto, 0, len(transactions))
+	businessNameCache := make(map[string]string)
+
+	for _, t := range transactions {
+		businessName := businessNameCache[t.BusinessID]
+		if businessName == "" {
+			pdb := dbinit.InitDB(db, false)
+			bRepo := repositories.NewBusinessRepository(pdb, pdb)
+			biz, err := bRepo.GetBusinessByIDForAggregator(pdb, aggregatorID, t.BusinessID)
+			if err == nil && biz != nil {
+				businessName = biz.CompanyName
+				if businessName == "" {
+					businessName = biz.Name
+				}
+				businessNameCache[t.BusinessID] = businessName
+			}
+		}
+
+		result = append(result, TransactionDto{
+			ID:           t.ID,
+			BusinessID:   t.BusinessID,
+			BusinessName: businessName,
+			AggregatorID: t.AggregatorID,
+			Reference:    t.Reference,
+			Provider:     t.Provider,
+			Status:       string(t.Status),
+			Amount:       t.Amount,
+			Currency:     t.Currency,
+			PlanID:       t.PlanID,
+			Plan:         t.Plan,
+			CreatedAt:    t.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:    t.UpdatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return result, buildPagination(page, size, total), nil
+}
+
+func (s *Service) UpdateBusinessSetup(db *gorm.DB, businessID string, req AggregatorUpdateBusinessSetupDto, aggregatorID string) error {
+	updates := make(map[string]interface{})
+
+	if req.ServiceID != nil {
+		updates["service_id"] = *req.ServiceID
+	}
+	if req.BusinessID != nil {
+		updates["business_id"] = *req.BusinessID
+	}
+	if req.IRNPublicKey != nil {
+		encryptedPublicKey, err := common.EncryptAES(*req.IRNPublicKey)
+		if err != nil {
+			return fmt.Errorf("failed to encrypt IRN public key: %w", err)
+		}
+		updates["irn_public_key"] = common.EncryptedString(encryptedPublicKey)
+		updates["keys_set"] = true
+	}
+	if req.IRNCertificate != nil {
+		encryptedCertificate, err := common.EncryptAES(*req.IRNCertificate)
+		if err != nil {
+			return fmt.Errorf("failed to encrypt IRN certificate: %w", err)
+		}
+		updates["irn_certificate"] = common.EncryptedString(encryptedCertificate)
+		updates["keys_set"] = true
+	}
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	result := db.Model(&entities.Business{}).Where("id = ? AND aggregator_id = ? AND created_by_aggregator = ?", businessID, aggregatorID, true).Updates(updates)
+	if result.Error != nil {
+		return fmt.Errorf("failed to update business setup: %w", result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("business not found or you do not have permission to update its setup (only businesses created by you can be updated)")
+	}
+
+	return nil
+}
+
+func (s *Service) LogActivity(db *gorm.DB, aggregatorID, businessID, action, details string) {
+	s.repo.CreateActivityLog(&entities.AggregatorActivityLog{
+		ID:           utility.GenerateUUID(),
+		AggregatorID: aggregatorID,
+		BusinessID:   businessID,
+		Action:       action,
+		Details:      details,
+	}, db)
+}
+
+func (s *Service) CreateBusiness(db *gorm.DB, req CreateBusinessDto, aggregatorID string) error {
+	serverSecret := s.cfg.Server.Secret
+	email := strings.ToLower(req.Email)
+	name := strings.Title(strings.ToLower(req.Name))
+
+	var existingBusiness entities.Business
+	if err := db.Where("email = ?", email).First(&existingBusiness).Error; err == nil {
+		return fmt.Errorf("business already exists with the given email")
+	}
+
+	if err := db.Where("LOWER(company_name) = LOWER(?)", req.CompanyName).First(&existingBusiness).Error; err == nil {
+		return fmt.Errorf("business already exists with the given company name")
+	}
+
+	password, err := utility.HashPassword(req.Password)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	apiKey, err := utility.GenerateSecureToken(32, serverSecret)
+	if err != nil {
+		return fmt.Errorf("failed to generate api key: %w", err)
+	}
+
+	encryptedAPIKey, err := common.EncryptAES(apiKey)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt API key: %w", err)
+	}
+
+	apiKeyHash := sha256.Sum256([]byte(apiKey))
+	apiKeyHashStr := hex.EncodeToString(apiKeyHash[:])
+
+	business := entities.Business{
+		ID:                  utility.GenerateUUID(),
+		Name:                name,
+		Email:               email,
+		Password:            password,
+		APIKey:              common.EncryptedString(encryptedAPIKey),
+		APIKeyHash:          apiKeyHashStr,
+		CompanyName:         req.CompanyName,
+		PhoneNumber:         req.PhoneNumber,
+		TIN:                 req.TIN,
+		IsAggregator:        false,
+		CreatedByAggregator: true,
+		EmailVerified:       true,
+		AggregatorID:        &aggregatorID,
+	}
+
+	if err := db.Create(&business).Error; err != nil {
+		return fmt.Errorf("failed to create business: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) GetInvoiceDetail(aggregatorID, invoiceID string, db *gorm.DB) (*entities.Invoice, error) {
+	var invoice entities.Invoice
+	if err := db.Where("id = ? AND aggregator_id = ?", invoiceID, aggregatorID).First(&invoice).Error; err != nil {
+		return nil, fmt.Errorf("invoice not found or does not belong to this aggregator")
+	}
+	return &invoice, nil
 }
