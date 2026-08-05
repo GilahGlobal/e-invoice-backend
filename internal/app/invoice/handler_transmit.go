@@ -26,6 +26,20 @@ func (h *Handler) LookUpIRN(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
 	}
 
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
 	respData, errDetails, err := h.svc.LookUpIRN(irn)
 	if err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
@@ -105,8 +119,20 @@ func (h *Handler) LookUpPartyID(c *fiber.Ctx) error {
 func (h *Handler) TransmitInvoice(c *fiber.Ctx) error {
 	irn := c.Params("irn")
 	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
 	if irn == "" {
 		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
 	}
 
 	respData, errDetails, err := h.svc.TransmitInvoice(irn, userDetails.IsSandbox)
@@ -133,8 +159,20 @@ func (h *Handler) TransmitInvoice(c *fiber.Ctx) error {
 func (h *Handler) TransmitConfirmInvoice(c *fiber.Ctx) error {
 	irn := c.Params("irn")
 	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
 	if irn == "" {
 		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
 	}
 
 	respData, errDetails, err := h.svc.TransmitConfirmInvoice(irn, userDetails.IsSandbox)

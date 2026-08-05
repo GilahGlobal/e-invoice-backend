@@ -113,6 +113,11 @@ func (s *Service) GetInvoiceByInvoiceNumber(db *gorm.DB, invoiceNumber, business
 	return s.repo.FindInvoiceByNumberAndBusinessID(pdb, invoiceNumber, businessID)
 }
 
+func (s *Service) GetInvoiceByIRN(db *gorm.DB, irn, businessID string) (*entities.Invoice, error) {
+	pdb := dbinit.InitDB(db, false)
+	return s.repo.FindInvoiceByIRNAndBusinessID(pdb, irn, businessID)
+}
+
 func (s *Service) UpdateInvoiceData(db database.DatabaseManager, invoiceNumber string, invoiceData []byte) error {
 	return s.repo.UpdateInvoice(db, invoiceNumber, invoiceData)
 }

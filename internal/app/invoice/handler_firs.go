@@ -37,6 +37,15 @@ func (h *Handler) ValidateIRN(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, req.IRN, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
 	respData, errDetails, err := h.svc.ValidateIRN(req, userDetails.IsSandbox)
 	if err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
@@ -116,6 +125,10 @@ func (h *Handler) SignIRN(c *fiber.Ctx) error {
 	if err = h.Validator.Struct(&req); err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, req.IRN, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
 	}
 
 	keys, err := h.businessSvc.ResolveBusinessIRNSigningKeys(db, userDetails.ID, userDetails.IsSandbox, h.Keys)
@@ -249,6 +262,10 @@ func (h *Handler) UpdateInvoice(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
 	}
 
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
 	respData, errDetails, err := h.svc.UpdateInvoice(req, irn, userDetails.IsSandbox)
 	if err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
@@ -287,6 +304,15 @@ func (h *Handler) ConfirmInvoice(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
 	}
 
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
 	respData, errDetails, err := h.svc.ConfirmInvoice(irn, userDetails.IsSandbox)
 	if err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
@@ -317,6 +343,15 @@ func (h *Handler) DownloadInvoice(c *fiber.Ctx) error {
 	irn := c.Params("irn")
 	if irn == "" {
 		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
 	}
 
 	respData, errDetails, err := h.svc.DownloadInvoice(irn, userDetails.IsSandbox)
@@ -360,6 +395,12 @@ func (h *Handler) BulkUpdateInvoice(c *fiber.Ctx) error {
 	if err = h.Validator.Struct(&req); err != nil {
 		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	for _, invoiceReq := range req.Invoices {
+		if _, err := h.svc.GetInvoiceByIRN(db, invoiceReq.IRN, userDetails.ID); err != nil {
+			return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you: "+invoiceReq.IRN, err, nil)
+		}
 	}
 
 	respData, err := h.svc.BulkUpdateInvoice(db, userDetails.ID, req, userDetails.IsSandbox)
