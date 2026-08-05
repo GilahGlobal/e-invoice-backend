@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func BusinessRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.App {
+func BusinessRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	businessController := business.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB)
 
 	businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()), middleware.SelectDatabaseFromClaims(c.DB, c.TestDB))
@@ -31,6 +31,4 @@ func BusinessRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.
 			aggregators.Delete("/invitations/:id", aggregatorController.RevokeAggregatorInvitation)
 		}
 	}
-
-	return app
 }

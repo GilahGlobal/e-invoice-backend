@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SubscriptionRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.App {
+func SubscriptionRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	subscriptionController := subscription.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB)
 
 	app.Post(ApiVersion+"/paystack/webhook", middleware.SelectDatabaseFromJSONPath("data.metadata.is_sandbox", c.DB, c.TestDB), subscriptionController.PaystackWebhook)
@@ -18,6 +18,4 @@ func SubscriptionRoute(app *fiber.App, ApiVersion string, c *core.Container) *fi
 		subscriptionGroup.Get("/plans", middleware.SelectDatabaseFromQuery("is_sandbox", c.DB, c.TestDB), subscriptionController.GetPlans)
 		subscriptionGroup.Post("/plans", middleware.SelectDatabaseFromJSONPath("is_sandbox", c.DB, c.TestDB), subscriptionController.CreatePlan)
 	}
-
-	return app
 }

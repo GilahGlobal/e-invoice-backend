@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func HealthRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.App {
+func HealthRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	svc := health.NewService()
 	healthController := health.NewHandler(svc, c.Validator, c.Logger, c.DB, c.TestDB)
 
@@ -16,6 +16,4 @@ func HealthRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.Ap
 	healthGroup.Post("/health", healthController.Post)
 	healthGroup.Get("/health", healthController.Get)
 	healthGroup.Get("/health/firs", healthController.FirsHealthCheck)
-
-	return app
 }

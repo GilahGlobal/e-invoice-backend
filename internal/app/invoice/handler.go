@@ -3,11 +3,19 @@ package invoice
 import (
 	"einvoice-access-point/internal/app/business"
 	"einvoice-access-point/internal/app/token"
+	"einvoice-access-point/internal/apperror"
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/dbinit"
+	"einvoice-access-point/internal/data/entities"
+	"einvoice-access-point/internal/middleware"
+	"einvoice-access-point/internal/pkg/cloudinary"
+	"einvoice-access-point/internal/pkg/firs_models"
 	"einvoice-access-point/internal/utility"
+	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 type Handler struct {
@@ -35,4 +43,820 @@ func NewHandler(validator *validator.Validate, logger *utility.Logger, db, testD
 		TestDB:      testDB,
 		Keys:        keys,
 	}
+}
+
+func (h *Handler) GetAllInvoices(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	var query entities.PaginationQuery
+	if err := c.QueryParser(&query); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Invalid query parameters", err, nil)
+	}
+	if query.Size <= 0 {
+		query.Size = 20
+	}
+	if query.Page <= 0 {
+		query.Page = 1
+	}
+
+	invoices, pagination, err := h.svc.GetAllInvoicesByBusinessID(db, userDetails.ID, query.Page, query.Size)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoices fetched successfully", invoices, pagination)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) GetInvoiceDetails(c *fiber.Ctx) error {
+	invoiceID := c.Params("invoice_id")
+
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if invoiceID == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "invoice_id is required", nil, nil)
+	}
+
+	invoice, err := h.svc.GetInvoiceDetails(db, userDetails.ID, invoiceID)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice details fetched successfully", invoice)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) DeleteInvoice(c *fiber.Ctx) error {
+	invoiceID := c.Params("invoice_id")
+
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if invoiceID == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "invoice_id is required", nil, nil)
+	}
+
+	if err := h.svc.DeleteInvoice(db, userDetails.ID, invoiceID); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice deleted successfully", nil)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
+	client := c.Get("client")
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	setup, err := h.businessSvc.ValidateInvoiceUploadSetup(db, userDetails.ID)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+	}
+
+	var req firs_models.UploadInvoiceRequestDto
+	err = c.BodyParser(&req)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	err = h.Validator.Struct(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(
+			fiber.StatusUnprocessableEntity,
+			"error", "Validation failed",
+			utility.ValidationErrorsToJSON(err, firs_models.UploadInvoiceRequestDto{}),
+			nil,
+		)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	invoiceExists, err := h.svc.GetInvoiceByInvoiceNumber(db, req.InvoiceNumber, userDetails.ID)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	if invoiceExists != nil {
+		blockedStatuses := map[string]bool{
+			entities.StatusSignedInvoice: true,
+			entities.StatusTransmitted:   true,
+			entities.StatusConfirmed:     true,
+		}
+		if blockedStatuses[invoiceExists.CurrentStatus] {
+			qrCode := invoiceExists.QrCode
+			if qrCode == "" {
+				qrCode = invoiceExists.EncryptedIRN
+			}
+
+			response := map[string]interface{}{
+				"metadata": invoiceExists.StatusHistory,
+			}
+
+			dataMap := map[string]interface{}{
+				"id":             invoiceExists.ID,
+				"invoice_number": invoiceExists.InvoiceNumber,
+				"irn":            invoiceExists.IRN,
+				"qr_code":        qrCode,
+				"qr_code_2":      invoiceExists.EncryptedIRN,
+			}
+			if invoiceExists.QrCodeBmpUrl != "" {
+				dataMap["qr_code_bmp_url"] = invoiceExists.QrCodeBmpUrl
+			}
+			response["data"] = dataMap
+
+			rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice previously uploaded successfully", response)
+			return c.Status(fiber.StatusOK).JSON(rd)
+		}
+	}
+
+	var irnPayload InvoiceData
+	if req.IRN == nil || *req.IRN == "" {
+		irnData, err := h.svc.IRNGeneration(db, userDetails.ID, req.InvoiceNumber, setup.ServiceID, req.BusinessID, userDetails.IsSandbox)
+		if err != nil {
+			rd := *err
+			return c.Status(fiber.StatusBadRequest).JSON(rd)
+		}
+		irnPayload = *irnData
+		req.IRN = &irnPayload.IRN
+	} else {
+		if invoiceExists == nil {
+			keys, err := h.businessSvc.ResolveBusinessIRNSigningKeys(db, userDetails.ID, userDetails.IsSandbox, h.Keys)
+			if err != nil {
+				return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+			}
+
+			signedIRN, err := h.svc.SignIRN(*req.IRN, keys)
+			if err != nil {
+				return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+			}
+
+			irnPayload = InvoiceData{
+				InvoiceNumber: req.InvoiceNumber,
+				IRN:           *req.IRN,
+				QRCode:        signedIRN.QrCodeImage,
+				QRCode2:       signedIRN.EncryptedIRN,
+				QRCodeBMP:     signedIRN.QrCodeImageBMP,
+			}
+		} else {
+			qrCode := invoiceExists.QrCode
+			if qrCode == "" {
+				qrCode = invoiceExists.EncryptedIRN
+			}
+			irnPayload = InvoiceData{
+				InvoiceNumber: req.InvoiceNumber,
+				IRN:           *req.IRN,
+				QRCode:        qrCode,
+				QRCode2:       invoiceExists.EncryptedIRN,
+				QRCodeBMP:     "",
+			}
+		}
+	}
+
+	qrCodeBMPURL := ""
+	if setup.BmpUploadSelected && irnPayload.QRCodeBMP != "" {
+		qrCodeBMPURL, err = cloudinary.UploadBMPBase64(irnPayload.QRCodeBMP, utility.GenerateUUID())
+		if err != nil {
+			qrCodeBMPURL = ""
+		}
+	}
+
+	createdInvoice, _, err, isInvoiceSigned := h.svc.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, qrCodeBMPURL, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil, client)
+
+	response := map[string]interface{}{
+		"metadata": createdInvoice.StatusHistory,
+	}
+	if isInvoiceSigned {
+		dataMap := map[string]interface{}{
+			"id":             createdInvoice.ID,
+			"invoice_number": irnPayload.InvoiceNumber,
+			"irn":            irnPayload.IRN,
+			"qr_code":        createdInvoice.QrCode,
+			"qr_code_2":      createdInvoice.EncryptedIRN,
+		}
+		if qrCodeBMPURL != "" {
+			dataMap["qr_code_bmp_url"] = qrCodeBMPURL
+		}
+		response["data"] = dataMap
+	}
+
+	if err != nil {
+		if isInvoiceSigned {
+			return apperror.New(fiber.StatusCreated, "partial_success", err.Error(), response, nil)
+		}
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), response, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice created successfully", response)
+	return c.Status(fiber.StatusCreated).JSON(rd)
+}
+
+func (h *Handler) ModifyInvoice(c *fiber.Ctx) error {
+	client := c.Get("client")
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	setup, err := h.businessSvc.ValidateInvoiceUploadSetup(db, userDetails.ID)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+	}
+
+	var req firs_models.UploadInvoiceRequestDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(
+			fiber.StatusUnprocessableEntity,
+			"error", "Validation failed",
+			utility.ValidationErrorsToJSON(err, firs_models.UploadInvoiceRequestDto{}),
+			nil,
+		)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	existingInvoice, err := h.svc.GetInvoiceByInvoiceNumber(db, req.InvoiceNumber, userDetails.ID)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+	if existingInvoice == nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found with the given invoice number", nil, nil)
+	}
+
+	oldIRN := existingInvoice.IRN
+
+	blockedStatuses := map[string]bool{
+		entities.StatusSignedInvoice: true,
+		entities.StatusTransmitted:   true,
+		entities.StatusConfirmed:     true,
+	}
+
+	if blockedStatuses[existingInvoice.CurrentStatus] {
+		now := time.Now().UTC()
+		created := existingInvoice.CreatedAt.UTC()
+		if now.Year() == created.Year() && now.YearDay() == created.YearDay() {
+			return apperror.New(fiber.StatusFailedDependency, "error", "invoice can only be modified on a different day from its creation", nil, nil)
+		}
+
+		if err := h.svc.DeprecateInvoiceOnNRS(oldIRN, userDetails.IsSandbox); err != nil {
+			return apperror.New(fiber.StatusBadRequest, "error", "failed to deprecate old invoice on NRS: "+err.Error(), nil, nil)
+		}
+	}
+
+	irnData, irnErr := h.svc.IRNGeneration(db, userDetails.ID, req.InvoiceNumber, setup.ServiceID, req.BusinessID, userDetails.IsSandbox)
+	if irnErr != nil {
+		rd := *irnErr
+		return c.Status(fiber.StatusBadRequest).JSON(rd)
+	}
+	req.IRN = &irnData.IRN
+
+	qrCodeBMPURL := ""
+	if setup.BmpUploadSelected && irnData.QRCodeBMP != "" {
+		qrCodeBMPURL, err = cloudinary.UploadBMPBase64(irnData.QRCodeBMP, utility.GenerateUUID())
+		if err != nil {
+			qrCodeBMPURL = ""
+		}
+	}
+
+	replacedInvoice, err := h.svc.ReplaceInvoiceRecord(db, existingInvoice, req, *req.IRN, irnData.QRCode, qrCodeBMPURL, irnData.QRCode2, client)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), nil, nil)
+	}
+
+	firsErr, isInvoiceSigned := h.svc.FirsAllInOneProcess(req, replacedInvoice, db, userDetails.IsSandbox)
+
+	response := map[string]interface{}{
+		"metadata": replacedInvoice.StatusHistory,
+	}
+	if isInvoiceSigned {
+		dataMap := map[string]interface{}{
+			"id":             replacedInvoice.ID,
+			"invoice_number": irnData.InvoiceNumber,
+			"irn":            irnData.IRN,
+			"qr_code":        replacedInvoice.QrCode,
+			"qr_code_2":      replacedInvoice.EncryptedIRN,
+		}
+		if qrCodeBMPURL != "" {
+			dataMap["qr_code_bmp_url"] = qrCodeBMPURL
+		}
+		response["data"] = dataMap
+	}
+
+	if firsErr != nil {
+		errorArray := strings.Split(firsErr.Error(), "-")
+		if isInvoiceSigned {
+			return apperror.New(fiber.StatusCreated, "partial_success", errorArray[len(errorArray)-1], response, nil)
+		}
+		return apperror.New(fiber.StatusBadRequest, "error", errorArray[len(errorArray)-1], response, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice modified successfully", response)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) GetInvoiceStats(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	var businessID, aggregatorID *string
+	if userDetails.IsAggregator {
+		aggregatorID = &userDetails.ID
+	} else {
+		businessID = &userDetails.ID
+	}
+
+	stats, err := h.svc.GetInvoiceStats(db, businessID, aggregatorID)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", "failed to retrieve invoice stats", err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice statistics fetched successfully", stats)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) ValidateIRN(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+
+	var req firs_models.IRNValidationRequest
+	if err = c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err = h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, req.IRN, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
+	respData, errDetails, err := h.svc.ValidateIRN(req, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("IRN validated successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "IRN validated successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) ValidateInvoice(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+
+	var req firs_models.UploadInvoiceRequestDto
+	if err = c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err = h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	respData, errDetails, err := h.svc.ValidateInvoice(req, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("Invoice validated successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice validated successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) SignIRN(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	var req firs_models.IRNSigningRequestData
+	if err = c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err = h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, req.IRN, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
+	keys, err := h.businessSvc.ResolveBusinessIRNSigningKeys(db, userDetails.ID, userDetails.IsSandbox, h.Keys)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+	}
+
+	respData, err := h.svc.SignIRN(req.IRN, keys)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	h.Logger.Info("qr code generated successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) SignInvoice(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	var req firs_models.UploadInvoiceRequestDto
+	if err = c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err = h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	respData, errDetails, err := h.svc.SignInvoice(req, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("Invoice signed successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice signed successfully", respData)
+	return c.Status(fiber.StatusCreated).JSON(rd)
+}
+
+func (h *Handler) GenerateIRN(c *fiber.Ctx) error {
+	var req firs_models.GenerateIRNRequestData
+
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+
+	if err = c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err = h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	respData, err := h.svc.GenerateIRN(req.InvoiceNumber, *userDetails.ServiceID)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	h.Logger.Info("IRN generated successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "IRN generated successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) UpdateInvoice(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	irn := c.Params("irn")
+	if irn == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
+	}
+
+	var req firs_models.UpdateInvoice
+	if err = c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err = h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
+	respData, errDetails, err := h.svc.UpdateInvoice(req, irn, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	if err := h.svc.UpdateStoredInvoicePaymentStatus(db, userDetails.ID, irn, req.PaymentStatus); err != nil {
+		return apperror.New(
+			fiber.StatusInternalServerError, "error", "invoice updated on FIRS but failed to update local invoice record", err, nil,
+		)
+	}
+
+	h.Logger.Info("Invoice updated successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice updated successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) ConfirmInvoice(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+
+	irn := c.Params("irn")
+	if irn == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
+	respData, errDetails, err := h.svc.ConfirmInvoice(irn, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("Invoice confirmed with irn successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice confirmed with irn successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) DownloadInvoice(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+
+	irn := c.Params("irn")
+	if irn == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
+	respData, errDetails, err := h.svc.DownloadInvoice(irn, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("Invoice downloaded with irn successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice downloaded with irn successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) BulkUpdateInvoice(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	var req firs_models.BulkUpdateInvoiceRequest
+	if err = c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err = h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	for _, invoiceReq := range req.Invoices {
+		if _, err := h.svc.GetInvoiceByIRN(db, invoiceReq.IRN, userDetails.ID); err != nil {
+			return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you: "+invoiceReq.IRN, err, nil)
+		}
+	}
+
+	respData, err := h.svc.BulkUpdateInvoice(db, userDetails.ID, req, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	h.Logger.Info("Bulk update completed")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Bulk update completed", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) LookUpIRN(c *fiber.Ctx) error {
+	irn := c.Params("irn")
+	if irn == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
+	}
+
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
+	respData, errDetails, err := h.svc.LookUpIRN(irn)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) LookUpTIN(c *fiber.Ctx) error {
+	tin := c.Params("tin")
+	userDetails, _ := middleware.GetUserDetails(c)
+	if tin == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "tin is required", nil, nil)
+	}
+
+	respData, errDetails, err := h.svc.LookUpTIN(tin, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) LookUpPartyID(c *fiber.Ctx) error {
+	partyId := c.Params("party_id")
+	if partyId == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "partyID is required", nil, nil)
+	}
+
+	respData, errDetails, err := h.svc.LookUpPartyID(partyId)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) TransmitInvoice(c *fiber.Ctx) error {
+	irn := c.Params("irn")
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+	if irn == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
+	respData, errDetails, err := h.svc.TransmitInvoice(irn, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) TransmitConfirmInvoice(c *fiber.Ctx) error {
+	irn := c.Params("irn")
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "unable to get user claims", nil, nil)
+	}
+	if irn == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "irn is required", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	if _, err := h.svc.GetInvoiceByIRN(db, irn, userDetails.ID); err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", "invoice not found or does not belong to you", err, nil)
+	}
+
+	respData, errDetails, err := h.svc.TransmitConfirmInvoice(irn, userDetails.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) TransmitPull(c *fiber.Ctx) error {
+	var query entities.PullDataQuery
+	if err := c.QueryParser(&query); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Invalid query parameters", err, nil)
+	}
+
+	respData, errDetails, err := h.svc.TransmitPull(query)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("gotten successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "gotten successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+func (h *Handler) DebugHealthCheck(c *fiber.Ctx) error {
+	respData, errDetails, err := h.svc.DebugHealthCheck()
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
 }

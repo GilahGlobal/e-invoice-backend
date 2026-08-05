@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func EntityRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.App {
+func EntityRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	entityController := entity.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB)
 
 	entityUrlSec := app.Group(fmt.Sprintf("%v/entity", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()))
@@ -19,6 +19,4 @@ func EntityRoute(app *fiber.App, ApiVersion string, c *core.Container) *fiber.Ap
 		entityUrlSec.Post("/verify-tin", entityController.VerifyTin)
 		entityUrlSec.Post("/vat-payment", entityController.PostVatPayment)
 	}
-
-	return app
 }
