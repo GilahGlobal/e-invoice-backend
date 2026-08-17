@@ -17,7 +17,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -44,16 +43,7 @@ type BulkUploadConsumer struct {
 func NewBulkUploadConsumer(db, testDB *database.Database, logger *utility.Logger, invoiceSvc *invoice.Service, bulkUploadSvc *bulk_upload.Service, subSvc *subscription.Service) *BulkUploadConsumer {
 	v := validator.New()
 
-	// Register custom validations
-	v.RegisterValidation("nrsdate", func(fl validator.FieldLevel) bool {
-		dateStr := fl.Field().String()
-		_, err := time.Parse("2006-01-02", dateStr)
-		return err == nil
-	})
-	v.RegisterValidation("hsncode", func(fl validator.FieldLevel) bool {
-		hsnCodeRegex := regexp.MustCompile(`^\d{4}\.\d{2}$`)
-		return hsnCodeRegex.MatchString(fl.Field().String())
-	})
+	utility.RegisterCustomValidations(v)
 
 	return &BulkUploadConsumer{
 		db:             db,
@@ -360,13 +350,11 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		currentStatus = createdInvoice.CurrentStatus
 	}
 	if err != nil && !invoiceSigned {
-		errStr := err.Error()
+		errStr := utility.ExtractRelevantErrorMessage(err)
 		if strings.Contains(errStr, "failed to validate invoice:") {
-			errStr = strings.Replace(errStr, "failed to process invoice through all steps: ", "", 1)
 			return false, currentStatus, fmt.Errorf("FIRS validation failed: %s", errStr)
 		}
-		errorArray := strings.Split(errStr, "-")
-		return false, currentStatus, fmt.Errorf("invoice creation failed: %s", strings.TrimSpace(errorArray[len(errorArray)-1]))
+		return false, currentStatus, fmt.Errorf("invoice creation failed: %s", strings.TrimSpace(errStr))
 	}
 
 	if err != nil && invoiceSigned {

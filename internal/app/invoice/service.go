@@ -57,7 +57,7 @@ func (s *Service) BusinessSvc() *business.Service {
 	return s.businessSvc
 }
 
-func (s *Service) GetAllInvoicesByBusinessID(db *gorm.DB, businessID string, page, size int) ([]entities.MinimalInvoiceDTO, database.PaginationResponse, error) {
+func (s *Service) GetAllInvoicesByBusinessID(db *gorm.DB, businessID string, page, size int) ([]InvoiceListItem, database.PaginationResponse, error) {
 	pdb := dbinit.InitDB(db, false)
 
 	pagination := database.Pagination{
@@ -65,7 +65,36 @@ func (s *Service) GetAllInvoicesByBusinessID(db *gorm.DB, businessID string, pag
 		Limit: size,
 	}
 
-	return s.repo.FindMinimalInvoicesByBusinessID(pdb, businessID, pagination)
+	rows, paginationResponse, err := s.repo.FindInvoicesWithMetadataByBusinessID(pdb, businessID, pagination)
+	if err != nil {
+		return nil, paginationResponse, err
+	}
+
+	result := make([]InvoiceListItem, 0, len(rows))
+	for _, row := range rows {
+		metadata := make([]InvoiceStepMetadata, 0)
+		if len(row.StatusHistory) > 0 {
+			if err := json.Unmarshal(row.StatusHistory, &metadata); err != nil {
+				return nil, paginationResponse, fmt.Errorf("failed to parse invoice metadata for %s: %w", row.InvoiceNumber, err)
+			}
+		}
+
+		result = append(result, InvoiceListItem{
+			ID:            row.ID,
+			InvoiceNumber: row.InvoiceNumber,
+			IRN:           row.IRN,
+			Platform:      row.Platform,
+			CurrentStatus: row.CurrentStatus,
+			PaymentStatus: row.PaymentStatus,
+			StatusText:    row.StatusText,
+			Metadata:      metadata,
+			QrCodeBmpUrl:  row.QrCodeBmpUrl,
+			QrCode:        row.QrCode,
+			CreatedAt:     row.CreatedAt,
+		})
+	}
+
+	return result, paginationResponse, nil
 }
 
 func (s *Service) GetInvoiceDetails(db *gorm.DB, businessID, invoiceID string) (*entities.Invoice, error) {
@@ -104,8 +133,7 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 
 		invoice, _ = s.repo.FindInvoiceByNumber(pdb, invoiceExists.InvoiceNumber)
 		if err, isInvoiceSigned = s.UncompletedFirsProcesses(db, invoiceExists.CurrentStatus, payload, invoiceExists, isSandbox); err != nil {
-			errorArray := strings.Split(err.Error(), "-")
-			return invoice, nil, errors.New(errorArray[0]), isInvoiceSigned
+			return invoice, nil, errors.New(utility.ExtractRelevantErrorMessage(err)), isInvoiceSigned
 		}
 	} else {
 		paymentStatus := "PENDING"
@@ -135,8 +163,7 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 			return nil, &errDetails, fmt.Errorf("%s: %w", errDetails, err), isInvoiceSigned
 		}
 		if err, isInvoiceSigned = s.FirsAllInOneProcess(payload, invoice, db, isSandbox); err != nil {
-			errorArray := strings.Split(err.Error(), "-")
-			return invoice, nil, errors.New(errorArray[0]), isInvoiceSigned
+			return invoice, nil, errors.New(utility.ExtractRelevantErrorMessage(err)), isInvoiceSigned
 		}
 	}
 
@@ -654,35 +681,40 @@ func (s *Service) FirsAllInOneProcess(payload firs_models.UploadInvoiceRequestDt
 
 	_, theErr, err := s.ValidateInvoice(payload, isSandbox)
 	if err != nil {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed")
-		return formatFirsError("failed to validate invoice", theErr, err), false
+		stageErr := formatFirsError("failed to validate invoice", theErr, err)
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return stageErr, false
 	}
 
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
 
 	_, theErr, err = s.SignInvoice(payload, isSandbox)
 	if err != nil {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "failed")
-		return formatFirsError("failed to sign invoice", theErr, err), false
+		stageErr := formatFirsError("failed to sign invoice", theErr, err)
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return stageErr, false
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "success")
 
 	_, theErr, err = s.TransmitInvoice(*payload.IRN, isSandbox)
 	if err != nil {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "failed")
-		return formatFirsError("failed to transmit invoice", theErr, err), true
+		stageErr := formatFirsError("failed to transmit invoice", theErr, err)
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return stageErr, true
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "success")
 
 	confirmInvoiceResp, theErr, err := s.ConfirmInvoice(*payload.IRN, isSandbox)
 	if err != nil {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed")
-		return formatFirsError("failed to confirm invoice", theErr, err), true
+		stageErr := formatFirsError("failed to confirm invoice", theErr, err)
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return stageErr, true
 	}
 
 	if confirmInvoiceResp.Code != 200 {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed")
-		return fmt.Errorf("failed to confirm invoice, didnt get 200 or delivered is false"), true
+		stageErr := fmt.Errorf("failed to confirm invoice, didnt get 200 or delivered is false")
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return stageErr, true
 	}
 
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "success")
@@ -696,34 +728,40 @@ func (s *Service) UncompletedFirsProcesses(db *gorm.DB, currentStatus string, pa
 	case entities.StatusValidatedInvoice:
 		_, theErr, err := s.ValidateInvoice(payload, isSandbox)
 		if err != nil {
-			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed")
-			return formatFirsError("failed to validate invoice", theErr, err), false
+			stageErr := formatFirsError("failed to validate invoice", theErr, err)
+			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+			return stageErr, false
 		}
 
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
 
 		_, theErr, err = s.SignInvoice(payload, isSandbox)
 		if err != nil {
-			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "failed")
-			return formatFirsError("failed to sign invoice", theErr, err), false
+			stageErr := formatFirsError("failed to sign invoice", theErr, err)
+			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+			return stageErr, false
 		}
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "success")
 
 		_, theErr, err = s.TransmitInvoice(*payload.IRN, isSandbox)
 		if err != nil {
-			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "failed")
-			return formatFirsError("failed to transmit invoice", theErr, err), true
+			stageErr := formatFirsError("failed to transmit invoice", theErr, err)
+			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+			return stageErr, true
 		}
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "success")
 
 		confirmInvoiceResp, theErr, err := s.ConfirmInvoice(*payload.IRN, isSandbox)
 		if err != nil {
-			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed")
-			return formatFirsError("failed to confirm invoice", theErr, err), true
+			stageErr := formatFirsError("failed to confirm invoice", theErr, err)
+			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+			return stageErr, true
 		}
 
 		if confirmInvoiceResp.Code != 200 {
-			return fmt.Errorf("failed to confirm invoice, didnt get 200 or delivered is false"), true
+			stageErr := fmt.Errorf("failed to confirm invoice, didnt get 200 or delivered is false")
+			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+			return stageErr, true
 		}
 
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "success")
@@ -741,7 +779,7 @@ func (s *Service) FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys 
 
 	theIRN, err := s.GenerateIRN(payload.Invoice.InvoiceNumber, *business.ServiceID)
 	if err != nil {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusGeneratedIRN, "failed")
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusGeneratedIRN, "failed", utility.ExtractRelevantErrorMessage(err))
 		return nil, nil, err
 	}
 
@@ -755,14 +793,15 @@ func (s *Service) FirsZohoAllInOneProcess(payload zoho.WebhookPayload, firsKeys 
 
 	_, theErr, err := s.ValidateIRN(validateIRN, isSandBox)
 	if err != nil {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedIRN, "failed")
-		return nil, nil, fmt.Errorf("failed to validate irn: %v - %v", *theErr, err)
+		stageErr := formatFirsError("failed to validate irn", theErr, err)
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedIRN, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return nil, nil, stageErr
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedIRN, "success")
 
 	signIRNResp, err := s.SignIRN(*theIRN, firsKeys)
 	if err != nil {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedIRN, "failed")
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedIRN, "failed", utility.ExtractRelevantErrorMessage(err))
 		return nil, nil, err
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedIRN, "success")
@@ -787,33 +826,40 @@ func (s *Service) otherFirsProcesses(payload zoho.WebhookPayload, business *enti
 
 	_, theErr, err := s.ValidateInvoice(newInvoiceResp, isSandBox)
 	if err != nil {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed")
-		return formatFirsError("failed to validate invoice", theErr, err)
+		stageErr := formatFirsError("failed to validate invoice", theErr, err)
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return stageErr
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
 
 	_, theErr, err = s.SignInvoice(newInvoiceResp, isSandBox)
 	if err != nil {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "failed")
-		return formatFirsError("failed to sign invoice", theErr, err)
+		stageErr := formatFirsError("failed to sign invoice", theErr, err)
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return stageErr
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "success")
 
 	_, theErr, err = s.TransmitInvoice(*newInvoiceResp.IRN, isSandBox)
 	if err != nil {
-		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "failed")
-		return formatFirsError("failed to transmit invoice", theErr, err)
+		stageErr := formatFirsError("failed to transmit invoice", theErr, err)
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return stageErr
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "success")
 
 	confirmInvoiceResp, theErr, err := s.ConfirmInvoice(theIRN, isSandBox)
 	if err != nil {
-		return formatFirsError("failed to confirm invoice", theErr, err)
+		stageErr := formatFirsError("failed to confirm invoice", theErr, err)
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return stageErr
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "success")
 
 	if confirmInvoiceResp.Code != 200 {
-		return fmt.Errorf("failed to confirm invoice, didnt get 200 or delivered is false")
+		stageErr := fmt.Errorf("failed to confirm invoice, didnt get 200 or delivered is false")
+		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		return stageErr
 	}
 
 	return nil

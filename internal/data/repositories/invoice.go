@@ -11,13 +11,29 @@ import (
 
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/entities"
+	"einvoice-access-point/internal/utility"
 
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type InvoiceRepository struct {
 	db     database.DatabaseManager
 	testDB database.DatabaseManager
+}
+
+type InvoiceListWithMetadata struct {
+	ID            string         `gorm:"column:id"`
+	InvoiceNumber string         `gorm:"column:invoice_number"`
+	IRN           string         `gorm:"column:irn"`
+	Platform      string         `gorm:"column:platform"`
+	CurrentStatus string         `gorm:"column:current_status"`
+	PaymentStatus string         `gorm:"column:payment_status"`
+	StatusText    string         `gorm:"column:status_text"`
+	StatusHistory  datatypes.JSON `gorm:"column:status_history"`
+	QrCodeBmpUrl  string         `gorm:"column:qr_code_bmp_url"`
+	QrCode        string         `gorm:"column:qr_code"`
+	CreatedAt     time.Time      `gorm:"column:created_at"`
 }
 
 func NewInvoiceRepository(db, testDB database.DatabaseManager) *InvoiceRepository {
@@ -81,19 +97,42 @@ func (r *InvoiceRepository) FindInvoiceByIRNAndBusinessID(db database.DatabaseMa
 	return &invoice, err
 }
 
-func (r *InvoiceRepository) UpdateInvoiceStatus(db database.DatabaseManager, invoice *entities.Invoice, step string, status string) error {
+func (r *InvoiceRepository) UpdateInvoiceStatus(db database.DatabaseManager, invoice *entities.Invoice, step string, status string, message ...string) error {
 	var history []entities.StatusHistoryEntry
 
 	if len(invoice.StatusHistory) > 0 {
 		_ = json.Unmarshal(invoice.StatusHistory, &history)
 	}
 
+	entryMessage := entities.StatusHistoryMessage(step, status)
+	if len(message) > 0 {
+		entryMessage = message[0]
+	}
+	entryMessage = utility.ExtractRelevantErrorMessage(errors.New(entryMessage))
+
 	for i := range history {
 		if history[i].Step == step {
 			history[i].Status = status
+			history[i].Message = entryMessage
 			history[i].Timestamp = time.Now()
 			break
 		}
+	}
+
+	found := false
+	for _, entry := range history {
+		if entry.Step == step {
+			found = true
+			break
+		}
+	}
+	if !found {
+		history = append(history, entities.StatusHistoryEntry{
+			Step:      step,
+			Status:    status,
+			Message:   entryMessage,
+			Timestamp: time.Now(),
+		})
 	}
 
 	historyJSON, _ := json.Marshal(history)
@@ -138,6 +177,73 @@ func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(db database.Database
 		platform,
 		current_status,
 		payment_status,
+		status_history,
+		qr_code_bmp_url,
+		qr_code,
+		CASE
+			WHEN current_status IN ('signed_invoice', 'transmitted_invoice')
+				THEN 'partial_success'
+			ELSE (
+				SELECT COALESCE(entry->>'status', 'pending')
+				FROM jsonb_array_elements(status_history) AS entry
+				WHERE entry->>'step' = invoices.current_status
+				ORDER BY entry->>'timestamp' DESC
+				LIMIT 1
+			)
+		END AS status_text,
+		created_at
+	FROM invoices
+	WHERE business_id = ? AND deleted_at IS NULL
+	ORDER BY created_at DESC
+	LIMIT ? OFFSET ?;
+	`
+
+	if err := db.DB().Raw(query, businessID, pagination.Limit, offset).Scan(&result).Error; err != nil {
+		return nil, database.PaginationResponse{
+			CurrentPage:     pagination.Page,
+			PageCount:       0,
+			TotalPagesCount: totalPages,
+		}, err
+	}
+
+	return result, database.PaginationResponse{
+		CurrentPage:     pagination.Page,
+		PageCount:       len(result),
+		TotalPagesCount: totalPages,
+	}, nil
+}
+
+func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]InvoiceListWithMetadata, database.PaginationResponse, error) {
+	var result []InvoiceListWithMetadata
+
+	if pagination.Page <= 0 {
+		pagination.Page = 1
+	}
+	if pagination.Limit <= 0 {
+		pagination.Limit = 20
+	}
+
+	var totalCount int64
+	if err := db.DB().Model(&entities.Invoice{}).Where("business_id = ? AND deleted_at IS NULL", businessID).Count(&totalCount).Error; err != nil {
+		return nil, database.PaginationResponse{
+			CurrentPage:     pagination.Page,
+			PageCount:       0,
+			TotalPagesCount: 0,
+		}, err
+	}
+
+	totalPages := int(math.Ceil(float64(totalCount) / float64(pagination.Limit)))
+	offset := (pagination.Page - 1) * pagination.Limit
+
+	query := `
+	SELECT 
+		id,
+		invoice_number,
+		irn,
+		platform,
+		current_status,
+		payment_status,
+		status_history,
 		qr_code_bmp_url,
 		qr_code,
 		CASE

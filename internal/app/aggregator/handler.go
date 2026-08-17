@@ -1133,6 +1133,17 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 			"qr_code_2":       createdInvoice.EncryptedIRN,
 			"qr_code_bmp_url": qrCodeBMPURL,
 		}
+	}
+
+	if err != nil {
+		normalizedErr := utility.ExtractRelevantErrorMessage(err)
+		if isInvoiceSigned {
+			return apperror.New(fiber.StatusCreated, "partial_success", normalizedErr, response, nil)
+		}
+		return apperror.New(fiber.StatusBadRequest, "error", normalizedErr, response, nil)
+	}
+
+	if isInvoiceSigned {
 		rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice generated successfully", response)
 		return c.Status(fiber.StatusCreated).JSON(rd)
 	}
