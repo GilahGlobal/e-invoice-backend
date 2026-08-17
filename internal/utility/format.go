@@ -224,6 +224,8 @@ func ValidationErrorsToJSON(err error, dto any) map[string]string {
 			errors[jsonPath] = "must be a valid date in the format YYYY-MM-DD"
 		case "hsncode":
 			errors[jsonPath] = "must be in the format 0000.00"
+		case "taxvalue":
+			errors[jsonPath] = "must be greater than 0 unless tax_category.id is EXEMPTED or ZERO_RATED"
 
 		default:
 			errors[jsonPath] = ve.Error()

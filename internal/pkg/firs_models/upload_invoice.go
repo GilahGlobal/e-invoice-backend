@@ -81,14 +81,14 @@ type TaxTotal struct {
 }
 
 type TaxSubtotal struct {
-	TaxableAmount *float64    `json:"taxable_amount" validate:"required"`
-	TaxAmount     *float64    `json:"tax_amount" validate:"required"`
+	TaxableAmount *float64    `json:"taxable_amount" validate:"required,taxvalue"`
+	TaxAmount     *float64    `json:"tax_amount" validate:"required,taxvalue"`
 	TaxCategory   TaxCategory `json:"tax_category" validate:"required"`
 }
 
 type TaxCategory struct {
-	ID      string   `json:"id" example:"STANDARD_VAT" validate:"required,oneof=STANDARD_GST REDUCED_GST ZERO_GST STANDARD_VAT REDUCED_VAT ZERO_VAT STATE_SALES_TAX LOCAL_SALES_TAX ALCOHOL_EXCISE_TAX TOBACCO_EXCISE_TAX FUEL_EXCISE_TAX CORPORATE_INCOME_TAX PERSONAL_INCOME_TAX SOCIAL_SECURITY_TAX MEDICARE_TAX REAL_ESTATE_TAX PERSONAL_PROPERTY_TAX CARBON_TAX PLASTIC_TAX IMPORT_DUTY EXPORT_DUTY LUXURY_TAX SERVICE_TAX TOURISM_TAX WITHHOLDING_TAX STAMP_DUTY EXEMPTED"`
-	Percent *float64 `json:"percent" example:"15.00" validate:"required"`
+	ID      string   `json:"id" example:"STANDARD_VAT" validate:"required,oneof=STANDARD_GST REDUCED_GST ZERO_GST STANDARD_VAT REDUCED_VAT ZERO_VAT STATE_SALES_TAX LOCAL_SALES_TAX ALCOHOL_EXCISE_TAX TOBACCO_EXCISE_TAX FUEL_EXCISE_TAX CORPORATE_INCOME_TAX PERSONAL_INCOME_TAX SOCIAL_SECURITY_TAX MEDICARE_TAX REAL_ESTATE_TAX PERSONAL_PROPERTY_TAX CARBON_TAX PLASTIC_TAX IMPORT_DUTY EXPORT_DUTY LUXURY_TAX SERVICE_TAX TOURISM_TAX WITHHOLDING_TAX STAMP_DUTY EXEMPTED ZERO_RATED"`
+	Percent *float64 `json:"percent" example:"15.00" validate:"required,taxvalue"`
 }
 
 type LegalMonetaryTotal struct {
