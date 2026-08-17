@@ -26,11 +26,11 @@ func ConvertZohoToFIRS(zohoInvoice zoho.Invoice, organizationID, organizationNam
 			taxAmount := item.ItemTotal * (item.TaxPercentage / 100)
 			taxTotal += taxAmount
 			taxSubtotals = append(taxSubtotals, firs_models.TaxSubtotal{
-				TaxableAmount: item.ItemTotal,
-				TaxAmount:     taxAmount,
+				TaxableAmount: &item.ItemTotal,
+				TaxAmount:     &taxAmount,
 				TaxCategory: firs_models.TaxCategory{
 					ID:      *item.TaxID,
-					Percent: item.TaxPercentage,
+					Percent: &item.TaxPercentage,
 				},
 			})
 		}
@@ -78,7 +78,7 @@ func ConvertZohoToFIRS(zohoInvoice zoho.Invoice, organizationID, organizationNam
 		PaymentTermsNote: &zohoInvoice.Terms,
 		TaxTotal: []firs_models.TaxTotal{
 			{
-				TaxAmount:   taxTotal,
+				TaxAmount:   &taxTotal,
 				TaxSubtotal: taxSubtotals,
 			},
 		},
