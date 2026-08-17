@@ -2952,7 +2952,56 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns a list of invoices with minimal details for a business",
+                "description": "Fetch all invoices for the authenticated user/business",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invoice"
+                ],
+                "summary": "Get All Invoices",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/invoice.GetAllInvoicesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Upload a new invoice",
                 "consumes": [
                     "application/json"
                 ],
@@ -2960,45 +3009,41 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Internal Invoice"
+                    "Invoice"
                 ],
-                "summary": "Get all invoices",
+                "summary": "Upload Invoice",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "reference",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "size",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "sortBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "boolean",
-                        "name": "sortDirectionDesc",
-                        "in": "query"
+                        "description": "Invoice Upload Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
+                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "invoices fetched successfully",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/invoice.GetAllInvoicesResponseDto"
+                            "$ref": "#/definitions/invoice.UploadInvoiceResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3211,10 +3256,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Confirms an invoice with IRN.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Confirm an invoice",
                 "produces": [
                     "application/json"
                 ],
@@ -3225,7 +3267,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Invoice Reference Number (IRN)",
+                        "description": "IRN",
                         "name": "irn",
                         "in": "path",
                         "required": true
@@ -3233,13 +3275,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invoice confirmed successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3297,10 +3339,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Downloads an invoice from FIRS using the IRN.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Download an invoice",
                 "produces": [
                     "application/json"
                 ],
@@ -3311,7 +3350,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Invoice Reference Number (IRN)",
+                        "description": "IRN",
                         "name": "irn",
                         "in": "path",
                         "required": true
@@ -3319,13 +3358,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invoice downloaded successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3340,7 +3379,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Generates a new IRN for an invoice.",
+                "description": "Generate an IRN for an invoice",
                 "consumes": [
                     "application/json"
                 ],
@@ -3364,19 +3403,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "IRN generated successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
-                        "description": "Validation failed",
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3391,7 +3430,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Signs an invoice and generates a digital signature.",
+                "description": "Sign an Invoice",
                 "consumes": [
                     "application/json"
                 ],
@@ -3404,7 +3443,7 @@ const docTemplate = `{
                 "summary": "Sign Invoice",
                 "parameters": [
                     {
-                        "description": "Invoice Request",
+                        "description": "Sign Invoice Request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -3414,20 +3453,20 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Invoice signed successfully",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
-                        "description": "Validation failed",
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3442,7 +3481,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Signs an IRN and generates a QR code.",
+                "description": "Sign an IRN",
                 "consumes": [
                     "application/json"
                 ],
@@ -3455,7 +3494,7 @@ const docTemplate = `{
                 "summary": "Sign IRN",
                 "parameters": [
                     {
-                        "description": "IRN Signing Request",
+                        "description": "Sign IRN Request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -3466,19 +3505,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "IRN signed successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
-                        "description": "Validation failed",
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3493,22 +3532,25 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns statistics for invoices including total, partial, successful, and failed.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Get statistics for invoices",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Invoice"
                 ],
-                "summary": "Get invoice statistics",
+                "summary": "Get Invoice Stats",
                 "responses": {
                     "200": {
-                        "description": "Invoice statistics fetched successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/invoice.GetInvoiceStatsResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "401": {
@@ -3527,10 +3569,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Confirms a transmitted invoice using the IRN.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Confirm a transmitted invoice by IRN",
                 "produces": [
                     "application/json"
                 ],
@@ -3541,7 +3580,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Invoice Reference Number (IRN)",
+                        "description": "IRN",
                         "name": "irn",
                         "in": "path",
                         "required": true
@@ -3549,13 +3588,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invoice confirmed successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3570,26 +3609,23 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Performs a debug health check on invoice transmission service.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Health check for FIRS transmission",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Invoice"
                 ],
-                "summary": "Debug Health Check",
+                "summary": "Transmit Health Check",
                 "responses": {
                     "200": {
-                        "description": "Health check successful",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3604,10 +3640,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieves invoice details using the IRN.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Look up an invoice by IRN",
                 "produces": [
                     "application/json"
                 ],
@@ -3618,7 +3651,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Invoice Reference Number (IRN)",
+                        "description": "IRN",
                         "name": "irn",
                         "in": "path",
                         "required": true
@@ -3626,13 +3659,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invoice details retrieved",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3647,10 +3680,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieves details using Party ID.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Look up by Party ID",
                 "produces": [
                     "application/json"
                 ],
@@ -3669,13 +3699,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Party ID details retrieved",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3690,10 +3720,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieves taxpayer details using TIN.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Look up by TIN",
                 "produces": [
                     "application/json"
                 ],
@@ -3704,7 +3731,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Tax Identification Number (TIN)",
+                        "description": "TIN",
                         "name": "tin",
                         "in": "path",
                         "required": true
@@ -3712,13 +3739,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "TIN details retrieved",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3733,10 +3760,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Pulls invoices from FIRS using query params.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Pull transmitted invoices",
                 "produces": [
                     "application/json"
                 ],
@@ -3747,29 +3771,26 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "name": "confirmed",
+                        "description": "Start Date",
+                        "name": "start_date",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "to",
+                        "description": "End Date",
+                        "name": "end_date",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invoices pulled successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Invalid query parameters",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3784,10 +3805,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Transmits an invoice to FIRS using the IRN.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Transmit an invoice by IRN",
                 "produces": [
                     "application/json"
                 ],
@@ -3798,7 +3816,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Invoice Reference Number (IRN)",
+                        "description": "IRN",
                         "name": "irn",
                         "in": "path",
                         "required": true
@@ -3806,13 +3824,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invoice transmitted successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3827,7 +3845,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates multiple invoices.",
+                "description": "Bulk update multiple invoices",
                 "consumes": [
                     "application/json"
                 ],
@@ -3837,10 +3855,10 @@ const docTemplate = `{
                 "tags": [
                     "Invoice"
                 ],
-                "summary": "Bulk Update Invoice",
+                "summary": "Bulk Update Invoices",
                 "parameters": [
                     {
-                        "description": "Bulk Update Invoice Request",
+                        "description": "Bulk Update Request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -3851,19 +3869,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Bulk update completed",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/invoice.BulkUpdateInvoiceResponseDto"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
-                        "description": "Validation failed",
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -3878,7 +3896,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates an existing invoice using the IRN.",
+                "description": "Update an invoice by its IRN",
                 "consumes": [
                     "application/json"
                 ],
@@ -3888,11 +3906,11 @@ const docTemplate = `{
                 "tags": [
                     "Invoice"
                 ],
-                "summary": "Update Invoice",
+                "summary": "Update Invoice by IRN",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Invoice Reference Number (IRN)",
+                        "description": "IRN",
                         "name": "irn",
                         "in": "path",
                         "required": true
@@ -3909,109 +3927,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invoice updated successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
-                        "description": "Validation failed",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/invoice/upload": {
-            "post": {
-                "security": [],
-                "description": "Receives invoice data as a json",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Internal Invoice"
-                ],
-                "summary": "Initializes invoice creation in one go",
-                "parameters": [
-                    {
-                        "description": "Invoice Payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Invoice created successfully",
-                        "schema": {
-                            "$ref": "#/definitions/invoice.UploadInvoiceResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Re-uploads an invoice with the same invoice_number. Deprecates the old invoice on NRS (REJECTED), generates a fresh IRN.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Internal Invoice"
-                ],
-                "summary": "Modify an existing invoice",
-                "parameters": [
-                    {
-                        "description": "Invoice Payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Invoice modified successfully",
-                        "schema": {
-                            "$ref": "#/definitions/invoice.UploadInvoiceResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "Validation failed",
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -4026,7 +3954,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Validates an invoice payload.",
+                "description": "Validates an invoice payload",
                 "consumes": [
                     "application/json"
                 ],
@@ -4050,19 +3978,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invoice validated successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
-                        "description": "Validation failed",
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -4077,7 +4005,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Validates an Invoice Reference Number (IRN).",
+                "description": "Validates an Invoice Reference Number (IRN)",
                 "consumes": [
                     "application/json"
                 ],
@@ -4101,19 +4029,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "IRN validated successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
                     },
                     "422": {
-                        "description": "Validation failed",
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -4128,21 +4056,17 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns full invoice details by invoice ID",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Fetch details of a specific invoice by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Internal Invoice"
+                    "Invoice"
                 ],
-                "summary": "Get one invoice details",
+                "summary": "Get Invoice Details",
                 "parameters": [
                     {
                         "type": "string",
-                        "format": "uuid",
                         "description": "Invoice ID",
                         "name": "invoice_id",
                         "in": "path",
@@ -4151,13 +4075,81 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "invoice details fetched successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/invoice.GetInvoiceDetailsResponseDto"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Modify an existing invoice",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invoice"
+                ],
+                "summary": "Modify Invoice",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Invoice ID",
+                        "name": "invoice_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Invoice Modify Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -4170,21 +4162,17 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Deletes an invoice invoice_id",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Delete a specific invoice by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Internal Invoice"
+                    "Invoice"
                 ],
                 "summary": "Delete Invoice",
                 "parameters": [
                     {
                         "type": "string",
-                        "format": "uuid",
                         "description": "Invoice ID",
                         "name": "invoice_id",
                         "in": "path",
@@ -4193,7 +4181,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invoice deleted successfully",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -4203,275 +4191,9 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
-                    }
-                }
-            }
-        },
-        "/resources/countries": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches countries resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Countries",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/invoice.CountriesResponseDto"
-                        }
                     },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/resources/currencies": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches currencies resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Currencies",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/invoice.CurrenciesResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/resources/hsn-codes": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches hsn codes resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get HSN Codes",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/invoice.HSNCodesResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/resources/invoice-types": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches invoice types resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Invoice Types",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/invoice.ResourcesResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/resources/lgas": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches LGAs resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get LGAs",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/invoice.LGAsResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/resources/service-codes": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches service codes resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Service Codes",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/invoice.ServiceCodesResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/resources/states": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches states resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get States",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/invoice.StatesResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/resources/tax-categories": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Fetches tax categories resource from FIRS.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Resources"
-                ],
-                "summary": "Get Tax Categories",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/invoice.TaxCategoriesResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -5665,6 +5387,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."
                 },
+                "qr_code_2": {
+                    "type": "string",
+                    "example": "eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."
+                },
                 "qr_code_bmp_url": {
                     "type": "string",
                     "example": "https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"
@@ -6658,6 +6384,12 @@ const docTemplate = `{
                 "irn": {
                     "type": "string"
                 },
+                "metadata": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.StatusHistoryEntry"
+                    }
+                },
                 "payment_status": {
                     "type": "string"
                 },
@@ -6726,6 +6458,24 @@ const docTemplate = `{
                 },
                 "status_code": {
                     "type": "integer"
+                }
+            }
+        },
+        "entities.StatusHistoryEntry": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "success | pending | failed",
+                    "type": "string"
+                },
+                "step": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
                 }
             }
         },
@@ -7201,7 +6951,8 @@ const docTemplate = `{
                         "TOURISM_TAX",
                         "WITHHOLDING_TAX",
                         "STAMP_DUTY",
-                        "EXEMPTED"
+                        "EXEMPTED",
+                        "ZERO_RATED"
                     ],
                     "example": "STANDARD_VAT"
                 },
@@ -7220,15 +6971,13 @@ const docTemplate = `{
             ],
             "properties": {
                 "tax_amount": {
-                    "type": "number",
-                    "example": 1500.75
+                    "type": "number"
                 },
                 "tax_category": {
                     "$ref": "#/definitions/firs_models.TaxCategory"
                 },
                 "taxable_amount": {
-                    "type": "number",
-                    "example": 1500.75
+                    "type": "number"
                 }
             }
         },
@@ -7492,147 +7241,13 @@ const docTemplate = `{
                 }
             }
         },
-        "invoice.CountriesResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/invoice.CountryItemDto"
-                    }
-                },
-                "error": {},
-                "extra": {},
-                "message": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "pagination": {},
-                "status": {
-                    "type": "string"
-                },
-                "status_code": {
-                    "type": "integer"
-                }
-            }
-        },
-        "invoice.CountryItemDto": {
-            "type": "object",
-            "properties": {
-                "alpha_2": {
-                    "type": "string",
-                    "example": "AF"
-                },
-                "alpha_3": {
-                    "type": "string",
-                    "example": "AFG"
-                },
-                "country_code": {
-                    "type": "string",
-                    "example": "004"
-                },
-                "intermediate_region": {
-                    "type": "string",
-                    "example": ""
-                },
-                "intermediate_region_code": {
-                    "type": "string",
-                    "example": ""
-                },
-                "iso_3166_2": {
-                    "type": "string",
-                    "example": "ISO 3166-2:AF"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Afghanistan"
-                },
-                "region": {
-                    "type": "string",
-                    "example": "Asia"
-                },
-                "region_code": {
-                    "type": "string",
-                    "example": "142"
-                },
-                "sub_region": {
-                    "type": "string",
-                    "example": "Southern Asia"
-                },
-                "sub_region_code": {
-                    "type": "string",
-                    "example": "034"
-                }
-            }
-        },
-        "invoice.CurrenciesResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/invoice.CurrencyItemDto"
-                    }
-                },
-                "error": {},
-                "extra": {},
-                "message": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "pagination": {},
-                "status": {
-                    "type": "string"
-                },
-                "status_code": {
-                    "type": "integer"
-                }
-            }
-        },
-        "invoice.CurrencyItemDto": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "USD"
-                },
-                "decimal_digits": {
-                    "type": "integer",
-                    "example": 2
-                },
-                "name": {
-                    "type": "string",
-                    "example": "US Dollar"
-                },
-                "name_plural": {
-                    "type": "string",
-                    "example": "US dollars"
-                },
-                "rounding": {
-                    "type": "integer",
-                    "example": 0
-                },
-                "symbol": {
-                    "type": "string",
-                    "example": "$"
-                },
-                "symbol_native": {
-                    "type": "string",
-                    "example": "$"
-                }
-            }
-        },
         "invoice.GetAllInvoicesResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/entities.MinimalInvoiceDTO"
+                        "$ref": "#/definitions/invoice.InvoiceListItem"
                     }
                 },
                 "error": {},
@@ -7700,48 +7315,64 @@ const docTemplate = `{
                 }
             }
         },
-        "invoice.HSNCodesItemDto": {
+        "invoice.InvoiceListItem": {
             "type": "object",
             "properties": {
-                "description": {
+                "created_at": {
                     "type": "string",
-                    "example": "Horses; live, pure-bred breeding animals"
+                    "example": "2024-01-01T12:00:00Z"
                 },
-                "hscode": {
+                "current_status": {
                     "type": "string",
-                    "example": "0101.21"
-                }
-            }
-        },
-        "invoice.HSNCodesResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
+                    "example": "validated_irn"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "invoice_number": {
+                    "type": "string",
+                    "example": "INV-1001"
+                },
+                "irn": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "metadata": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/invoice.HSNCodesItemDto"
+                        "$ref": "#/definitions/invoice.InvoiceStepMetadata"
                     }
                 },
-                "error": {},
-                "extra": {},
-                "message": {
-                    "type": "string"
+                "payment_status": {
+                    "type": "string",
+                    "example": "PENDING"
                 },
-                "name": {
-                    "type": "string"
+                "platform": {
+                    "type": "string",
+                    "example": "zoho"
                 },
-                "pagination": {},
-                "status": {
-                    "type": "string"
+                "qr_code": {
+                    "type": "string",
+                    "example": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."
                 },
-                "status_code": {
-                    "type": "integer"
+                "qr_code_bmp_url": {
+                    "type": "string",
+                    "example": "https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"
+                },
+                "status_text": {
+                    "type": "string",
+                    "example": "success"
                 }
             }
         },
         "invoice.InvoiceStepMetadata": {
             "type": "object",
             "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "IRN validated successfully"
+                },
                 "status": {
                     "type": "string",
                     "example": "success"
@@ -7775,212 +7406,13 @@ const docTemplate = `{
                     "type": "string",
                     "example": "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."
                 },
+                "qr_code_2": {
+                    "type": "string",
+                    "example": "eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51..."
+                },
                 "qr_code_bmp_url": {
                     "type": "string",
                     "example": "https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"
-                }
-            }
-        },
-        "invoice.LGAItemDto": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "NG-AB-ANO"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Aba North"
-                },
-                "state_code": {
-                    "type": "string",
-                    "example": "NG-AB"
-                }
-            }
-        },
-        "invoice.LGAsResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/invoice.LGAItemDto"
-                    }
-                },
-                "error": {},
-                "extra": {},
-                "message": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "pagination": {},
-                "status": {
-                    "type": "string"
-                },
-                "status_code": {
-                    "type": "integer"
-                }
-            }
-        },
-        "invoice.ResourceItemDto": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "380"
-                },
-                "value": {
-                    "type": "string",
-                    "example": "Credit Note"
-                }
-            }
-        },
-        "invoice.ResourcesResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/invoice.ResourceItemDto"
-                    }
-                },
-                "error": {},
-                "extra": {},
-                "message": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "pagination": {},
-                "status": {
-                    "type": "string"
-                },
-                "status_code": {
-                    "type": "integer"
-                }
-            }
-        },
-        "invoice.ServiceCodesItemDto": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "0111"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "Growing of cereals (except rice), leguminous crops and oil seeds"
-                }
-            }
-        },
-        "invoice.ServiceCodesResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/invoice.ServiceCodesItemDto"
-                    }
-                },
-                "error": {},
-                "extra": {},
-                "message": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "pagination": {},
-                "status": {
-                    "type": "string"
-                },
-                "status_code": {
-                    "type": "integer"
-                }
-            }
-        },
-        "invoice.StateItemDto": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "NG-AB"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Abia"
-                }
-            }
-        },
-        "invoice.StatesResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/invoice.StateItemDto"
-                    }
-                },
-                "error": {},
-                "extra": {},
-                "message": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "pagination": {},
-                "status": {
-                    "type": "string"
-                },
-                "status_code": {
-                    "type": "integer"
-                }
-            }
-        },
-        "invoice.TaxCategoriesResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/invoice.TaxCategoryItemDto"
-                    }
-                },
-                "error": {},
-                "extra": {},
-                "message": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "pagination": {},
-                "status": {
-                    "type": "string"
-                },
-                "status_code": {
-                    "type": "integer"
-                }
-            }
-        },
-        "invoice.TaxCategoryItemDto": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "STANDARD_GST"
-                },
-                "percent": {
-                    "type": "string",
-                    "example": "Not Available"
-                },
-                "value": {
-                    "type": "string",
-                    "example": "Standard Goods and Services Tax"
                 }
             }
         },

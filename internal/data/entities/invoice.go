@@ -2,6 +2,7 @@ package entities
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,6 +25,7 @@ const (
 type StatusHistoryEntry struct {
 	Step      string    `json:"step"`
 	Status    string    `json:"status"` // success | pending | failed
+	Message   string    `json:"message"`
 	Timestamp time.Time `json:"timestamp"`
 }
 
@@ -62,16 +64,17 @@ type InvoicePlatformData struct {
 }
 
 type MinimalInvoiceDTO struct {
-	ID            string    `json:"id"`
-	InvoiceNumber string    `json:"invoice_number"`
-	IRN           string    `json:"irn"`
-	Platform      string    `json:"platform"`
-	CurrentStatus string    `json:"current_status"`
-	PaymentStatus string    `json:"payment_status"`
-	StatusText    string    `json:"status_text"`
-	QrCodeBmpUrl  string    `json:"qr_code_bmp_url" gorm:"column:qr_code_bmp_url"`
-	QrCode        string    `json:"qr_code" gorm:"column:qr_code"`
-	CreatedAt     time.Time `json:"created_at" gorm:"column:created_at"`
+	ID            string               `json:"id"`
+	InvoiceNumber string               `json:"invoice_number"`
+	IRN           string               `json:"irn"`
+	Platform      string               `json:"platform"`
+	CurrentStatus string               `json:"current_status"`
+	PaymentStatus string               `json:"payment_status"`
+	StatusText    string               `json:"status_text"`
+	Metadata      []StatusHistoryEntry `json:"metadata" gorm:"column:status_history;serializer:json"`
+	QrCodeBmpUrl  string               `json:"qr_code_bmp_url"`
+	QrCode        string               `json:"qr_code"`
+	CreatedAt     time.Time            `json:"created_at"`
 }
 
 type InvoiceStatsDto struct {
@@ -113,14 +116,51 @@ var defaultSteps = []string{
 	StatusConfirmed,
 }
 
+// StatusSuccessMessage returns the default success message for a status step.
+func StatusSuccessMessage(step string) string {
+	switch step {
+	case StatusCreated:
+		return "invoice created successfully"
+	case StatusGeneratedIRN:
+		return "IRN generated successfully"
+	case StatusValidatedIRN:
+		return "IRN validated successfully"
+	case StatusSignedIRN:
+		return "IRN signed successfully"
+	case StatusValidatedInvoice:
+		return "invoice validated successfully"
+	case StatusSignedInvoice:
+		return "invoice signed successfully"
+	case StatusTransmitted:
+		return "invoice transmitted successfully"
+	case StatusConfirmed:
+		return "invoice confirmed successfully"
+	default:
+		return "step completed successfully"
+	}
+}
+
+// StatusHistoryMessage returns the message stored with a history entry for the given status.
+func StatusHistoryMessage(step, status string) string {
+	if strings.EqualFold(status, "success") {
+		return StatusSuccessMessage(step)
+	}
+	return ""
+}
+
+func newStatusHistoryEntry(step, status string) StatusHistoryEntry {
+	return StatusHistoryEntry{
+		Step:      step,
+		Status:    status,
+		Message:   StatusHistoryMessage(step, status),
+		Timestamp: time.Now(),
+	}
+}
+
 func InitInvoiceStatus() (string, datatypes.JSON, error) {
 	var history []StatusHistoryEntry
 	for _, step := range defaultSteps {
-		history = append(history, StatusHistoryEntry{
-			Step:      step,
-			Status:    "pending",
-			Timestamp: time.Now(),
-		})
+		history = append(history, newStatusHistoryEntry(step, "pending"))
 	}
 
 	historyJSON, err := json.Marshal(history)
@@ -148,11 +188,7 @@ func InitNewInvoiceStatus() (string, datatypes.JSON, error) {
 			status = "success"
 		}
 
-		history = append(history, StatusHistoryEntry{
-			Step:      step,
-			Status:    status,
-			Timestamp: time.Now(),
-		})
+		history = append(history, newStatusHistoryEntry(step, status))
 	}
 
 	historyJSON, err := json.Marshal(history)
@@ -176,11 +212,7 @@ func InitPlatformInvoiceStatus() (string, datatypes.JSON, error) {
 			status = "success"
 		}
 
-		history = append(history, StatusHistoryEntry{
-			Step:      step,
-			Status:    status,
-			Timestamp: time.Now(),
-		})
+		history = append(history, newStatusHistoryEntry(step, status))
 	}
 
 	historyJSON, err := json.Marshal(history)

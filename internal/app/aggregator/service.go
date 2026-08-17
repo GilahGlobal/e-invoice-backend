@@ -14,6 +14,7 @@ import (
 	"einvoice-access-point/internal/pkg/resend_email"
 	"einvoice-access-point/internal/utility"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -472,6 +473,10 @@ func (s *Service) ListInvoicesByBusiness(aggregatorID, businessID string, page, 
 
 	result := make([]entities.MinimalInvoiceDTO, 0, len(invoices))
 	for _, inv := range invoices {
+		var metadata []entities.StatusHistoryEntry
+		if len(inv.StatusHistory) > 0 {
+			_ = json.Unmarshal(inv.StatusHistory, &metadata)
+		}
 		result = append(result, entities.MinimalInvoiceDTO{
 			ID:            inv.ID,
 			InvoiceNumber: inv.InvoiceNumber,
@@ -480,6 +485,7 @@ func (s *Service) ListInvoicesByBusiness(aggregatorID, businessID string, page, 
 			CurrentStatus: inv.CurrentStatus,
 			PaymentStatus: inv.PaymentStatus,
 			StatusText:    inv.CurrentStatus,
+			Metadata:      metadata,
 			QrCodeBmpUrl:  inv.QrCodeBmpUrl,
 			QrCode:        inv.QrCode,
 			CreatedAt:     inv.CreatedAt,
@@ -497,6 +503,10 @@ func (s *Service) ListAllInvoices(aggregatorID string, page, size int, db *gorm.
 
 	result := make([]entities.MinimalInvoiceDTO, 0, len(invoices))
 	for _, inv := range invoices {
+		var metadata []entities.StatusHistoryEntry
+		if len(inv.StatusHistory) > 0 {
+			_ = json.Unmarshal(inv.StatusHistory, &metadata)
+		}
 		result = append(result, entities.MinimalInvoiceDTO{
 			ID:            inv.ID,
 			InvoiceNumber: inv.InvoiceNumber,
@@ -505,6 +515,7 @@ func (s *Service) ListAllInvoices(aggregatorID string, page, size int, db *gorm.
 			CurrentStatus: inv.CurrentStatus,
 			PaymentStatus: inv.PaymentStatus,
 			StatusText:    inv.CurrentStatus,
+			Metadata:      metadata,
 			QrCodeBmpUrl:  inv.QrCodeBmpUrl,
 			QrCode:        inv.QrCode,
 			CreatedAt:     inv.CreatedAt,

@@ -42,8 +42,7 @@ func main() {
 	configuration := config.Setup(logger, "./app")
 	postgresql.ConnectToDatabase(logger, configuration.Database, configuration.TestDatabase)
 	validatorRef := validator.New()
-	validatorRef.RegisterValidation("nrsdate", utility.IsValidNRSDate)
-	validatorRef.RegisterValidation("hsncode", utility.ValidateHSNCode)
+	utility.RegisterCustomValidations(validatorRef)
 	db, testDb := database.Connection()
 
 	// Load crypto key from application onstart

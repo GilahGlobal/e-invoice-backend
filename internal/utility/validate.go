@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"strings"
 	"time"
 
 	"crypto/hmac"
@@ -150,4 +151,85 @@ func IsValidNRSDate(fl validator.FieldLevel) bool {
 func ValidateHSNCode(fl validator.FieldLevel) bool {
 	hsnCodeRegex := regexp.MustCompile(`^\d{4}\.\d{2}$`)
 	return hsnCodeRegex.MatchString(fl.Field().String())
+}
+
+// RegisterCustomValidations wires the shared validation rules used by invoice uploads.
+func RegisterCustomValidations(v *validator.Validate) {
+	if v == nil {
+		return
+	}
+
+	_ = v.RegisterValidation("nrsdate", IsValidNRSDate)
+	_ = v.RegisterValidation("hsncode", ValidateHSNCode)
+	_ = v.RegisterValidation("taxvalue", ValidateTaxValue)
+}
+
+// ValidateTaxValue enforces positive tax values, while allowing zero for exempted and zero-rated categories.
+func ValidateTaxValue(fl validator.FieldLevel) bool {
+	field := fl.Field()
+	if field.Kind() == reflect.Ptr {
+		if field.IsNil() {
+			return true
+		}
+		field = field.Elem()
+	}
+
+	if !field.IsValid() || !field.CanFloat() {
+		return false
+	}
+
+	value := field.Float()
+	categoryID := taxCategoryIDFromStruct(fl.Parent())
+	if isZeroAllowedTaxCategory(categoryID) {
+		return value >= 0
+	}
+
+	return value > 0
+}
+
+func taxCategoryIDFromStruct(v reflect.Value) string {
+	if !v.IsValid() {
+		return ""
+	}
+
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return ""
+		}
+		v = v.Elem()
+	}
+
+	if v.Kind() != reflect.Struct {
+		return ""
+	}
+
+	if idField := v.FieldByName("ID"); idField.IsValid() && idField.Kind() == reflect.String {
+		return strings.ToUpper(strings.TrimSpace(idField.String()))
+	}
+
+	if taxCategoryField := v.FieldByName("TaxCategory"); taxCategoryField.IsValid() {
+		if taxCategoryField.Kind() == reflect.Ptr {
+			if taxCategoryField.IsNil() {
+				return ""
+			}
+			taxCategoryField = taxCategoryField.Elem()
+		}
+
+		if taxCategoryField.Kind() == reflect.Struct {
+			if idField := taxCategoryField.FieldByName("ID"); idField.IsValid() && idField.Kind() == reflect.String {
+				return strings.ToUpper(strings.TrimSpace(idField.String()))
+			}
+		}
+	}
+
+	return ""
+}
+
+func isZeroAllowedTaxCategory(categoryID string) bool {
+	switch strings.ToUpper(strings.TrimSpace(categoryID)) {
+	case "EXEMPTED", "ZERO_RATED":
+		return true
+	default:
+		return false
+	}
 }
