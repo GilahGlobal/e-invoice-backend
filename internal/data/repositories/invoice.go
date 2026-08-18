@@ -30,7 +30,7 @@ type InvoiceListWithMetadata struct {
 	CurrentStatus string         `gorm:"column:current_status"`
 	PaymentStatus string         `gorm:"column:payment_status"`
 	StatusText    string         `gorm:"column:status_text"`
-	StatusHistory  datatypes.JSON `gorm:"column:status_history"`
+	StatusHistory datatypes.JSON `gorm:"column:status_history"`
 	QrCodeBmpUrl  string         `gorm:"column:qr_code_bmp_url"`
 	QrCode        string         `gorm:"column:qr_code"`
 	CreatedAt     time.Time      `gorm:"column:created_at"`
@@ -147,18 +147,31 @@ func (r *InvoiceRepository) UpdateInvoiceIRN(db database.DatabaseManager, invoic
 	return db.DB().Save(invoice).Error
 }
 
-func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]entities.MinimalInvoiceDTO, database.PaginationResponse, error) {
+func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(
+	db database.DatabaseManager,
+	businessID string,
+	pagination database.Pagination,
+) ([]entities.MinimalInvoiceDTO, database.PaginationResponse, error) {
+
 	var result []entities.MinimalInvoiceDTO
 
+	// Set pagination defaults
 	if pagination.Page <= 0 {
 		pagination.Page = 1
 	}
+
 	if pagination.Limit <= 0 {
 		pagination.Limit = 20
 	}
 
+	// Get total number of invoices
 	var totalCount int64
-	if err := db.DB().Model(&entities.Invoice{}).Where("business_id = ? AND deleted_at IS NULL", businessID).Count(&totalCount).Error; err != nil {
+
+	if err := db.DB().
+		Model(&entities.Invoice{}).
+		Where("business_id = ? AND deleted_at IS NULL", businessID).
+		Count(&totalCount).Error; err != nil {
+
 		return nil, database.PaginationResponse{
 			CurrentPage:     pagination.Page,
 			PageCount:       0,
@@ -166,39 +179,92 @@ func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(db database.Database
 		}, err
 	}
 
-	totalPages := int(math.Ceil(float64(totalCount) / float64(pagination.Limit)))
+	// Calculate total pages
+	totalPages := int(math.Ceil(
+		float64(totalCount) / float64(pagination.Limit),
+	))
+
+	// Calculate offset
 	offset := (pagination.Page - 1) * pagination.Limit
 
 	query := `
 	SELECT 
-		id,
-		invoice_number,
-		irn,
-		platform,
-		current_status,
-		payment_status,
-		status_history,
-		qr_code_bmp_url,
-		qr_code,
+		invoices.id,
+		invoices.invoice_number,
+		invoices.irn,
+		invoices.platform,
+		invoices.current_status,
+		invoices.payment_status,
+		invoices.status_history,
+		invoices.qr_code_bmp_url,
+		invoices.qr_code,
+
 		CASE
-			WHEN current_status IN ('signed_invoice', 'transmitted_invoice')
-				THEN 'partial_success'
-			ELSE (
-				SELECT COALESCE(entry->>'status', 'pending')
-				FROM jsonb_array_elements(status_history) AS entry
-				WHERE entry->>'step' = invoices.current_status
-				ORDER BY entry->>'timestamp' DESC
-				LIMIT 1
-			)
+
+			-- CONFIRMED INVOICE
+			--
+			-- success -> success
+			-- pending -> partial_success
+			-- failed -> partial_success
+			-- missing -> partial_success
+			WHEN invoices.current_status = 'confirmed_invoice' THEN
+				CASE
+					WHEN current_step_status = 'success'
+						THEN 'success'
+
+					ELSE 'partial_success'
+				END
+
+			-- TRANSMITTED INVOICE
+			--
+			-- Always partial_success regardless
+			-- of the history status.
+			WHEN invoices.current_status = 'transmitted_invoice' THEN
+				'partial_success'
+
+			-- SIGNED INVOICE
+			--
+			-- success -> partial_success
+			-- pending -> failed
+			-- failed -> failed
+			-- missing -> failed
+			WHEN invoices.current_status = 'signed_invoice' THEN
+				CASE
+					WHEN current_step_status = 'success'
+						THEN 'partial_success'
+
+					ELSE 'failed'
+				END
+
+			-- ALL OTHER CURRENT STATUSES
+			ELSE
+				'failed'
+
 		END AS status_text,
-		created_at
+
+		invoices.created_at
+
 	FROM invoices
-	WHERE business_id = ? AND deleted_at IS NULL
-	ORDER BY created_at DESC
+
+	LEFT JOIN LATERAL (
+		SELECT entry->>'status' AS current_step_status
+		FROM jsonb_array_elements(invoices.status_history) AS entry
+		WHERE entry->>'step' = invoices.current_status
+		ORDER BY (entry->>'timestamp')::timestamptz DESC
+		LIMIT 1
+	) AS current_step ON TRUE
+
+	WHERE invoices.business_id = ?
+	  AND invoices.deleted_at IS NULL
+
+	ORDER BY invoices.created_at DESC
 	LIMIT ? OFFSET ?;
 	`
 
-	if err := db.DB().Raw(query, businessID, pagination.Limit, offset).Scan(&result).Error; err != nil {
+	if err := db.DB().
+		Raw(query, businessID, pagination.Limit, offset).
+		Scan(&result).Error; err != nil {
+
 		return nil, database.PaginationResponse{
 			CurrentPage:     pagination.Page,
 			PageCount:       0,
@@ -213,18 +279,31 @@ func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(db database.Database
 	}, nil
 }
 
-func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(db database.DatabaseManager, businessID string, pagination database.Pagination) ([]InvoiceListWithMetadata, database.PaginationResponse, error) {
+func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(
+	db database.DatabaseManager,
+	businessID string,
+	pagination database.Pagination,
+) ([]InvoiceListWithMetadata, database.PaginationResponse, error) {
+
 	var result []InvoiceListWithMetadata
 
+	// Set pagination defaults
 	if pagination.Page <= 0 {
 		pagination.Page = 1
 	}
+
 	if pagination.Limit <= 0 {
 		pagination.Limit = 20
 	}
 
+	// Get total number of invoices
 	var totalCount int64
-	if err := db.DB().Model(&entities.Invoice{}).Where("business_id = ? AND deleted_at IS NULL", businessID).Count(&totalCount).Error; err != nil {
+
+	if err := db.DB().
+		Model(&entities.Invoice{}).
+		Where("business_id = ? AND deleted_at IS NULL", businessID).
+		Count(&totalCount).Error; err != nil {
+
 		return nil, database.PaginationResponse{
 			CurrentPage:     pagination.Page,
 			PageCount:       0,
@@ -232,7 +311,12 @@ func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(db database.Dat
 		}, err
 	}
 
-	totalPages := int(math.Ceil(float64(totalCount) / float64(pagination.Limit)))
+	// Calculate total pages
+	totalPages := int(math.Ceil(
+		float64(totalCount) / float64(pagination.Limit),
+	))
+
+	// Calculate offset
 	offset := (pagination.Page - 1) * pagination.Limit
 
 	query := `
@@ -246,25 +330,81 @@ func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(db database.Dat
 		status_history,
 		qr_code_bmp_url,
 		qr_code,
+
 		CASE
-			WHEN current_status IN ('signed_invoice', 'transmitted_invoice')
-				THEN 'partial_success'
-			ELSE (
-				SELECT COALESCE(entry->>'status', 'pending')
-				FROM jsonb_array_elements(status_history) AS entry
-				WHERE entry->>'step' = invoices.current_status
-				ORDER BY entry->>'timestamp' DESC
-				LIMIT 1
-			)
+
+			-- CONFIRMED INVOICE
+			--
+			-- success -> success
+			-- pending -> partial_success
+			-- failed -> partial_success
+			-- missing -> partial_success
+			--
+			-- Only a successful confirmation is considered
+			-- a fully successful invoice.
+			WHEN current_status = 'confirmed_invoice' THEN
+				CASE
+					WHEN current_step_status = 'success'
+						THEN 'success'
+
+					ELSE 'partial_success'
+				END
+
+			-- TRANSMITTED INVOICE
+			--
+			-- Always partial_success regardless of
+			-- the status recorded in status_history.
+			WHEN current_status = 'transmitted_invoice' THEN
+				'partial_success'
+
+			-- SIGNED INVOICE
+			--
+			-- success -> partial_success
+			-- pending -> failed
+			-- failed -> failed
+			-- missing -> failed
+			WHEN current_status = 'signed_invoice' THEN
+				CASE
+					WHEN current_step_status = 'success'
+						THEN 'partial_success'
+
+					ELSE 'failed'
+				END
+
+			-- ALL OTHER STATUSES
+			ELSE
+				'failed'
+
 		END AS status_text,
+
 		created_at
-	FROM invoices
-	WHERE business_id = ? AND deleted_at IS NULL
+
+	FROM (
+		SELECT 
+			invoices.*,
+
+			(
+				SELECT entry->>'status'
+				FROM jsonb_array_elements(invoices.status_history) AS entry
+				WHERE entry->>'step' = invoices.current_status
+				ORDER BY (entry->>'timestamp')::timestamptz DESC
+				LIMIT 1
+			) AS current_step_status
+
+		FROM invoices
+
+		WHERE business_id = ?
+		  AND deleted_at IS NULL
+	) AS invoices
+
 	ORDER BY created_at DESC
 	LIMIT ? OFFSET ?;
 	`
 
-	if err := db.DB().Raw(query, businessID, pagination.Limit, offset).Scan(&result).Error; err != nil {
+	if err := db.DB().
+		Raw(query, businessID, pagination.Limit, offset).
+		Scan(&result).Error; err != nil {
+
 		return nil, database.PaginationResponse{
 			CurrentPage:     pagination.Page,
 			PageCount:       0,
@@ -327,25 +467,87 @@ func (r *InvoiceRepository) SaveInvoice(db database.DatabaseManager, invoice *en
 	return db.DB().Save(invoice).Error
 }
 
-func (r *InvoiceRepository) GetInvoiceStats(db *gorm.DB, businessID *string, aggregatorID *string) (*entities.InvoiceStatsResponseData, error) {
+func (r *InvoiceRepository) GetInvoiceStats(
+	db *gorm.DB,
+	businessID *string,
+	aggregatorID *string,
+) (*entities.InvoiceStatsResponseData, error) {
+
 	var monthlyResults []entities.MonthlyInvoiceStatsDto
 
 	query := `
 	SELECT 
 		TO_CHAR(created_at, 'YYYYMM') AS month,
+
 		COUNT(*) AS total_invoices,
-		SUM(CASE WHEN current_status = 'confirmed_invoice' THEN 1 ELSE 0 END) AS successful_invoices,
-		SUM(CASE WHEN current_status IN ('signed_invoice', 'transmitted_invoice') THEN 1 ELSE 0 END) AS partial_invoices,
-		SUM(CASE 
-			WHEN current_status NOT IN ('confirmed_invoice', 'signed_invoice', 'transmitted_invoice') 
-			AND (
-				SELECT COALESCE(entry->>'status', 'pending')
-				FROM jsonb_array_elements(status_history) AS entry
-				WHERE entry->>'step' = invoices.current_status
-				ORDER BY entry->>'timestamp' DESC
-				LIMIT 1
-			) = 'failed' THEN 1 ELSE 0 END) AS failed_invoices
+
+		-- Successful invoices
+		--
+		-- Only confirmed_invoice with a successful
+		-- confirmed_invoice history entry is successful.
+		SUM(
+			CASE
+				WHEN current_status = 'confirmed_invoice'
+					AND current_step_status = 'success'
+				THEN 1
+				ELSE 0
+			END
+		) AS successful_invoices,
+
+		-- Partial invoices
+		--
+		-- confirmed_invoice + anything other than success
+		-- transmitted_invoice + anything
+		-- signed_invoice + success
+		SUM(
+			CASE
+				WHEN current_status = 'confirmed_invoice'
+					AND current_step_status != 'success'
+				THEN 1
+
+				WHEN current_status = 'transmitted_invoice'
+					THEN 1
+
+				WHEN current_status = 'signed_invoice'
+					AND current_step_status = 'success'
+				THEN 1
+
+				ELSE 0
+			END
+		) AS partial_invoices,
+
+		-- Failed invoices
+		--
+		-- signed_invoice + anything other than success
+		-- all other current statuses
+		SUM(
+			CASE
+				WHEN current_status = 'signed_invoice'
+					AND current_step_status != 'success'
+				THEN 1
+
+				WHEN current_status NOT IN (
+					'confirmed_invoice',
+					'signed_invoice',
+					'transmitted_invoice'
+				)
+				THEN 1
+
+				ELSE 0
+			END
+		) AS failed_invoices
+
 	FROM invoices
+
+	-- Extract the latest status for the current step once
+	CROSS JOIN LATERAL (
+		SELECT entry->>'status' AS current_step_status
+		FROM jsonb_array_elements(invoices.status_history) AS entry
+		WHERE entry->>'step' = invoices.current_status
+		ORDER BY (entry->>'timestamp')::timestamptz DESC
+		LIMIT 1
+	) AS current_step
+
 	WHERE deleted_at IS NULL
 	`
 
@@ -361,13 +563,17 @@ func (r *InvoiceRepository) GetInvoiceStats(db *gorm.DB, businessID *string, agg
 		args = append(args, *aggregatorID)
 	}
 
-	query += " GROUP BY TO_CHAR(created_at, 'YYYYMM') ORDER BY month DESC;"
+	query += `
+	GROUP BY TO_CHAR(created_at, 'YYYYMM')
+	ORDER BY month DESC;
+	`
 
 	if err := db.Raw(query, args...).Scan(&monthlyResults).Error; err != nil {
 		return nil, err
 	}
 
 	totalStats := entities.InvoiceStatsDto{}
+
 	for _, m := range monthlyResults {
 		totalStats.TotalInvoices += m.TotalInvoices
 		totalStats.SuccessfulInvoices += m.SuccessfulInvoices
