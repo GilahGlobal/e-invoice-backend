@@ -295,7 +295,14 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 			entities.StatusTransmitted:   true,
 			entities.StatusConfirmed:     true,
 		}
-		if blockedStatuses[invoiceExists.CurrentStatus] {
+		
+		isBlocked := blockedStatuses[invoiceExists.CurrentStatus]
+		// if the current status is signed_invoice but the status of it in the metadata is saying failed, please allow a reupload
+		if invoiceExists.CurrentStatus == entities.StatusSignedInvoice && invoiceExists.HasFailedStatus() {
+			isBlocked = false
+		}
+		
+		if isBlocked {
 			return false, FailureStageDuplicateCheck, fmt.Errorf("invoice cannot be overwritten: %s", invoicePayload.InvoiceNumber)
 		}
 	}

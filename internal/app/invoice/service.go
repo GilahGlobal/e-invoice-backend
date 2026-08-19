@@ -29,11 +29,10 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/image/bmp"
-
 	"github.com/gofiber/fiber/v2"
-	qrcode "github.com/skip2/go-qrcode"
+	"github.com/skip2/go-qrcode"
 	"go.uber.org/zap"
+	"golang.org/x/image/bmp"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
