@@ -213,7 +213,13 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 			entities.StatusTransmitted:   true,
 			entities.StatusConfirmed:     true,
 		}
-		if blockedStatuses[invoiceExists.CurrentStatus] {
+		
+		isBlocked := blockedStatuses[invoiceExists.CurrentStatus]
+		if invoiceExists.CurrentStatus == entities.StatusSignedInvoice && invoiceExists.HasFailedStatus() {
+			isBlocked = false
+		}
+		
+		if isBlocked {
 			qrCode := invoiceExists.QrCode
 			if qrCode == "" {
 				qrCode = invoiceExists.EncryptedIRN
@@ -382,7 +388,12 @@ func (h *Handler) ModifyInvoice(c *fiber.Ctx) error {
 		entities.StatusConfirmed:     true,
 	}
 
-	if blockedStatuses[existingInvoice.CurrentStatus] {
+	isBlocked := blockedStatuses[existingInvoice.CurrentStatus]
+	if existingInvoice.CurrentStatus == entities.StatusSignedInvoice && existingInvoice.HasFailedStatus() {
+		isBlocked = false
+	}
+
+	if isBlocked {
 		now := time.Now().UTC()
 		created := existingInvoice.CreatedAt.UTC()
 		if now.Year() == created.Year() && now.YearDay() == created.YearDay() {
