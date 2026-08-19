@@ -222,3 +222,19 @@ func InitPlatformInvoiceStatus() (string, datatypes.JSON, error) {
 
 	return StatusSignedIRN, historyJSON, nil
 }
+
+func (i *Invoice) HasFailedStatus() bool {
+	if len(i.StatusHistory) == 0 {
+		return false
+	}
+	var history []StatusHistoryEntry
+	if err := json.Unmarshal(i.StatusHistory, &history); err != nil {
+		return false
+	}
+	for _, entry := range history {
+		if entry.Step == StatusSignedInvoice && strings.EqualFold(entry.Status, "failed") {
+			return true
+		}
+	}
+	return false
+}
