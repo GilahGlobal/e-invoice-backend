@@ -395,8 +395,6 @@ func (s *Service) SignIRN(irn string, keys *utility.CryptoKeys) (*firs_models.IR
 		return nil, fmt.Errorf("failed to marshal JSON: %v", err)
 	}
 
-	log.Println("sign irn payload: ", string(jsonData))
-
 	encrypted, err := rsa.EncryptPKCS1v15(rand.Reader, keys.PublicKey, jsonData)
 	if err != nil {
 		return nil, fmt.Errorf("encryption failed: %v", err)
@@ -767,6 +765,41 @@ func (s *Service) UncompletedFirsProcesses(db *gorm.DB, currentStatus string, pa
 		return nil, true
 	case entities.StatusSignedIRN:
 		return s.FirsAllInOneProcess(payload, invoiceModel, db, isSandbox)
+	case entities.StatusSignedInvoice:
+		if invoiceModel.HasFailedStatus() {
+			_, theErr, err := s.SignInvoice(payload, isSandbox)
+			if err != nil {
+				stageErr := formatFirsError("failed to sign invoice", theErr, err)
+				_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+				return stageErr, false
+			}
+			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusSignedInvoice, "success")
+
+			_, theErr, err = s.TransmitInvoice(*payload.IRN, isSandbox)
+			if err != nil {
+				stageErr := formatFirsError("failed to transmit invoice", theErr, err)
+				_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+				return stageErr, true
+			}
+			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusTransmitted, "success")
+
+			confirmInvoiceResp, theErr, err := s.ConfirmInvoice(*payload.IRN, isSandbox)
+			if err != nil {
+				stageErr := formatFirsError("failed to confirm invoice", theErr, err)
+				_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+				return stageErr, true
+			}
+
+			if confirmInvoiceResp.Code != 200 {
+				stageErr := fmt.Errorf("failed to confirm invoice, didnt get 200 or delivered is false")
+				_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+				return stageErr, true
+			}
+
+			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "success")
+			return nil, true
+		}
+		return nil, true
 	default:
 		return fmt.Errorf("unknown status: %s", currentStatus), false
 	}

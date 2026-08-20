@@ -213,12 +213,12 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 			entities.StatusTransmitted:   true,
 			entities.StatusConfirmed:     true,
 		}
-		
+
 		isBlocked := blockedStatuses[invoiceExists.CurrentStatus]
 		if invoiceExists.CurrentStatus == entities.StatusSignedInvoice && invoiceExists.HasFailedStatus() {
 			isBlocked = false
 		}
-		
+
 		if isBlocked {
 			qrCode := invoiceExists.QrCode
 			if qrCode == "" {
