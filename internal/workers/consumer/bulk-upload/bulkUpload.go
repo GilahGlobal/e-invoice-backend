@@ -227,9 +227,76 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 		mu.Lock()
 		if result.Status == entities.StatusConfirmed || result.Posted {
 			results.SuccessCount++
-		} else if result.Status == entities.StatusSignedInvoice || result.Status == entities.StatusTransmitted {
+		} else if result.Status == entities.StatusTransmitted {
 			results.PartialCount++
+		} else if result.Status == entities.StatusSignedInvoice {
+			db := middleware.GetDatabaseInstance(isSandbox, qc.db, qc.testDb)
+			invoiceExists, _ := qc.invoiceSvc.GetInvoiceByInvoiceNumber(db, result.Invoice.InvoiceNumber, businessId)
+			
+			hasSuccess := false
+			if invoiceExists != nil && len(invoiceExists.StatusHistory) > 0 {
+				var history []entities.StatusHistoryEntry
+				if err := json.Unmarshal(invoiceExists.StatusHistory, &history); err == nil {
+					for _, entry := range history {
+						if entry.Step == entities.StatusSignedInvoice && strings.EqualFold(entry.Status, "success") {
+							hasSuccess = true
+							break
+						}
+					}
+				}
+			}
+
+			if hasSuccess {
+				results.PartialCount++
+			} else {
+				results.ErrorCount++
+				errStr := "signed_invoice failed or pending in history"
+				if result.Error != nil {
+					errStr = result.Error.Error()
+				}
+				results.Errors = append(results.Errors, ProcessError{
+					InvoiceNumber: result.Invoice.InvoiceNumber,
+					Stage:         normalizeFailureStage(result.Status, result.Error),
+					Invoice:       cloneInvoiceForError(*result.Invoice),
+					Error:         errStr,
+				})
+			}
 		} else if result.Error != nil {
+			if strings.HasPrefix(result.Error.Error(), "invoice cannot be overwritten:") {
+				db := middleware.GetDatabaseInstance(isSandbox, qc.db, qc.testDb)
+				invoiceExists, _ := qc.invoiceSvc.GetInvoiceByInvoiceNumber(db, result.Invoice.InvoiceNumber, id)
+				if invoiceExists != nil {
+					if invoiceExists.CurrentStatus == entities.StatusConfirmed {
+						results.SuccessCount++
+						mu.Unlock()
+						continue
+					} else if invoiceExists.CurrentStatus == entities.StatusTransmitted {
+						results.PartialCount++
+						mu.Unlock()
+						continue
+					} else if invoiceExists.CurrentStatus == entities.StatusSignedInvoice {
+						hasSuccess := false
+						if len(invoiceExists.StatusHistory) > 0 {
+							var history []entities.StatusHistoryEntry
+							if err := json.Unmarshal(invoiceExists.StatusHistory, &history); err == nil {
+								for _, entry := range history {
+									if entry.Step == entities.StatusSignedInvoice && strings.EqualFold(entry.Status, "success") {
+										hasSuccess = true
+										break
+									}
+								}
+							}
+						}
+						
+						if hasSuccess {
+							results.PartialCount++
+							mu.Unlock()
+							continue
+						}
+					}
+				}
+			}
+
 			results.ErrorCount++
 			results.Errors = append(results.Errors, ProcessError{
 				InvoiceNumber: result.Invoice.InvoiceNumber,
