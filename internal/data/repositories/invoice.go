@@ -201,45 +201,23 @@ func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(
 
 		CASE
 
-			-- CONFIRMED INVOICE
-			--
-			-- success -> success
-			-- pending -> partial_success
-			-- failed -> partial_success
-			-- missing -> partial_success
+			WHEN invoices.current_status = 'transmitted_invoice' THEN
+				'partial_success'
+			
 			WHEN invoices.current_status = 'confirmed_invoice' THEN
 				CASE
-					WHEN current_step_status = 'success'
-						THEN 'success'
-
+					WHEN current_step_status = 'success' THEN 'success'
 					ELSE 'partial_success'
 				END
 
-			-- TRANSMITTED INVOICE
-			--
-			-- Always partial_success regardless
-			-- of the history status.
-			WHEN invoices.current_status = 'transmitted_invoice' THEN
-				'partial_success'
-
-			-- SIGNED INVOICE
-			--
-			-- success -> partial_success
-			-- pending -> failed
-			-- failed -> failed
-			-- missing -> failed
 			WHEN invoices.current_status = 'signed_invoice' THEN
 				CASE
-					WHEN current_step_status = 'success'
-						THEN 'partial_success'
-
+					WHEN current_step_status = 'success' THEN 'partial_success'
 					ELSE 'failed'
 				END
 
-			-- ALL OTHER CURRENT STATUSES
 			ELSE
 				'failed'
-
 		END AS status_text,
 
 		invoices.created_at
@@ -333,48 +311,23 @@ func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(
 
 		CASE
 
-			-- CONFIRMED INVOICE
-			--
-			-- success -> success
-			-- pending -> partial_success
-			-- failed -> partial_success
-			-- missing -> partial_success
-			--
-			-- Only a successful confirmation is considered
-			-- a fully successful invoice.
+			WHEN current_status = 'transmitted_invoice' THEN
+				'partial_success'
+			
 			WHEN current_status = 'confirmed_invoice' THEN
 				CASE
-					WHEN current_step_status = 'success'
-						THEN 'success'
-
+					WHEN current_step_status = 'success' THEN 'success'
 					ELSE 'partial_success'
 				END
 
-			-- TRANSMITTED INVOICE
-			--
-			-- Always partial_success regardless of
-			-- the status recorded in status_history.
-			WHEN current_status = 'transmitted_invoice' THEN
-				'partial_success'
-
-			-- SIGNED INVOICE
-			--
-			-- success -> partial_success
-			-- pending -> failed
-			-- failed -> failed
-			-- missing -> failed
 			WHEN current_status = 'signed_invoice' THEN
 				CASE
-					WHEN current_step_status = 'success'
-						THEN 'partial_success'
-
+					WHEN current_step_status = 'success' THEN 'partial_success'
 					ELSE 'failed'
 				END
 
-			-- ALL OTHER STATUSES
 			ELSE
 				'failed'
-
 		END AS status_text,
 
 		created_at
