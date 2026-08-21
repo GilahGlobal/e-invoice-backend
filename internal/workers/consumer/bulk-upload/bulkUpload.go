@@ -231,9 +231,10 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 			results.PartialCount++
 		} else if result.Status == entities.StatusSignedInvoice {
 			db := middleware.GetDatabaseInstance(isSandbox, qc.db, qc.testDb)
-			invoiceExists, _ := qc.invoiceSvc.GetInvoiceByInvoiceNumber(db, result.Invoice.InvoiceNumber, businessId)
-			
+			invoiceExists, _ := qc.invoiceSvc.GetInvoiceByInvoiceNumber(db, result.Invoice.InvoiceNumber, id)
+
 			hasSuccess := false
+			failureMessage := "signed_invoice failed in history"
 			if invoiceExists != nil && len(invoiceExists.StatusHistory) > 0 {
 				var history []entities.StatusHistoryEntry
 				if err := json.Unmarshal(invoiceExists.StatusHistory, &history); err == nil {
@@ -241,6 +242,8 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 						if entry.Step == entities.StatusSignedInvoice && strings.EqualFold(entry.Status, "success") {
 							hasSuccess = true
 							break
+						} else if entry.Step == entities.StatusSignedInvoice && entry.Message != "" {
+							failureMessage = entry.Message
 						}
 					}
 				}
@@ -250,7 +253,7 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 				results.PartialCount++
 			} else {
 				results.ErrorCount++
-				errStr := "signed_invoice failed or pending in history"
+				errStr := failureMessage
 				if result.Error != nil {
 					errStr = result.Error.Error()
 				}
@@ -276,6 +279,7 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 						continue
 					} else if invoiceExists.CurrentStatus == entities.StatusSignedInvoice {
 						hasSuccess := false
+						failureMessage := ""
 						if len(invoiceExists.StatusHistory) > 0 {
 							var history []entities.StatusHistoryEntry
 							if err := json.Unmarshal(invoiceExists.StatusHistory, &history); err == nil {
@@ -283,6 +287,8 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 									if entry.Step == entities.StatusSignedInvoice && strings.EqualFold(entry.Status, "success") {
 										hasSuccess = true
 										break
+									} else if entry.Step == entities.StatusSignedInvoice && entry.Message != "" {
+										failureMessage = entry.Message
 									}
 								}
 							}
@@ -292,6 +298,8 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 							results.PartialCount++
 							mu.Unlock()
 							continue
+						} else if failureMessage != "" {
+							result.Error = fmt.Errorf("%s", failureMessage)
 						}
 					}
 				}
@@ -362,13 +370,13 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 			entities.StatusTransmitted:   true,
 			entities.StatusConfirmed:     true,
 		}
-		
+
 		isBlocked := blockedStatuses[invoiceExists.CurrentStatus]
 		// if the current status is signed_invoice but the status of it in the metadata is saying failed, please allow a reupload
 		if invoiceExists.CurrentStatus == entities.StatusSignedInvoice && invoiceExists.HasFailedStatus() {
 			isBlocked = false
 		}
-		
+
 		if isBlocked {
 			return false, FailureStageDuplicateCheck, fmt.Errorf("invoice cannot be overwritten: %s", invoicePayload.InvoiceNumber)
 		}
