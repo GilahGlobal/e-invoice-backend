@@ -20,6 +20,7 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
 	protected.Use(middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()))
 	protected.Use(middleware.SelectDatabaseFromClaims(c.DB, c.TestDB))
 	protected.Use(middleware.AggregatorGuard())
+	protected.Use(middleware.RequireFrontend())
 
 	// Dashboard & General
 	{
