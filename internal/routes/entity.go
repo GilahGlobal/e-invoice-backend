@@ -12,7 +12,7 @@ import (
 func EntityRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	entityController := entity.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB)
 
-	entityUrlSec := app.Group(fmt.Sprintf("%v/entity", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()))
+	entityUrlSec := app.Group(fmt.Sprintf("%v/entity", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()), middleware.RequireFrontend())
 	{
 		entityUrlSec.Get("", entityController.GetEntities)
 		entityUrlSec.Get("/:entity_id", entityController.GetEntity)
