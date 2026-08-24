@@ -13,20 +13,21 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	invoiceController := invoice.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB, c.Keys)
 
 	invoiceUrlSec := app.Group(fmt.Sprintf("%v/invoice", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()), middleware.SelectDatabaseFromClaims(c.DB, c.TestDB))
-	
+
 	// Endpoints open to external API clients
 	invoiceUrlSec.Patch("/update", invoiceController.BulkUpdateInvoice)
 	invoiceUrlSec.Patch("/update/:irn", invoiceController.UpdateInvoice)
+	invoiceUrlSec.Post("/upload", invoiceController.UploadInvoice)
+	invoiceUrlSec.Patch("/upload", invoiceController.ModifyInvoice)
+	invoiceUrlSec.Get("/:invoice_id", invoiceController.GetInvoiceDetails)
+	invoiceUrlSec.Get("/download/:irn", invoiceController.DownloadInvoice)
 
 	// Endpoints restricted to frontend only
 	invoiceFrontend := invoiceUrlSec.Group("", middleware.RequireFrontend())
 	{
 		invoiceFrontend.Get("/stats", invoiceController.GetInvoiceStats)
 		invoiceFrontend.Get("", invoiceController.GetAllInvoices)
-		invoiceFrontend.Get("/:invoice_id", invoiceController.GetInvoiceDetails)
 		invoiceFrontend.Delete("/:invoice_id", invoiceController.DeleteInvoice)
-		invoiceFrontend.Post("/upload", invoiceController.UploadInvoice)
-		invoiceFrontend.Patch("/upload", invoiceController.ModifyInvoice)
 	}
 	{
 		invoiceFrontend.Post("/validate-irn", invoiceController.ValidateIRN)
