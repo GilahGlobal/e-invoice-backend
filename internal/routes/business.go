@@ -13,16 +13,17 @@ import (
 func BusinessRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	businessController := business.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB)
 
-	businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()), middleware.SelectDatabaseFromClaims(c.DB, c.TestDB), middleware.RequireFrontend())
+	businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()), middleware.SelectDatabaseFromClaims(c.DB, c.TestDB))
+	rf := middleware.RequireFrontend()
 	// businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(nil, testDb.Postgresql.DB()))
 	{
-		// businessUrlSec.Get("", businessController.GetAllBusiness)
-		businessUrlSec.Get("", businessController.GetBusiness)
-		businessUrlSec.Patch("", businessController.UpdateBusinessProfile)
+		// businessUrlSec.Get("", rf, businessController.GetAllBusiness)
+		businessUrlSec.Get("", rf, businessController.GetBusiness)
+		businessUrlSec.Patch("", rf, businessController.UpdateBusinessProfile)
 
-		businessUrlSec.Post("/crypto-keys", businessController.UploadIRNSigningKeys)
+		businessUrlSec.Post("/crypto-keys", rf, businessController.UploadIRNSigningKeys)
 		aggregatorController := aggregator.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB, c.Config)
-		aggregators := businessUrlSec.Group("/aggregators")
+		aggregators := businessUrlSec.Group("/aggregators", rf)
 		{
 			aggregators.Get("/", aggregatorController.ListAvailableAggregators)
 			aggregators.Post("/invite", aggregatorController.SendAggregatorInvitation)

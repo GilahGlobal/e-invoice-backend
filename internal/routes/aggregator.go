@@ -20,24 +20,25 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
 	protected.Use(middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()))
 	protected.Use(middleware.SelectDatabaseFromClaims(c.DB, c.TestDB))
 	protected.Use(middleware.AggregatorGuard())
-	protected.Use(middleware.RequireFrontend())
+
+	rf := middleware.RequireFrontend()
 
 	// Dashboard & General
 	{
-		protected.Get("/dashboard", controller.Dashboard)
-		protected.Get("/stats", controller.GetInvoiceStats)
-		protected.Get("/activity-log", controller.ActivityLog)
+		protected.Get("/dashboard", rf, controller.Dashboard)
+		protected.Get("/stats", rf, controller.GetInvoiceStats)
+		protected.Get("/activity-log", rf, controller.ActivityLog)
 	}
 
 	// Invitations
-	invitations := protected.Group("/invitations")
+	invitations := protected.Group("/invitations", rf)
 	{
 		invitations.Get("/", controller.ListInvitations)
 		invitations.Post("/respond", controller.RespondToInvitation)
 	}
 
 	// Business Management
-	businesses := protected.Group("/businesses")
+	businesses := protected.Group("/businesses", rf)
 	{
 		businesses.Get("/", controller.ListBusinesses)
 		businesses.Post("/", controller.CreateBusiness)
@@ -48,7 +49,7 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
 	}
 
 	// Invoices
-	invoices := protected.Group("/invoices")
+	invoices := protected.Group("/invoices", rf)
 	{
 		invoices.Get("/", controller.ListAllInvoices)
 		invoices.Get("/single/:invoice_id", controller.GetInvoiceDetail)
@@ -57,7 +58,7 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
 	}
 
 	// Bulk Uploads
-	bulkUploads := protected.Group("/bulk-uploads")
+	bulkUploads := protected.Group("/bulk-uploads", rf)
 	{
 		bulkUploads.Get("/", controller.ListAllBulkUploads)
 		bulkUploads.Get("/:bulk_id/failed", controller.GetBulkUploadFailedInvoices)
@@ -68,11 +69,11 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
 
 	// Transactions
 	{
-		protected.Get("/transactions", controller.ListAllTransactions)
+		protected.Get("/transactions", rf, controller.ListAllTransactions)
 	}
 
 	// Subscription
-	subscription := protected.Group("/subscription")
+	subscription := protected.Group("/subscription", rf)
 	{
 		subscription.Get("/plans", subHandler.GetPlans)
 		subscription.Post("/subscribe", subHandler.Subscribe)
