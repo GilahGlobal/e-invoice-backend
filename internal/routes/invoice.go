@@ -19,7 +19,6 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	invoiceUrlSec.Patch("/update/:irn", invoiceController.UpdateInvoice)
 	invoiceUrlSec.Post("/upload", invoiceController.UploadInvoice)
 	invoiceUrlSec.Patch("/upload", invoiceController.ModifyInvoice)
-	invoiceUrlSec.Get("/:invoice_id", invoiceController.GetInvoiceDetails)
 	invoiceUrlSec.Get("/download/:irn", invoiceController.DownloadInvoice)
 
 	// Endpoints restricted to frontend only
@@ -27,7 +26,6 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	{
 		invoiceFrontend.Get("/stats", invoiceController.GetInvoiceStats)
 		invoiceFrontend.Get("", invoiceController.GetAllInvoices)
-		invoiceFrontend.Delete("/:invoice_id", invoiceController.DeleteInvoice)
 	}
 	{
 		invoiceFrontend.Post("/validate-irn", invoiceController.ValidateIRN)
@@ -36,7 +34,6 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 		invoiceFrontend.Post("/sign-irn", invoiceController.SignIRN)
 		invoiceFrontend.Post("/generate-irn", invoiceController.GenerateIRN)
 		invoiceFrontend.Get("/confirm/:irn", invoiceController.ConfirmInvoice)
-		invoiceFrontend.Get("/download/:irn", invoiceController.DownloadInvoice)
 	}
 
 	transmit := invoiceFrontend.Group("/transmit")
@@ -48,6 +45,9 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 		transmit.Get("/lookup-party/:party_id", invoiceController.LookUpPartyID)
 		transmit.Get("/pull", invoiceController.TransmitPull)
 		transmit.Get("/health-check", invoiceController.DebugHealthCheck)
-
 	}
+
+	// Parameterized routes MUST be registered last
+	invoiceUrlSec.Get("/:invoice_id", invoiceController.GetInvoiceDetails)
+	invoiceFrontend.Delete("/:invoice_id", invoiceController.DeleteInvoice)
 }
