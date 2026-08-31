@@ -138,6 +138,13 @@ func (s *Service) RespondToInvitation(invitationID, aggregatorID string, accept 
 			BusinessID:   invitation.BusinessID,
 			Action:       entities.ActivityInvitationAccepted,
 		}, db)
+
+		bRepo := repositories.NewBusinessRepository(dbinit.InitDB(db, false), dbinit.InitDB(db, false))
+		bRepo.CreateBusinessAggregatorHistory(dbinit.InitDB(db, false), &entities.BusinessAggregatorHistory{
+			BusinessID:   invitation.BusinessID,
+			AggregatorID: aggregatorID,
+			Action:       "assigned",
+		})
 	} else {
 		invitation.Status = entities.InvitationStatusRejected
 		invitation.RejectedAt = &now
@@ -177,6 +184,13 @@ func (s *Service) RevokeInvitation(invitationID, businessID string, db *gorm.DB)
 			Update("aggregator_id", nil).Error; err != nil {
 			return http.StatusInternalServerError, fmt.Errorf("failed to unlink aggregator: %w", err)
 		}
+
+		bRepo := repositories.NewBusinessRepository(dbinit.InitDB(db, false), dbinit.InitDB(db, false))
+		bRepo.CreateBusinessAggregatorHistory(dbinit.InitDB(db, false), &entities.BusinessAggregatorHistory{
+			BusinessID:   businessID,
+			AggregatorID: invitation.AggregatorID,
+			Action:       "removed",
+		})
 	}
 
 	invitation.Status = entities.InvitationStatusRevoked
@@ -442,6 +456,12 @@ func (s *Service) RemoveBusiness(aggregatorID, businessID string, db *gorm.DB) (
 		Update("aggregator_id", nil).Error; err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("failed to unlink business: %w", err)
 	}
+
+	bRepo.CreateBusinessAggregatorHistory(pdb, &entities.BusinessAggregatorHistory{
+		BusinessID:   businessID,
+		AggregatorID: aggregatorID,
+		Action:       "removed",
+	})
 
 	db.Model(&entities.AggregatorInvitation{}).
 		Where("business_id = ? AND aggregator_id = ? AND status = ?", businessID, aggregatorID, entities.InvitationStatusAccepted).
@@ -754,6 +774,13 @@ func (s *Service) CreateBusiness(db *gorm.DB, req CreateBusinessDto, aggregatorI
 	if err := db.Create(&business).Error; err != nil {
 		return fmt.Errorf("failed to create business: %w", err)
 	}
+
+	bRepo := repositories.NewBusinessRepository(dbinit.InitDB(db, false), dbinit.InitDB(db, false))
+	bRepo.CreateBusinessAggregatorHistory(dbinit.InitDB(db, false), &entities.BusinessAggregatorHistory{
+		BusinessID:   business.ID,
+		AggregatorID: aggregatorID,
+		Action:       "assigned",
+	})
 
 	return nil
 }
