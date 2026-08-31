@@ -525,6 +525,89 @@ func (r *InvoiceRepository) GetInvoiceStats(
 		return nil, err
 	}
 
+	var dailyResults []entities.DailyInvoiceStatsDto
+	dailyQuery := `
+	SELECT 
+		TO_CHAR(DATE(created_at), 'YYYY-MM-DD') AS date,
+
+		COUNT(*) AS total_invoices,
+
+		-- Successful invoices
+		SUM(
+			CASE
+				WHEN current_status = 'confirmed_invoice'
+					AND current_step_status = 'success'
+				THEN 1
+				ELSE 0
+			END
+		) AS successful_invoices,
+
+		-- Partial invoices
+		SUM(
+			CASE
+				WHEN current_status = 'confirmed_invoice'
+					AND current_step_status != 'success'
+				THEN 1
+
+				WHEN current_status = 'transmitted_invoice'
+					THEN 1
+
+				WHEN current_status = 'signed_invoice'
+					AND current_step_status = 'success'
+				THEN 1
+
+				ELSE 0
+			END
+		) AS partial_invoices,
+
+		-- Failed invoices
+		SUM(
+			CASE
+				WHEN current_status = 'signed_invoice'
+					AND current_step_status != 'success'
+				THEN 1
+
+				WHEN current_status NOT IN (
+					'confirmed_invoice',
+					'signed_invoice',
+					'transmitted_invoice'
+				)
+				THEN 1
+
+				ELSE 0
+			END
+		) AS failed_invoices
+
+	FROM invoices
+
+	LEFT JOIN LATERAL (
+		SELECT entry->>'status' AS current_step_status
+		FROM jsonb_array_elements(invoices.status_history) AS entry
+		WHERE entry->>'step' = invoices.current_status
+		ORDER BY (entry->>'timestamp')::timestamptz DESC
+		LIMIT 1
+	) AS current_step ON true
+
+	WHERE deleted_at IS NULL AND created_at >= NOW() - INTERVAL '14 days'
+	`
+
+	if businessID != nil && *businessID != "" {
+		dailyQuery += " AND business_id = ?"
+	}
+
+	if aggregatorID != nil && *aggregatorID != "" {
+		dailyQuery += " AND aggregator_id = ?"
+	}
+
+	dailyQuery += `
+	GROUP BY DATE(created_at)
+	ORDER BY date DESC;
+	`
+
+	if err := db.Raw(dailyQuery, args...).Scan(&dailyResults).Error; err != nil {
+		return nil, err
+	}
+
 	totalStats := entities.InvoiceStatsDto{}
 
 	for _, m := range monthlyResults {
@@ -537,5 +620,6 @@ func (r *InvoiceRepository) GetInvoiceStats(
 	return &entities.InvoiceStatsResponseData{
 		Total:   totalStats,
 		Monthly: monthlyResults,
+		Daily:   dailyResults,
 	}, nil
 }

@@ -28,23 +28,45 @@ func (r *AggregatorRepository) GetAggregatorByID(db *gorm.DB, id string) (*entit
 	return &aggregator, nil
 }
 
-func (r *AggregatorRepository) ListAllAggregators(db *gorm.DB, search string, page, size int) ([]entities.Business, int64, error) {
-	var aggregators []entities.Business
+type AdminAggregatorQueryResult struct {
+	entities.Business
+	CompaniesManaged      int64
+	TotalInvoicesManaged  int64
+	LastInvoiceUploadedAt *string
+	SubscribedPlan        string
+}
+
+func (r *AggregatorRepository) ListAllAggregators(db *gorm.DB, search string, page, size int) ([]AdminAggregatorQueryResult, int64, error) {
+	var aggregators []AdminAggregatorQueryResult
 	var total int64
 
-	query := db.Model(&entities.Business{}).Where("is_aggregator = ? AND email_verified = ?", true, true)
+	baseQuery := db.Model(&entities.Business{}).Where("is_aggregator = ?", true) // removed email_verified = true requirement for admin view
 
 	if search != "" {
 		searchPattern := "%" + strings.ToLower(search) + "%"
-		query = query.Where("LOWER(name) LIKE ? OR LOWER(company_name) LIKE ? OR LOWER(email) LIKE ?", searchPattern, searchPattern, searchPattern)
+		baseQuery = baseQuery.Where("LOWER(name) LIKE ? OR LOWER(company_name) LIKE ? OR LOWER(email) LIKE ?", searchPattern, searchPattern, searchPattern)
 	}
 
-	if err := query.Count(&total).Error; err != nil {
+	if err := baseQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
 	offset := (page - 1) * size
-	if err := query.Offset(offset).Limit(size).Order("created_at DESC").Find(&aggregators).Error; err != nil {
+
+	query := db.Table("businesses").
+		Select(`businesses.*, 
+			(SELECT COUNT(*) FROM businesses b2 WHERE b2.aggregator_id = businesses.id) as companies_managed,
+			(SELECT COUNT(*) FROM invoices WHERE invoices.aggregator_id = businesses.id) as total_invoices_managed,
+			(SELECT MAX(created_at) FROM invoices WHERE invoices.aggregator_id = businesses.id) as last_invoice_uploaded_at,
+			(SELECT plan FROM subscriptions WHERE subscriptions.aggregator_id = businesses.id AND subscriptions.is_active = true ORDER BY created_at DESC LIMIT 1) as subscribed_plan`).
+		Where("is_aggregator = ?", true)
+
+	if search != "" {
+		searchPattern := "%" + strings.ToLower(search) + "%"
+		query = query.Where("LOWER(businesses.name) LIKE ? OR LOWER(businesses.company_name) LIKE ? OR LOWER(businesses.email) LIKE ?", searchPattern, searchPattern, searchPattern)
+	}
+
+	if err := query.Offset(offset).Limit(size).Order("businesses.created_at DESC").Scan(&aggregators).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -306,4 +328,52 @@ func (r *AggregatorRepository) GetTransactionsByAggregator(db *gorm.DB, aggregat
 	}
 
 	return transactions, total, nil
+}
+
+type AdminAggregatorCompanyStatsResult struct {
+	ID               string
+	CompanyName      string
+	TIN              string
+	InvoicesUploaded int64
+}
+
+func (r *AggregatorRepository) GetAggregatorCompanyStats(db *gorm.DB, aggregatorID string) ([]AdminAggregatorCompanyStatsResult, error) {
+	var results []AdminAggregatorCompanyStatsResult
+	query := `
+		SELECT 
+			b.id,
+			b.company_name,
+			b.tin,
+			(SELECT COUNT(*) FROM invoices WHERE invoices.business_id = b.id AND invoices.aggregator_id = ?) as invoices_uploaded
+		FROM businesses b
+		WHERE b.aggregator_id = ? AND b.acc_status = 0
+	`
+	err := db.Raw(query, aggregatorID, aggregatorID).Scan(&results).Error
+	return results, err
+}
+
+type AdminAggregatorInvitationResult struct {
+	ID          string
+	CompanyName string
+	Industry    string
+	Status      string
+	CreatedAt   string
+}
+
+func (r *AggregatorRepository) ListPendingInvitationsForAdmin(db *gorm.DB, aggregatorID string) ([]AdminAggregatorInvitationResult, error) {
+	var results []AdminAggregatorInvitationResult
+	query := `
+		SELECT 
+			i.id,
+			b.company_name,
+			b.industry,
+			i.status,
+			i.created_at
+		FROM aggregator_invitations i
+		JOIN businesses b ON i.business_id = b.id
+		WHERE i.aggregator_id = ? AND i.status = 'pending'
+		ORDER BY i.created_at DESC
+	`
+	err := db.Raw(query, aggregatorID).Scan(&results).Error
+	return results, err
 }
