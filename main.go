@@ -54,19 +54,21 @@ func main() {
 
 	// Run migrations if enabled
 
-	if configuration.TestDatabase.Migrate {
-		migrations.RunAllMigrations(testDb)
-		if err := seed.SeedSuperAdmin(dbinit.InitDB(testDb.Postgresql.DB(), false)); err != nil {
-			utility.LogAndPrint(logger, fmt.Sprintf("Failed to seed sandbox super admin: %v\n", err))
+	go func() {
+		if configuration.TestDatabase.Migrate {
+			migrations.RunAllMigrations(testDb)
+			if err := seed.SeedSuperAdmin(dbinit.InitDB(testDb.Postgresql.DB(), false)); err != nil {
+				utility.LogAndPrint(logger, fmt.Sprintf("Failed to seed sandbox super admin: %v\n", err))
+			}
 		}
-	}
 
-	if configuration.Database.Migrate {
-		migrations.RunAllMigrations(db)
-		if err := seed.SeedSuperAdmin(dbinit.InitDB(db.Postgresql.DB(), false)); err != nil {
-			utility.LogAndPrint(logger, fmt.Sprintf("Failed to seed production super admin: %v\n", err))
-		}
-	}
+		// if configuration.Database.Migrate {
+		// 	migrations.RunAllMigrations(db)
+		// 	if err := seed.SeedSuperAdmin(dbinit.InitDB(db.Postgresql.DB(), false)); err != nil {
+		// 		utility.LogAndPrint(logger, fmt.Sprintf("Failed to seed production super admin: %v\n", err))
+		// 	}
+		// }
+	}()
 
 	app := fiber.New(fiber.Config{
 		Prefork:                 false,

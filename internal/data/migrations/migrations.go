@@ -15,6 +15,8 @@ func AuthMigrationModels() []interface{} {
 		&entities.TokenManager{},
 		&entities.BulkUpload{},
 		&entities.Admin{},
+		&entities.ApiLog{},
+		&entities.BusinessAggregatorHistory{},
 	}
 
 }

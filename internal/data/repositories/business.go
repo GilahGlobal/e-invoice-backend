@@ -152,30 +152,46 @@ func (r *BusinessRepository) FindAllBusinesses(db database.DatabaseManager) ([]e
 	return businesses, nil
 }
 
-func (r *BusinessRepository) ListAllBusinesses(db database.DatabaseManager, search string, page, size int) ([]entities.Business, int64, error) {
-	var businesses []entities.Business
+type AdminBusinessQueryResult struct {
+	entities.Business
+	TotalInvoicesUploaded int64
+	LastInvoiceUploadedAt *string
+	SubscribedPlan        string
+}
+
+func (r *BusinessRepository) ListAllBusinesses(db database.DatabaseManager, search string, page, size int) ([]AdminBusinessQueryResult, int64, error) {
+	var businesses []AdminBusinessQueryResult
 	var total int64
 
-	query := db.DB().Where("acc_status = ? AND is_aggregator = ?", 0, false)
+	// Base query for businesses
+	baseQuery := db.DB().Model(&entities.Business{}).Where("is_aggregator = ?", false)
 
 	if search != "" {
 		searchPattern := "%" + strings.ToLower(search) + "%"
-		query = query.Where("LOWER(name) LIKE ? OR LOWER(company_name) LIKE ? OR LOWER(email) LIKE ?", searchPattern, searchPattern, searchPattern)
+		baseQuery = baseQuery.Where("LOWER(name) LIKE ? OR LOWER(company_name) LIKE ? OR LOWER(email) LIKE ?", searchPattern, searchPattern, searchPattern)
 	}
 
-	if err := query.Model(&entities.Business{}).Count(&total).Error; err != nil {
+	if err := baseQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
 	offset := (page - 1) * size
-	if err := query.Offset(offset).Limit(size).Order("created_at DESC").Find(&businesses).Error; err != nil {
-		return nil, 0, err
+
+	// Join with invoices for counts and last upload, and transactions for subscribed plan
+	query := db.DB().Table("businesses").
+		Select(`businesses.*, 
+			(SELECT COUNT(*) FROM invoices WHERE invoices.business_id = businesses.id) as total_invoices_uploaded,
+			(SELECT MAX(created_at) FROM invoices WHERE invoices.business_id = businesses.id) as last_invoice_uploaded_at,
+			(SELECT plan FROM subscriptions WHERE subscriptions.business_id = businesses.id AND subscriptions.is_active = true ORDER BY created_at DESC LIMIT 1) as subscribed_plan`).
+		Where("is_aggregator = ?", false)
+
+	if search != "" {
+		searchPattern := "%" + strings.ToLower(search) + "%"
+		query = query.Where("LOWER(businesses.name) LIKE ? OR LOWER(businesses.company_name) LIKE ? OR LOWER(businesses.email) LIKE ?", searchPattern, searchPattern, searchPattern)
 	}
 
-	for i := range businesses {
-		if err := businesses[i].APIKey.AfterFind(db.DB()); err != nil {
-			return nil, 0, fmt.Errorf("failed to decrypt API key for business %s: %w", businesses[i].ID, err)
-		}
+	if err := query.Offset(offset).Limit(size).Order("businesses.created_at DESC").Scan(&businesses).Error; err != nil {
+		return nil, 0, err
 	}
 
 	return businesses, total, nil
@@ -192,6 +208,18 @@ func (r *BusinessRepository) FindBusinessByID(db database.DatabaseManager, id st
 
 	if err := business.APIKey.AfterFind(db.DB()); err != nil {
 		return nil, fmt.Errorf("failed to decrypt API key for business %s: %w", business.ID, err)
+	}
+
+	return &business, nil
+}
+
+func (r *BusinessRepository) GetBusinessByIDForAdmin(db database.DatabaseManager, id string) (*entities.Business, error) {
+	var business entities.Business
+	query := db.DB().Where("id = ? AND acc_status = ?", id, 0)
+	query = db.PreloadEntities(query, &entities.Business{}, "Invoices")
+
+	if err := query.First(&business).Error; err != nil {
+		return nil, err
 	}
 
 	return &business, nil
@@ -218,4 +246,14 @@ func (r *BusinessRepository) GetSystemBusinessStats(db database.DatabaseManager)
 	}
 
 	return totalBusinesses, totalAggregators, nil
+}
+
+func (r *BusinessRepository) CreateBusinessAggregatorHistory(db database.DatabaseManager, history *entities.BusinessAggregatorHistory) error {
+	return db.CreateOneRecord(history)
+}
+
+func (r *BusinessRepository) GetBusinessAggregatorHistory(db database.DatabaseManager, businessID string) ([]entities.BusinessAggregatorHistory, error) {
+	var histories []entities.BusinessAggregatorHistory
+	err := db.DB().Where("business_id = ?", businessID).Order("created_at DESC").Find(&histories).Error
+	return histories, err
 }

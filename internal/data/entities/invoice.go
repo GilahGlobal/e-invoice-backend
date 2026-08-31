@@ -92,9 +92,18 @@ type MonthlyInvoiceStatsDto struct {
 	FailedInvoices     int64  `json:"failed_invoices" example:"20"`
 }
 
+type DailyInvoiceStatsDto struct {
+	Date               string `json:"date" example:"2024-01-01"`
+	TotalInvoices      int64  `json:"total_invoices" example:"150"`
+	SuccessfulInvoices int64  `json:"successful_invoices" example:"100"`
+	PartialInvoices    int64  `json:"partial_invoices" example:"30"`
+	FailedInvoices     int64  `json:"failed_invoices" example:"20"`
+}
+
 type InvoiceStatsResponseData struct {
 	Total   InvoiceStatsDto          `json:"total"`
 	Monthly []MonthlyInvoiceStatsDto `json:"monthly"`
+	Daily   []DailyInvoiceStatsDto   `json:"daily"`
 }
 
 // BeforeCreate sets the ID if not provided

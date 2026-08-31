@@ -320,3 +320,285 @@ func (h *Handler) GetBusinessStats(c *fiber.Ctx) error {
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business stats retrieved successfully", stats)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
+
+// GetOverviewStats godoc
+// @Summary Admin Overview Stats
+// @Description Returns overview stats for invoices, companies, API calls, and registrations based on timeframe.
+// @Tags Admin Queries
+// @Accept json
+// @Produce json
+// @Param timeframe query string false "Timeframe: today, 7_days, 30_days, custom"
+// @Param start_date query string false "Custom start date (YYYY-MM-DD)"
+// @Param end_date query string false "Custom end date (YYYY-MM-DD)"
+// @Success 200 {object} AdminOverviewStatsResponseDto
+// @Failure 500 {object} apperror.AppError
+// @Router /admin/stats/overview [get]
+func (h *Handler) GetOverviewStats(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	timeframe := c.Query("timeframe", "30_days") // default to 30_days
+	customStartDate := c.Query("start_date", "")
+	customEndDate := c.Query("end_date", "")
+
+	stats, err := h.svc.GetOverviewStats(db, timeframe, customStartDate, customEndDate)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Overview stats retrieved successfully", stats)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// CreateBusiness godoc
+// @Summary Create Business
+// @Description Creates a new business (admin only).
+// @Tags Admin Operations
+// @Accept json
+// @Produce json
+// @Param data body AdminCreateBusinessDto true "Business request payload"
+// @Success 201 {object} utility.Response "Business created successfully"
+// @Failure 400 {object} apperror.AppError
+// @Failure 422 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /admin/businesses [post]
+func (h *Handler) CreateBusiness(c *fiber.Ctx) error {
+	var req AdminCreateBusinessDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	claims, ok := c.Locals("adminClaims").(*middleware.AdminDataClaims)
+	if !ok {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", nil, nil)
+	}
+
+	err := h.svc.CreateBusiness(req, claims.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Business created successfully", nil)
+	return c.Status(fiber.StatusCreated).JSON(rd)
+}
+
+// GetBusinessDailyInvoiceStats godoc
+// @Summary Business Daily Invoice Stats
+// @Description Returns daily invoice stats (last 14 days) and aggregated stats for a specific business.
+// @Tags Admin Queries
+// @Accept json
+// @Produce json
+// @Param id path string true "Business ID"
+// @Success 200 {object} AdminBusinessDailyStatsResponseDto
+// @Failure 500 {object} apperror.AppError
+// @Router /admin/businesses/stats{id} [get]
+func (h *Handler) GetBusinessDailyInvoiceStats(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	businessID := c.Params("id")
+	stats, err := h.svc.GetBusinessDailyInvoiceStatsDto(db, businessID)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business daily invoice stats retrieved successfully", stats)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// UpdateBusiness godoc
+// @Summary Update Business
+// @Description Updates business details and status.
+// @Tags Admin Operations
+// @Accept json
+// @Produce json
+// @Param id path string true "Business ID"
+// @Param data body AdminUpdateBusinessDto true "Business update payload"
+// @Success 200 {object} utility.Response "Business updated successfully"
+// @Failure 400 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /admin/businesses/{id} [put]
+func (h *Handler) UpdateBusiness(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	businessID := c.Params("id")
+	var req AdminUpdateBusinessDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	err = h.svc.UpdateBusiness(db, businessID, req)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business updated successfully", nil)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// GetBusinessAggregatorInfo godoc
+// @Summary Business Aggregator Info
+// @Description Returns current aggregator ID and relationship history for a business.
+// @Tags Admin Queries
+// @Accept json
+// @Produce json
+// @Param id path string true "Business ID"
+// @Success 200 {object} AdminBusinessAggregatorInfoResponse
+// @Failure 500 {object} apperror.AppError
+// @Router /admin/businesses/aggregator/{id} [get]
+func (h *Handler) GetBusinessAggregatorInfo(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	businessID := c.Params("id")
+	info, err := h.svc.GetBusinessAggregatorInfo(db, businessID)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business aggregator info retrieved successfully", info)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// CreateAggregator godoc
+// @Summary Create Aggregator
+// @Description Creates a new aggregator (admin only).
+// @Tags Admin Operations
+// @Accept json
+// @Produce json
+// @Param data body AdminCreateAggregatorDto true "Aggregator request payload"
+// @Success 201 {object} utility.Response "Aggregator created successfully"
+// @Failure 400 {object} apperror.AppError
+// @Failure 422 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /admin/aggregators [post]
+func (h *Handler) CreateAggregator(c *fiber.Ctx) error {
+	var req AdminCreateAggregatorDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	claims, ok := c.Locals("adminClaims").(*middleware.AdminDataClaims)
+	if !ok {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", nil, nil)
+	}
+
+	err := h.svc.CreateAggregator(req, claims.IsSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Aggregator created successfully", nil)
+	return c.Status(fiber.StatusCreated).JSON(rd)
+}
+
+// UpdateAggregator godoc
+// @Summary Update Aggregator
+// @Description Updates aggregator details and status.
+// @Tags Admin Operations
+// @Accept json
+// @Produce json
+// @Param id path string true "Aggregator ID"
+// @Param data body AdminUpdateBusinessDto true "Aggregator update payload"
+// @Success 200 {object} utility.Response "Aggregator updated successfully"
+// @Failure 400 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Router /admin/aggregators/{id} [put]
+func (h *Handler) UpdateAggregator(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	aggregatorID := c.Params("id")
+	var req AdminUpdateBusinessDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	err = h.svc.UpdateAggregator(db, aggregatorID, req)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Aggregator updated successfully", nil)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// GetAggregatorInfo godoc
+// @Summary Aggregator Info
+// @Description Returns stats and associated companies for an aggregator.
+// @Tags Admin Queries
+// @Accept json
+// @Produce json
+// @Param id path string true "Aggregator ID"
+// @Success 200 {object} AdminAggregatorInfoResponse
+// @Failure 500 {object} apperror.AppError
+// @Router /admin/aggregators/{id} [get]
+func (h *Handler) GetAggregatorInfo(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	aggregatorID := c.Params("id")
+	info, err := h.svc.GetAggregatorInfo(db, aggregatorID)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Aggregator info retrieved successfully", info)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// GetAggregatorInvitations godoc
+// @Summary Aggregator Invitations
+// @Description Returns pending invitations sent by an aggregator.
+// @Tags Admin Queries
+// @Accept json
+// @Produce json
+// @Param id path string true "Aggregator ID"
+// @Success 200 {object} AdminAggregatorInvitationsResponse
+// @Failure 500 {object} apperror.AppError
+// @Router /admin/aggregators/invitations/{id} [get]
+func (h *Handler) GetAggregatorInvitations(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	aggregatorID := c.Params("id")
+	invitations, err := h.svc.GetAggregatorInvitations(db, aggregatorID)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Aggregator invitations retrieved successfully", invitations)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}

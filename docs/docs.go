@@ -63,6 +63,94 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Creates a new aggregator (admin only).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Operations"
+                ],
+                "summary": "Create Aggregator",
+                "parameters": [
+                    {
+                        "description": "Aggregator request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminCreateAggregatorDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Aggregator created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/utility.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/aggregators/invitations/{id}": {
+            "get": {
+                "description": "Returns pending invitations sent by an aggregator.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Aggregator Invitations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Aggregator ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminAggregatorInvitationsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
             }
         },
         "/admin/aggregators/invoices/{id}": {
@@ -104,6 +192,95 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/admin.AdminAggregatorInvoiceListResponseDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/aggregators/{id}": {
+            "get": {
+                "description": "Returns stats and associated companies for an aggregator.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Aggregator Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Aggregator ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminAggregatorInfoResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates aggregator details and status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Operations"
+                ],
+                "summary": "Update Aggregator",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Aggregator ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Aggregator update payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminUpdateBusinessDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aggregator updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/utility.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
@@ -271,6 +448,94 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Creates a new business (admin only).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Operations"
+                ],
+                "summary": "Create Business",
+                "parameters": [
+                    {
+                        "description": "Business request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminCreateBusinessDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Business created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/utility.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/businesses/aggregator/{id}": {
+            "get": {
+                "description": "Returns current aggregator ID and relationship history for a business.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Business Aggregator Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminBusinessAggregatorInfoResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
             }
         },
         "/admin/businesses/invoices/{id}": {
@@ -312,6 +577,97 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/admin.AdminInvoiceListResponseDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/businesses/stats{id}": {
+            "get": {
+                "description": "Returns daily invoice stats (last 14 days) and aggregated stats for a specific business.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Business Daily Invoice Stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminBusinessDailyStatsResponseDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/businesses/{id}": {
+            "put": {
+                "description": "Updates business details and status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Operations"
+                ],
+                "summary": "Update Business",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Business update payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminUpdateBusinessDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/utility.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
@@ -370,6 +726,55 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/admin.AdminInvoiceStatsResponseDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/stats/overview": {
+            "get": {
+                "description": "Returns overview stats for invoices, companies, API calls, and registrations based on timeframe.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Admin Overview Stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Timeframe: today, 7_days, 30_days, custom",
+                        "name": "timeframe",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Custom start date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Custom end date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminOverviewStatsResponseDto"
                         }
                     },
                     "500": {
@@ -4365,6 +4770,92 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "admin.AdminAggregatorInfoResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.AdminAggregatorInfoResponseDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminAggregatorInfoResponseDto": {
+            "type": "object",
+            "properties": {
+                "aggregator": {
+                    "$ref": "#/definitions/admin.AdminAggregatorResponseDto"
+                },
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.AggregatorCompanyDto"
+                    }
+                },
+                "stats": {
+                    "$ref": "#/definitions/admin.AggregatorStatsDto"
+                }
+            }
+        },
+        "admin.AdminAggregatorInvitationDto": {
+            "type": "object",
+            "properties": {
+                "company_name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "industry": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "admin.AdminAggregatorInvitationsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.AdminAggregatorInvitationDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
         "admin.AdminAggregatorInvoiceListResponseDto": {
             "type": "object",
             "properties": {
@@ -4399,7 +4890,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin.AdminBusinessResponseDto"
+                        "$ref": "#/definitions/admin.AdminAggregatorResponseDto"
                     }
                 },
                 "error": {},
@@ -4413,6 +4904,124 @@ const docTemplate = `{
                 "pagination": {
                     "$ref": "#/definitions/database.PaginationResponse"
                 },
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminAggregatorResponseDto": {
+            "type": "object",
+            "properties": {
+                "companies_managed": {
+                    "type": "integer"
+                },
+                "company_name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "industry": {
+                    "type": "string"
+                },
+                "last_invoice_uploaded_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "subscribed_plan": {
+                    "type": "string"
+                },
+                "tin": {
+                    "type": "string"
+                },
+                "total_invoices_managed": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminBusinessAggregatorHistoryDto": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "aggregator_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "admin.AdminBusinessAggregatorInfoResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.AdminBusinessAggregatorInfoResponseDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminBusinessAggregatorInfoResponseDto": {
+            "type": "object",
+            "properties": {
+                "current_aggregator_id": {
+                    "type": "string"
+                },
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.AdminBusinessAggregatorHistoryDto"
+                    }
+                }
+            }
+        },
+        "admin.AdminBusinessDailyStatsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.AdminDailyInvoiceStatsDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
                 "status": {
                     "type": "string"
                 },
@@ -4470,6 +5079,12 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "industry": {
+                    "type": "string"
+                },
+                "last_invoice_uploaded_at": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -4479,8 +5094,17 @@ const docTemplate = `{
                 "service_id": {
                     "type": "string"
                 },
+                "status": {
+                    "type": "integer"
+                },
+                "subscribed_plan": {
+                    "type": "string"
+                },
                 "tin": {
                     "type": "string"
+                },
+                "total_invoices_uploaded": {
+                    "type": "integer"
                 }
             }
         },
@@ -4514,6 +5138,73 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminCreateAggregatorDto": {
+            "type": "object",
+            "required": [
+                "company_name",
+                "email",
+                "tin"
+            ],
+            "properties": {
+                "company_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "industry": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "tin": {
+                    "type": "string"
+                }
+            }
+        },
+        "admin.AdminCreateBusinessDto": {
+            "type": "object",
+            "required": [
+                "company_name",
+                "email",
+                "tin"
+            ],
+            "properties": {
+                "company_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "industry": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "tin": {
+                    "type": "string"
+                }
+            }
+        },
+        "admin.AdminDailyInvoiceStatsDto": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "failed_invoices": {
+                    "type": "integer"
+                },
+                "partial_success_invoices": {
+                    "type": "integer"
+                },
+                "success_invoices": {
                     "type": "integer"
                 }
             }
@@ -4596,6 +5287,55 @@ const docTemplate = `{
                 },
                 "data": {
                     "$ref": "#/definitions/admin.AdminResponse"
+                }
+            }
+        },
+        "admin.AdminOverviewStatsDto": {
+            "type": "object",
+            "properties": {
+                "failed_invoices": {
+                    "type": "integer"
+                },
+                "new_registrations": {
+                    "type": "integer"
+                },
+                "partial_success_invoices": {
+                    "type": "integer"
+                },
+                "success_invoices": {
+                    "type": "integer"
+                },
+                "total_api_calls": {
+                    "type": "integer"
+                },
+                "total_companies": {
+                    "type": "integer"
+                },
+                "total_invoices": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminOverviewStatsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.AdminOverviewStatsDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
                 }
             }
         },
@@ -4710,6 +5450,57 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminUpdateBusinessDto": {
+            "type": "object",
+            "properties": {
+                "acc_status": {
+                    "type": "integer"
+                },
+                "company_name": {
+                    "type": "string"
+                },
+                "industry": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "tin": {
+                    "type": "string"
+                }
+            }
+        },
+        "admin.AggregatorCompanyDto": {
+            "type": "object",
+            "properties": {
+                "company_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "invoices_uploaded": {
+                    "type": "integer"
+                },
+                "tin": {
+                    "type": "string"
+                }
+            }
+        },
+        "admin.AggregatorStatsDto": {
+            "type": "object",
+            "properties": {
+                "companies_managed": {
+                    "type": "integer"
+                },
+                "invoices_uploaded": {
+                    "type": "integer"
+                },
+                "pending_invitations": {
                     "type": "integer"
                 }
             }
@@ -6274,6 +7065,31 @@ const docTemplate = `{
                 }
             }
         },
+        "entities.DailyInvoiceStatsDto": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "example": "2024-01-01"
+                },
+                "failed_invoices": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "partial_invoices": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "successful_invoices": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 150
+                }
+            }
+        },
         "entities.Invoice": {
             "type": "object",
             "properties": {
@@ -6355,6 +7171,12 @@ const docTemplate = `{
         "entities.InvoiceStatsResponseData": {
             "type": "object",
             "properties": {
+                "daily": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.DailyInvoiceStatsDto"
+                    }
+                },
                 "monthly": {
                     "type": "array",
                     "items": {

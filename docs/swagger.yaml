@@ -1,5 +1,63 @@
 basePath: /api/v1
 definitions:
+  admin.AdminAggregatorInfoResponse:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminAggregatorInfoResponseDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminAggregatorInfoResponseDto:
+    properties:
+      aggregator:
+        $ref: '#/definitions/admin.AdminAggregatorResponseDto'
+      companies:
+        items:
+          $ref: '#/definitions/admin.AggregatorCompanyDto'
+        type: array
+      stats:
+        $ref: '#/definitions/admin.AggregatorStatsDto'
+    type: object
+  admin.AdminAggregatorInvitationDto:
+    properties:
+      company_name:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      industry:
+        type: string
+      status:
+        type: string
+    type: object
+  admin.AdminAggregatorInvitationsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminAggregatorInvitationDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
   admin.AdminAggregatorInvoiceListResponseDto:
     properties:
       data:
@@ -23,7 +81,7 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/admin.AdminBusinessResponseDto'
+          $ref: '#/definitions/admin.AdminAggregatorResponseDto'
         type: array
       error: {}
       extra: {}
@@ -33,6 +91,85 @@ definitions:
         type: string
       pagination:
         $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminAggregatorResponseDto:
+    properties:
+      companies_managed:
+        type: integer
+      company_name:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      industry:
+        type: string
+      last_invoice_uploaded_at:
+        type: string
+      status:
+        type: integer
+      subscribed_plan:
+        type: string
+      tin:
+        type: string
+      total_invoices_managed:
+        type: integer
+    type: object
+  admin.AdminBusinessAggregatorHistoryDto:
+    properties:
+      action:
+        type: string
+      aggregator_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+    type: object
+  admin.AdminBusinessAggregatorInfoResponse:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminBusinessAggregatorInfoResponseDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminBusinessAggregatorInfoResponseDto:
+    properties:
+      current_aggregator_id:
+        type: string
+      history:
+        items:
+          $ref: '#/definitions/admin.AdminBusinessAggregatorHistoryDto'
+        type: array
+    type: object
+  admin.AdminBusinessDailyStatsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminDailyInvoiceStatsDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
       status:
         type: string
       status_code:
@@ -71,14 +208,24 @@ definitions:
         type: string
       id:
         type: string
+      industry:
+        type: string
+      last_invoice_uploaded_at:
+        type: string
       name:
         type: string
       phone_number:
         type: string
       service_id:
         type: string
+      status:
+        type: integer
+      subscribed_plan:
+        type: string
       tin:
         type: string
+      total_invoices_uploaded:
+        type: integer
     type: object
   admin.AdminBusinessStatsDto:
     properties:
@@ -101,6 +248,51 @@ definitions:
       status:
         type: string
       status_code:
+        type: integer
+    type: object
+  admin.AdminCreateAggregatorDto:
+    properties:
+      company_name:
+        type: string
+      email:
+        type: string
+      industry:
+        type: string
+      phone_number:
+        type: string
+      tin:
+        type: string
+    required:
+    - company_name
+    - email
+    - tin
+    type: object
+  admin.AdminCreateBusinessDto:
+    properties:
+      company_name:
+        type: string
+      email:
+        type: string
+      industry:
+        type: string
+      phone_number:
+        type: string
+      tin:
+        type: string
+    required:
+    - company_name
+    - email
+    - tin
+    type: object
+  admin.AdminDailyInvoiceStatsDto:
+    properties:
+      date:
+        type: string
+      failed_invoices:
+        type: integer
+      partial_success_invoices:
+        type: integer
+      success_invoices:
         type: integer
     type: object
   admin.AdminInvoiceListResponseDto:
@@ -157,6 +349,39 @@ definitions:
         type: string
       data:
         $ref: '#/definitions/admin.AdminResponse'
+    type: object
+  admin.AdminOverviewStatsDto:
+    properties:
+      failed_invoices:
+        type: integer
+      new_registrations:
+        type: integer
+      partial_success_invoices:
+        type: integer
+      success_invoices:
+        type: integer
+      total_api_calls:
+        type: integer
+      total_companies:
+        type: integer
+      total_invoices:
+        type: integer
+    type: object
+  admin.AdminOverviewStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminOverviewStatsDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
     type: object
   admin.AdminRegisterDto:
     properties:
@@ -232,6 +457,39 @@ definitions:
       status:
         type: string
       status_code:
+        type: integer
+    type: object
+  admin.AdminUpdateBusinessDto:
+    properties:
+      acc_status:
+        type: integer
+      company_name:
+        type: string
+      industry:
+        type: string
+      phone_number:
+        type: string
+      tin:
+        type: string
+    type: object
+  admin.AggregatorCompanyDto:
+    properties:
+      company_name:
+        type: string
+      id:
+        type: string
+      invoices_uploaded:
+        type: integer
+      tin:
+        type: string
+    type: object
+  admin.AggregatorStatsDto:
+    properties:
+      companies_managed:
+        type: integer
+      invoices_uploaded:
+        type: integer
+      pending_invitations:
         type: integer
     type: object
   aggregator.AggregatorActivityLogDto:
@@ -1345,6 +1603,24 @@ definitions:
       validation_errors:
         type: object
     type: object
+  entities.DailyInvoiceStatsDto:
+    properties:
+      date:
+        example: "2024-01-01"
+        type: string
+      failed_invoices:
+        example: 20
+        type: integer
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      total_invoices:
+        example: 150
+        type: integer
+    type: object
   entities.Invoice:
     properties:
       aggregator_id:
@@ -1400,6 +1676,10 @@ definitions:
     type: object
   entities.InvoiceStatsResponseData:
     properties:
+      daily:
+        items:
+          $ref: '#/definitions/entities.DailyInvoiceStatsDto'
+        type: array
       monthly:
         items:
           $ref: '#/definitions/entities.MonthlyInvoiceStatsDto'
@@ -2337,6 +2617,123 @@ paths:
       summary: List Aggregators
       tags:
       - Admin Queries
+    post:
+      consumes:
+      - application/json
+      description: Creates a new aggregator (admin only).
+      parameters:
+      - description: Aggregator request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminCreateAggregatorDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Aggregator created successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Create Aggregator
+      tags:
+      - Admin Operations
+  /admin/aggregators/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns stats and associated companies for an aggregator.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminAggregatorInfoResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Aggregator Info
+      tags:
+      - Admin Queries
+    put:
+      consumes:
+      - application/json
+      description: Updates aggregator details and status.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Aggregator update payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminUpdateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Aggregator updated successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Update Aggregator
+      tags:
+      - Admin Operations
+  /admin/aggregators/invitations/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns pending invitations sent by an aggregator.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminAggregatorInvitationsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Aggregator Invitations
+      tags:
+      - Admin Queries
   /admin/aggregators/invoices/{id}:
     get:
       consumes:
@@ -2473,6 +2870,99 @@ paths:
       summary: List Businesses
       tags:
       - Admin Queries
+    post:
+      consumes:
+      - application/json
+      description: Creates a new business (admin only).
+      parameters:
+      - description: Business request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminCreateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Business created successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Create Business
+      tags:
+      - Admin Operations
+  /admin/businesses/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates business details and status.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Business update payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminUpdateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business updated successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Update Business
+      tags:
+      - Admin Operations
+  /admin/businesses/aggregator/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns current aggregator ID and relationship history for a business.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessAggregatorInfoResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Business Aggregator Info
+      tags:
+      - Admin Queries
   /admin/businesses/invoices/{id}:
     get:
       consumes:
@@ -2504,6 +2994,32 @@ paths:
           schema:
             $ref: '#/definitions/apperror.AppError'
       summary: List Invoices by Business
+      tags:
+      - Admin Queries
+  /admin/businesses/stats{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns daily invoice stats (last 14 days) and aggregated stats
+        for a specific business.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessDailyStatsResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Business Daily Invoice Stats
       tags:
       - Admin Queries
   /admin/stats/businesses:
@@ -2542,6 +3058,39 @@ paths:
           schema:
             $ref: '#/definitions/apperror.AppError'
       summary: System Invoice Stats
+      tags:
+      - Admin Queries
+  /admin/stats/overview:
+    get:
+      consumes:
+      - application/json
+      description: Returns overview stats for invoices, companies, API calls, and
+        registrations based on timeframe.
+      parameters:
+      - description: 'Timeframe: today, 7_days, 30_days, custom'
+        in: query
+        name: timeframe
+        type: string
+      - description: Custom start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Custom end date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminOverviewStatsResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Admin Overview Stats
       tags:
       - Admin Queries
   /admin/transactions:
