@@ -38,23 +38,23 @@ type UploadInvoiceResponseDto struct {
 }
 
 type InvoiceListItem struct {
-	ID            string              `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	InvoiceNumber string              `json:"invoice_number" example:"INV-1001"`
-	IRN           string              `json:"irn" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Platform      string              `json:"platform" example:"zoho"`
-	CurrentStatus string              `json:"current_status" example:"validated_irn"`
-	PaymentStatus string              `json:"payment_status" example:"PENDING"`
-	StatusText    string              `json:"status_text" example:"success"`
+	ID            string                `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	InvoiceNumber string                `json:"invoice_number" example:"INV-1001"`
+	IRN           string                `json:"irn" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Platform      string                `json:"platform" example:"zoho"`
+	CurrentStatus string                `json:"current_status" example:"validated_irn"`
+	PaymentStatus string                `json:"payment_status" example:"PENDING"`
+	StatusText    string                `json:"status_text" example:"success"`
 	Metadata      []InvoiceStepMetadata `json:"metadata"`
-	QrCodeBmpUrl  string              `json:"qr_code_bmp_url" example:"https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"`
-	QrCode        string              `json:"qr_code" example:"iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."`
-	CreatedAt     time.Time           `json:"created_at" example:"2024-01-01T12:00:00Z"`
+	QrCodeBmpUrl  string                `json:"qr_code_bmp_url" example:"https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"`
+	QrCode        string                `json:"qr_code" example:"iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."`
+	CreatedAt     time.Time             `json:"created_at" example:"2024-01-01T12:00:00Z"`
 }
 
 type GetAllInvoicesResponseDto struct {
 	entities.Response
-	Data       []InvoiceListItem            `json:"data"`
-	Pagination database.PaginationResponse  `json:"pagination"`
+	Data       []InvoiceListItem           `json:"data"`
+	Pagination database.PaginationResponse `json:"pagination"`
 }
 
 type GetInvoiceDetailsResponseDto struct {
@@ -73,7 +73,7 @@ type InvoiceResponse struct {
 	IRN              string                              `json:"irn" example:"123e4567-e89b-12d3-a456-426614174000"`
 	BusinessID       string                              `json:"business_id" example:"business-uuid"`
 	Platform         string                              `json:"platform" example:"zoho"`
-	PlatformMetadata string                              `json:"platform_metadata"`
+	PlatformMetadata string                              `json:"platform_metadata" example:"2023-10-12T07:20:50.52Z"`
 	InvoiceData      firs_models.UploadInvoiceRequestDto `json:"invoice_data"`
 	CurrentStatus    string                              `json:"current_status" example:"validated_irn"`
 	StatusHistory    []InvoiceStepMetadata               `json:"status_history"`

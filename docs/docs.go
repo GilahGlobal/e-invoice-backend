@@ -4814,19 +4814,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "company_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "76a73e5c-6fe0-4f83-9b95-715147812f65"
                 },
                 "industry": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 }
             }
         },
@@ -4916,37 +4921,48 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "companies_managed": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "company_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "8c596cb2-ac83-489a-bb00-10e0d83c0510"
                 },
                 "industry": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "last_invoice_uploaded_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 },
                 "status": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "subscribed_plan": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "tin": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12345678-0001"
                 },
                 "total_invoices_managed": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -5062,49 +5078,64 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "bmp_upload_selected": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 },
                 "business_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "4f7ba55f-1c44-4ac4-989e-1d5c3d948c16"
                 },
                 "company_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "e4b7712b-1461-4ae1-aabd-a591ce653b8a"
                 },
                 "industry": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "last_invoice_uploaded_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "phone_number": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "+1234567890"
                 },
                 "service_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "8817a77d-22d9-4bcc-8b33-dcd1328e31e4"
                 },
                 "status": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "subscribed_plan": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "tin": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12345678-0001"
                 },
                 "total_invoices_uploaded": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -5112,10 +5143,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "total_aggregators": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "total_businesses": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -5151,19 +5184,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "company_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "industry": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "phone_number": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "+1234567890"
                 },
                 "tin": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12345678-0001"
                 }
             }
         },
@@ -5176,19 +5214,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "company_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "industry": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "phone_number": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "+1234567890"
                 },
                 "tin": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12345678-0001"
                 }
             }
         },
@@ -5196,16 +5239,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 },
                 "failed_invoices": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "partial_success_invoices": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "success_invoices": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -5269,13 +5316,16 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "admin@example.com"
                 },
                 "is_sandbox": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": false
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password123"
                 }
             }
         },
@@ -5283,7 +5333,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "data": {
                     "$ref": "#/definitions/admin.AdminResponse"
@@ -5294,25 +5345,32 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "failed_invoices": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "new_registrations": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "partial_success_invoices": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "success_invoices": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "total_api_calls": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "total_companies": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "total_invoices": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -5345,29 +5403,25 @@ const docTemplate = `{
                 "email",
                 "name",
                 "password",
-                "role"
+                "role_id"
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "admin@example.com"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Super Admin"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 8
+                    "minLength": 8,
+                    "example": "password123"
                 },
-                "role": {
-                    "enum": [
-                        "superadmin",
-                        "admin"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/entities.AdminRole"
-                        }
-                    ]
+                "role_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         },
@@ -5375,16 +5429,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "admin@example.com"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Super Admin"
                 },
                 "role": {
-                    "$ref": "#/definitions/entities.AdminRole"
+                    "type": "string",
+                    "example": "superadmin"
+                },
+                "role_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         },
@@ -5392,37 +5454,48 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "aggregator_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "74edb1a0-54f7-41ae-b68b-1904f9f64acf"
                 },
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 0
                 },
                 "business_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 },
                 "currency": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0a0ecb8d-413a-4bf8-8b45-f86980c92e8f"
                 },
                 "plan": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "plan_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "223f3eba-f611-4b8c-94e3-993b0201fa3f"
                 },
                 "provider": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "99a22e3e-371b-42cc-b77a-55b656af65f0"
                 },
                 "reference": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 }
             }
         },
@@ -5461,16 +5534,20 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "company_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "industry": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "phone_number": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "+1234567890"
                 },
                 "tin": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12345678-0001"
                 }
             }
         },
@@ -5478,16 +5555,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "company_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "103e792c-c952-499d-a40c-9f3c237ac293"
                 },
                 "invoices_uploaded": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "tin": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12345678-0001"
                 }
             }
         },
@@ -5495,13 +5576,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "companies_managed": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "invoices_uploaded": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "pending_invitations": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -6356,10 +6440,12 @@ const docTemplate = `{
             "properties": {
                 "new_password": {
                     "type": "string",
-                    "minLength": 6
+                    "minLength": 6,
+                    "example": "password123"
                 },
                 "old_password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password123"
                 }
             }
         },
@@ -6406,14 +6492,17 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "is_sandbox": {
                     "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "example": true
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password123"
                 }
             }
         },
@@ -6421,7 +6510,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "data": {
                     "$ref": "#/definitions/auth.UserResponse"
@@ -6997,17 +7087,6 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        },
-        "entities.AdminRole": {
-            "type": "string",
-            "enum": [
-                "superadmin",
-                "admin"
-            ],
-            "x-enum-varnames": [
-                "RoleSuperAdmin",
-                "RoleAdmin"
-            ]
         },
         "entities.BulkUpload": {
             "type": "object",
@@ -8304,10 +8383,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "business_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "657cf2f1-46e5-4977-a6a6-484a691866d5"
                 },
                 "plan_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "f435c4ed-694e-4d4a-8d1e-75be3bb5e43b"
                 }
             }
         },
@@ -8357,19 +8438,23 @@ const docTemplate = `{
             ],
             "properties": {
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 0
                 },
                 "billing_cycle": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "is_sandbox": {
                     "type": "boolean"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "total_invoices": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },

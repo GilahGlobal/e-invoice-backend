@@ -30,14 +30,19 @@ definitions:
   admin.AdminAggregatorInvitationDto:
     properties:
       company_name:
+        example: Example Name
         type: string
       created_at:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
       id:
+        example: 76a73e5c-6fe0-4f83-9b95-715147812f65
         type: string
       industry:
+        example: string
         type: string
       status:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
     type: object
   admin.AdminAggregatorInvitationsResponse:
@@ -99,26 +104,37 @@ definitions:
   admin.AdminAggregatorResponseDto:
     properties:
       companies_managed:
+        example: 0
         type: integer
       company_name:
+        example: Example Name
         type: string
       created_at:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
       email:
+        example: user@example.com
         type: string
       id:
+        example: 8c596cb2-ac83-489a-bb00-10e0d83c0510
         type: string
       industry:
+        example: string
         type: string
       last_invoice_uploaded_at:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
       status:
+        example: 1
         type: integer
       subscribed_plan:
+        example: string
         type: string
       tin:
+        example: 12345678-0001
         type: string
       total_invoices_managed:
+        example: 0
         type: integer
     type: object
   admin.AdminBusinessAggregatorHistoryDto:
@@ -197,41 +213,58 @@ definitions:
   admin.AdminBusinessResponseDto:
     properties:
       bmp_upload_selected:
+        example: true
         type: boolean
       business_id:
+        example: 4f7ba55f-1c44-4ac4-989e-1d5c3d948c16
         type: string
       company_name:
+        example: Example Name
         type: string
       created_at:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
       email:
+        example: user@example.com
         type: string
       id:
+        example: e4b7712b-1461-4ae1-aabd-a591ce653b8a
         type: string
       industry:
+        example: string
         type: string
       last_invoice_uploaded_at:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
       name:
+        example: Example Name
         type: string
       phone_number:
+        example: "+1234567890"
         type: string
       service_id:
+        example: 8817a77d-22d9-4bcc-8b33-dcd1328e31e4
         type: string
       status:
+        example: 1
         type: integer
       subscribed_plan:
+        example: string
         type: string
       tin:
+        example: 12345678-0001
         type: string
       total_invoices_uploaded:
+        example: 0
         type: integer
     type: object
   admin.AdminBusinessStatsDto:
     properties:
       total_aggregators:
+        example: 0
         type: integer
       total_businesses:
+        example: 0
         type: integer
     type: object
   admin.AdminBusinessStatsResponseDto:
@@ -253,14 +286,19 @@ definitions:
   admin.AdminCreateAggregatorDto:
     properties:
       company_name:
+        example: Example Name
         type: string
       email:
+        example: user@example.com
         type: string
       industry:
+        example: string
         type: string
       phone_number:
+        example: "+1234567890"
         type: string
       tin:
+        example: 12345678-0001
         type: string
     required:
     - company_name
@@ -270,14 +308,19 @@ definitions:
   admin.AdminCreateBusinessDto:
     properties:
       company_name:
+        example: Example Name
         type: string
       email:
+        example: user@example.com
         type: string
       industry:
+        example: string
         type: string
       phone_number:
+        example: "+1234567890"
         type: string
       tin:
+        example: 12345678-0001
         type: string
     required:
     - company_name
@@ -287,12 +330,16 @@ definitions:
   admin.AdminDailyInvoiceStatsDto:
     properties:
       date:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
       failed_invoices:
+        example: 0
         type: integer
       partial_success_invoices:
+        example: 0
         type: integer
       success_invoices:
+        example: 0
         type: integer
     type: object
   admin.AdminInvoiceListResponseDto:
@@ -333,10 +380,13 @@ definitions:
   admin.AdminLoginRequestDto:
     properties:
       email:
+        example: admin@example.com
         type: string
       is_sandbox:
+        example: false
         type: boolean
       password:
+        example: password123
         type: string
     required:
     - email
@@ -346,6 +396,7 @@ definitions:
   admin.AdminLoginResponseDto:
     properties:
       access_token:
+        example: string
         type: string
       data:
         $ref: '#/definitions/admin.AdminResponse'
@@ -353,18 +404,25 @@ definitions:
   admin.AdminOverviewStatsDto:
     properties:
       failed_invoices:
+        example: 0
         type: integer
       new_registrations:
+        example: 0
         type: integer
       partial_success_invoices:
+        example: 0
         type: integer
       success_invoices:
+        example: 0
         type: integer
       total_api_calls:
+        example: 0
         type: integer
       total_companies:
+        example: 0
         type: integer
       total_invoices:
+        example: 0
         type: integer
     type: object
   admin.AdminOverviewStatsResponseDto:
@@ -386,58 +444,76 @@ definitions:
   admin.AdminRegisterDto:
     properties:
       email:
+        example: admin@example.com
         type: string
       name:
+        example: Super Admin
         type: string
       password:
+        example: password123
         minLength: 8
         type: string
-      role:
-        allOf:
-        - $ref: '#/definitions/entities.AdminRole'
-        enum:
-        - superadmin
-        - admin
+      role_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
     required:
     - email
     - name
     - password
-    - role
+    - role_id
     type: object
   admin.AdminResponse:
     properties:
       email:
+        example: admin@example.com
         type: string
       id:
+        example: 123e4567-e89b-12d3-a456-426614174000
         type: string
       name:
+        example: Super Admin
         type: string
       role:
-        $ref: '#/definitions/entities.AdminRole'
+        example: superadmin
+        type: string
+      role_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
     type: object
   admin.AdminTransactionDto:
     properties:
       aggregator_id:
+        example: 74edb1a0-54f7-41ae-b68b-1904f9f64acf
         type: string
       amount:
+        example: 0
         type: number
       business_id:
+        example: 8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9
         type: string
       created_at:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
       currency:
+        example: string
         type: string
       id:
+        example: 0a0ecb8d-413a-4bf8-8b45-f86980c92e8f
         type: string
       plan:
+        example: string
         type: string
       plan_id:
+        example: 223f3eba-f611-4b8c-94e3-993b0201fa3f
         type: string
       provider:
+        example: 99a22e3e-371b-42cc-b77a-55b656af65f0
         type: string
       reference:
+        example: string
         type: string
       status:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
     type: object
   admin.AdminTransactionListResponseDto:
@@ -464,32 +540,43 @@ definitions:
       acc_status:
         type: integer
       company_name:
+        example: Example Name
         type: string
       industry:
+        example: string
         type: string
       phone_number:
+        example: "+1234567890"
         type: string
       tin:
+        example: 12345678-0001
         type: string
     type: object
   admin.AggregatorCompanyDto:
     properties:
       company_name:
+        example: Example Name
         type: string
       id:
+        example: 103e792c-c952-499d-a40c-9f3c237ac293
         type: string
       invoices_uploaded:
+        example: 0
         type: integer
       tin:
+        example: 12345678-0001
         type: string
     type: object
   admin.AggregatorStatsDto:
     properties:
       companies_managed:
+        example: 0
         type: integer
       invoices_uploaded:
+        example: 0
         type: integer
       pending_invitations:
+        example: 0
         type: integer
     type: object
   aggregator.AggregatorActivityLogDto:
@@ -1093,9 +1180,11 @@ definitions:
   auth.ChangePasswordDto:
     properties:
       new_password:
+        example: password123
         minLength: 6
         type: string
       old_password:
+        example: password123
         type: string
     required:
     - new_password
@@ -1129,11 +1218,14 @@ definitions:
   auth.LoginRequestDto:
     properties:
       email:
+        example: user@example.com
         type: string
       is_sandbox:
         default: true
+        example: true
         type: boolean
       password:
+        example: password123
         type: string
     required:
     - email
@@ -1142,6 +1234,7 @@ definitions:
   auth.LoginResponseDto:
     properties:
       access_token:
+        example: string
         type: string
       data:
         $ref: '#/definitions/auth.UserResponse'
@@ -1558,14 +1651,6 @@ definitions:
       total_pages_count:
         type: integer
     type: object
-  entities.AdminRole:
-    enum:
-    - superadmin
-    - admin
-    type: string
-    x-enum-varnames:
-    - RoleSuperAdmin
-    - RoleAdmin
   entities.BulkUpload:
     properties:
       aggregator_id:
@@ -2484,8 +2569,10 @@ definitions:
   subscription.AggregatorSubscribeRequestDto:
     properties:
       business_id:
+        example: 657cf2f1-46e5-4977-a6a6-484a691866d5
         type: string
       plan_id:
+        example: f435c4ed-694e-4d4a-8d1e-75be3bb5e43b
         type: string
     required:
     - business_id
@@ -2518,14 +2605,18 @@ definitions:
   subscription.CreateSubscriptionPlanDto:
     properties:
       amount:
+        example: 0
         type: number
       billing_cycle:
+        example: 0
         type: integer
       is_sandbox:
         type: boolean
       name:
+        example: Example Name
         type: string
       total_invoices:
+        example: 0
         type: integer
     required:
     - amount

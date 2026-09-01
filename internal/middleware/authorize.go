@@ -74,7 +74,7 @@ func Authorize(db, testDB *gorm.DB) fiber.Handler {
 
 }
 
-func AuthorizeAdmin(db, testDB *gorm.DB, requiredRoles ...entities.AdminRole) fiber.Handler {
+func AuthorizeAdmin(db, testDB *gorm.DB, requiredRoles ...string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		configs := config.GetConfig()
 
@@ -110,23 +110,31 @@ func AuthorizeAdmin(db, testDB *gorm.DB, requiredRoles ...entities.AdminRole) fi
 			return c.Status(fiber.StatusUnauthorized).JSON(rd)
 		}
 
-		// Check roles
-		hasRole := false
-		for _, role := range requiredRoles {
-			if string(role) == claims.Role {
-				hasRole = true
-				break
-			}
-		}
-
-		if len(requiredRoles) > 0 && !hasRole {
-			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Forbidden: Insufficient privileges", "Forbidden", nil)
-			return c.Status(fiber.StatusForbidden).JSON(rd)
-		}
-
 		selectedDB := dbinit.InitDB(db, false)
 		if claims.IsSandbox {
 			selectedDB = dbinit.InitDB(testDB, false)
+		}
+
+		// Check roles
+		if len(requiredRoles) > 0 {
+			var role entities.Role
+			if err := selectedDB.DB().Where("id = ?", claims.RoleID).First(&role).Error; err != nil {
+				rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Forbidden: Role not found", "Forbidden", nil)
+				return c.Status(fiber.StatusForbidden).JSON(rd)
+			}
+
+			hasRole := false
+			for _, requiredRole := range requiredRoles {
+				if string(requiredRole) == role.Name {
+					hasRole = true
+					break
+				}
+			}
+
+			if !hasRole {
+				rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Forbidden: Insufficient privileges", "Forbidden", nil)
+				return c.Status(fiber.StatusForbidden).JSON(rd)
+			}
 		}
 
 		var accessToken entities.AccessToken

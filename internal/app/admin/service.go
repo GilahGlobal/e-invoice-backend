@@ -59,12 +59,20 @@ func (s *Service) RegisterAdmin(req AdminRegisterDto, isSandbox bool) (int, erro
 		return http.StatusInternalServerError, fmt.Errorf("failed to hash password: %w", err)
 	}
 
+	var roleCount int64
+	if err := db.DB().Model(&entities.Role{}).Where("id = ?", req.RoleID).Count(&roleCount).Error; err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to verify role: %w", err)
+	}
+	if roleCount == 0 {
+		return http.StatusBadRequest, errors.New("invalid role_id provided")
+	}
+
 	admin := entities.Admin{
 		ID:       utility.GenerateUUID(),
 		Name:     req.Name,
 		Email:    email,
 		Password: passwordHash,
-		Role:     req.Role,
+		RoleID:   req.RoleID,
 	}
 
 	err = s.adminRepo.CreateAdmin(&admin, db)
@@ -90,6 +98,10 @@ func (s *Service) LoginAdmin(req AdminLoginRequestDto, isSandbox bool) (map[stri
 		return nil, http.StatusBadRequest, errors.New("invalid credentials")
 	}
 
+	if err := db.DB().Preload("Role").Where("id = ?", admin.ID).First(&admin).Error; err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("failed to load admin role: %w", err)
+	}
+
 	tokenData, err := middleware.CreateAdminToken(*admin, isSandbox)
 	if err != nil {
 		return nil, http.StatusInternalServerError, fmt.Errorf("failed to create token: %w", err)
@@ -108,10 +120,11 @@ func (s *Service) LoginAdmin(req AdminLoginRequestDto, isSandbox bool) (map[stri
 
 	responseData := map[string]interface{}{
 		"data": AdminResponse{
-			ID:    admin.ID,
-			Name:  admin.Name,
-			Email: admin.Email,
-			Role:  admin.Role,
+			ID:     admin.ID,
+			Name:   admin.Name,
+			Email:  admin.Email,
+			RoleID: admin.RoleID.String(),
+			Role:   admin.Role.Name,
 		},
 		"access_token": tokenData.AccessToken,
 	}

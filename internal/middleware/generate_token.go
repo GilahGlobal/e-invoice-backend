@@ -58,7 +58,7 @@ func CreateAdminToken(admin entities.Admin, isSandbox bool) (*TokenDetailDTO, er
 		ID:         admin.ID,
 		Name:       admin.Name,
 		Email:      admin.Email,
-		Role:       string(admin.Role),
+		RoleID:     admin.RoleID.String(),
 		AccessUuid: tokenData.AccessUuid,
 		IsSandbox:  isSandbox,
 		RegisteredClaims: jwt.RegisteredClaims{
