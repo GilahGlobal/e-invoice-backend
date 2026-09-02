@@ -32,6 +32,7 @@ func AdminRoute(router fiber.Router, version string, container *core.Container) 
 		middleware.SelectDatabaseFromClaims(container.DB, container.TestDB),
 	)
 
+	adminAuthAll.Get("/roles", rf, handler.GetRoles)
 	adminAuthAll.Get("/businesses", rf, handler.GetBusinesses)
 	adminAuthAll.Post("/businesses", rf, handler.CreateBusiness)
 	adminAuthAll.Put("/businesses/:id", rf, handler.UpdateBusiness)

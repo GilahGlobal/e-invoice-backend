@@ -54,6 +54,15 @@ func (r *AdminRepository) CountAdmins(db database.DatabaseManager) (int64, error
 	return count, nil
 }
 
+func (r *AdminRepository) GetAllRoles(db database.DatabaseManager) ([]entities.Role, error) {
+	var roles []entities.Role
+	err := db.SelectAllFromDb("created_at asc", "", &roles, nil)
+	if err != nil {
+		return nil, err
+	}
+	return roles, nil
+}
+
 type AdminOverviewStatsResult struct {
 	TotalInvoices          int64
 	SuccessInvoices        int64

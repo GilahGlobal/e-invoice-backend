@@ -579,6 +579,36 @@ definitions:
         example: 0
         type: integer
     type: object
+  admin.RoleListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.RoleResponseDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.RoleResponseDto:
+    properties:
+      description:
+        example: Super Administrator with full access
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: superadmin
+        type: string
+    type: object
   aggregator.AggregatorActivityLogDto:
     properties:
       action:
@@ -2545,6 +2575,270 @@ definitions:
       status_code:
         type: integer
     type: object
+  resources.CountriesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.CountryItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.CountryItemDto:
+    properties:
+      alpha_2:
+        example: AF
+        type: string
+      alpha_3:
+        example: AFG
+        type: string
+      country_code:
+        example: "004"
+        type: string
+      intermediate_region:
+        example: ""
+        type: string
+      intermediate_region_code:
+        example: ""
+        type: string
+      iso_3166_2:
+        example: ISO 3166-2:AF
+        type: string
+      name:
+        example: Afghanistan
+        type: string
+      region:
+        example: Asia
+        type: string
+      region_code:
+        example: "142"
+        type: string
+      sub_region:
+        example: Southern Asia
+        type: string
+      sub_region_code:
+        example: "034"
+        type: string
+    type: object
+  resources.CurrenciesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.CurrencyItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.CurrencyItemDto:
+    properties:
+      code:
+        example: USD
+        type: string
+      decimal_digits:
+        example: 2
+        type: integer
+      name:
+        example: US Dollar
+        type: string
+      name_plural:
+        example: US dollars
+        type: string
+      rounding:
+        example: 0
+        type: integer
+      symbol:
+        example: $
+        type: string
+      symbol_native:
+        example: $
+        type: string
+    type: object
+  resources.HSNCodesItemDto:
+    properties:
+      description:
+        example: Horses; live, pure-bred breeding animals
+        type: string
+      hscode:
+        example: "0101.21"
+        type: string
+    type: object
+  resources.HSNCodesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.HSNCodesItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.LGAItemDto:
+    properties:
+      code:
+        example: NG-AB-ANO
+        type: string
+      name:
+        example: Aba North
+        type: string
+      state_code:
+        example: NG-AB
+        type: string
+    type: object
+  resources.LGAsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.LGAItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.ResourceItemDto:
+    properties:
+      code:
+        example: "380"
+        type: string
+      value:
+        example: Credit Note
+        type: string
+    type: object
+  resources.ResourcesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.ResourceItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.ServiceCodesItemDto:
+    properties:
+      code:
+        example: "0111"
+        type: string
+      description:
+        example: Growing of cereals (except rice), leguminous crops and oil seeds
+        type: string
+    type: object
+  resources.ServiceCodesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.ServiceCodesItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.StateItemDto:
+    properties:
+      code:
+        example: NG-AB
+        type: string
+      name:
+        example: Abia
+        type: string
+    type: object
+  resources.StatesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.StateItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.TaxCategoriesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.TaxCategoryItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.TaxCategoryItemDto:
+    properties:
+      code:
+        example: STANDARD_GST
+        type: string
+      percent:
+        example: Not Available
+        type: string
+      value:
+        example: Standard Goods and Services Tax
+        type: string
+    type: object
   subscription.AggregatorSubscribeDataDto:
     properties:
       authorization_url:
@@ -3113,6 +3407,31 @@ paths:
       summary: Business Daily Invoice Stats
       tags:
       - Admin Queries
+  /admin/roles:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all roles available for admin users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Roles retrieved successfully
+          schema:
+            $ref: '#/definitions/admin.RoleListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve all roles
+      tags:
+      - Admin Roles
   /admin/stats/businesses:
     get:
       consumes:
@@ -5625,6 +5944,195 @@ paths:
       summary: Validate IRN
       tags:
       - Invoice
+  /resources/countries:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all countries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.CountriesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Countries
+      tags:
+      - Resources
+  /resources/currencies:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all currencies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.CurrenciesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Currencies
+      tags:
+      - Resources
+  /resources/hsn-codes:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all HSN codes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.HSNCodesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve HSN Codes
+      tags:
+      - Resources
+  /resources/invoice-types:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all invoice types
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.ResourcesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Invoice Types
+      tags:
+      - Resources
+  /resources/lgas:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all Local Government Areas
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.LGAsResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve LGAs
+      tags:
+      - Resources
+  /resources/payment-means:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all payment means
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.ResourcesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Payment Means
+      tags:
+      - Resources
+  /resources/service-codes:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all service codes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.ServiceCodesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Service Codes
+      tags:
+      - Resources
+  /resources/states:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all states
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.StatesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve States
+      tags:
+      - Resources
+  /resources/tax-categories:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all tax categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.TaxCategoriesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Tax Categories
+      tags:
+      - Resources
   /subscription/plans:
     get:
       consumes:

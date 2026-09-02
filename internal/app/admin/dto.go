@@ -216,3 +216,14 @@ type AdminAggregatorInvitationsResponse struct {
 	entities.Response
 	Data []AdminAggregatorInvitationDto `json:"data"`
 }
+
+type RoleResponseDto struct {
+	ID          uuid.UUID `json:"id" example:"123e4567-e89b-12d3-a456-426614174000" swaggertype:"string"`
+	Name        string    `json:"name" example:"superadmin"`
+	Description string    `json:"description" example:"Super Administrator with full access"`
+}
+
+type RoleListResponseDto struct {
+	entities.Response
+	Data []RoleResponseDto `json:"data"`
+}

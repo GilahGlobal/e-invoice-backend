@@ -19,6 +19,15 @@ func NewHandler(logger *utility.Logger) *Handler {
 	}
 }
 
+// @Summary Retrieve Invoice Types
+// @Description Retrieve a list of all invoice types
+// @Tags Resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} ResourcesResponseDto "Fetched successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Router /resources/invoice-types [get]
 func (h *Handler) GetInvoiceTypes(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetInvoiceTypes()
 	if err != nil {
@@ -30,6 +39,15 @@ func (h *Handler) GetInvoiceTypes(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// @Summary Retrieve Payment Means
+// @Description Retrieve a list of all payment means
+// @Tags Resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} ResourcesResponseDto "Fetched successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Router /resources/payment-means [get]
 func (h *Handler) GetPaymentMeans(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetPaymentMeans()
 	if err != nil {
@@ -41,6 +59,15 @@ func (h *Handler) GetPaymentMeans(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// @Summary Retrieve Tax Categories
+// @Description Retrieve a list of all tax categories
+// @Tags Resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} TaxCategoriesResponseDto "Fetched successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Router /resources/tax-categories [get]
 func (h *Handler) GetTaxCategories(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetTaxCategories()
 	if err != nil {
@@ -52,6 +79,15 @@ func (h *Handler) GetTaxCategories(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// @Summary Retrieve HSN Codes
+// @Description Retrieve a list of all HSN codes
+// @Tags Resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} HSNCodesResponseDto "Fetched successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Router /resources/hsn-codes [get]
 func (h *Handler) GetHSNCodes(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetHSNCodes()
 	if err != nil {
@@ -63,6 +99,15 @@ func (h *Handler) GetHSNCodes(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// @Summary Retrieve Service Codes
+// @Description Retrieve a list of all service codes
+// @Tags Resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} ServiceCodesResponseDto "Fetched successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Router /resources/service-codes [get]
 func (h *Handler) GetServiceCodes(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetServiceCodes()
 	if err != nil {
@@ -74,6 +119,15 @@ func (h *Handler) GetServiceCodes(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// @Summary Retrieve Currencies
+// @Description Retrieve a list of all currencies
+// @Tags Resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} CurrenciesResponseDto "Fetched successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Router /resources/currencies [get]
 func (h *Handler) GetCurrencies(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetCurrencies()
 	if err != nil {
@@ -85,6 +139,15 @@ func (h *Handler) GetCurrencies(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// @Summary Retrieve LGAs
+// @Description Retrieve a list of all Local Government Areas
+// @Tags Resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} LGAsResponseDto "Fetched successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Router /resources/lgas [get]
 func (h *Handler) GetLGA(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetLGA()
 	if err != nil {
@@ -96,6 +159,15 @@ func (h *Handler) GetLGA(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// @Summary Retrieve Countries
+// @Description Retrieve a list of all countries
+// @Tags Resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} CountriesResponseDto "Fetched successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Router /resources/countries [get]
 func (h *Handler) GetCountries(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetCountries()
 	if err != nil {
@@ -107,6 +179,15 @@ func (h *Handler) GetCountries(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// @Summary Retrieve States
+// @Description Retrieve a list of all states
+// @Tags Resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} StatesResponseDto "Fetched successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Router /resources/states [get]
 func (h *Handler) GetStates(c *fiber.Ctx) error {
 	respData, errDetails, err := h.svc.GetStates()
 	if err != nil {

@@ -34,6 +34,36 @@ func NewHandler(validator *validator.Validate, logger *utility.Logger, cfg *conf
 	}
 }
 
+// @Summary Retrieve all roles
+// @Description Retrieve a list of all roles available for admin users
+// @Tags Admin Roles
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} RoleListResponseDto "Roles retrieved successfully"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/roles [get]
+func (h *Handler) GetRoles(c *fiber.Ctx) error {
+	db := c.Locals("db").(database.DatabaseManager)
+	roles, err := h.svc.GetRoles(db)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", "Failed to retrieve roles", err, nil)
+	}
+
+	var rolesData []RoleResponseDto
+	for _, role := range roles {
+		rolesData = append(rolesData, RoleResponseDto{
+			ID:          role.ID,
+			Name:        role.Name,
+			Description: role.Description,
+		})
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "success", "Roles retrieved successfully", rolesData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
 // @Summary Register Admin
 // @Description Register a new admin (Requires SuperAdmin privileges)
 // @Tags Admin Auth

@@ -679,6 +679,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/roles": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all roles available for admin users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Roles"
+                ],
+                "summary": "Retrieve all roles",
+                "responses": {
+                    "200": {
+                        "description": "Roles retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.RoleListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/stats/businesses": {
             "get": {
                 "description": "Returns system-wide business statistics",
@@ -4606,6 +4646,312 @@ const docTemplate = `{
                 }
             }
         },
+        "/resources/countries": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all countries",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Countries",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.CountriesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/currencies": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all currencies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Currencies",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.CurrenciesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/hsn-codes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all HSN codes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve HSN Codes",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.HSNCodesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/invoice-types": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all invoice types",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Invoice Types",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.ResourcesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/lgas": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all Local Government Areas",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve LGAs",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.LGAsResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/payment-means": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all payment means",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Payment Means",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.ResourcesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/service-codes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all service codes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Service Codes",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.ServiceCodesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/states": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all states",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve States",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.StatesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/tax-categories": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all tax categories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Tax Categories",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.TaxCategoriesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
         "/subscription/plans": {
             "get": {
                 "description": "Retrieves all available subscription plans",
@@ -5586,6 +5932,49 @@ const docTemplate = `{
                 "pending_invitations": {
                     "type": "integer",
                     "example": 0
+                }
+            }
+        },
+        "admin.RoleListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.RoleResponseDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.RoleResponseDto": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Super Administrator with full access"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "superadmin"
                 }
             }
         },
@@ -8343,6 +8732,382 @@ const docTemplate = `{
                 },
                 "status_code": {
                     "type": "integer"
+                }
+            }
+        },
+        "resources.CountriesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.CountryItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.CountryItemDto": {
+            "type": "object",
+            "properties": {
+                "alpha_2": {
+                    "type": "string",
+                    "example": "AF"
+                },
+                "alpha_3": {
+                    "type": "string",
+                    "example": "AFG"
+                },
+                "country_code": {
+                    "type": "string",
+                    "example": "004"
+                },
+                "intermediate_region": {
+                    "type": "string",
+                    "example": ""
+                },
+                "intermediate_region_code": {
+                    "type": "string",
+                    "example": ""
+                },
+                "iso_3166_2": {
+                    "type": "string",
+                    "example": "ISO 3166-2:AF"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Afghanistan"
+                },
+                "region": {
+                    "type": "string",
+                    "example": "Asia"
+                },
+                "region_code": {
+                    "type": "string",
+                    "example": "142"
+                },
+                "sub_region": {
+                    "type": "string",
+                    "example": "Southern Asia"
+                },
+                "sub_region_code": {
+                    "type": "string",
+                    "example": "034"
+                }
+            }
+        },
+        "resources.CurrenciesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.CurrencyItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.CurrencyItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "USD"
+                },
+                "decimal_digits": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "name": {
+                    "type": "string",
+                    "example": "US Dollar"
+                },
+                "name_plural": {
+                    "type": "string",
+                    "example": "US dollars"
+                },
+                "rounding": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "symbol": {
+                    "type": "string",
+                    "example": "$"
+                },
+                "symbol_native": {
+                    "type": "string",
+                    "example": "$"
+                }
+            }
+        },
+        "resources.HSNCodesItemDto": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Horses; live, pure-bred breeding animals"
+                },
+                "hscode": {
+                    "type": "string",
+                    "example": "0101.21"
+                }
+            }
+        },
+        "resources.HSNCodesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.HSNCodesItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.LGAItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "NG-AB-ANO"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Aba North"
+                },
+                "state_code": {
+                    "type": "string",
+                    "example": "NG-AB"
+                }
+            }
+        },
+        "resources.LGAsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.LGAItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.ResourceItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "380"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "Credit Note"
+                }
+            }
+        },
+        "resources.ResourcesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.ResourceItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.ServiceCodesItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "0111"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Growing of cereals (except rice), leguminous crops and oil seeds"
+                }
+            }
+        },
+        "resources.ServiceCodesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.ServiceCodesItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.StateItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "NG-AB"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Abia"
+                }
+            }
+        },
+        "resources.StatesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.StateItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.TaxCategoriesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.TaxCategoryItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.TaxCategoryItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "STANDARD_GST"
+                },
+                "percent": {
+                    "type": "string",
+                    "example": "Not Available"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "Standard Goods and Services Tax"
                 }
             }
         },

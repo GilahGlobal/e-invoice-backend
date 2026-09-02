@@ -85,6 +85,14 @@ func (s *Service) RegisterAdmin(req AdminRegisterDto, isSandbox bool) (int, erro
 	return http.StatusCreated, nil
 }
 
+func (s *Service) GetRoles(db database.DatabaseManager) ([]entities.Role, error) {
+	roles, err := s.adminRepo.GetAllRoles(db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve roles: %v", err)
+	}
+	return roles, nil
+}
+
 func (s *Service) LoginAdmin(req AdminLoginRequestDto, isSandbox bool) (map[string]interface{}, int, error) {
 	db := s.authRepo.GetDB(isSandbox)
 
