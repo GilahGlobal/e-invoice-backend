@@ -34,13 +34,13 @@ type RegisterResponseDto struct {
 }
 
 type UpdateUserRequestModel struct {
-	Name string `json:"name" validate:"required"`
+	Name string `json:"name" validate:"required" example:"Example Name"`
 }
 
 type LoginRequestDto struct {
-	Email     string `json:"email" validate:"required"`
-	Password  string `json:"password" validate:"required"`
-	IsSandbox bool   `json:"is_sandbox" default:"true" validate:"omitempty"`
+	Email     string `json:"email" validate:"required" example:"user@example.com"`
+	Password  string `json:"password" validate:"required" example:"password123"`
+	IsSandbox bool   `json:"is_sandbox" default:"true" validate:"omitempty" example:"true"`
 }
 type UserResponse struct {
 	ID           string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
@@ -55,12 +55,12 @@ type UserResponse struct {
 type LoginResponseDto struct {
 	BaseResponseDto
 	Data        UserResponse `json:"data"`
-	AccessToken string       `json:"access_token"`
+	AccessToken string       `json:"access_token" example:"string"`
 }
 
 type ChangePasswordDto struct {
-	OldPassword string `json:"old_password" validate:"required"`
-	NewPassword string `json:"new_password" validate:"required,min=6"`
+	OldPassword string `json:"old_password" validate:"required" example:"password123"`
+	NewPassword string `json:"new_password" validate:"required,min=6" example:"password123"`
 }
 
 type InitiateForgotPasswordDto struct {

@@ -27,7 +27,6 @@ type CreateBusinessResponseDto struct {
 	Message    string `json:"message" example:"Business created successfully"`
 }
 
-
 type RespondToInvitationDto struct {
 	InvitationID string `json:"invitation_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"required,uuid"`
 	Accept       bool   `json:"accept" example:"true"`

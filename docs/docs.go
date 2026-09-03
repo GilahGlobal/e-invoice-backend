@@ -63,6 +63,94 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Creates a new aggregator (admin only).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Operations"
+                ],
+                "summary": "Create Aggregator",
+                "parameters": [
+                    {
+                        "description": "Aggregator request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminCreateAggregatorDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Aggregator created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/utility.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/aggregators/invitations/{id}": {
+            "get": {
+                "description": "Returns pending invitations sent by an aggregator.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Aggregator Invitations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Aggregator ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminAggregatorInvitationsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
             }
         },
         "/admin/aggregators/invoices/{id}": {
@@ -104,6 +192,95 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/admin.AdminAggregatorInvoiceListResponseDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/aggregators/{id}": {
+            "get": {
+                "description": "Returns stats and associated companies for an aggregator.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Aggregator Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Aggregator ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminAggregatorInfoResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates aggregator details and status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Operations"
+                ],
+                "summary": "Update Aggregator",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Aggregator ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Aggregator update payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminUpdateBusinessDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Aggregator updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/utility.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "500": {
@@ -271,6 +448,94 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Creates a new business (admin only).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Operations"
+                ],
+                "summary": "Create Business",
+                "parameters": [
+                    {
+                        "description": "Business request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminCreateBusinessDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Business created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/utility.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/businesses/aggregator/{id}": {
+            "get": {
+                "description": "Returns current aggregator ID and relationship history for a business.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Business Aggregator Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminBusinessAggregatorInfoResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
             }
         },
         "/admin/businesses/invoices/{id}": {
@@ -316,6 +581,137 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/businesses/stats{id}": {
+            "get": {
+                "description": "Returns daily invoice stats (last 14 days) and aggregated stats for a specific business.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Business Daily Invoice Stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminBusinessDailyStatsResponseDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/businesses/{id}": {
+            "put": {
+                "description": "Updates business details and status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Operations"
+                ],
+                "summary": "Update Business",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Business update payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminUpdateBusinessDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/utility.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/roles": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all roles available for admin users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Roles"
+                ],
+                "summary": "Retrieve all roles",
+                "responses": {
+                    "200": {
+                        "description": "Roles retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.RoleListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/apperror.AppError"
                         }
@@ -370,6 +766,55 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/admin.AdminInvoiceStatsResponseDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/stats/overview": {
+            "get": {
+                "description": "Returns overview stats for invoices, companies, API calls, and registrations based on timeframe.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Admin Overview Stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Timeframe: today, 7_days, 30_days, custom",
+                        "name": "timeframe",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Custom start date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Custom end date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminOverviewStatsResponseDto"
                         }
                     },
                     "500": {
@@ -4201,6 +4646,312 @@ const docTemplate = `{
                 }
             }
         },
+        "/resources/countries": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all countries",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Countries",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.CountriesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/currencies": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all currencies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Currencies",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.CurrenciesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/hsn-codes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all HSN codes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve HSN Codes",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.HSNCodesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/invoice-types": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all invoice types",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Invoice Types",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.ResourcesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/lgas": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all Local Government Areas",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve LGAs",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.LGAsResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/payment-means": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all payment means",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Payment Means",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.ResourcesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/service-codes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all service codes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Service Codes",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.ServiceCodesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/states": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all states",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve States",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.StatesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/tax-categories": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all tax categories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Tax Categories",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.TaxCategoriesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
         "/subscription/plans": {
             "get": {
                 "description": "Retrieves all available subscription plans",
@@ -4365,6 +5116,97 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "admin.AdminAggregatorInfoResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.AdminAggregatorInfoResponseDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminAggregatorInfoResponseDto": {
+            "type": "object",
+            "properties": {
+                "aggregator": {
+                    "$ref": "#/definitions/admin.AdminAggregatorResponseDto"
+                },
+                "companies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.AggregatorCompanyDto"
+                    }
+                },
+                "stats": {
+                    "$ref": "#/definitions/admin.AggregatorStatsDto"
+                }
+            }
+        },
+        "admin.AdminAggregatorInvitationDto": {
+            "type": "object",
+            "properties": {
+                "company_name": {
+                    "type": "string",
+                    "example": "Example Name"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "76a73e5c-6fe0-4f83-9b95-715147812f65"
+                },
+                "industry": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
+                }
+            }
+        },
+        "admin.AdminAggregatorInvitationsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.AdminAggregatorInvitationDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
         "admin.AdminAggregatorInvoiceListResponseDto": {
             "type": "object",
             "properties": {
@@ -4399,7 +5241,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin.AdminBusinessResponseDto"
+                        "$ref": "#/definitions/admin.AdminAggregatorResponseDto"
                     }
                 },
                 "error": {},
@@ -4413,6 +5255,135 @@ const docTemplate = `{
                 "pagination": {
                     "$ref": "#/definitions/database.PaginationResponse"
                 },
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminAggregatorResponseDto": {
+            "type": "object",
+            "properties": {
+                "companies_managed": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "company_name": {
+                    "type": "string",
+                    "example": "Example Name"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "8c596cb2-ac83-489a-bb00-10e0d83c0510"
+                },
+                "industry": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "last_invoice_uploaded_at": {
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "subscribed_plan": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "12345678-0001"
+                },
+                "total_invoices_managed": {
+                    "type": "integer",
+                    "example": 0
+                }
+            }
+        },
+        "admin.AdminBusinessAggregatorHistoryDto": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "aggregator_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "admin.AdminBusinessAggregatorInfoResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.AdminBusinessAggregatorInfoResponseDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminBusinessAggregatorInfoResponseDto": {
+            "type": "object",
+            "properties": {
+                "current_aggregator_id": {
+                    "type": "string"
+                },
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.AdminBusinessAggregatorHistoryDto"
+                    }
+                }
+            }
+        },
+        "admin.AdminBusinessDailyStatsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.AdminDailyInvoiceStatsDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
                 "status": {
                     "type": "string"
                 },
@@ -4453,34 +5424,64 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "bmp_upload_selected": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 },
                 "business_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "4f7ba55f-1c44-4ac4-989e-1d5c3d948c16"
                 },
                 "company_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "e4b7712b-1461-4ae1-aabd-a591ce653b8a"
+                },
+                "industry": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "last_invoice_uploaded_at": {
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "phone_number": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "+1234567890"
                 },
                 "service_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "8817a77d-22d9-4bcc-8b33-dcd1328e31e4"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "subscribed_plan": {
+                    "type": "string",
+                    "example": "string"
                 },
                 "tin": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12345678-0001"
+                },
+                "total_invoices_uploaded": {
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -4488,10 +5489,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "total_aggregators": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "total_businesses": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -4515,6 +5518,87 @@ const docTemplate = `{
                 },
                 "status_code": {
                     "type": "integer"
+                }
+            }
+        },
+        "admin.AdminCreateAggregatorDto": {
+            "type": "object",
+            "required": [
+                "company_name",
+                "email",
+                "tin"
+            ],
+            "properties": {
+                "company_name": {
+                    "type": "string",
+                    "example": "Example Name"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "industry": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "12345678-0001"
+                }
+            }
+        },
+        "admin.AdminCreateBusinessDto": {
+            "type": "object",
+            "required": [
+                "company_name",
+                "email",
+                "tin"
+            ],
+            "properties": {
+                "company_name": {
+                    "type": "string",
+                    "example": "Example Name"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "industry": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "12345678-0001"
+                }
+            }
+        },
+        "admin.AdminDailyInvoiceStatsDto": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
+                },
+                "failed_invoices": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "partial_success_invoices": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "success_invoices": {
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -4578,13 +5662,16 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "admin@example.com"
                 },
                 "is_sandbox": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": false
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password123"
                 }
             }
         },
@@ -4592,10 +5679,67 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "data": {
                     "$ref": "#/definitions/admin.AdminResponse"
+                }
+            }
+        },
+        "admin.AdminOverviewStatsDto": {
+            "type": "object",
+            "properties": {
+                "failed_invoices": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "new_registrations": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "partial_success_invoices": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "success_invoices": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "total_api_calls": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "total_companies": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 0
+                }
+            }
+        },
+        "admin.AdminOverviewStatsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.AdminOverviewStatsDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
                 }
             }
         },
@@ -4605,29 +5749,25 @@ const docTemplate = `{
                 "email",
                 "name",
                 "password",
-                "role"
+                "role_id"
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "admin@example.com"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Super Admin"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 8
+                    "minLength": 8,
+                    "example": "password123"
                 },
-                "role": {
-                    "enum": [
-                        "superadmin",
-                        "admin"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/entities.AdminRole"
-                        }
-                    ]
+                "role_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         },
@@ -4635,16 +5775,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "admin@example.com"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Super Admin"
                 },
                 "role": {
-                    "$ref": "#/definitions/entities.AdminRole"
+                    "type": "string",
+                    "example": "superadmin"
+                },
+                "role_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         },
@@ -4652,37 +5800,48 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "aggregator_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "74edb1a0-54f7-41ae-b68b-1904f9f64acf"
                 },
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 0
                 },
                 "business_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 },
                 "currency": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0a0ecb8d-413a-4bf8-8b45-f86980c92e8f"
                 },
                 "plan": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "plan_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "223f3eba-f611-4b8c-94e3-993b0201fa3f"
                 },
                 "provider": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "99a22e3e-371b-42cc-b77a-55b656af65f0"
                 },
                 "reference": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-10-12T07:20:50.52Z"
                 }
             }
         },
@@ -4711,6 +5870,111 @@ const docTemplate = `{
                 },
                 "status_code": {
                     "type": "integer"
+                }
+            }
+        },
+        "admin.AdminUpdateBusinessDto": {
+            "type": "object",
+            "properties": {
+                "acc_status": {
+                    "type": "integer"
+                },
+                "company_name": {
+                    "type": "string",
+                    "example": "Example Name"
+                },
+                "industry": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "12345678-0001"
+                }
+            }
+        },
+        "admin.AggregatorCompanyDto": {
+            "type": "object",
+            "properties": {
+                "company_name": {
+                    "type": "string",
+                    "example": "Example Name"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "103e792c-c952-499d-a40c-9f3c237ac293"
+                },
+                "invoices_uploaded": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "tin": {
+                    "type": "string",
+                    "example": "12345678-0001"
+                }
+            }
+        },
+        "admin.AggregatorStatsDto": {
+            "type": "object",
+            "properties": {
+                "companies_managed": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "invoices_uploaded": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "pending_invitations": {
+                    "type": "integer",
+                    "example": 0
+                }
+            }
+        },
+        "admin.RoleListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.RoleResponseDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.RoleResponseDto": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Super Administrator with full access"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "superadmin"
                 }
             }
         },
@@ -5565,10 +6829,12 @@ const docTemplate = `{
             "properties": {
                 "new_password": {
                     "type": "string",
-                    "minLength": 6
+                    "minLength": 6,
+                    "example": "password123"
                 },
                 "old_password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password123"
                 }
             }
         },
@@ -5615,14 +6881,17 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "is_sandbox": {
                     "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "example": true
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password123"
                 }
             }
         },
@@ -5630,7 +6899,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string"
                 },
                 "data": {
                     "$ref": "#/definitions/auth.UserResponse"
@@ -6207,17 +7477,6 @@ const docTemplate = `{
                 }
             }
         },
-        "entities.AdminRole": {
-            "type": "string",
-            "enum": [
-                "superadmin",
-                "admin"
-            ],
-            "x-enum-varnames": [
-                "RoleSuperAdmin",
-                "RoleAdmin"
-            ]
-        },
         "entities.BulkUpload": {
             "type": "object",
             "properties": {
@@ -6271,6 +7530,31 @@ const docTemplate = `{
                 },
                 "validation_errors": {
                     "type": "object"
+                }
+            }
+        },
+        "entities.DailyInvoiceStatsDto": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "example": "2024-01-01"
+                },
+                "failed_invoices": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "partial_invoices": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "successful_invoices": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 150
                 }
             }
         },
@@ -6355,6 +7639,12 @@ const docTemplate = `{
         "entities.InvoiceStatsResponseData": {
             "type": "object",
             "properties": {
+                "daily": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.DailyInvoiceStatsDto"
+                    }
+                },
                 "monthly": {
                     "type": "array",
                     "items": {
@@ -7445,6 +8735,382 @@ const docTemplate = `{
                 }
             }
         },
+        "resources.CountriesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.CountryItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.CountryItemDto": {
+            "type": "object",
+            "properties": {
+                "alpha_2": {
+                    "type": "string",
+                    "example": "AF"
+                },
+                "alpha_3": {
+                    "type": "string",
+                    "example": "AFG"
+                },
+                "country_code": {
+                    "type": "string",
+                    "example": "004"
+                },
+                "intermediate_region": {
+                    "type": "string",
+                    "example": ""
+                },
+                "intermediate_region_code": {
+                    "type": "string",
+                    "example": ""
+                },
+                "iso_3166_2": {
+                    "type": "string",
+                    "example": "ISO 3166-2:AF"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Afghanistan"
+                },
+                "region": {
+                    "type": "string",
+                    "example": "Asia"
+                },
+                "region_code": {
+                    "type": "string",
+                    "example": "142"
+                },
+                "sub_region": {
+                    "type": "string",
+                    "example": "Southern Asia"
+                },
+                "sub_region_code": {
+                    "type": "string",
+                    "example": "034"
+                }
+            }
+        },
+        "resources.CurrenciesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.CurrencyItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.CurrencyItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "USD"
+                },
+                "decimal_digits": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "name": {
+                    "type": "string",
+                    "example": "US Dollar"
+                },
+                "name_plural": {
+                    "type": "string",
+                    "example": "US dollars"
+                },
+                "rounding": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "symbol": {
+                    "type": "string",
+                    "example": "$"
+                },
+                "symbol_native": {
+                    "type": "string",
+                    "example": "$"
+                }
+            }
+        },
+        "resources.HSNCodesItemDto": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Horses; live, pure-bred breeding animals"
+                },
+                "hscode": {
+                    "type": "string",
+                    "example": "0101.21"
+                }
+            }
+        },
+        "resources.HSNCodesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.HSNCodesItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.LGAItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "NG-AB-ANO"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Aba North"
+                },
+                "state_code": {
+                    "type": "string",
+                    "example": "NG-AB"
+                }
+            }
+        },
+        "resources.LGAsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.LGAItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.ResourceItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "380"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "Credit Note"
+                }
+            }
+        },
+        "resources.ResourcesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.ResourceItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.ServiceCodesItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "0111"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Growing of cereals (except rice), leguminous crops and oil seeds"
+                }
+            }
+        },
+        "resources.ServiceCodesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.ServiceCodesItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.StateItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "NG-AB"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Abia"
+                }
+            }
+        },
+        "resources.StatesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.StateItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.TaxCategoriesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.TaxCategoryItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.TaxCategoryItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "STANDARD_GST"
+                },
+                "percent": {
+                    "type": "string",
+                    "example": "Not Available"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "Standard Goods and Services Tax"
+                }
+            }
+        },
         "subscription.AggregatorSubscribeDataDto": {
             "type": "object",
             "properties": {
@@ -7482,10 +9148,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "business_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "657cf2f1-46e5-4977-a6a6-484a691866d5"
                 },
                 "plan_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "f435c4ed-694e-4d4a-8d1e-75be3bb5e43b"
                 }
             }
         },
@@ -7535,19 +9203,23 @@ const docTemplate = `{
             ],
             "properties": {
                 "amount": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 0
                 },
                 "billing_cycle": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "is_sandbox": {
                     "type": "boolean"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Example Name"
                 },
                 "total_invoices": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },

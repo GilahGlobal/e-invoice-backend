@@ -665,7 +665,7 @@ func (ep *ExcelProcessor) ProcessExcelWithRetry(ctx context.Context, data []byte
 			log.Printf("Excel Attempt %d failed with %d errors, attempting to fix common issues",
 				attempt, len(errors))
 
-			fixedData, err := ep.fixCommonExcelIssues(data, errors)
+			fixedData, err := ep.fixCommonExcelIssues(data)
 			if err != nil {
 				log.Printf("Failed to fix Excel issues: %v", err)
 				break
@@ -686,7 +686,7 @@ func (ep *ExcelProcessor) ProcessExcelWithRetry(ctx context.Context, data []byte
 }
 
 // fixCommonExcelIssues attempts to fix common Excel formatting issues
-func (ep *ExcelProcessor) fixCommonExcelIssues(data []byte, errors []error) ([]byte, error) {
+func (ep *ExcelProcessor) fixCommonExcelIssues(data []byte) ([]byte, error) {
 	f, err := excelize.OpenReader(bytes.NewReader(data))
 	if err != nil {
 		return nil, err

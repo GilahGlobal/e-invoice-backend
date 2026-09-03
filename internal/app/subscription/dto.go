@@ -8,10 +8,10 @@ type SubscriptionPlanQueryDto struct {
 
 type CreateSubscriptionPlanDto struct {
 	IsSandbox     *bool   `json:"is_sandbox" validate:"required"`
-	Name          string  `json:"name" validate:"required"`
-	Amount        float64 `json:"amount" validate:"required,gt=0"`
-	TotalInvoices int     `json:"total_invoices" validate:"required,gt=0"`
-	BillingCycle  int     `json:"billing_cycle" validate:"required,gt=0"`
+	Name          string  `json:"name" validate:"required" example:"Example Name"`
+	Amount        float64 `json:"amount" validate:"required,gt=0" example:"0.0"`
+	TotalInvoices int     `json:"total_invoices" validate:"required,gt=0" example:"0"`
+	BillingCycle  int     `json:"billing_cycle" validate:"required,gt=0" example:"0"`
 }
 
 type SubscriptionPlansResponseDto struct {
@@ -30,8 +30,8 @@ type CreateSubscriptionPlanResponseDto struct {
 }
 
 type AggregatorSubscribeRequestDto struct {
-	BusinessID string `json:"business_id" validate:"required,uuid"`
-	PlanID     string `json:"plan_id" validate:"required"`
+	BusinessID string `json:"business_id" validate:"required,uuid" example:"657cf2f1-46e5-4977-a6a6-484a691866d5"`
+	PlanID     string `json:"plan_id" validate:"required" example:"f435c4ed-694e-4d4a-8d1e-75be3bb5e43b"`
 }
 
 type AggregatorSubscribeDataDto struct {

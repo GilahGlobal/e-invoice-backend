@@ -26,6 +26,7 @@ type Business struct {
 	TIN                 string                 `gorm:"column:tin;type:varchar(20)" json:"tin"`
 	PhoneNumber         string                 `gorm:"column:phone_number;type:varchar(13)" json:"phone_number"`
 	CompanyName         string                 `gorm:"column:company_name;type:varchar(250)" json:"company_name"`
+	Industry            string                 `gorm:"column:industry;type:text" json:"industry"`
 	IRNPublicKey        common.EncryptedString `gorm:"column:irn_public_key;type:text" json:"-"`
 	IRNCertificate      common.EncryptedString `gorm:"column:irn_certificate;type:text" json:"-"`
 	KeysSet             bool                   `gorm:"column:keys_set;type:bool;default:false" json:"keys_set"`

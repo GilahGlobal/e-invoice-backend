@@ -1,5 +1,68 @@
 basePath: /api/v1
 definitions:
+  admin.AdminAggregatorInfoResponse:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminAggregatorInfoResponseDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminAggregatorInfoResponseDto:
+    properties:
+      aggregator:
+        $ref: '#/definitions/admin.AdminAggregatorResponseDto'
+      companies:
+        items:
+          $ref: '#/definitions/admin.AggregatorCompanyDto'
+        type: array
+      stats:
+        $ref: '#/definitions/admin.AggregatorStatsDto'
+    type: object
+  admin.AdminAggregatorInvitationDto:
+    properties:
+      company_name:
+        example: Example Name
+        type: string
+      created_at:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      id:
+        example: 76a73e5c-6fe0-4f83-9b95-715147812f65
+        type: string
+      industry:
+        example: string
+        type: string
+      status:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+    type: object
+  admin.AdminAggregatorInvitationsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminAggregatorInvitationDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
   admin.AdminAggregatorInvoiceListResponseDto:
     properties:
       data:
@@ -23,7 +86,7 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/admin.AdminBusinessResponseDto'
+          $ref: '#/definitions/admin.AdminAggregatorResponseDto'
         type: array
       error: {}
       extra: {}
@@ -33,6 +96,96 @@ definitions:
         type: string
       pagination:
         $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminAggregatorResponseDto:
+    properties:
+      companies_managed:
+        example: 0
+        type: integer
+      company_name:
+        example: Example Name
+        type: string
+      created_at:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      id:
+        example: 8c596cb2-ac83-489a-bb00-10e0d83c0510
+        type: string
+      industry:
+        example: string
+        type: string
+      last_invoice_uploaded_at:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      status:
+        example: 1
+        type: integer
+      subscribed_plan:
+        example: string
+        type: string
+      tin:
+        example: 12345678-0001
+        type: string
+      total_invoices_managed:
+        example: 0
+        type: integer
+    type: object
+  admin.AdminBusinessAggregatorHistoryDto:
+    properties:
+      action:
+        type: string
+      aggregator_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+    type: object
+  admin.AdminBusinessAggregatorInfoResponse:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminBusinessAggregatorInfoResponseDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminBusinessAggregatorInfoResponseDto:
+    properties:
+      current_aggregator_id:
+        type: string
+      history:
+        items:
+          $ref: '#/definitions/admin.AdminBusinessAggregatorHistoryDto'
+        type: array
+    type: object
+  admin.AdminBusinessDailyStatsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminDailyInvoiceStatsDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
       status:
         type: string
       status_code:
@@ -60,31 +213,58 @@ definitions:
   admin.AdminBusinessResponseDto:
     properties:
       bmp_upload_selected:
+        example: true
         type: boolean
       business_id:
+        example: 4f7ba55f-1c44-4ac4-989e-1d5c3d948c16
         type: string
       company_name:
+        example: Example Name
         type: string
       created_at:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
       email:
+        example: user@example.com
         type: string
       id:
+        example: e4b7712b-1461-4ae1-aabd-a591ce653b8a
+        type: string
+      industry:
+        example: string
+        type: string
+      last_invoice_uploaded_at:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
       name:
+        example: Example Name
         type: string
       phone_number:
+        example: "+1234567890"
         type: string
       service_id:
+        example: 8817a77d-22d9-4bcc-8b33-dcd1328e31e4
+        type: string
+      status:
+        example: 1
+        type: integer
+      subscribed_plan:
+        example: string
         type: string
       tin:
+        example: 12345678-0001
         type: string
+      total_invoices_uploaded:
+        example: 0
+        type: integer
     type: object
   admin.AdminBusinessStatsDto:
     properties:
       total_aggregators:
+        example: 0
         type: integer
       total_businesses:
+        example: 0
         type: integer
     type: object
   admin.AdminBusinessStatsResponseDto:
@@ -101,6 +281,65 @@ definitions:
       status:
         type: string
       status_code:
+        type: integer
+    type: object
+  admin.AdminCreateAggregatorDto:
+    properties:
+      company_name:
+        example: Example Name
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      industry:
+        example: string
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      tin:
+        example: 12345678-0001
+        type: string
+    required:
+    - company_name
+    - email
+    - tin
+    type: object
+  admin.AdminCreateBusinessDto:
+    properties:
+      company_name:
+        example: Example Name
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      industry:
+        example: string
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      tin:
+        example: 12345678-0001
+        type: string
+    required:
+    - company_name
+    - email
+    - tin
+    type: object
+  admin.AdminDailyInvoiceStatsDto:
+    properties:
+      date:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      failed_invoices:
+        example: 0
+        type: integer
+      partial_success_invoices:
+        example: 0
+        type: integer
+      success_invoices:
+        example: 0
         type: integer
     type: object
   admin.AdminInvoiceListResponseDto:
@@ -141,10 +380,13 @@ definitions:
   admin.AdminLoginRequestDto:
     properties:
       email:
+        example: admin@example.com
         type: string
       is_sandbox:
+        example: false
         type: boolean
       password:
+        example: password123
         type: string
     required:
     - email
@@ -154,65 +396,124 @@ definitions:
   admin.AdminLoginResponseDto:
     properties:
       access_token:
+        example: string
         type: string
       data:
         $ref: '#/definitions/admin.AdminResponse'
     type: object
-  admin.AdminRegisterDto:
+  admin.AdminOverviewStatsDto:
     properties:
-      email:
+      failed_invoices:
+        example: 0
+        type: integer
+      new_registrations:
+        example: 0
+        type: integer
+      partial_success_invoices:
+        example: 0
+        type: integer
+      success_invoices:
+        example: 0
+        type: integer
+      total_api_calls:
+        example: 0
+        type: integer
+      total_companies:
+        example: 0
+        type: integer
+      total_invoices:
+        example: 0
+        type: integer
+    type: object
+  admin.AdminOverviewStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminOverviewStatsDto'
+      error: {}
+      extra: {}
+      message:
         type: string
       name:
         type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminRegisterDto:
+    properties:
+      email:
+        example: admin@example.com
+        type: string
+      name:
+        example: Super Admin
+        type: string
       password:
+        example: password123
         minLength: 8
         type: string
-      role:
-        allOf:
-        - $ref: '#/definitions/entities.AdminRole'
-        enum:
-        - superadmin
-        - admin
+      role_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
     required:
     - email
     - name
     - password
-    - role
+    - role_id
     type: object
   admin.AdminResponse:
     properties:
       email:
+        example: admin@example.com
         type: string
       id:
+        example: 123e4567-e89b-12d3-a456-426614174000
         type: string
       name:
+        example: Super Admin
         type: string
       role:
-        $ref: '#/definitions/entities.AdminRole'
+        example: superadmin
+        type: string
+      role_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
     type: object
   admin.AdminTransactionDto:
     properties:
       aggregator_id:
+        example: 74edb1a0-54f7-41ae-b68b-1904f9f64acf
         type: string
       amount:
+        example: 0
         type: number
       business_id:
+        example: 8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9
         type: string
       created_at:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
       currency:
+        example: string
         type: string
       id:
+        example: 0a0ecb8d-413a-4bf8-8b45-f86980c92e8f
         type: string
       plan:
+        example: string
         type: string
       plan_id:
+        example: 223f3eba-f611-4b8c-94e3-993b0201fa3f
         type: string
       provider:
+        example: 99a22e3e-371b-42cc-b77a-55b656af65f0
         type: string
       reference:
+        example: string
         type: string
       status:
+        example: "2023-10-12T07:20:50.52Z"
         type: string
     type: object
   admin.AdminTransactionListResponseDto:
@@ -233,6 +534,80 @@ definitions:
         type: string
       status_code:
         type: integer
+    type: object
+  admin.AdminUpdateBusinessDto:
+    properties:
+      acc_status:
+        type: integer
+      company_name:
+        example: Example Name
+        type: string
+      industry:
+        example: string
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      tin:
+        example: 12345678-0001
+        type: string
+    type: object
+  admin.AggregatorCompanyDto:
+    properties:
+      company_name:
+        example: Example Name
+        type: string
+      id:
+        example: 103e792c-c952-499d-a40c-9f3c237ac293
+        type: string
+      invoices_uploaded:
+        example: 0
+        type: integer
+      tin:
+        example: 12345678-0001
+        type: string
+    type: object
+  admin.AggregatorStatsDto:
+    properties:
+      companies_managed:
+        example: 0
+        type: integer
+      invoices_uploaded:
+        example: 0
+        type: integer
+      pending_invitations:
+        example: 0
+        type: integer
+    type: object
+  admin.RoleListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.RoleResponseDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.RoleResponseDto:
+    properties:
+      description:
+        example: Super Administrator with full access
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: superadmin
+        type: string
     type: object
   aggregator.AggregatorActivityLogDto:
     properties:
@@ -835,9 +1210,11 @@ definitions:
   auth.ChangePasswordDto:
     properties:
       new_password:
+        example: password123
         minLength: 6
         type: string
       old_password:
+        example: password123
         type: string
     required:
     - new_password
@@ -871,11 +1248,14 @@ definitions:
   auth.LoginRequestDto:
     properties:
       email:
+        example: user@example.com
         type: string
       is_sandbox:
         default: true
+        example: true
         type: boolean
       password:
+        example: password123
         type: string
     required:
     - email
@@ -884,6 +1264,7 @@ definitions:
   auth.LoginResponseDto:
     properties:
       access_token:
+        example: string
         type: string
       data:
         $ref: '#/definitions/auth.UserResponse'
@@ -1300,14 +1681,6 @@ definitions:
       total_pages_count:
         type: integer
     type: object
-  entities.AdminRole:
-    enum:
-    - superadmin
-    - admin
-    type: string
-    x-enum-varnames:
-    - RoleSuperAdmin
-    - RoleAdmin
   entities.BulkUpload:
     properties:
       aggregator_id:
@@ -1344,6 +1717,24 @@ definitions:
         type: integer
       validation_errors:
         type: object
+    type: object
+  entities.DailyInvoiceStatsDto:
+    properties:
+      date:
+        example: "2024-01-01"
+        type: string
+      failed_invoices:
+        example: 20
+        type: integer
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      total_invoices:
+        example: 150
+        type: integer
     type: object
   entities.Invoice:
     properties:
@@ -1400,6 +1791,10 @@ definitions:
     type: object
   entities.InvoiceStatsResponseData:
     properties:
+      daily:
+        items:
+          $ref: '#/definitions/entities.DailyInvoiceStatsDto'
+        type: array
       monthly:
         items:
           $ref: '#/definitions/entities.MonthlyInvoiceStatsDto'
@@ -2180,6 +2575,270 @@ definitions:
       status_code:
         type: integer
     type: object
+  resources.CountriesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.CountryItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.CountryItemDto:
+    properties:
+      alpha_2:
+        example: AF
+        type: string
+      alpha_3:
+        example: AFG
+        type: string
+      country_code:
+        example: "004"
+        type: string
+      intermediate_region:
+        example: ""
+        type: string
+      intermediate_region_code:
+        example: ""
+        type: string
+      iso_3166_2:
+        example: ISO 3166-2:AF
+        type: string
+      name:
+        example: Afghanistan
+        type: string
+      region:
+        example: Asia
+        type: string
+      region_code:
+        example: "142"
+        type: string
+      sub_region:
+        example: Southern Asia
+        type: string
+      sub_region_code:
+        example: "034"
+        type: string
+    type: object
+  resources.CurrenciesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.CurrencyItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.CurrencyItemDto:
+    properties:
+      code:
+        example: USD
+        type: string
+      decimal_digits:
+        example: 2
+        type: integer
+      name:
+        example: US Dollar
+        type: string
+      name_plural:
+        example: US dollars
+        type: string
+      rounding:
+        example: 0
+        type: integer
+      symbol:
+        example: $
+        type: string
+      symbol_native:
+        example: $
+        type: string
+    type: object
+  resources.HSNCodesItemDto:
+    properties:
+      description:
+        example: Horses; live, pure-bred breeding animals
+        type: string
+      hscode:
+        example: "0101.21"
+        type: string
+    type: object
+  resources.HSNCodesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.HSNCodesItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.LGAItemDto:
+    properties:
+      code:
+        example: NG-AB-ANO
+        type: string
+      name:
+        example: Aba North
+        type: string
+      state_code:
+        example: NG-AB
+        type: string
+    type: object
+  resources.LGAsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.LGAItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.ResourceItemDto:
+    properties:
+      code:
+        example: "380"
+        type: string
+      value:
+        example: Credit Note
+        type: string
+    type: object
+  resources.ResourcesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.ResourceItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.ServiceCodesItemDto:
+    properties:
+      code:
+        example: "0111"
+        type: string
+      description:
+        example: Growing of cereals (except rice), leguminous crops and oil seeds
+        type: string
+    type: object
+  resources.ServiceCodesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.ServiceCodesItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.StateItemDto:
+    properties:
+      code:
+        example: NG-AB
+        type: string
+      name:
+        example: Abia
+        type: string
+    type: object
+  resources.StatesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.StateItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.TaxCategoriesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.TaxCategoryItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.TaxCategoryItemDto:
+    properties:
+      code:
+        example: STANDARD_GST
+        type: string
+      percent:
+        example: Not Available
+        type: string
+      value:
+        example: Standard Goods and Services Tax
+        type: string
+    type: object
   subscription.AggregatorSubscribeDataDto:
     properties:
       authorization_url:
@@ -2204,8 +2863,10 @@ definitions:
   subscription.AggregatorSubscribeRequestDto:
     properties:
       business_id:
+        example: 657cf2f1-46e5-4977-a6a6-484a691866d5
         type: string
       plan_id:
+        example: f435c4ed-694e-4d4a-8d1e-75be3bb5e43b
         type: string
     required:
     - business_id
@@ -2238,14 +2899,18 @@ definitions:
   subscription.CreateSubscriptionPlanDto:
     properties:
       amount:
+        example: 0
         type: number
       billing_cycle:
+        example: 0
         type: integer
       is_sandbox:
         type: boolean
       name:
+        example: Example Name
         type: string
       total_invoices:
+        example: 0
         type: integer
     required:
     - amount
@@ -2335,6 +3000,123 @@ paths:
           schema:
             $ref: '#/definitions/apperror.AppError'
       summary: List Aggregators
+      tags:
+      - Admin Queries
+    post:
+      consumes:
+      - application/json
+      description: Creates a new aggregator (admin only).
+      parameters:
+      - description: Aggregator request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminCreateAggregatorDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Aggregator created successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Create Aggregator
+      tags:
+      - Admin Operations
+  /admin/aggregators/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns stats and associated companies for an aggregator.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminAggregatorInfoResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Aggregator Info
+      tags:
+      - Admin Queries
+    put:
+      consumes:
+      - application/json
+      description: Updates aggregator details and status.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Aggregator update payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminUpdateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Aggregator updated successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Update Aggregator
+      tags:
+      - Admin Operations
+  /admin/aggregators/invitations/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns pending invitations sent by an aggregator.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminAggregatorInvitationsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Aggregator Invitations
       tags:
       - Admin Queries
   /admin/aggregators/invoices/{id}:
@@ -2473,6 +3255,99 @@ paths:
       summary: List Businesses
       tags:
       - Admin Queries
+    post:
+      consumes:
+      - application/json
+      description: Creates a new business (admin only).
+      parameters:
+      - description: Business request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminCreateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Business created successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Create Business
+      tags:
+      - Admin Operations
+  /admin/businesses/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates business details and status.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Business update payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminUpdateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business updated successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Update Business
+      tags:
+      - Admin Operations
+  /admin/businesses/aggregator/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns current aggregator ID and relationship history for a business.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessAggregatorInfoResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Business Aggregator Info
+      tags:
+      - Admin Queries
   /admin/businesses/invoices/{id}:
     get:
       consumes:
@@ -2506,6 +3381,57 @@ paths:
       summary: List Invoices by Business
       tags:
       - Admin Queries
+  /admin/businesses/stats{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns daily invoice stats (last 14 days) and aggregated stats
+        for a specific business.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessDailyStatsResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Business Daily Invoice Stats
+      tags:
+      - Admin Queries
+  /admin/roles:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all roles available for admin users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Roles retrieved successfully
+          schema:
+            $ref: '#/definitions/admin.RoleListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve all roles
+      tags:
+      - Admin Roles
   /admin/stats/businesses:
     get:
       consumes:
@@ -2542,6 +3468,39 @@ paths:
           schema:
             $ref: '#/definitions/apperror.AppError'
       summary: System Invoice Stats
+      tags:
+      - Admin Queries
+  /admin/stats/overview:
+    get:
+      consumes:
+      - application/json
+      description: Returns overview stats for invoices, companies, API calls, and
+        registrations based on timeframe.
+      parameters:
+      - description: 'Timeframe: today, 7_days, 30_days, custom'
+        in: query
+        name: timeframe
+        type: string
+      - description: Custom start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Custom end date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminOverviewStatsResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Admin Overview Stats
       tags:
       - Admin Queries
   /admin/transactions:
@@ -4985,6 +5944,195 @@ paths:
       summary: Validate IRN
       tags:
       - Invoice
+  /resources/countries:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all countries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.CountriesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Countries
+      tags:
+      - Resources
+  /resources/currencies:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all currencies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.CurrenciesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Currencies
+      tags:
+      - Resources
+  /resources/hsn-codes:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all HSN codes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.HSNCodesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve HSN Codes
+      tags:
+      - Resources
+  /resources/invoice-types:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all invoice types
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.ResourcesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Invoice Types
+      tags:
+      - Resources
+  /resources/lgas:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all Local Government Areas
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.LGAsResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve LGAs
+      tags:
+      - Resources
+  /resources/payment-means:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all payment means
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.ResourcesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Payment Means
+      tags:
+      - Resources
+  /resources/service-codes:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all service codes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.ServiceCodesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Service Codes
+      tags:
+      - Resources
+  /resources/states:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all states
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.StatesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve States
+      tags:
+      - Resources
+  /resources/tax-categories:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all tax categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.TaxCategoriesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Tax Categories
+      tags:
+      - Resources
   /subscription/plans:
     get:
       consumes:
