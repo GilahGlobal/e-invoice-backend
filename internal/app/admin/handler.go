@@ -66,7 +66,7 @@ func (h *Handler) GetRoles(c *fiber.Ctx) error {
 		})
 	}
 
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, "success", "Roles retrieved successfully", rolesData)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Roles retrieved successfully", rolesData)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
