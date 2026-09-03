@@ -321,9 +321,12 @@ func (s *Service) GetOverviewStats(db database.DatabaseManager, timeframe string
 func (s *Service) CreateBusiness(req AdminCreateBusinessDto, isSandbox bool) error {
 	db := s.authRepo.GetDB(isSandbox)
 
-	existingBusiness, _ := s.businessRepo.GetUserByEmail(db, strings.ToLower(req.Email))
-	if existingBusiness.ID != "" {
-		return errors.New("business with this email already exists")
+	exists, err := s.businessRepo.CheckBusinessExistsByEmailOrCompanyName(db, req.Email, req.CompanyName)
+	if err != nil {
+		return fmt.Errorf("failed to check existing business: %w", err)
+	}
+	if exists {
+		return errors.New("business with this email or company name already exists")
 	}
 
 	generatedPassword := utility.RandomString(12)
@@ -413,9 +416,12 @@ func (s *Service) GetBusinessDailyInvoiceStatsDto(db database.DatabaseManager, b
 func (s *Service) CreateAggregator(req AdminCreateAggregatorDto, isSandbox bool) error {
 	db := s.authRepo.GetDB(isSandbox)
 
-	existingBusiness, _ := s.businessRepo.GetUserByEmail(db, strings.ToLower(req.Email))
-	if existingBusiness.ID != "" {
-		return errors.New("aggregator with this email already exists")
+	exists, err := s.businessRepo.CheckBusinessExistsByEmailOrCompanyName(db, req.Email, req.CompanyName)
+	if err != nil {
+		return fmt.Errorf("failed to check existing aggregator: %w", err)
+	}
+	if exists {
+		return errors.New("aggregator with this email or company name already exists")
 	}
 
 	generatedPassword := utility.RandomString(12)

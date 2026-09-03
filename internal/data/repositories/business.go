@@ -90,6 +90,17 @@ func (r *BusinessRepository) GetUserByEmail(db database.DatabaseManager, userEma
 	return user, nil
 }
 
+func (r *BusinessRepository) CheckBusinessExistsByEmailOrCompanyName(db database.DatabaseManager, email, companyName string) (bool, error) {
+	var count int64
+	err := db.DB().Model(&entities.Business{}).
+		Where("LOWER(email) = ? OR LOWER(company_name) = ?", strings.ToLower(email), strings.ToLower(companyName)).
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
 func (r *BusinessRepository) FindUserByKey(db database.DatabaseManager, apiKey string) (*entities.Business, error) {
 	apiKeyHash := sha256.Sum256([]byte(apiKey))
 	apiKeyHashStr := hex.EncodeToString(apiKeyHash[:])

@@ -8,6 +8,7 @@ import (
 	"einvoice-access-point/internal/middleware"
 	"einvoice-access-point/internal/utility"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -413,6 +414,9 @@ func (h *Handler) CreateBusiness(c *fiber.Ctx) error {
 
 	err := h.svc.CreateBusiness(req, claims.IsSandbox)
 	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+		}
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
@@ -538,6 +542,9 @@ func (h *Handler) CreateAggregator(c *fiber.Ctx) error {
 
 	err := h.svc.CreateAggregator(req, claims.IsSandbox)
 	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+		}
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
