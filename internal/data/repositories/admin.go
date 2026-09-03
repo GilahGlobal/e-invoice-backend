@@ -56,7 +56,7 @@ func (r *AdminRepository) CountAdmins(db database.DatabaseManager) (int64, error
 
 func (r *AdminRepository) GetAllRoles(db database.DatabaseManager) ([]entities.Role, error) {
 	var roles []entities.Role
-	err := db.SelectAllFromDb("created_at asc", "", &roles, nil)
+	err := db.DB().Order("created_at asc").Find(&roles).Error
 	if err != nil {
 		return nil, err
 	}

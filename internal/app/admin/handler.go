@@ -46,7 +46,12 @@ func NewHandler(validator *validator.Validate, logger *utility.Logger, cfg *conf
 // @Failure 500 {object} apperror.AppError "Internal server error"
 // @Router /admin/roles [get]
 func (h *Handler) GetRoles(c *fiber.Ctx) error {
-	db := c.Locals("db").(database.DatabaseManager)
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
 	roles, err := h.svc.GetRoles(db)
 	if err != nil {
 		return apperror.New(fiber.StatusInternalServerError, "error", "Failed to retrieve roles", err, nil)
