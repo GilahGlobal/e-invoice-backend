@@ -6108,7 +6108,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "TIN-123456789"
+                    "example": "12345678-0001"
                 }
             }
         },
@@ -6156,7 +6156,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "TIN-123456789"
+                    "example": "12345678-0001"
                 },
                 "total_bulk_uploads": {
                     "type": "integer",
@@ -6534,7 +6534,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "123456789"
+                    "example": "12345678-0001"
                 }
             }
         },
@@ -6969,7 +6969,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "TIN-123456789"
+                    "example": "12345678-0001"
                 }
             }
         },
@@ -7377,7 +7377,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "123456789"
+                    "example": "12345678-0001"
                 },
                 "updated_at": {
                     "type": "string",
@@ -8125,7 +8125,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "123456789012345"
+                    "example": "12345678-0001"
                 }
             }
         },
@@ -8201,7 +8201,7 @@ const docTemplate = `{
                 },
                 "price_unit": {
                     "type": "string",
-                    "example": "NGN per 1"
+                    "example": "CEN"
                 }
             }
         },
@@ -8248,7 +8248,7 @@ const docTemplate = `{
                 },
                 "percent": {
                     "type": "number",
-                    "example": 15
+                    "example": 7.5
                 }
             }
         },
