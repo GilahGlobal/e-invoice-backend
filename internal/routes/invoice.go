@@ -22,15 +22,15 @@ func InvoiceRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	invoiceUrlSec.Post("/upload", invoiceController.UploadInvoice)
 	invoiceUrlSec.Patch("/upload", invoiceController.ModifyInvoice)
 	invoiceUrlSec.Get("/download/:irn", invoiceController.DownloadInvoice)
+	invoiceUrlSec.Post("/validate-irn", invoiceController.ValidateIRN)
+	invoiceUrlSec.Post("/validate", invoiceController.ValidateInvoice)
+	invoiceUrlSec.Post("/sign", invoiceController.SignInvoice)
+	invoiceUrlSec.Post("/sign-irn", invoiceController.SignIRN)
+	invoiceUrlSec.Post("/generate-irn", invoiceController.GenerateIRN)
 
 	// Endpoints restricted to frontend only
 	invoiceUrlSec.Get("/stats", rf, invoiceController.GetInvoiceStats)
 	invoiceUrlSec.Get("", invoiceController.GetAllInvoices)
-	invoiceUrlSec.Post("/validate-irn", rf, invoiceController.ValidateIRN)
-	invoiceUrlSec.Post("/validate", rf, invoiceController.ValidateInvoice)
-	invoiceUrlSec.Post("/sign", rf, invoiceController.SignInvoice)
-	invoiceUrlSec.Post("/sign-irn", rf, invoiceController.SignIRN)
-	invoiceUrlSec.Post("/generate-irn", rf, invoiceController.GenerateIRN)
 	invoiceUrlSec.Get("/confirm/:irn", rf, invoiceController.ConfirmInvoice)
 
 	transmit := invoiceUrlSec.Group("/transmit", rf)
