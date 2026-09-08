@@ -5191,7 +5191,7 @@ const docTemplate = `{
                 },
                 "price_unit": {
                     "type": "string",
-                    "example": "NGN per 1"
+                    "example": "CEN"
                 }
             }
         },
