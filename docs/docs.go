@@ -9304,7 +9304,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "Gention E-invoicing Service API",
+	Title:            "Byte Cognetics E-invoicing Service API",
 	Description:      "This is the e-invoicing service API documentation.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
