@@ -5353,7 +5353,7 @@ const docTemplate = `{
                 },
                 "percent": {
                     "type": "number",
-                    "example": 0.075
+                    "example": 7.5
                 }
             }
         },
