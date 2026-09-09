@@ -8006,19 +8006,19 @@ const docTemplate = `{
             "properties": {
                 "discount_amount": {
                     "type": "number",
-                    "example": 2500
+                    "example": 0
                 },
                 "discount_rate": {
                     "type": "number",
-                    "example": 5
+                    "example": 0
                 },
                 "fee_amount": {
                     "type": "number",
-                    "example": 450
+                    "example": 0
                 },
                 "fee_rate": {
                     "type": "number",
-                    "example": 2
+                    "example": 0
                 },
                 "hsn_code": {
                     "type": "string",
@@ -8027,14 +8027,14 @@ const docTemplate = `{
                 "invoiced_quantity": {
                     "type": "integer",
                     "minimum": 1,
-                    "example": 10
+                    "example": 1
                 },
                 "item": {
                     "$ref": "#/definitions/firs_models.Item"
                 },
                 "line_extension_amount": {
                     "type": "number",
-                    "example": 1500.75
+                    "example": 1500.00
                 },
                 "price": {
                     "$ref": "#/definitions/firs_models.Price"
@@ -8197,7 +8197,7 @@ const docTemplate = `{
                 },
                 "price_amount": {
                     "type": "number",
-                    "example": 5000
+                    "example": 1500
                 },
                 "price_unit": {
                     "type": "string",
@@ -8261,13 +8261,15 @@ const docTemplate = `{
             ],
             "properties": {
                 "tax_amount": {
-                    "type": "number"
+                    "type": "number",
+					"example":"112.50"
                 },
                 "tax_category": {
                     "$ref": "#/definitions/firs_models.TaxCategory"
                 },
                 "taxable_amount": {
-                    "type": "number"
+                    "type": "number",
+					"example": "1612.50"
                 }
             }
         },
