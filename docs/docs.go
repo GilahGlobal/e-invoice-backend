@@ -7806,7 +7806,7 @@ const docTemplate = `{
             "properties": {
                 "amount": {
                     "type": "number",
-                    "example": 1500.75
+                    "example": 1500.00
                 },
                 "charge_indicator": {
                     "type": "boolean",
