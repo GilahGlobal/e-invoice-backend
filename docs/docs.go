@@ -8076,19 +8076,19 @@ const docTemplate = `{
             "properties": {
                 "line_extension_amount": {
                     "type": "number",
-                    "example": 1500.75
+                    "example": 1500.00
                 },
                 "payable_amount": {
                     "type": "number",
-                    "example": 1700.75
+                    "example": 1612.50
                 },
                 "tax_exclusive_amount": {
                     "type": "number",
-                    "example": 1500.75
+                    "example": 1500.00
                 },
                 "tax_inclusive_amount": {
                     "type": "number",
-                    "example": 1700.75
+                    "example": 1612.50
                 }
             }
         },
@@ -8279,7 +8279,7 @@ const docTemplate = `{
             "properties": {
                 "tax_amount": {
                     "type": "number",
-                    "example": 1500.75
+                    "example": 112.50
                 },
                 "tax_subtotal": {
                     "type": "array",
