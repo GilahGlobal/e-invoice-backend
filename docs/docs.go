@@ -8269,7 +8269,7 @@ const docTemplate = `{
                 },
                 "taxable_amount": {
                     "type": "number",
-					"example": "1612.50"
+					"example": "1500.00"
                 }
             }
         },
