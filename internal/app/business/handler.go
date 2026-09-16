@@ -8,9 +8,11 @@ import (
 	"einvoice-access-point/internal/utility"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type Handler struct {
@@ -52,6 +54,41 @@ func (h *Handler) GetAllBusiness(c *fiber.Ctx) error {
 	}
 
 	rd := utility.BuildSuccessResponse(http.StatusOK, "businesses gotten successfully", businesses)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary      Get All Businesses (Simple & Unauthenticated)
+// @Description  Retrieve an unpaginated list of all businesses with id, business_name, and business_id
+// @Tags         Business
+// @Accept       json
+// @Produce      json
+// @Param        is_sandbox query bool false "Query sandbox database"
+// @Success      200 {object} BusinessSimpleListResponseDto "Businesses retrieved successfully"
+// @Failure      500 {object} apperror.AppError "Internal server error"
+// @Router       /business/all [get]
+func (h *Handler) GetAllBusinessesSimple(c *fiber.Ctx) error {
+	isSandbox := false
+	if sandboxQuery := c.Query("is_sandbox"); sandboxQuery != "" {
+		if parsed, err := strconv.ParseBool(sandboxQuery); err == nil {
+			isSandbox = parsed
+		}
+	}
+
+	var rawDb *gorm.DB
+	if isSandbox && h.TestDB != nil {
+		rawDb = h.TestDB.Postgresql.DB()
+	} else if h.Db != nil {
+		rawDb = h.Db.Postgresql.DB()
+	}
+
+	db := dbinit.InitDB(rawDb, false)
+
+	businesses, err := h.svc.GetAllBusinessesSimple(db)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Businesses retrieved successfully", businesses)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 

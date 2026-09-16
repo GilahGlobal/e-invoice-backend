@@ -64,6 +64,27 @@ func (s *Service) GetAllBusinesses(db *gorm.DB) ([]fiber.Map, error) {
 	return response, nil
 }
 
+func (s *Service) GetAllBusinessesSimple(db database.DatabaseManager) ([]BusinessSimpleDto, error) {
+	businesses, err := s.repo.GetAllBusinessesSimple(db)
+	if err != nil {
+		return nil, err
+	}
+
+	dtos := make([]BusinessSimpleDto, 0, len(businesses))
+	for _, b := range businesses {
+		bizName := b.CompanyName
+		if strings.TrimSpace(bizName) == "" {
+			bizName = b.Name
+		}
+		dtos = append(dtos, BusinessSimpleDto{
+			ID:           b.ID,
+			BusinessName: bizName,
+			BusinessID:   b.BusinessID,
+		})
+	}
+	return dtos, nil
+}
+
 func (s *Service) GetBusinessByID(db *gorm.DB, id string) (fiber.Map, error) {
 	pdb := dbinit.InitDB(db, false)
 

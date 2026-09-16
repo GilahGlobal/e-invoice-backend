@@ -97,3 +97,14 @@ type StatesResponseDto struct {
 	entities.Response
 	Data []StateItemDto `json:"data"`
 }
+
+type InvoiceQuantityCodeItemDto struct {
+	Code        string `json:"code" example:"10"`
+	Name        string `json:"name" example:"group"`
+	Description string `json:"description" example:"A unit of count defining the number of groups (group: set of items classified together)."`
+}
+
+type InvoiceQuantityCodesResponseDto struct {
+	entities.Response
+	Data []InvoiceQuantityCodeItemDto `json:"data"`
+}

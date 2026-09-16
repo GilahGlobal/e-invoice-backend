@@ -137,3 +137,17 @@ func (s *Service) GetStates() (*firs_models.FirsResponse, *string, error) {
 
 	return theResp, nil, nil
 }
+
+func (s *Service) GetInvoiceQuantityCodes() (*firs_models.FirsResponse, *string, error) {
+	resp, err := firs.GetInvoiceQuantityCodes()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get invoice quantity codes: %w", err)
+	}
+
+	theResp, errDetails, err := firs.ParseFIRSAPIResponse(resp)
+	if err != nil {
+		return nil, errDetails, fmt.Errorf("failed to parse FIRS API response: %w", err)
+	}
+
+	return theResp, nil, nil
+}

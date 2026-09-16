@@ -8,7 +8,7 @@ type UploadInvoiceRequestDto struct {
 	DueDate                     *string                `json:"due_date" example:"2026-01-20" validate:"omitempty,nrsdate"`
 	IssueTime                   *string                `json:"issue_time" example:"12:00:00" validate:"omitempty"`
 	InvoiceTypeCode             string                 `json:"invoice_type_code" example:"381" validate:"required,oneof=380 381 384 385 386 388 389 390 392 393 394 395 396 397 399 400 402 404 406 408"`
-	InvoiceKind                 string                 `json:"invoice_kind" example:"B2B" validate:"required,oneof=B2C B2B B2G"`
+	InvoiceKind                 string                 `json:"invoice_kind" example:"B2B" validate:"required,oneof=B2C B2B B2G G2B"`
 	PaymentStatus               *string                `json:"payment_status" example:"PENDING" validate:"omitempty,oneof=PENDING PAID REJECTED"`
 	Note                        *string                `json:"note" example:"Invoice note" validate:"omitempty"`
 	TaxPointDate                *string                `json:"tax_point_date" example:"2026-01-16" validate:"omitempty,nrsdate"`

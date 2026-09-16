@@ -1571,6 +1571,36 @@ definitions:
         example: org-123456789
         type: string
     type: object
+  business.BusinessSimpleDto:
+    properties:
+      business_id:
+        example: 4f7ba55f-1c44-4ac4-989e-1d5c3d948c16
+        type: string
+      business_name:
+        example: Acme Corp
+        type: string
+      id:
+        example: e4b7712b-1461-4ae1-aabd-a591ce653b8a
+        type: string
+    type: object
+  business.BusinessSimpleListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/business.BusinessSimpleDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
   business.GetBusinessResponseDto:
     properties:
       acc_status:
@@ -2685,6 +2715,37 @@ definitions:
       data:
         items:
           $ref: '#/definitions/resources.HSNCodesItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.InvoiceQuantityCodeItemDto:
+    properties:
+      code:
+        example: "10"
+        type: string
+      description:
+        example: 'A unit of count defining the number of groups (group: set of items
+          classified together).'
+        type: string
+      name:
+        example: group
+        type: string
+    type: object
+  resources.InvoiceQuantityCodesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.InvoiceQuantityCodeItemDto'
         type: array
       error: {}
       extra: {}
@@ -4888,6 +4949,31 @@ paths:
       summary: Send Invitation By Email
       tags:
       - Business Aggregator Portal
+  /business/all:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve an unpaginated list of all businesses with id, business_name,
+        and business_id
+      parameters:
+      - description: Query sandbox database
+        in: query
+        name: is_sandbox
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Businesses retrieved successfully
+          schema:
+            $ref: '#/definitions/business.BusinessSimpleListResponseDto'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Get All Businesses (Simple & Unauthenticated)
+      tags:
+      - Business
   /business/crypto-keys:
     post:
       consumes:
@@ -6005,6 +6091,27 @@ paths:
       security:
       - BearerAuth: []
       summary: Retrieve HSN Codes
+      tags:
+      - Resources
+  /resources/invoice-quantity:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all invoice quantity codes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.InvoiceQuantityCodesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Invoice Quantity Codes
       tags:
       - Resources
   /resources/invoice-types:

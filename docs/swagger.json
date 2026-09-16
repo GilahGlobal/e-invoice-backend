@@ -2972,6 +2972,43 @@
                 }
             }
         },
+        "/business/all": {
+            "get": {
+                "description": "Retrieve an unpaginated list of all businesses with id, business_name, and business_id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Get All Businesses (Simple \u0026 Unauthenticated)",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Query sandbox database",
+                        "name": "is_sandbox",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Businesses retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/business.BusinessSimpleListResponseDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
         "/business/crypto-keys": {
             "post": {
                 "security": [
@@ -4730,6 +4767,40 @@
                         "description": "Fetched successfully",
                         "schema": {
                             "$ref": "#/definitions/resources.HSNCodesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/invoice-quantity": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all invoice quantity codes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Invoice Quantity Codes",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.InvoiceQuantityCodesResponseDto"
                         }
                     },
                     "400": {
@@ -7317,6 +7388,49 @@
                 }
             }
         },
+        "business.BusinessSimpleDto": {
+            "type": "object",
+            "properties": {
+                "business_id": {
+                    "type": "string",
+                    "example": "4f7ba55f-1c44-4ac4-989e-1d5c3d948c16"
+                },
+                "business_name": {
+                    "type": "string",
+                    "example": "Acme Corp"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "e4b7712b-1461-4ae1-aabd-a591ce653b8a"
+                }
+            }
+        },
+        "business.BusinessSimpleListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/business.BusinessSimpleDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
         "business.GetBusinessResponseDto": {
             "type": "object",
             "properties": {
@@ -8882,6 +8996,49 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/resources.HSNCodesItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.InvoiceQuantityCodeItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "10"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "A unit of count defining the number of groups (group: set of items classified together)."
+                },
+                "name": {
+                    "type": "string",
+                    "example": "group"
+                }
+            }
+        },
+        "resources.InvoiceQuantityCodesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.InvoiceQuantityCodeItemDto"
                     }
                 },
                 "error": {},

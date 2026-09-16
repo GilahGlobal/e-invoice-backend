@@ -163,6 +163,27 @@ func (r *BusinessRepository) FindAllBusinesses(db database.DatabaseManager) ([]e
 	return businesses, nil
 }
 
+type BusinessSimpleQueryResult struct {
+	ID          string  `json:"id" gorm:"column:id"`
+	Name        string  `json:"name" gorm:"column:name"`
+	CompanyName string  `json:"company_name" gorm:"column:company_name"`
+	BusinessID  *string `json:"business_id" gorm:"column:business_id"`
+}
+
+func (r *BusinessRepository) GetAllBusinessesSimple(db database.DatabaseManager) ([]BusinessSimpleQueryResult, error) {
+	var businesses []BusinessSimpleQueryResult
+
+	query := db.DB().Model(&entities.Business{}).
+		Select("id, name, company_name, business_id").
+		Where("is_aggregator = ?", false)
+
+	if err := query.Order("COALESCE(NULLIF(company_name, ''), name) ASC").Scan(&businesses).Error; err != nil {
+		return nil, err
+	}
+
+	return businesses, nil
+}
+
 type AdminBusinessQueryResult struct {
 	entities.Business
 	TotalInvoicesUploaded int64

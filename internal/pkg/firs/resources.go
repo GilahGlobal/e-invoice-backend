@@ -141,3 +141,18 @@ func GetStates() (*utility.Response, error) {
 
 	return utility.GetRequest(utility.DefaultHTTPClient, config, theResp)
 }
+
+func GetInvoiceQuantityCodes() (*utility.Response, error) {
+	var (
+		configs = config.GetConfig()
+		apiURL  = fmt.Sprintf("%v/invoice/resources/invoice-quantity-codes", configs.Firs.FirsApiUrl)
+	)
+
+	config := utility.RequestConfig{
+		URL: apiURL,
+	}
+
+	theResp := &firs_models.FirsResponse{}
+
+	return utility.GetRequest(utility.DefaultHTTPClient, config, theResp)
+}

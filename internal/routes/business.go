@@ -13,9 +13,12 @@ import (
 func BusinessRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	businessController := business.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB)
 
+	// Unauthenticated / Public
+	businessPublic := app.Group(fmt.Sprintf("%v/business", ApiVersion))
+	businessPublic.Get("/all", businessController.GetAllBusinessesSimple)
+
 	businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()), middleware.SelectDatabaseFromClaims(c.DB, c.TestDB))
 	rf := middleware.RequireFrontend()
-	// businessUrlSec := app.Group(fmt.Sprintf("%v/business", ApiVersion), middleware.Authorize(nil, testDb.Postgresql.DB()))
 	{
 		// businessUrlSec.Get("", rf, businessController.GetAllBusiness)
 		businessUrlSec.Get("", rf, businessController.GetBusiness)
