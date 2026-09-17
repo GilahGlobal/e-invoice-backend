@@ -25,7 +25,7 @@ func GetInvoiceTypes() (*utility.Response, error) {
 func GetPaymentMeans() (*utility.Response, error) {
 	var (
 		configs = config.GetConfig()
-		apiURL  = fmt.Sprintf("%v/invoice/resources/payment_means", configs.Firs.FirsApiUrl)
+		apiURL  = fmt.Sprintf("%v/invoice/resources/payment-means", configs.Firs.FirsApiUrl)
 	)
 
 	config := utility.RequestConfig{
