@@ -45,6 +45,9 @@ type InvoiceListItem struct {
 	CurrentStatus string                `json:"current_status" example:"validated_irn"`
 	PaymentStatus string                `json:"payment_status" example:"PENDING"`
 	StatusText    string                `json:"status_text" example:"success"`
+	TotalAmount   float64               `json:"total_amount" example:"1700.75"`
+	TaxAmount     float64               `json:"tax_amount" example:"150.00"`
+	IssueDate     *time.Time            `json:"issue_date" example:"2026-01-16"`
 	Metadata      []InvoiceStepMetadata `json:"metadata"`
 	QrCodeBmpUrl  string                `json:"qr_code_bmp_url" example:"https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp"`
 	QrCode        string                `json:"qr_code" example:"iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN..."`

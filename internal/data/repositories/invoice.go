@@ -22,6 +22,12 @@ type InvoiceRepository struct {
 	testDB database.DatabaseManager
 }
 
+type InvoiceFilter struct {
+	IssueDate *string
+	StartDate *string
+	EndDate   *string
+}
+
 type InvoiceListWithMetadata struct {
 	ID            string         `gorm:"column:id"`
 	InvoiceNumber string         `gorm:"column:invoice_number"`
@@ -30,6 +36,9 @@ type InvoiceListWithMetadata struct {
 	CurrentStatus string         `gorm:"column:current_status"`
 	PaymentStatus string         `gorm:"column:payment_status"`
 	StatusText    string         `gorm:"column:status_text"`
+	TotalAmount   float64        `gorm:"column:total_amount"`
+	TaxAmount     float64        `gorm:"column:tax_amount"`
+	IssueDate     *time.Time     `gorm:"column:issue_date"`
 	StatusHistory datatypes.JSON `gorm:"column:status_history"`
 	QrCodeBmpUrl  string         `gorm:"column:qr_code_bmp_url"`
 	QrCode        string         `gorm:"column:qr_code"`
@@ -151,6 +160,7 @@ func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(
 	db database.DatabaseManager,
 	businessID string,
 	pagination database.Pagination,
+	filter ...InvoiceFilter,
 ) ([]entities.MinimalInvoiceDTO, database.PaginationResponse, error) {
 
 	var result []entities.MinimalInvoiceDTO
@@ -164,14 +174,35 @@ func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(
 		pagination.Limit = 20
 	}
 
+	countDB := db.DB().
+		Model(&entities.Invoice{}).
+		Where("business_id = ? AND deleted_at IS NULL", businessID)
+
+	whereClause := "invoices.business_id = ? AND invoices.deleted_at IS NULL"
+	args := []interface{}{businessID}
+
+	if len(filter) > 0 {
+		f := filter[0]
+		if f.IssueDate != nil && *f.IssueDate != "" {
+			countDB = countDB.Where("issue_date = ?", *f.IssueDate)
+			whereClause += " AND invoices.issue_date = ?"
+			args = append(args, *f.IssueDate)
+		}
+		if f.StartDate != nil && *f.StartDate != "" {
+			countDB = countDB.Where("issue_date >= ?", *f.StartDate)
+			whereClause += " AND invoices.issue_date >= ?"
+			args = append(args, *f.StartDate)
+		}
+		if f.EndDate != nil && *f.EndDate != "" {
+			countDB = countDB.Where("issue_date <= ?", *f.EndDate)
+			whereClause += " AND invoices.issue_date <= ?"
+			args = append(args, *f.EndDate)
+		}
+	}
+
 	// Get total number of invoices
 	var totalCount int64
-
-	if err := db.DB().
-		Model(&entities.Invoice{}).
-		Where("business_id = ? AND deleted_at IS NULL", businessID).
-		Count(&totalCount).Error; err != nil {
-
+	if err := countDB.Count(&totalCount).Error; err != nil {
 		return nil, database.PaginationResponse{
 			CurrentPage:     pagination.Page,
 			PageCount:       0,
@@ -187,7 +218,7 @@ func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(
 	// Calculate offset
 	offset := (pagination.Page - 1) * pagination.Limit
 
-	query := `
+	query := fmt.Sprintf(`
 	SELECT 
 		invoices.id,
 		invoices.invoice_number,
@@ -196,6 +227,9 @@ func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(
 		invoices.current_status,
 		invoices.payment_status,
 		invoices.status_history,
+		invoices.total_amount,
+		invoices.tax_amount,
+		invoices.issue_date,
 		invoices.qr_code_bmp_url,
 		invoices.qr_code,
 
@@ -232,15 +266,16 @@ func (r *InvoiceRepository) FindMinimalInvoicesByBusinessID(
 		LIMIT 1
 	) AS current_step ON TRUE
 
-	WHERE invoices.business_id = ?
-	  AND invoices.deleted_at IS NULL
+	WHERE %s
 
 	ORDER BY invoices.created_at DESC
 	LIMIT ? OFFSET ?;
-	`
+	`, whereClause)
+
+	args = append(args, pagination.Limit, offset)
 
 	if err := db.DB().
-		Raw(query, businessID, pagination.Limit, offset).
+		Raw(query, args...).
 		Scan(&result).Error; err != nil {
 
 		return nil, database.PaginationResponse{
@@ -261,6 +296,7 @@ func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(
 	db database.DatabaseManager,
 	businessID string,
 	pagination database.Pagination,
+	filter ...InvoiceFilter,
 ) ([]InvoiceListWithMetadata, database.PaginationResponse, error) {
 
 	var result []InvoiceListWithMetadata
@@ -274,14 +310,35 @@ func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(
 		pagination.Limit = 20
 	}
 
+	countDB := db.DB().
+		Model(&entities.Invoice{}).
+		Where("business_id = ? AND deleted_at IS NULL", businessID)
+
+	whereClause := "business_id = ? AND deleted_at IS NULL"
+	args := []interface{}{businessID}
+
+	if len(filter) > 0 {
+		f := filter[0]
+		if f.IssueDate != nil && *f.IssueDate != "" {
+			countDB = countDB.Where("issue_date = ?", *f.IssueDate)
+			whereClause += " AND issue_date = ?"
+			args = append(args, *f.IssueDate)
+		}
+		if f.StartDate != nil && *f.StartDate != "" {
+			countDB = countDB.Where("issue_date >= ?", *f.StartDate)
+			whereClause += " AND issue_date >= ?"
+			args = append(args, *f.StartDate)
+		}
+		if f.EndDate != nil && *f.EndDate != "" {
+			countDB = countDB.Where("issue_date <= ?", *f.EndDate)
+			whereClause += " AND issue_date <= ?"
+			args = append(args, *f.EndDate)
+		}
+	}
+
 	// Get total number of invoices
 	var totalCount int64
-
-	if err := db.DB().
-		Model(&entities.Invoice{}).
-		Where("business_id = ? AND deleted_at IS NULL", businessID).
-		Count(&totalCount).Error; err != nil {
-
+	if err := countDB.Count(&totalCount).Error; err != nil {
 		return nil, database.PaginationResponse{
 			CurrentPage:     pagination.Page,
 			PageCount:       0,
@@ -297,7 +354,7 @@ func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(
 	// Calculate offset
 	offset := (pagination.Page - 1) * pagination.Limit
 
-	query := `
+	query := fmt.Sprintf(`
 	SELECT 
 		id,
 		invoice_number,
@@ -306,6 +363,9 @@ func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(
 		current_status,
 		payment_status,
 		status_history,
+		total_amount,
+		tax_amount,
+		issue_date,
 		qr_code_bmp_url,
 		qr_code,
 
@@ -346,16 +406,17 @@ func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(
 
 		FROM invoices
 
-		WHERE business_id = ?
-		  AND deleted_at IS NULL
+		WHERE %s
 	) AS invoices
 
 	ORDER BY created_at DESC
 	LIMIT ? OFFSET ?;
-	`
+	`, whereClause)
+
+	args = append(args, pagination.Limit, offset)
 
 	if err := db.DB().
-		Raw(query, businessID, pagination.Limit, offset).
+		Raw(query, args...).
 		Scan(&result).Error; err != nil {
 
 		return nil, database.PaginationResponse{
@@ -488,7 +549,24 @@ func (r *InvoiceRepository) GetInvoiceStats(
 
 				ELSE 0
 			END
-		) AS failed_invoices
+		) AS failed_invoices,
+
+		-- Total amount for completed (successful) or partial_success invoices
+		COALESCE(
+			SUM(
+				CASE
+					WHEN current_status = 'confirmed_invoice'
+						THEN total_amount
+					WHEN current_status = 'transmitted_invoice'
+						THEN total_amount
+					WHEN current_status = 'signed_invoice'
+						AND current_step_status = 'success'
+						THEN total_amount
+					ELSE 0
+				END
+			),
+			0
+		) AS total_amount
 
 	FROM invoices
 
@@ -576,7 +654,24 @@ func (r *InvoiceRepository) GetInvoiceStats(
 
 				ELSE 0
 			END
-		) AS failed_invoices
+		) AS failed_invoices,
+
+		-- Total amount for completed (successful) or partial_success invoices
+		COALESCE(
+			SUM(
+				CASE
+					WHEN current_status = 'confirmed_invoice'
+						THEN total_amount
+					WHEN current_status = 'transmitted_invoice'
+						THEN total_amount
+					WHEN current_status = 'signed_invoice'
+						AND current_step_status = 'success'
+						THEN total_amount
+					ELSE 0
+				END
+			),
+			0
+		) AS total_amount
 
 	FROM invoices
 
@@ -615,6 +710,7 @@ func (r *InvoiceRepository) GetInvoiceStats(
 		totalStats.SuccessfulInvoices += m.SuccessfulInvoices
 		totalStats.PartialInvoices += m.PartialInvoices
 		totalStats.FailedInvoices += m.FailedInvoices
+		totalStats.TotalAmount += m.TotalAmount
 	}
 
 	return &entities.InvoiceStatsResponseData{

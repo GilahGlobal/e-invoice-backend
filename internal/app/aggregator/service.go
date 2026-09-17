@@ -478,7 +478,7 @@ func (s *Service) RemoveBusiness(aggregatorID, businessID string, db *gorm.DB) (
 	return http.StatusOK, nil
 }
 
-func (s *Service) ListInvoicesByBusiness(aggregatorID, businessID string, page, size int, db *gorm.DB) ([]entities.MinimalInvoiceDTO, *database.PaginationResponse, error) {
+func (s *Service) ListInvoicesByBusiness(aggregatorID, businessID string, page, size int, db *gorm.DB, filter ...repositories.InvoiceFilter) ([]entities.MinimalInvoiceDTO, *database.PaginationResponse, error) {
 	pdb := dbinit.InitDB(db, false)
 	bRepo := repositories.NewBusinessRepository(pdb, pdb)
 	business, err := bRepo.GetBusinessByIDForAggregator(pdb, aggregatorID, businessID)
@@ -486,7 +486,7 @@ func (s *Service) ListInvoicesByBusiness(aggregatorID, businessID string, page, 
 		return nil, nil, fmt.Errorf("business not found or not managed by this aggregator")
 	}
 
-	invoices, total, err := s.repo.GetInvoicesByAggregatorAndBusiness(db, aggregatorID, businessID, page, size)
+	invoices, total, err := s.repo.GetInvoicesByAggregatorAndBusiness(db, aggregatorID, businessID, page, size, filter...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to fetch invoices: %w", err)
 	}
@@ -505,6 +505,9 @@ func (s *Service) ListInvoicesByBusiness(aggregatorID, businessID string, page, 
 			CurrentStatus: inv.CurrentStatus,
 			PaymentStatus: inv.PaymentStatus,
 			StatusText:    inv.CurrentStatus,
+			TotalAmount:   inv.TotalAmount,
+			TaxAmount:     inv.TaxAmount,
+			IssueDate:     inv.IssueDate,
 			Metadata:      metadata,
 			QrCodeBmpUrl:  inv.QrCodeBmpUrl,
 			QrCode:        inv.QrCode,
@@ -515,8 +518,8 @@ func (s *Service) ListInvoicesByBusiness(aggregatorID, businessID string, page, 
 	return result, buildPagination(page, size, total), nil
 }
 
-func (s *Service) ListAllInvoices(aggregatorID string, page, size int, db *gorm.DB) ([]entities.MinimalInvoiceDTO, *database.PaginationResponse, error) {
-	invoices, total, err := s.repo.GetAllInvoicesByAggregator(db, aggregatorID, page, size)
+func (s *Service) ListAllInvoices(aggregatorID string, page, size int, db *gorm.DB, filter ...repositories.InvoiceFilter) ([]entities.MinimalInvoiceDTO, *database.PaginationResponse, error) {
+	invoices, total, err := s.repo.GetAllInvoicesByAggregator(db, aggregatorID, page, size, filter...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to fetch invoices: %w", err)
 	}
@@ -535,6 +538,9 @@ func (s *Service) ListAllInvoices(aggregatorID string, page, size int, db *gorm.
 			CurrentStatus: inv.CurrentStatus,
 			PaymentStatus: inv.PaymentStatus,
 			StatusText:    inv.CurrentStatus,
+			TotalAmount:   inv.TotalAmount,
+			TaxAmount:     inv.TaxAmount,
+			IssueDate:     inv.IssueDate,
 			Metadata:      metadata,
 			QrCodeBmpUrl:  inv.QrCodeBmpUrl,
 			QrCode:        inv.QrCode,

@@ -189,11 +189,24 @@ func (r *AggregatorRepository) GetBusinessStatsForAggregator(db *gorm.DB, aggreg
 	return
 }
 
-func (r *AggregatorRepository) GetInvoicesByAggregatorAndBusiness(db *gorm.DB, aggregatorID, businessID string, page, size int) ([]entities.Invoice, int64, error) {
+func (r *AggregatorRepository) GetInvoicesByAggregatorAndBusiness(db *gorm.DB, aggregatorID, businessID string, page, size int, filter ...InvoiceFilter) ([]entities.Invoice, int64, error) {
 	var invoices []entities.Invoice
 	var total int64
 
 	query := db.Model(&entities.Invoice{}).Where("aggregator_id = ? AND business_id = ?", aggregatorID, businessID)
+
+	if len(filter) > 0 {
+		f := filter[0]
+		if f.IssueDate != nil && *f.IssueDate != "" {
+			query = query.Where("issue_date = ?", *f.IssueDate)
+		}
+		if f.StartDate != nil && *f.StartDate != "" {
+			query = query.Where("issue_date >= ?", *f.StartDate)
+		}
+		if f.EndDate != nil && *f.EndDate != "" {
+			query = query.Where("issue_date <= ?", *f.EndDate)
+		}
+	}
 
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -207,11 +220,24 @@ func (r *AggregatorRepository) GetInvoicesByAggregatorAndBusiness(db *gorm.DB, a
 	return invoices, total, nil
 }
 
-func (r *AggregatorRepository) GetAllInvoicesByAggregator(db *gorm.DB, aggregatorID string, page, size int) ([]entities.Invoice, int64, error) {
+func (r *AggregatorRepository) GetAllInvoicesByAggregator(db *gorm.DB, aggregatorID string, page, size int, filter ...InvoiceFilter) ([]entities.Invoice, int64, error) {
 	var invoices []entities.Invoice
 	var total int64
 
 	query := db.Model(&entities.Invoice{}).Where("aggregator_id = ?", aggregatorID)
+
+	if len(filter) > 0 {
+		f := filter[0]
+		if f.IssueDate != nil && *f.IssueDate != "" {
+			query = query.Where("issue_date = ?", *f.IssueDate)
+		}
+		if f.StartDate != nil && *f.StartDate != "" {
+			query = query.Where("issue_date >= ?", *f.StartDate)
+		}
+		if f.EndDate != nil && *f.EndDate != "" {
+			query = query.Where("issue_date <= ?", *f.EndDate)
+		}
+	}
 
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err

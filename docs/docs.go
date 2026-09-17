@@ -1722,7 +1722,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Gets all invoices across all businesses uploaded by this aggregator",
+                "description": "Gets all invoices across all businesses uploaded by this aggregator with optional issue date filtering",
                 "produces": [
                     "application/json"
                 ],
@@ -1741,6 +1741,36 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Page size",
                         "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by specific issue date (YYYY-MM-DD)",
+                        "name": "issue_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by start issue date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by end issue date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by from issue date (YYYY-MM-DD)",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by to issue date (YYYY-MM-DD)",
+                        "name": "to_date",
                         "in": "query"
                     }
                 ],
@@ -1834,7 +1864,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Gets invoices uploaded by aggregator for a specific business",
+                "description": "Gets invoices uploaded by aggregator for a specific business with optional issue date filtering",
                 "produces": [
                     "application/json"
                 ],
@@ -1860,6 +1890,36 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Page size",
                         "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by specific issue date (YYYY-MM-DD)",
+                        "name": "issue_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by start issue date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by end issue date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by from issue date (YYYY-MM-DD)",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by to issue date (YYYY-MM-DD)",
+                        "name": "to_date",
                         "in": "query"
                     }
                 ],
@@ -3434,7 +3494,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Fetch all invoices for the authenticated user/business",
+                "description": "Fetch all invoices for the authenticated user/business with optional issue date filtering",
                 "produces": [
                     "application/json"
                 ],
@@ -3453,6 +3513,36 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Page size",
                         "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by specific issue date (YYYY-MM-DD)",
+                        "name": "issue_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by start issue date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by end issue date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by from issue date (YYYY-MM-DD)",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by to issue date (YYYY-MM-DD)",
+                        "name": "to_date",
                         "in": "query"
                     }
                 ],
@@ -6179,7 +6269,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "12345678-0001"
+                    "example": "TIN-123456789"
                 }
             }
         },
@@ -6227,7 +6317,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "12345678-0001"
+                    "example": "TIN-123456789"
                 },
                 "total_bulk_uploads": {
                     "type": "integer",
@@ -6605,7 +6695,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "12345678-0001"
+                    "example": "123456789"
                 }
             }
         },
@@ -6712,11 +6802,11 @@ const docTemplate = `{
                 },
                 "invoice_number": {
                     "type": "string",
-                    "example": "INVBY020"
+                    "example": "INV-1001"
                 },
                 "irn": {
                     "type": "string",
-                    "example": "INVBY020-6A2BC898-20260609"
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "qr_code": {
                     "type": "string",
@@ -7040,7 +7130,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "12345678-0001"
+                    "example": "TIN-123456789"
                 }
             }
         },
@@ -7142,7 +7232,7 @@ const docTemplate = `{
                 },
                 "invoice_number": {
                     "type": "string",
-                    "example": "INVBY020"
+                    "example": "VA12239"
                 },
                 "reason": {
                     "type": "string",
@@ -7312,7 +7402,7 @@ const docTemplate = `{
                 },
                 "invoice_number": {
                     "type": "string",
-                    "example": "INVBY020"
+                    "example": "VA12239"
                 },
                 "stage": {
                     "type": "string",
@@ -7491,7 +7581,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "12345678-0001"
+                    "example": "123456789"
                 },
                 "updated_at": {
                     "type": "string",
@@ -7666,6 +7756,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 100
                 },
+                "total_amount": {
+                    "type": "number",
+                    "example": 500000
+                },
                 "total_invoices": {
                     "type": "integer",
                     "example": 150
@@ -7702,6 +7796,9 @@ const docTemplate = `{
                 "irn": {
                     "type": "string"
                 },
+                "issue_date": {
+                    "type": "string"
+                },
                 "payment_status": {
                     "type": "string"
                 },
@@ -7721,8 +7818,14 @@ const docTemplate = `{
                 "status_history": {
                     "type": "object"
                 },
+                "tax_amount": {
+                    "type": "number"
+                },
                 "timestamp": {
                     "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
                 },
                 "updated_at": {
                     "type": "string"
@@ -7743,6 +7846,10 @@ const docTemplate = `{
                 "successful_invoices": {
                     "type": "integer",
                     "example": 100
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 500000
                 },
                 "total_invoices": {
                     "type": "integer",
@@ -7788,6 +7895,9 @@ const docTemplate = `{
                 "irn": {
                     "type": "string"
                 },
+                "issue_date": {
+                    "type": "string"
+                },
                 "metadata": {
                     "type": "array",
                     "items": {
@@ -7808,6 +7918,12 @@ const docTemplate = `{
                 },
                 "status_text": {
                     "type": "string"
+                },
+                "tax_amount": {
+                    "type": "number"
+                },
+                "total_amount": {
+                    "type": "number"
                 }
             }
         },
@@ -7829,6 +7945,10 @@ const docTemplate = `{
                 "successful_invoices": {
                     "type": "integer",
                     "example": 100
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 500000
                 },
                 "total_invoices": {
                     "type": "integer",
@@ -7920,7 +8040,7 @@ const docTemplate = `{
             "properties": {
                 "amount": {
                     "type": "number",
-                    "example": 1500.00
+                    "example": 1500.75
                 },
                 "charge_indicator": {
                     "type": "boolean",
@@ -8003,7 +8123,7 @@ const docTemplate = `{
             "properties": {
                 "irn": {
                     "type": "string",
-                    "example": "INVBY020-6A2BC898-20260609"
+                    "example": "ITW001-E9E0C0D3-20240619"
                 },
                 "issue_date": {
                     "type": "string",
@@ -8120,19 +8240,19 @@ const docTemplate = `{
             "properties": {
                 "discount_amount": {
                     "type": "number",
-                    "example": 0
+                    "example": 2500
                 },
                 "discount_rate": {
                     "type": "number",
-                    "example": 0
+                    "example": 5
                 },
                 "fee_amount": {
                     "type": "number",
-                    "example": 0
+                    "example": 450
                 },
                 "fee_rate": {
                     "type": "number",
-                    "example": 0
+                    "example": 2
                 },
                 "hsn_code": {
                     "type": "string",
@@ -8141,14 +8261,14 @@ const docTemplate = `{
                 "invoiced_quantity": {
                     "type": "integer",
                     "minimum": 1,
-                    "example": 1
+                    "example": 10
                 },
                 "item": {
                     "$ref": "#/definitions/firs_models.Item"
                 },
                 "line_extension_amount": {
                     "type": "number",
-                    "example": 1500.00
+                    "example": 1500.75
                 },
                 "price": {
                     "$ref": "#/definitions/firs_models.Price"
@@ -8190,19 +8310,19 @@ const docTemplate = `{
             "properties": {
                 "line_extension_amount": {
                     "type": "number",
-                    "example": 1500.00
+                    "example": 1500.75
                 },
                 "payable_amount": {
                     "type": "number",
-                    "example": 1612.50
+                    "example": 1700.75
                 },
                 "tax_exclusive_amount": {
                     "type": "number",
-                    "example": 1500.00
+                    "example": 1500.75
                 },
                 "tax_inclusive_amount": {
                     "type": "number",
-                    "example": 1612.50
+                    "example": 1700.75
                 }
             }
         },
@@ -8239,7 +8359,7 @@ const docTemplate = `{
                 },
                 "tin": {
                     "type": "string",
-                    "example": "12345678-0001"
+                    "example": "123456789012345"
                 }
             }
         },
@@ -8311,11 +8431,11 @@ const docTemplate = `{
                 },
                 "price_amount": {
                     "type": "number",
-                    "example": 1500
+                    "example": 5000
                 },
                 "price_unit": {
                     "type": "string",
-                    "example": "CEN"
+                    "example": "NGN per 1"
                 }
             }
         },
@@ -8362,7 +8482,7 @@ const docTemplate = `{
                 },
                 "percent": {
                     "type": "number",
-                    "example": 7.5
+                    "example": 15
                 }
             }
         },
@@ -8375,15 +8495,13 @@ const docTemplate = `{
             ],
             "properties": {
                 "tax_amount": {
-                    "type": "number",
-					"example":"112.50"
+                    "type": "number"
                 },
                 "tax_category": {
                     "$ref": "#/definitions/firs_models.TaxCategory"
                 },
                 "taxable_amount": {
-                    "type": "number",
-					"example": "1500.00"
+                    "type": "number"
                 }
             }
         },
@@ -8395,7 +8513,7 @@ const docTemplate = `{
             "properties": {
                 "tax_amount": {
                     "type": "number",
-                    "example": 112.50
+                    "example": 1500.75
                 },
                 "tax_subtotal": {
                     "type": "array",
@@ -8502,7 +8620,8 @@ const docTemplate = `{
                     "enum": [
                         "B2C",
                         "B2B",
-                        "B2G"
+                        "B2G",
+                        "G2B"
                     ],
                     "example": "B2B"
                 },
@@ -8515,7 +8634,7 @@ const docTemplate = `{
                 "invoice_number": {
                     "type": "string",
                     "minLength": 1,
-                    "example": "INVBY020"
+                    "example": "INV-001"
                 },
                 "invoice_type_code": {
                     "type": "string",
@@ -8545,7 +8664,7 @@ const docTemplate = `{
                 },
                 "irn": {
                     "type": "string",
-                    "example": "INVBY020-6A2BC898-20260609"
+                    "example": "IRN-001-20122345"
                 },
                 "issue_date": {
                     "type": "string",
@@ -8738,11 +8857,15 @@ const docTemplate = `{
                 },
                 "invoice_number": {
                     "type": "string",
-                    "example": "INVBY020"
+                    "example": "INV-1001"
                 },
                 "irn": {
                     "type": "string",
-                    "example": "INVBY020-6A2BC898-20260609"
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "issue_date": {
+                    "type": "string",
+                    "example": "2026-01-16"
                 },
                 "metadata": {
                     "type": "array",
@@ -8769,6 +8892,14 @@ const docTemplate = `{
                 "status_text": {
                     "type": "string",
                     "example": "success"
+                },
+                "tax_amount": {
+                    "type": "number",
+                    "example": 150
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 1700.75
                 }
             }
         },
@@ -8802,11 +8933,11 @@ const docTemplate = `{
                 },
                 "invoice_number": {
                     "type": "string",
-                    "example": "INVBY020"
+                    "example": "INV-1001"
                 },
                 "irn": {
                     "type": "string",
-                    "example": "INVBY020-6A2BC898-20260609"
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "qr_code": {
                     "type": "string",
