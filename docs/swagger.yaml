@@ -1762,6 +1762,9 @@ definitions:
       successful_invoices:
         example: 100
         type: integer
+      total_amount:
+        example: 500000
+        type: number
       total_invoices:
         example: 150
         type: integer
@@ -1786,6 +1789,8 @@ definitions:
         type: string
       irn:
         type: string
+      issue_date:
+        type: string
       payment_status:
         type: string
       platform:
@@ -1799,8 +1804,12 @@ definitions:
         type: string
       status_history:
         type: object
+      tax_amount:
+        type: number
       timestamp:
         type: string
+      total_amount:
+        type: number
       updated_at:
         type: string
     type: object
@@ -1815,6 +1824,9 @@ definitions:
       successful_invoices:
         example: 100
         type: integer
+      total_amount:
+        example: 500000
+        type: number
       total_invoices:
         example: 150
         type: integer
@@ -1844,6 +1856,8 @@ definitions:
         type: string
       irn:
         type: string
+      issue_date:
+        type: string
       metadata:
         items:
           $ref: '#/definitions/entities.StatusHistoryEntry'
@@ -1858,6 +1872,10 @@ definitions:
         type: string
       status_text:
         type: string
+      tax_amount:
+        type: number
+      total_amount:
+        type: number
     type: object
   entities.MonthlyInvoiceStatsDto:
     properties:
@@ -1873,6 +1891,9 @@ definitions:
       successful_invoices:
         example: 100
         type: integer
+      total_amount:
+        example: 500000
+        type: number
       total_invoices:
         example: 150
         type: integer
@@ -2343,6 +2364,7 @@ definitions:
         - B2C
         - B2B
         - B2G
+        - G2B
         example: B2B
         type: string
       invoice_line:
@@ -2529,6 +2551,9 @@ definitions:
       irn:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
+      issue_date:
+        example: "2026-01-16"
+        type: string
       metadata:
         items:
           $ref: '#/definitions/invoice.InvoiceStepMetadata'
@@ -2548,6 +2573,12 @@ definitions:
       status_text:
         example: success
         type: string
+      tax_amount:
+        example: 150
+        type: number
+      total_amount:
+        example: 1700.75
+        type: number
     type: object
   invoice.InvoiceStepMetadata:
     properties:
@@ -4140,6 +4171,7 @@ paths:
   /aggregator/invoices:
     get:
       description: Gets all invoices across all businesses uploaded by this aggregator
+        with optional issue date filtering
       parameters:
       - description: Page number
         in: query
@@ -4149,6 +4181,26 @@ paths:
         in: query
         name: size
         type: integer
+      - description: Filter by specific issue date (YYYY-MM-DD)
+        in: query
+        name: issue_date
+        type: string
+      - description: Filter by start issue date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Filter by end issue date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      - description: Filter by from issue date (YYYY-MM-DD)
+        in: query
+        name: from_date
+        type: string
+      - description: Filter by to issue date (YYYY-MM-DD)
+        in: query
+        name: to_date
+        type: string
       produces:
       - application/json
       responses:
@@ -4171,7 +4223,8 @@ paths:
       - Aggregator Portal
   /aggregator/invoices/{id}:
     get:
-      description: Gets invoices uploaded by aggregator for a specific business
+      description: Gets invoices uploaded by aggregator for a specific business with
+        optional issue date filtering
       parameters:
       - description: Business ID
         in: path
@@ -4186,6 +4239,26 @@ paths:
         in: query
         name: size
         type: integer
+      - description: Filter by specific issue date (YYYY-MM-DD)
+        in: query
+        name: issue_date
+        type: string
+      - description: Filter by start issue date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Filter by end issue date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      - description: Filter by from issue date (YYYY-MM-DD)
+        in: query
+        name: from_date
+        type: string
+      - description: Filter by to issue date (YYYY-MM-DD)
+        in: query
+        name: to_date
+        type: string
       produces:
       - application/json
       responses:
@@ -5239,7 +5312,8 @@ paths:
       - Health
   /invoice:
     get:
-      description: Fetch all invoices for the authenticated user/business
+      description: Fetch all invoices for the authenticated user/business with optional
+        issue date filtering
       parameters:
       - description: Page number
         in: query
@@ -5249,6 +5323,26 @@ paths:
         in: query
         name: size
         type: integer
+      - description: Filter by specific issue date (YYYY-MM-DD)
+        in: query
+        name: issue_date
+        type: string
+      - description: Filter by start issue date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Filter by end issue date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      - description: Filter by from issue date (YYYY-MM-DD)
+        in: query
+        name: from_date
+        type: string
+      - description: Filter by to issue date (YYYY-MM-DD)
+        in: query
+        name: to_date
+        type: string
       produces:
       - application/json
       responses:

@@ -1715,7 +1715,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Gets all invoices across all businesses uploaded by this aggregator",
+                "description": "Gets all invoices across all businesses uploaded by this aggregator with optional issue date filtering",
                 "produces": [
                     "application/json"
                 ],
@@ -1734,6 +1734,36 @@
                         "type": "integer",
                         "description": "Page size",
                         "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by specific issue date (YYYY-MM-DD)",
+                        "name": "issue_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by start issue date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by end issue date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by from issue date (YYYY-MM-DD)",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by to issue date (YYYY-MM-DD)",
+                        "name": "to_date",
                         "in": "query"
                     }
                 ],
@@ -1827,7 +1857,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Gets invoices uploaded by aggregator for a specific business",
+                "description": "Gets invoices uploaded by aggregator for a specific business with optional issue date filtering",
                 "produces": [
                     "application/json"
                 ],
@@ -1853,6 +1883,36 @@
                         "type": "integer",
                         "description": "Page size",
                         "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by specific issue date (YYYY-MM-DD)",
+                        "name": "issue_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by start issue date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by end issue date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by from issue date (YYYY-MM-DD)",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by to issue date (YYYY-MM-DD)",
+                        "name": "to_date",
                         "in": "query"
                     }
                 ],
@@ -3427,7 +3487,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Fetch all invoices for the authenticated user/business",
+                "description": "Fetch all invoices for the authenticated user/business with optional issue date filtering",
                 "produces": [
                     "application/json"
                 ],
@@ -3446,6 +3506,36 @@
                         "type": "integer",
                         "description": "Page size",
                         "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by specific issue date (YYYY-MM-DD)",
+                        "name": "issue_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by start issue date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by end issue date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by from issue date (YYYY-MM-DD)",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by to issue date (YYYY-MM-DD)",
+                        "name": "to_date",
                         "in": "query"
                     }
                 ],
@@ -7659,6 +7749,10 @@
                     "type": "integer",
                     "example": 100
                 },
+                "total_amount": {
+                    "type": "number",
+                    "example": 500000
+                },
                 "total_invoices": {
                     "type": "integer",
                     "example": 150
@@ -7695,6 +7789,9 @@
                 "irn": {
                     "type": "string"
                 },
+                "issue_date": {
+                    "type": "string"
+                },
                 "payment_status": {
                     "type": "string"
                 },
@@ -7714,8 +7811,14 @@
                 "status_history": {
                     "type": "object"
                 },
+                "tax_amount": {
+                    "type": "number"
+                },
                 "timestamp": {
                     "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
                 },
                 "updated_at": {
                     "type": "string"
@@ -7736,6 +7839,10 @@
                 "successful_invoices": {
                     "type": "integer",
                     "example": 100
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 500000
                 },
                 "total_invoices": {
                     "type": "integer",
@@ -7781,6 +7888,9 @@
                 "irn": {
                     "type": "string"
                 },
+                "issue_date": {
+                    "type": "string"
+                },
                 "metadata": {
                     "type": "array",
                     "items": {
@@ -7801,6 +7911,12 @@
                 },
                 "status_text": {
                     "type": "string"
+                },
+                "tax_amount": {
+                    "type": "number"
+                },
+                "total_amount": {
+                    "type": "number"
                 }
             }
         },
@@ -7822,6 +7938,10 @@
                 "successful_invoices": {
                     "type": "integer",
                     "example": 100
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 500000
                 },
                 "total_invoices": {
                     "type": "integer",
@@ -8493,7 +8613,8 @@
                     "enum": [
                         "B2C",
                         "B2B",
-                        "B2G"
+                        "B2G",
+                        "G2B"
                     ],
                     "example": "B2B"
                 },
@@ -8735,6 +8856,10 @@
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
+                "issue_date": {
+                    "type": "string",
+                    "example": "2026-01-16"
+                },
                 "metadata": {
                     "type": "array",
                     "items": {
@@ -8760,6 +8885,14 @@
                 "status_text": {
                     "type": "string",
                     "example": "success"
+                },
+                "tax_amount": {
+                    "type": "number",
+                    "example": 150
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 1700.75
                 }
             }
         },

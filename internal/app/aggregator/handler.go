@@ -12,6 +12,7 @@ import (
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/data/entities"
+	"einvoice-access-point/internal/data/repositories"
 	"einvoice-access-point/internal/middleware"
 	"einvoice-access-point/internal/pkg/cloudinary"
 	"einvoice-access-point/internal/pkg/s3"
@@ -24,6 +25,15 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
+
+type AggregatorInvoicesQuery struct {
+	entities.PaginationQuery
+	IssueDate *string `query:"issue_date"`
+	StartDate *string `query:"start_date"`
+	EndDate   *string `query:"end_date"`
+	FromDate  *string `query:"from_date"`
+	ToDate    *string `query:"to_date"`
+}
 
 type Handler struct {
 	svc           *Service
@@ -663,12 +673,17 @@ func (h *Handler) RemoveBusiness(c *fiber.Ctx) error {
 }
 
 // @Summary List All Invoices
-// @Description Gets all invoices across all businesses uploaded by this aggregator
+// @Description Gets all invoices across all businesses uploaded by this aggregator with optional issue date filtering
 // @Tags Aggregator Portal
 // @Produce json
 // @Security BearerAuth
 // @Param page query int false "Page number"
 // @Param size query int false "Page size"
+// @Param issue_date query string false "Filter by specific issue date (YYYY-MM-DD)"
+// @Param start_date query string false "Filter by start issue date (YYYY-MM-DD)"
+// @Param end_date query string false "Filter by end issue date (YYYY-MM-DD)"
+// @Param from_date query string false "Filter by from issue date (YYYY-MM-DD)"
+// @Param to_date query string false "Filter by to issue date (YYYY-MM-DD)"
 // @Success 200 {object} AggregatorInvoiceListResponseDto "Invoices fetched successfully"
 // @Failure 401 {object} entities.Response "Unauthorized"
 // @Failure 500 {object} entities.Response "Internal server error"
@@ -679,7 +694,7 @@ func (h *Handler) ListAllInvoices(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
 	}
 
-	var query entities.PaginationQuery
+	var query AggregatorInvoicesQuery
 	if err := c.QueryParser(&query); err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", "Invalid query parameters", err, nil)
 	}
@@ -690,12 +705,28 @@ func (h *Handler) ListAllInvoices(c *fiber.Ctx) error {
 		query.Page = 1
 	}
 
+	startDate := query.StartDate
+	if startDate == nil || *startDate == "" {
+		startDate = query.FromDate
+	}
+
+	endDate := query.EndDate
+	if endDate == nil || *endDate == "" {
+		endDate = query.ToDate
+	}
+
+	filter := repositories.InvoiceFilter{
+		IssueDate: query.IssueDate,
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
 	db, err := middleware.GetDatabase(c)
 	if err != nil {
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
-	invoices, pagination, err := h.svc.ListAllInvoices(userDetails.ID, query.Page, query.Size, db)
+	invoices, pagination, err := h.svc.ListAllInvoices(userDetails.ID, query.Page, query.Size, db, filter)
 	if err != nil {
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
@@ -705,13 +736,18 @@ func (h *Handler) ListAllInvoices(c *fiber.Ctx) error {
 }
 
 // @Summary List Business Invoices
-// @Description Gets invoices uploaded by aggregator for a specific business
+// @Description Gets invoices uploaded by aggregator for a specific business with optional issue date filtering
 // @Tags Aggregator Portal
 // @Produce json
 // @Security BearerAuth
 // @Param id path string true "Business ID"
 // @Param page query int false "Page number"
 // @Param size query int false "Page size"
+// @Param issue_date query string false "Filter by specific issue date (YYYY-MM-DD)"
+// @Param start_date query string false "Filter by start issue date (YYYY-MM-DD)"
+// @Param end_date query string false "Filter by end issue date (YYYY-MM-DD)"
+// @Param from_date query string false "Filter by from issue date (YYYY-MM-DD)"
+// @Param to_date query string false "Filter by to issue date (YYYY-MM-DD)"
 // @Success 200 {object} AggregatorInvoiceListResponseDto "Invoices fetched successfully"
 // @Failure 400 {object} entities.Response "Bad request"
 // @Failure 401 {object} entities.Response "Unauthorized"
@@ -728,7 +764,7 @@ func (h *Handler) ListBusinessInvoices(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
 	}
 
-	var query entities.PaginationQuery
+	var query AggregatorInvoicesQuery
 	if err := c.QueryParser(&query); err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", "Invalid query parameters", err, nil)
 	}
@@ -739,12 +775,28 @@ func (h *Handler) ListBusinessInvoices(c *fiber.Ctx) error {
 		query.Page = 1
 	}
 
+	startDate := query.StartDate
+	if startDate == nil || *startDate == "" {
+		startDate = query.FromDate
+	}
+
+	endDate := query.EndDate
+	if endDate == nil || *endDate == "" {
+		endDate = query.ToDate
+	}
+
+	filter := repositories.InvoiceFilter{
+		IssueDate: query.IssueDate,
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
 	db, err := middleware.GetDatabase(c)
 	if err != nil {
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
-	invoices, pagination, err := h.svc.ListInvoicesByBusiness(userDetails.ID, businessID, query.Page, query.Size, db)
+	invoices, pagination, err := h.svc.ListInvoicesByBusiness(userDetails.ID, businessID, query.Page, query.Size, db, filter)
 	if err != nil {
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}

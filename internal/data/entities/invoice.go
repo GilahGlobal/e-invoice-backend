@@ -45,6 +45,9 @@ type Invoice struct {
 	CurrentStatus    string         `gorm:"column:current_status;type:varchar(50);not null;default:'created'" json:"current_status"`
 	PaymentStatus    string         `gorm:"column:payment_status;type:varchar(50);not null;default:'PENDING'" json:"payment_status"`
 	StatusHistory    datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'" json:"status_history" swaggertype:"object"`
+	TotalAmount      float64        `gorm:"column:total_amount;type:decimal(18,2);default:0" json:"total_amount"`
+	TaxAmount        float64        `gorm:"column:tax_amount;type:decimal(18,2);default:0" json:"tax_amount"`
+	IssueDate        *time.Time     `gorm:"column:issue_date;type:date" json:"issue_date"`
 	Timestamp        time.Time      `gorm:"column:timestamp;not null" json:"timestamp"`
 	CreatedAt        time.Time      `gorm:"column:created_at;not null;autoCreateTime" json:"created_at"`
 	UpdatedAt        time.Time      `gorm:"column:updated_at;null;autoUpdateTime" json:"updated_at"`
@@ -71,6 +74,9 @@ type MinimalInvoiceDTO struct {
 	CurrentStatus string               `json:"current_status"`
 	PaymentStatus string               `json:"payment_status"`
 	StatusText    string               `json:"status_text"`
+	TotalAmount   float64              `json:"total_amount" gorm:"column:total_amount"`
+	TaxAmount     float64              `json:"tax_amount" gorm:"column:tax_amount"`
+	IssueDate     *time.Time           `json:"issue_date" gorm:"column:issue_date"`
 	Metadata      []StatusHistoryEntry `json:"metadata" gorm:"column:status_history;serializer:json"`
 	QrCodeBmpUrl  string               `json:"qr_code_bmp_url"`
 	QrCode        string               `json:"qr_code"`
@@ -78,26 +84,29 @@ type MinimalInvoiceDTO struct {
 }
 
 type InvoiceStatsDto struct {
-	TotalInvoices      int64 `json:"total_invoices" example:"150"`
-	SuccessfulInvoices int64 `json:"successful_invoices" example:"100"`
-	PartialInvoices    int64 `json:"partial_invoices" example:"30"`
-	FailedInvoices     int64 `json:"failed_invoices" example:"20"`
+	TotalInvoices      int64   `json:"total_invoices" example:"150"`
+	SuccessfulInvoices int64   `json:"successful_invoices" example:"100"`
+	PartialInvoices    int64   `json:"partial_invoices" example:"30"`
+	FailedInvoices     int64   `json:"failed_invoices" example:"20"`
+	TotalAmount        float64 `json:"total_amount" gorm:"column:total_amount" example:"500000.00"`
 }
 
 type MonthlyInvoiceStatsDto struct {
-	Month              string `json:"month" example:"202401"`
-	TotalInvoices      int64  `json:"total_invoices" example:"150"`
-	SuccessfulInvoices int64  `json:"successful_invoices" example:"100"`
-	PartialInvoices    int64  `json:"partial_invoices" example:"30"`
-	FailedInvoices     int64  `json:"failed_invoices" example:"20"`
+	Month              string  `json:"month" example:"202401"`
+	TotalInvoices      int64   `json:"total_invoices" example:"150"`
+	SuccessfulInvoices int64   `json:"successful_invoices" example:"100"`
+	PartialInvoices    int64   `json:"partial_invoices" example:"30"`
+	FailedInvoices     int64   `json:"failed_invoices" example:"20"`
+	TotalAmount        float64 `json:"total_amount" gorm:"column:total_amount" example:"500000.00"`
 }
 
 type DailyInvoiceStatsDto struct {
-	Date               string `json:"date" example:"2024-01-01"`
-	TotalInvoices      int64  `json:"total_invoices" example:"150"`
-	SuccessfulInvoices int64  `json:"successful_invoices" example:"100"`
-	PartialInvoices    int64  `json:"partial_invoices" example:"30"`
-	FailedInvoices     int64  `json:"failed_invoices" example:"20"`
+	Date               string  `json:"date" example:"2024-01-01"`
+	TotalInvoices      int64   `json:"total_invoices" example:"150"`
+	SuccessfulInvoices int64   `json:"successful_invoices" example:"100"`
+	PartialInvoices    int64   `json:"partial_invoices" example:"30"`
+	FailedInvoices     int64   `json:"failed_invoices" example:"20"`
+	TotalAmount        float64 `json:"total_amount" gorm:"column:total_amount" example:"500000.00"`
 }
 
 type InvoiceStatsResponseData struct {

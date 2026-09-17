@@ -56,7 +56,21 @@ func (s *Service) BusinessSvc() *business.Service {
 	return s.businessSvc
 }
 
-func (s *Service) GetAllInvoicesByBusinessID(db *gorm.DB, businessID string, page, size int) ([]InvoiceListItem, database.PaginationResponse, error) {
+func extractInvoiceTotalsAndIssueDate(payload firs_models.UploadInvoiceRequestDto) (totalAmount float64, taxAmount float64, issueDate *time.Time) {
+	totalAmount = payload.LegalMonetaryTotal.PayableAmount
+	taxAmount = payload.LegalMonetaryTotal.TaxInclusiveAmount - payload.LegalMonetaryTotal.TaxExclusiveAmount
+	if taxAmount < 0 {
+		taxAmount = 0
+	}
+	if payload.IssueDate != "" {
+		if parsedDate, err := time.Parse("2006-01-02", payload.IssueDate); err == nil {
+			issueDate = &parsedDate
+		}
+	}
+	return
+}
+
+func (s *Service) GetAllInvoicesByBusinessID(db *gorm.DB, businessID string, page, size int, filter ...repositories.InvoiceFilter) ([]InvoiceListItem, database.PaginationResponse, error) {
 	pdb := dbinit.InitDB(db, false)
 
 	pagination := database.Pagination{
@@ -64,7 +78,7 @@ func (s *Service) GetAllInvoicesByBusinessID(db *gorm.DB, businessID string, pag
 		Limit: size,
 	}
 
-	rows, paginationResponse, err := s.repo.FindInvoicesWithMetadataByBusinessID(pdb, businessID, pagination)
+	rows, paginationResponse, err := s.repo.FindInvoicesWithMetadataByBusinessID(pdb, businessID, pagination, filter...)
 	if err != nil {
 		return nil, paginationResponse, err
 	}
@@ -86,6 +100,9 @@ func (s *Service) GetAllInvoicesByBusinessID(db *gorm.DB, businessID string, pag
 			CurrentStatus: row.CurrentStatus,
 			PaymentStatus: row.PaymentStatus,
 			StatusText:    row.StatusText,
+			TotalAmount:   row.TotalAmount,
+			TaxAmount:     row.TaxAmount,
+			IssueDate:     row.IssueDate,
 			Metadata:      metadata,
 			QrCodeBmpUrl:  row.QrCodeBmpUrl,
 			QrCode:        row.QrCode,
@@ -110,6 +127,8 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 		platform = "API"
 	}
 
+	totalAmount, taxAmount, issueDate := extractInvoiceTotalsAndIssueDate(payload)
+
 	invoiceData, err := json.Marshal(payload)
 	if err != nil {
 		errDetails := "failed to marshal invoice data"
@@ -125,12 +144,17 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 	platformMetadata := "{}"
 
 	if invoiceExists != nil {
-		err = s.UpdateInvoiceData(pdb, invoiceExists.InvoiceNumber, invoiceData)
-		if err != nil {
+		invoiceExists.InvoiceData = invoiceData
+		invoiceExists.TotalAmount = totalAmount
+		invoiceExists.TaxAmount = taxAmount
+		if issueDate != nil {
+			invoiceExists.IssueDate = issueDate
+		}
+		if err := s.repo.SaveInvoice(pdb, invoiceExists); err != nil {
 			return nil, nil, errors.New("failed to update invoice"), isInvoiceSigned
 		}
 
-		invoice, _ = s.repo.FindInvoiceByNumber(pdb, invoiceExists.InvoiceNumber)
+		invoice = invoiceExists
 		if err, isInvoiceSigned = s.UncompletedFirsProcesses(db, invoiceExists.CurrentStatus, payload, invoiceExists, isSandbox); err != nil {
 			return invoice, nil, errors.New(utility.ExtractRelevantErrorMessage(err)), isInvoiceSigned
 		}
@@ -152,6 +176,9 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 			CurrentStatus:    currentStatus,
 			PaymentStatus:    paymentStatus,
 			StatusHistory:    datatypes.JSON(statusHistory),
+			TotalAmount:      totalAmount,
+			TaxAmount:        taxAmount,
+			IssueDate:        issueDate,
 			Timestamp:        time.Now(),
 			EncryptedIRN:     encryptedIRN,
 			AggregatorID:     aggregatorID,
@@ -243,6 +270,8 @@ func (s *Service) ReplaceInvoiceRecord(db *gorm.DB, existing *entities.Invoice, 
 		platform = "API"
 	}
 
+	totalAmount, taxAmount, issueDate := extractInvoiceTotalsAndIssueDate(payload)
+
 	newInvoice := &entities.Invoice{
 		ID:               existing.ID,
 		InvoiceNumber:    existing.InvoiceNumber,
@@ -255,9 +284,13 @@ func (s *Service) ReplaceInvoiceRecord(db *gorm.DB, existing *entities.Invoice, 
 		EncryptedIRN:     encryptedIRN,
 		InvoiceData:      invoiceData,
 		CurrentStatus:    currentStatus,
+		PaymentStatus:    existing.PaymentStatus,
 		StatusHistory:    datatypes.JSON(statusHistory),
 		Platform:         platform,
 		PlatformMetadata: datatypes.JSON("{}"),
+		TotalAmount:      totalAmount,
+		TaxAmount:        taxAmount,
+		IssueDate:        issueDate,
 		Timestamp:        time.Now(),
 	}
 
@@ -971,6 +1004,17 @@ func (s *Service) processZohoWebhook(payload zoho.WebhookPayload, db *gorm.DB, l
 		return nil, &errDetails, fmt.Errorf("%s: %w", errDetails, err)
 	}
 
+	var zohoIssueDate *time.Time
+	if payload.Invoice.Date != "" {
+		if t, err := time.Parse("2006-01-02", payload.Invoice.Date); err == nil {
+			zohoIssueDate = &t
+		}
+	}
+	var zohoTax float64
+	for _, item := range payload.Invoice.LineItems {
+		zohoTax += (item.ItemTotal * item.TaxPercentage) / 100.0
+	}
+
 	invoice := &entities.Invoice{
 		InvoiceNumber:    payload.Invoice.InvoiceNumber,
 		BusinessID:       business.ID,
@@ -979,6 +1023,9 @@ func (s *Service) processZohoWebhook(payload zoho.WebhookPayload, db *gorm.DB, l
 		InvoiceData:      invoiceData,
 		CurrentStatus:    currentStatus,
 		StatusHistory:    statusHistory,
+		TotalAmount:      payload.Invoice.Total,
+		TaxAmount:        zohoTax,
+		IssueDate:        zohoIssueDate,
 		Timestamp:        time.Now(),
 	}
 
