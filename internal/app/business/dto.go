@@ -47,3 +47,14 @@ type AccountingPlatformConfig struct {
 	HMACSecret string `json:"hmac_secret" example:"hmac-secret-123456789"`
 	APIKey     string `json:"api_key" example:"api-key-123456789"`
 }
+
+type BusinessSimpleDto struct {
+	ID           string  `json:"id" example:"e4b7712b-1461-4ae1-aabd-a591ce653b8a"`
+	BusinessName string  `json:"business_name" example:"Acme Corp"`
+	BusinessID   *string `json:"business_id" example:"4f7ba55f-1c44-4ac4-989e-1d5c3d948c16"`
+}
+
+type BusinessSimpleListResponseDto struct {
+	entities.Response
+	Data []BusinessSimpleDto `json:"data"`
+}

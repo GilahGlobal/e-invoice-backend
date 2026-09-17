@@ -1722,7 +1722,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Gets all invoices across all businesses uploaded by this aggregator",
+                "description": "Gets all invoices across all businesses uploaded by this aggregator with optional issue date filtering",
                 "produces": [
                     "application/json"
                 ],
@@ -1741,6 +1741,36 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Page size",
                         "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by specific issue date (YYYY-MM-DD)",
+                        "name": "issue_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by start issue date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by end issue date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by from issue date (YYYY-MM-DD)",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by to issue date (YYYY-MM-DD)",
+                        "name": "to_date",
                         "in": "query"
                     }
                 ],
@@ -1834,7 +1864,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Gets invoices uploaded by aggregator for a specific business",
+                "description": "Gets invoices uploaded by aggregator for a specific business with optional issue date filtering",
                 "produces": [
                     "application/json"
                 ],
@@ -1860,6 +1890,36 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Page size",
                         "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by specific issue date (YYYY-MM-DD)",
+                        "name": "issue_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by start issue date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by end issue date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by from issue date (YYYY-MM-DD)",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by to issue date (YYYY-MM-DD)",
+                        "name": "to_date",
                         "in": "query"
                     }
                 ],
@@ -2979,6 +3039,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/business/all": {
+            "get": {
+                "description": "Retrieve an unpaginated list of all businesses with id, business_name, and business_id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Get All Businesses (Simple \u0026 Unauthenticated)",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Query sandbox database",
+                        "name": "is_sandbox",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Businesses retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/business.BusinessSimpleListResponseDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
         "/business/crypto-keys": {
             "post": {
                 "security": [
@@ -3397,7 +3494,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Fetch all invoices for the authenticated user/business",
+                "description": "Fetch all invoices for the authenticated user/business with optional issue date filtering",
                 "produces": [
                     "application/json"
                 ],
@@ -3416,6 +3513,36 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Page size",
                         "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by specific issue date (YYYY-MM-DD)",
+                        "name": "issue_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by start issue date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by end issue date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by from issue date (YYYY-MM-DD)",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by to issue date (YYYY-MM-DD)",
+                        "name": "to_date",
                         "in": "query"
                     }
                 ],
@@ -4737,6 +4864,40 @@ const docTemplate = `{
                         "description": "Fetched successfully",
                         "schema": {
                             "$ref": "#/definitions/resources.HSNCodesResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/invoice-quantity": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all invoice quantity codes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Retrieve Invoice Quantity Codes",
+                "responses": {
+                    "200": {
+                        "description": "Fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/resources.InvoiceQuantityCodesResponseDto"
                         }
                     },
                     "400": {
@@ -7324,6 +7485,49 @@ const docTemplate = `{
                 }
             }
         },
+        "business.BusinessSimpleDto": {
+            "type": "object",
+            "properties": {
+                "business_id": {
+                    "type": "string",
+                    "example": "4f7ba55f-1c44-4ac4-989e-1d5c3d948c16"
+                },
+                "business_name": {
+                    "type": "string",
+                    "example": "Acme Corp"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "e4b7712b-1461-4ae1-aabd-a591ce653b8a"
+                }
+            }
+        },
+        "business.BusinessSimpleListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/business.BusinessSimpleDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
         "business.GetBusinessResponseDto": {
             "type": "object",
             "properties": {
@@ -7552,6 +7756,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 100
                 },
+                "total_amount": {
+                    "type": "number",
+                    "example": 500000
+                },
                 "total_invoices": {
                     "type": "integer",
                     "example": 150
@@ -7588,6 +7796,9 @@ const docTemplate = `{
                 "irn": {
                     "type": "string"
                 },
+                "issue_date": {
+                    "type": "string"
+                },
                 "payment_status": {
                     "type": "string"
                 },
@@ -7607,8 +7818,14 @@ const docTemplate = `{
                 "status_history": {
                     "type": "object"
                 },
+                "tax_amount": {
+                    "type": "number"
+                },
                 "timestamp": {
                     "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
                 },
                 "updated_at": {
                     "type": "string"
@@ -7629,6 +7846,10 @@ const docTemplate = `{
                 "successful_invoices": {
                     "type": "integer",
                     "example": 100
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 500000
                 },
                 "total_invoices": {
                     "type": "integer",
@@ -7674,6 +7895,9 @@ const docTemplate = `{
                 "irn": {
                     "type": "string"
                 },
+                "issue_date": {
+                    "type": "string"
+                },
                 "metadata": {
                     "type": "array",
                     "items": {
@@ -7694,6 +7918,12 @@ const docTemplate = `{
                 },
                 "status_text": {
                     "type": "string"
+                },
+                "tax_amount": {
+                    "type": "number"
+                },
+                "total_amount": {
+                    "type": "number"
                 }
             }
         },
@@ -7715,6 +7945,10 @@ const docTemplate = `{
                 "successful_invoices": {
                     "type": "integer",
                     "example": 100
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 500000
                 },
                 "total_invoices": {
                     "type": "integer",
@@ -8386,7 +8620,8 @@ const docTemplate = `{
                     "enum": [
                         "B2C",
                         "B2B",
-                        "B2G"
+                        "B2G",
+                        "G2B"
                     ],
                     "example": "B2B"
                 },
@@ -8628,6 +8863,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
+                "issue_date": {
+                    "type": "string",
+                    "example": "2026-01-16"
+                },
                 "metadata": {
                     "type": "array",
                     "items": {
@@ -8653,6 +8892,14 @@ const docTemplate = `{
                 "status_text": {
                     "type": "string",
                     "example": "success"
+                },
+                "tax_amount": {
+                    "type": "number",
+                    "example": 150
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 1700.75
                 }
             }
         },
@@ -8889,6 +9136,49 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/resources.HSNCodesItemDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources.InvoiceQuantityCodeItemDto": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "10"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "A unit of count defining the number of groups (group: set of items classified together)."
+                },
+                "name": {
+                    "type": "string",
+                    "example": "group"
+                }
+            }
+        },
+        "resources.InvoiceQuantityCodesResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resources.InvoiceQuantityCodeItemDto"
                     }
                 },
                 "error": {},

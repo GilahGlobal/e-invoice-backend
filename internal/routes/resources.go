@@ -23,5 +23,6 @@ func ResourcesRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 		resourcesGroup.Get("/lgas", resourcesController.GetLGA)
 		resourcesGroup.Get("/countries", resourcesController.GetCountries)
 		resourcesGroup.Get("/states", resourcesController.GetStates)
+		resourcesGroup.Get("/invoice-quantity", resourcesController.GetInvoiceQuantityCodes)
 	}
 }

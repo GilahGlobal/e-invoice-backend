@@ -7,6 +7,7 @@ import (
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/data/entities"
+	"einvoice-access-point/internal/data/repositories"
 	"einvoice-access-point/internal/middleware"
 	"einvoice-access-point/internal/pkg/cloudinary"
 	"einvoice-access-point/internal/pkg/firs_models"
@@ -16,6 +17,15 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
+
+type GetAllInvoicesQuery struct {
+	entities.PaginationQuery
+	IssueDate *string `query:"issue_date"`
+	StartDate *string `query:"start_date"`
+	EndDate   *string `query:"end_date"`
+	FromDate  *string `query:"from_date"`
+	ToDate    *string `query:"to_date"`
+}
 
 type Handler struct {
 	svc         *Service
@@ -45,12 +55,17 @@ func NewHandler(validator *validator.Validate, logger *utility.Logger, db, testD
 }
 
 // @Summary Get All Invoices
-// @Description Fetch all invoices for the authenticated user/business
+// @Description Fetch all invoices for the authenticated user/business with optional issue date filtering
 // @Tags Invoice
 // @Produce json
 // @Security BearerAuth
 // @Param page query int false "Page number"
 // @Param size query int false "Page size"
+// @Param issue_date query string false "Filter by specific issue date (YYYY-MM-DD)"
+// @Param start_date query string false "Filter by start issue date (YYYY-MM-DD)"
+// @Param end_date query string false "Filter by end issue date (YYYY-MM-DD)"
+// @Param from_date query string false "Filter by from issue date (YYYY-MM-DD)"
+// @Param to_date query string false "Filter by to issue date (YYYY-MM-DD)"
 // @Success 200 {object} GetAllInvoicesResponseDto
 // @Failure 400 {object} entities.Response
 // @Failure 401 {object} entities.Response
@@ -66,7 +81,7 @@ func (h *Handler) GetAllInvoices(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
-	var query entities.PaginationQuery
+	var query GetAllInvoicesQuery
 	if err := c.QueryParser(&query); err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", "Invalid query parameters", err, nil)
 	}
@@ -77,7 +92,23 @@ func (h *Handler) GetAllInvoices(c *fiber.Ctx) error {
 		query.Page = 1
 	}
 
-	invoices, pagination, err := h.svc.GetAllInvoicesByBusinessID(db, userDetails.ID, query.Page, query.Size)
+	startDate := query.StartDate
+	if startDate == nil || *startDate == "" {
+		startDate = query.FromDate
+	}
+
+	endDate := query.EndDate
+	if endDate == nil || *endDate == "" {
+		endDate = query.ToDate
+	}
+
+	filter := repositories.InvoiceFilter{
+		IssueDate: query.IssueDate,
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	invoices, pagination, err := h.svc.GetAllInvoicesByBusinessID(db, userDetails.ID, query.Page, query.Size, filter)
 	if err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 	}

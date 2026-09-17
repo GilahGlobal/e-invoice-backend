@@ -72,3 +72,9 @@ type ErrorData struct {
 	Handler       string `json:"handler,omitempty"`
 	PublicMessage string `json:"public_message,omitempty"`
 }
+
+type InvoiceQuantityCode struct {
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}

@@ -198,3 +198,23 @@ func (h *Handler) GetStates(c *fiber.Ctx) error {
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
+
+// @Summary Retrieve Invoice Quantity Codes
+// @Description Retrieve a list of all invoice quantity codes
+// @Tags Resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} InvoiceQuantityCodesResponseDto "Fetched successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Router /resources/invoice-quantity [get]
+func (h *Handler) GetInvoiceQuantityCodes(c *fiber.Ctx) error {
+	respData, errDetails, err := h.svc.GetInvoiceQuantityCodes()
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.Logger.Info("Fetched invoice quantity codes successfully")
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Fetched successfully", respData.Data)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
