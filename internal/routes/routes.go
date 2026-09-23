@@ -1,11 +1,13 @@
 package routes
 
 import (
-	_ "einvoice-access-point/docs"
 	"einvoice-access-point/internal/config"
 	"einvoice-access-point/internal/core"
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/utility"
+
+	_ "einvoice-access-point/docs/external"
+	_ "einvoice-access-point/docs/frontend"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -17,8 +19,28 @@ func Setup(app *fiber.App, logger *utility.Logger, validatorRef *validator.Valid
 
 	container := core.NewContainer(config.GetConfig(), db, testDb, logger, validatorRef, keys)
 
-	// General API route
-	app.Get("/swagger/*", swagger.HandlerDefault)
+	// Swagger UI for external integrations
+	app.Get("/swagger/external/*", swagger.New(swagger.Config{
+		InstanceName: "external",
+		Title:        "External Integration API",
+	}))
+
+	// Swagger UI for frontend integration (shows all endpoints)
+	app.Get("/swagger/frontend/*", swagger.New(swagger.Config{
+		InstanceName: "frontend",
+		Title:        "Frontend API",
+	}))
+
+	// Redirect base swagger path to a landing page
+	app.Get("/swagger", func(c *fiber.Ctx) error {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"message": "Swagger Documentation",
+			"docs": fiber.Map{
+				"external": "/swagger/external/index.html",
+				"frontend": "/swagger/frontend/index.html",
+			},
+		})
+	})
 
 	// All routes registered
 	HealthRoute(app, apiVersion, container)
@@ -35,3 +57,4 @@ func Setup(app *fiber.App, logger *utility.Logger, validatorRef *validator.Valid
 	AdminRoute(app, apiVersion, container)
 	RegisterBaseRoutes(app, apiVersion)
 }
+

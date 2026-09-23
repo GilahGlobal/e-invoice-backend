@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is the e-invoicing service API documentation.",
-        "title": "Gention E-invoicing Service API",
+        "description": "Complete API documentation for Nexar.",
+        "title": "Nexar API Documentation",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {},
         "version": "1.0"
@@ -2434,7 +2434,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/auth/logout": {
@@ -3558,7 +3559,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             },
             "post": {
                 "security": [
@@ -3566,7 +3568,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Upload a new invoice",
+                "description": "Submit an invoice payload to generate/sign the IRN, validate with NRS, and process for transmission",
                 "consumes": [
                     "application/json"
                 ],
@@ -3576,7 +3578,7 @@
                 "tags": [
                     "Invoice"
                 ],
-                "summary": "Upload Invoice",
+                "summary": "Submit and Process Invoice",
                 "parameters": [
                     {
                         "description": "Invoice Upload Request",
@@ -3613,7 +3615,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/invoice/bulk-upload": {
@@ -3904,7 +3907,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Download an invoice",
+                "description": "Download invoice as PDF",
                 "produces": [
                     "application/json"
                 ],
@@ -3934,7 +3937,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/invoice/generate-irn": {
@@ -3944,7 +3948,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Generate an IRN for an invoice",
+                "description": "Generate IRN for an invoice",
                 "consumes": [
                     "application/json"
                 ],
@@ -3985,7 +3989,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/invoice/sign": {
@@ -3995,7 +4000,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Sign an Invoice",
+                "description": "Sign invoice directly",
                 "consumes": [
                     "application/json"
                 ],
@@ -4036,7 +4041,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/invoice/sign-irn": {
@@ -4046,7 +4052,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Sign an IRN",
+                "description": "Sign IRN request data",
                 "consumes": [
                     "application/json"
                 ],
@@ -4087,7 +4093,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/invoice/stats": {
@@ -4410,7 +4417,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Bulk update multiple invoices",
+                "description": "Update multiple invoices at once",
                 "consumes": [
                     "application/json"
                 ],
@@ -4451,7 +4458,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/invoice/update/{irn}": {
@@ -4461,7 +4469,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update an invoice by its IRN",
+                "description": "Update existing invoice using IRN",
                 "consumes": [
                     "application/json"
                 ],
@@ -4509,7 +4517,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/invoice/validate": {
@@ -4560,7 +4569,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/invoice/validate-irn": {
@@ -4570,7 +4580,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Validates an Invoice Reference Number (IRN)",
+                "description": "Validate IRN for invoice data",
                 "consumes": [
                     "application/json"
                 ],
@@ -4583,12 +4593,12 @@
                 "summary": "Validate IRN",
                 "parameters": [
                     {
-                        "description": "IRN Validation Request",
+                        "description": "Invoice Request",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/firs_models.IRNValidationRequest"
+                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
                         }
                     }
                 ],
@@ -4611,7 +4621,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/invoice/{invoice_id}": {
@@ -4621,7 +4632,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Fetch details of a specific invoice by ID",
+                "description": "Fetch invoice details by its ID for the authenticated user/business",
                 "produces": [
                     "application/json"
                 ],
@@ -4657,7 +4668,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             },
             "put": {
                 "security": [
@@ -4665,7 +4677,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Modify an existing invoice",
+                "description": "Modify an existing invoice payload",
                 "consumes": [
                     "application/json"
                 ],
@@ -4719,7 +4731,8 @@
                             "$ref": "#/definitions/entities.Response"
                         }
                     }
-                }
+                },
+                "x-external": true
             },
             "delete": {
                 "security": [
@@ -4797,7 +4810,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/resources/currencies": {
@@ -4831,7 +4845,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/resources/hsn-codes": {
@@ -4865,7 +4880,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/resources/invoice-quantity": {
@@ -4899,7 +4915,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/resources/invoice-types": {
@@ -4933,7 +4950,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/resources/lgas": {
@@ -4967,7 +4985,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/resources/payment-means": {
@@ -5001,7 +5020,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/resources/service-codes": {
@@ -5035,7 +5055,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/resources/states": {
@@ -5069,7 +5090,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/resources/tax-categories": {
@@ -5103,7 +5125,8 @@
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     }
-                }
+                },
+                "x-external": true
             }
         },
         "/subscription/plans": {
@@ -7730,9 +7753,48 @@
                 }
             }
         },
+        "entities.CurrencyStatsDto": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string",
+                    "example": "NGN"
+                },
+                "failed_invoices": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "partial_invoices": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "successful_invoices": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "tax_amount": {
+                    "type": "number",
+                    "example": 37500
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 500000
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 150
+                }
+            }
+        },
         "entities.DailyInvoiceStatsDto": {
             "type": "object",
             "properties": {
+                "currencies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.CurrencyStatsDto"
+                    }
+                },
                 "date": {
                     "type": "string",
                     "example": "2024-01-01"
@@ -7749,9 +7811,8 @@
                     "type": "integer",
                     "example": 100
                 },
-                "total_amount": {
-                    "type": "number",
-                    "example": 500000
+                "total_amount_by_currency": {
+                    "type": "object"
                 },
                 "total_invoices": {
                     "type": "integer",
@@ -7828,6 +7889,12 @@
         "entities.InvoiceStatsDto": {
             "type": "object",
             "properties": {
+                "currencies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.CurrencyStatsDto"
+                    }
+                },
                 "failed_invoices": {
                     "type": "integer",
                     "example": 20
@@ -7840,9 +7907,8 @@
                     "type": "integer",
                     "example": 100
                 },
-                "total_amount": {
-                    "type": "number",
-                    "example": 500000
+                "total_amount_by_currency": {
+                    "type": "object"
                 },
                 "total_invoices": {
                     "type": "integer",
@@ -7867,6 +7933,9 @@
                 },
                 "total": {
                     "$ref": "#/definitions/entities.InvoiceStatsDto"
+                },
+                "total_amount_by_currency": {
+                    "type": "object"
                 }
             }
         },
@@ -7923,6 +7992,12 @@
         "entities.MonthlyInvoiceStatsDto": {
             "type": "object",
             "properties": {
+                "currencies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.CurrencyStatsDto"
+                    }
+                },
                 "failed_invoices": {
                     "type": "integer",
                     "example": 20
@@ -7939,9 +8014,8 @@
                     "type": "integer",
                     "example": 100
                 },
-                "total_amount": {
-                    "type": "number",
-                    "example": 500000
+                "total_amount_by_currency": {
+                    "type": "object"
                 },
                 "total_invoices": {
                     "type": "integer",
@@ -8179,25 +8253,6 @@
         "firs_models.IRNSigningRequestData": {
             "type": "object",
             "properties": {
-                "irn": {
-                    "type": "string"
-                }
-            }
-        },
-        "firs_models.IRNValidationRequest": {
-            "type": "object",
-            "required": [
-                "business_id",
-                "invoice_reference",
-                "irn"
-            ],
-            "properties": {
-                "business_id": {
-                    "type": "string"
-                },
-                "invoice_reference": {
-                    "type": "string"
-                },
                 "irn": {
                     "type": "string"
                 }

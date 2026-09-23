@@ -57,6 +57,7 @@ func NewHandler(validator *validator.Validate, logger *utility.Logger, db, testD
 // @Summary Get All Invoices
 // @Description Fetch all invoices for the authenticated user/business with optional issue date filtering
 // @Tags Invoice
+// @x-external true
 // @Produce json
 // @Security BearerAuth
 // @Param page query int false "Page number"
@@ -118,8 +119,9 @@ func (h *Handler) GetAllInvoices(c *fiber.Ctx) error {
 }
 
 // @Summary Get Invoice Details
-// @Description Fetch details of a specific invoice by ID
+// @Description Fetch invoice details by its ID for the authenticated user/business
 // @Tags Invoice
+// @x-external true
 // @Produce json
 // @Security BearerAuth
 // @Param invoice_id path string true "Invoice ID"
@@ -188,9 +190,10 @@ func (h *Handler) DeleteInvoice(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// @Summary Upload Invoice
-// @Description Upload a new invoice
+// @Summary Submit and Process Invoice
+// @Description Submit an invoice payload to generate/sign the IRN, validate with NRS, and process for transmission
 // @Tags Invoice
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -360,8 +363,9 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 }
 
 // @Summary Modify Invoice
-// @Description Modify an existing invoice
+// @Description Modify an existing invoice payload
 // @Tags Invoice
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -524,12 +528,13 @@ func (h *Handler) GetInvoiceStats(c *fiber.Ctx) error {
 }
 
 // @Summary Validate IRN
-// @Description Validates an Invoice Reference Number (IRN)
+// @Description Validate IRN for invoice data
 // @Tags Invoice
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body firs_models.IRNValidationRequest true "IRN Validation Request"
+// @Param request body firs_models.UploadInvoiceRequestDto true "Invoice Request"
 // @Success 200 {object} entities.Response
 // @Failure 400 {object} entities.Response
 // @Failure 422 {object} entities.Response
@@ -572,6 +577,7 @@ func (h *Handler) ValidateIRN(c *fiber.Ctx) error {
 // @Summary Validate Invoice
 // @Description Validates an invoice payload
 // @Tags Invoice
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -607,8 +613,9 @@ func (h *Handler) ValidateInvoice(c *fiber.Ctx) error {
 }
 
 // @Summary Sign IRN
-// @Description Sign an IRN
+// @Description Sign IRN request data
 // @Tags Invoice
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -658,8 +665,9 @@ func (h *Handler) SignIRN(c *fiber.Ctx) error {
 }
 
 // @Summary Sign Invoice
-// @Description Sign an Invoice
+// @Description Sign invoice directly
 // @Tags Invoice
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -695,8 +703,9 @@ func (h *Handler) SignInvoice(c *fiber.Ctx) error {
 }
 
 // @Summary Generate IRN
-// @Description Generate an IRN for an invoice
+// @Description Generate IRN for an invoice
 // @Tags Invoice
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -733,8 +742,9 @@ func (h *Handler) GenerateIRN(c *fiber.Ctx) error {
 }
 
 // @Summary Update Invoice by IRN
-// @Description Update an invoice by its IRN
+// @Description Update existing invoice using IRN
 // @Tags Invoice
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -830,8 +840,9 @@ func (h *Handler) ConfirmInvoice(c *fiber.Ctx) error {
 }
 
 // @Summary Download Invoice
-// @Description Download an invoice
+// @Description Download invoice as PDF
 // @Tags Invoice
+// @x-external true
 // @Produce json
 // @Security BearerAuth
 // @Param irn path string true "IRN"
@@ -869,8 +880,9 @@ func (h *Handler) DownloadInvoice(c *fiber.Ctx) error {
 }
 
 // @Summary Bulk Update Invoices
-// @Description Bulk update multiple invoices
+// @Description Update multiple invoices at once
 // @Tags Invoice
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth

@@ -1748,8 +1748,36 @@ definitions:
       validation_errors:
         type: object
     type: object
+  entities.CurrencyStatsDto:
+    properties:
+      currency:
+        example: NGN
+        type: string
+      failed_invoices:
+        example: 20
+        type: integer
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      tax_amount:
+        example: 37500
+        type: number
+      total_amount:
+        example: 500000
+        type: number
+      total_invoices:
+        example: 150
+        type: integer
+    type: object
   entities.DailyInvoiceStatsDto:
     properties:
+      currencies:
+        items:
+          $ref: '#/definitions/entities.CurrencyStatsDto'
+        type: array
       date:
         example: "2024-01-01"
         type: string
@@ -1762,9 +1790,8 @@ definitions:
       successful_invoices:
         example: 100
         type: integer
-      total_amount:
-        example: 500000
-        type: number
+      total_amount_by_currency:
+        type: object
       total_invoices:
         example: 150
         type: integer
@@ -1815,6 +1842,10 @@ definitions:
     type: object
   entities.InvoiceStatsDto:
     properties:
+      currencies:
+        items:
+          $ref: '#/definitions/entities.CurrencyStatsDto'
+        type: array
       failed_invoices:
         example: 20
         type: integer
@@ -1824,9 +1855,8 @@ definitions:
       successful_invoices:
         example: 100
         type: integer
-      total_amount:
-        example: 500000
-        type: number
+      total_amount_by_currency:
+        type: object
       total_invoices:
         example: 150
         type: integer
@@ -1843,6 +1873,8 @@ definitions:
         type: array
       total:
         $ref: '#/definitions/entities.InvoiceStatsDto'
+      total_amount_by_currency:
+        type: object
     type: object
   entities.MinimalInvoiceDTO:
     properties:
@@ -1879,6 +1911,10 @@ definitions:
     type: object
   entities.MonthlyInvoiceStatsDto:
     properties:
+      currencies:
+        items:
+          $ref: '#/definitions/entities.CurrencyStatsDto'
+        type: array
       failed_invoices:
         example: 20
         type: integer
@@ -1891,9 +1927,8 @@ definitions:
       successful_invoices:
         example: 100
         type: integer
-      total_amount:
-        example: 500000
-        type: number
+      total_amount_by_currency:
+        type: object
       total_invoices:
         example: 150
         type: integer
@@ -2054,19 +2089,6 @@ definitions:
     properties:
       irn:
         type: string
-    type: object
-  firs_models.IRNValidationRequest:
-    properties:
-      business_id:
-        type: string
-      invoice_reference:
-        type: string
-      irn:
-        type: string
-    required:
-    - business_id
-    - invoice_reference
-    - irn
     type: object
   firs_models.InvoiceDeliveryPeriod:
     properties:
@@ -3057,9 +3079,9 @@ definitions:
     type: object
 info:
   contact: {}
-  description: This is the e-invoicing service API documentation.
+  description: Complete API documentation for Nexar.
   termsOfService: http://swagger.io/terms/
-  title: Gention E-invoicing Service API
+  title: Nexar API Documentation
   version: "1.0"
 paths:
   /admin/aggregators:
@@ -4642,6 +4664,7 @@ paths:
       summary: Login
       tags:
       - Auth
+      x-external: true
   /auth/logout:
     get:
       consumes:
@@ -5363,10 +5386,12 @@ paths:
       summary: Get All Invoices
       tags:
       - Invoice
+      x-external: true
     post:
       consumes:
       - application/json
-      description: Upload a new invoice
+      description: Submit an invoice payload to generate/sign the IRN, validate with
+        NRS, and process for transmission
       parameters:
       - description: Invoice Upload Request
         in: body
@@ -5395,9 +5420,10 @@ paths:
             $ref: '#/definitions/entities.Response'
       security:
       - BearerAuth: []
-      summary: Upload Invoice
+      summary: Submit and Process Invoice
       tags:
       - Invoice
+      x-external: true
   /invoice/{invoice_id}:
     delete:
       description: Delete a specific invoice by ID
@@ -5428,7 +5454,7 @@ paths:
       tags:
       - Invoice
     get:
-      description: Fetch details of a specific invoice by ID
+      description: Fetch invoice details by its ID for the authenticated user/business
       parameters:
       - description: Invoice ID
         in: path
@@ -5455,10 +5481,11 @@ paths:
       summary: Get Invoice Details
       tags:
       - Invoice
+      x-external: true
     put:
       consumes:
       - application/json
-      description: Modify an existing invoice
+      description: Modify an existing invoice payload
       parameters:
       - description: Invoice ID
         in: path
@@ -5495,6 +5522,7 @@ paths:
       summary: Modify Invoice
       tags:
       - Invoice
+      x-external: true
   /invoice/bulk-upload:
     get:
       consumes:
@@ -5677,7 +5705,7 @@ paths:
       - Internal Invoice
   /invoice/download/{irn}:
     get:
-      description: Download an invoice
+      description: Download invoice as PDF
       parameters:
       - description: IRN
         in: path
@@ -5700,11 +5728,12 @@ paths:
       summary: Download Invoice
       tags:
       - Invoice
+      x-external: true
   /invoice/generate-irn:
     post:
       consumes:
       - application/json
-      description: Generate an IRN for an invoice
+      description: Generate IRN for an invoice
       parameters:
       - description: Generate IRN Request
         in: body
@@ -5732,11 +5761,12 @@ paths:
       summary: Generate IRN
       tags:
       - Invoice
+      x-external: true
   /invoice/sign:
     post:
       consumes:
       - application/json
-      description: Sign an Invoice
+      description: Sign invoice directly
       parameters:
       - description: Sign Invoice Request
         in: body
@@ -5764,11 +5794,12 @@ paths:
       summary: Sign Invoice
       tags:
       - Invoice
+      x-external: true
   /invoice/sign-irn:
     post:
       consumes:
       - application/json
-      description: Sign an IRN
+      description: Sign IRN request data
       parameters:
       - description: Sign IRN Request
         in: body
@@ -5796,6 +5827,7 @@ paths:
       summary: Sign IRN
       tags:
       - Invoice
+      x-external: true
   /invoice/stats:
     get:
       description: Get statistics for invoices
@@ -5995,7 +6027,7 @@ paths:
     patch:
       consumes:
       - application/json
-      description: Bulk update multiple invoices
+      description: Update multiple invoices at once
       parameters:
       - description: Bulk Update Request
         in: body
@@ -6023,11 +6055,12 @@ paths:
       summary: Bulk Update Invoices
       tags:
       - Invoice
+      x-external: true
   /invoice/update/{irn}:
     patch:
       consumes:
       - application/json
-      description: Update an invoice by its IRN
+      description: Update existing invoice using IRN
       parameters:
       - description: IRN
         in: path
@@ -6060,6 +6093,7 @@ paths:
       summary: Update Invoice by IRN
       tags:
       - Invoice
+      x-external: true
   /invoice/validate:
     post:
       consumes:
@@ -6092,18 +6126,19 @@ paths:
       summary: Validate Invoice
       tags:
       - Invoice
+      x-external: true
   /invoice/validate-irn:
     post:
       consumes:
       - application/json
-      description: Validates an Invoice Reference Number (IRN)
+      description: Validate IRN for invoice data
       parameters:
-      - description: IRN Validation Request
+      - description: Invoice Request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/firs_models.IRNValidationRequest'
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
       produces:
       - application/json
       responses:
@@ -6124,6 +6159,7 @@ paths:
       summary: Validate IRN
       tags:
       - Invoice
+      x-external: true
   /resources/countries:
     get:
       consumes:
@@ -6145,6 +6181,7 @@ paths:
       summary: Retrieve Countries
       tags:
       - Resources
+      x-external: true
   /resources/currencies:
     get:
       consumes:
@@ -6166,6 +6203,7 @@ paths:
       summary: Retrieve Currencies
       tags:
       - Resources
+      x-external: true
   /resources/hsn-codes:
     get:
       consumes:
@@ -6187,6 +6225,7 @@ paths:
       summary: Retrieve HSN Codes
       tags:
       - Resources
+      x-external: true
   /resources/invoice-quantity:
     get:
       consumes:
@@ -6208,6 +6247,7 @@ paths:
       summary: Retrieve Invoice Quantity Codes
       tags:
       - Resources
+      x-external: true
   /resources/invoice-types:
     get:
       consumes:
@@ -6229,6 +6269,7 @@ paths:
       summary: Retrieve Invoice Types
       tags:
       - Resources
+      x-external: true
   /resources/lgas:
     get:
       consumes:
@@ -6250,6 +6291,7 @@ paths:
       summary: Retrieve LGAs
       tags:
       - Resources
+      x-external: true
   /resources/payment-means:
     get:
       consumes:
@@ -6271,6 +6313,7 @@ paths:
       summary: Retrieve Payment Means
       tags:
       - Resources
+      x-external: true
   /resources/service-codes:
     get:
       consumes:
@@ -6292,6 +6335,7 @@ paths:
       summary: Retrieve Service Codes
       tags:
       - Resources
+      x-external: true
   /resources/states:
     get:
       consumes:
@@ -6313,6 +6357,7 @@ paths:
       summary: Retrieve States
       tags:
       - Resources
+      x-external: true
   /resources/tax-categories:
     get:
       consumes:
@@ -6334,6 +6379,7 @@ paths:
       summary: Retrieve Tax Categories
       tags:
       - Resources
+      x-external: true
   /subscription/plans:
     get:
       consumes:
