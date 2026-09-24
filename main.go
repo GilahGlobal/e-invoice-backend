@@ -1,12 +1,5 @@
-// @title Gention E-invoicing Service API
-// @version 1.0
-// @description This is the e-invoicing service API documentation.
-// @termsOfService http://swagger.io/terms/
-// @BasePath /api/v1
-// @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
-// @description Type "Bearer" followed by a space and JWT token.
+//go:generate swag init -g swaggerinfo/external.go -o docs/external --instanceName external --parseExtension external --parseInternal --parseDependency
+//go:generate swag init -g swaggerinfo/frontend.go -o docs/frontend --instanceName frontend --parseInternal --parseDependency
 
 package main
 
@@ -62,12 +55,12 @@ func main() {
 			}
 		}
 
-		// if configuration.Database.Migrate {
-		// 	migrations.RunAllMigrations(db)
-		// 	if err := seed.SeedSuperAdmin(dbinit.InitDB(db.Postgresql.DB(), false)); err != nil {
-		// 		utility.LogAndPrint(logger, fmt.Sprintf("Failed to seed production super admin: %v\n", err))
-		// 	}
-		// }
+		if configuration.Database.Migrate {
+			migrations.RunAllMigrations(db)
+			if err := seed.SeedSuperAdmin(dbinit.InitDB(db.Postgresql.DB(), false)); err != nil {
+				utility.LogAndPrint(logger, fmt.Sprintf("Failed to seed production super admin: %v\n", err))
+			}
+		}
 	}()
 
 	app := fiber.New(fiber.Config{

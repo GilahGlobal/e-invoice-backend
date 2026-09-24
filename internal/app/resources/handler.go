@@ -22,6 +22,7 @@ func NewHandler(logger *utility.Logger) *Handler {
 // @Summary Retrieve Invoice Types
 // @Description Retrieve a list of all invoice types
 // @Tags Resources
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -42,6 +43,7 @@ func (h *Handler) GetInvoiceTypes(c *fiber.Ctx) error {
 // @Summary Retrieve Payment Means
 // @Description Retrieve a list of all payment means
 // @Tags Resources
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -62,6 +64,7 @@ func (h *Handler) GetPaymentMeans(c *fiber.Ctx) error {
 // @Summary Retrieve Tax Categories
 // @Description Retrieve a list of all tax categories
 // @Tags Resources
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -82,6 +85,7 @@ func (h *Handler) GetTaxCategories(c *fiber.Ctx) error {
 // @Summary Retrieve HSN Codes
 // @Description Retrieve a list of all HSN codes
 // @Tags Resources
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -102,6 +106,7 @@ func (h *Handler) GetHSNCodes(c *fiber.Ctx) error {
 // @Summary Retrieve Service Codes
 // @Description Retrieve a list of all service codes
 // @Tags Resources
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -122,6 +127,7 @@ func (h *Handler) GetServiceCodes(c *fiber.Ctx) error {
 // @Summary Retrieve Currencies
 // @Description Retrieve a list of all currencies
 // @Tags Resources
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -142,6 +148,7 @@ func (h *Handler) GetCurrencies(c *fiber.Ctx) error {
 // @Summary Retrieve LGAs
 // @Description Retrieve a list of all Local Government Areas
 // @Tags Resources
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -162,6 +169,7 @@ func (h *Handler) GetLGA(c *fiber.Ctx) error {
 // @Summary Retrieve Countries
 // @Description Retrieve a list of all countries
 // @Tags Resources
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -182,6 +190,7 @@ func (h *Handler) GetCountries(c *fiber.Ctx) error {
 // @Summary Retrieve States
 // @Description Retrieve a list of all states
 // @Tags Resources
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -202,6 +211,7 @@ func (h *Handler) GetStates(c *fiber.Ctx) error {
 // @Summary Retrieve Invoice Quantity Codes
 // @Description Retrieve a list of all invoice quantity codes
 // @Tags Resources
+// @x-external true
 // @Accept json
 // @Produce json
 // @Security BearerAuth

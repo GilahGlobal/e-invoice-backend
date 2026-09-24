@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"sort"
 	"strconv"
 	"time"
 
@@ -481,24 +482,37 @@ func (r *InvoiceRepository) SaveInvoice(db database.DatabaseManager, invoice *en
 	return db.DB().Save(invoice).Error
 }
 
+type invoicePeriodCurrencyResult struct {
+	Period             string  `gorm:"column:period"`
+	Currency           string  `gorm:"column:currency"`
+	TotalInvoices      int64   `gorm:"column:total_invoices"`
+	SuccessfulInvoices int64   `gorm:"column:successful_invoices"`
+	PartialInvoices    int64   `gorm:"column:partial_invoices"`
+	FailedInvoices     int64   `gorm:"column:failed_invoices"`
+	TotalAmount        float64 `gorm:"column:total_amount"`
+	TaxAmount          float64 `gorm:"column:tax_amount"`
+}
+
 func (r *InvoiceRepository) GetInvoiceStats(
 	db *gorm.DB,
 	businessID *string,
 	aggregatorID *string,
 ) (*entities.InvoiceStatsResponseData, error) {
 
-	var monthlyResults []entities.MonthlyInvoiceStatsDto
+	currencyExpr := `COALESCE(
+		NULLIF(TRIM(UPPER(invoices.invoice_data->>'document_currency_code')), ''),
+		NULLIF(TRIM(UPPER(invoices.invoice_data->>'currency_code')), ''),
+		NULLIF(TRIM(UPPER(invoices.platform_metadata->'zoho'->>'currency_code')), ''),
+		'NGN'
+	)`
 
-	query := `
+	monthlyQuery := fmt.Sprintf(`
 	SELECT 
-		TO_CHAR(created_at, 'YYYYMM') AS month,
-
+		TO_CHAR(created_at, 'YYYYMM') AS period,
+		%s AS currency,
 		COUNT(*) AS total_invoices,
 
 		-- Successful invoices
-		--
-		-- Only confirmed_invoice with a successful
-		-- confirmed_invoice history entry is successful.
 		SUM(
 			CASE
 				WHEN current_status = 'confirmed_invoice'
@@ -509,10 +523,6 @@ func (r *InvoiceRepository) GetInvoiceStats(
 		) AS successful_invoices,
 
 		-- Partial invoices
-		--
-		-- confirmed_invoice + anything other than success
-		-- transmitted_invoice + anything
-		-- signed_invoice + success
 		SUM(
 			CASE
 				WHEN current_status = 'confirmed_invoice'
@@ -531,9 +541,6 @@ func (r *InvoiceRepository) GetInvoiceStats(
 		) AS partial_invoices,
 
 		-- Failed invoices
-		--
-		-- signed_invoice + anything other than success
-		-- all other current statuses
 		SUM(
 			CASE
 				WHEN current_status = 'signed_invoice'
@@ -566,48 +573,64 @@ func (r *InvoiceRepository) GetInvoiceStats(
 				END
 			),
 			0
-		) AS total_amount
+		) AS total_amount,
+
+		-- Tax amount for completed (successful) or partial_success invoices
+		COALESCE(
+			SUM(
+				CASE
+					WHEN current_status = 'confirmed_invoice'
+						THEN tax_amount
+					WHEN current_status = 'transmitted_invoice'
+						THEN tax_amount
+					WHEN current_status = 'signed_invoice'
+						AND current_step_status = 'success'
+						THEN tax_amount
+					ELSE 0
+				END
+			),
+			0
+		) AS tax_amount
 
 	FROM invoices
 
-	-- Extract the latest status for the current step once
-	CROSS JOIN LATERAL (
+	LEFT JOIN LATERAL (
 		SELECT entry->>'status' AS current_step_status
 		FROM jsonb_array_elements(invoices.status_history) AS entry
 		WHERE entry->>'step' = invoices.current_status
 		ORDER BY (entry->>'timestamp')::timestamptz DESC
 		LIMIT 1
-	) AS current_step
+	) AS current_step ON true
 
 	WHERE deleted_at IS NULL
-	`
+	`, currencyExpr)
 
-	args := []interface{}{}
+	monthlyArgs := []interface{}{}
 
 	if businessID != nil && *businessID != "" {
-		query += " AND business_id = ?"
-		args = append(args, *businessID)
+		monthlyQuery += " AND business_id = ?"
+		monthlyArgs = append(monthlyArgs, *businessID)
 	}
 
 	if aggregatorID != nil && *aggregatorID != "" {
-		query += " AND aggregator_id = ?"
-		args = append(args, *aggregatorID)
+		monthlyQuery += " AND aggregator_id = ?"
+		monthlyArgs = append(monthlyArgs, *aggregatorID)
 	}
 
-	query += `
-	GROUP BY TO_CHAR(created_at, 'YYYYMM')
-	ORDER BY month DESC;
-	`
+	monthlyQuery += fmt.Sprintf(`
+	GROUP BY TO_CHAR(created_at, 'YYYYMM'), %s
+	ORDER BY period DESC, currency ASC;
+	`, currencyExpr)
 
-	if err := db.Raw(query, args...).Scan(&monthlyResults).Error; err != nil {
+	var monthlyRaw []invoicePeriodCurrencyResult
+	if err := db.Raw(monthlyQuery, monthlyArgs...).Scan(&monthlyRaw).Error; err != nil {
 		return nil, err
 	}
 
-	var dailyResults []entities.DailyInvoiceStatsDto
-	dailyQuery := `
+	dailyQuery := fmt.Sprintf(`
 	SELECT 
-		TO_CHAR(DATE(created_at), 'YYYY-MM-DD') AS date,
-
+		TO_CHAR(DATE(created_at), 'YYYY-MM-DD') AS period,
+		%s AS currency,
 		COUNT(*) AS total_invoices,
 
 		-- Successful invoices
@@ -671,7 +694,24 @@ func (r *InvoiceRepository) GetInvoiceStats(
 				END
 			),
 			0
-		) AS total_amount
+		) AS total_amount,
+
+		-- Tax amount for completed (successful) or partial_success invoices
+		COALESCE(
+			SUM(
+				CASE
+					WHEN current_status = 'confirmed_invoice'
+						THEN tax_amount
+					WHEN current_status = 'transmitted_invoice'
+						THEN tax_amount
+					WHEN current_status = 'signed_invoice'
+						AND current_step_status = 'success'
+						THEN tax_amount
+					ELSE 0
+				END
+			),
+			0
+		) AS tax_amount
 
 	FROM invoices
 
@@ -684,38 +724,137 @@ func (r *InvoiceRepository) GetInvoiceStats(
 	) AS current_step ON true
 
 	WHERE deleted_at IS NULL AND created_at >= NOW() - INTERVAL '14 days'
-	`
+	`, currencyExpr)
+
+	dailyArgs := []interface{}{}
 
 	if businessID != nil && *businessID != "" {
 		dailyQuery += " AND business_id = ?"
+		dailyArgs = append(dailyArgs, *businessID)
 	}
 
 	if aggregatorID != nil && *aggregatorID != "" {
 		dailyQuery += " AND aggregator_id = ?"
+		dailyArgs = append(dailyArgs, *aggregatorID)
 	}
 
-	dailyQuery += `
-	GROUP BY DATE(created_at)
-	ORDER BY date DESC;
-	`
+	dailyQuery += fmt.Sprintf(`
+	GROUP BY DATE(created_at), %s
+	ORDER BY period DESC, currency ASC;
+	`, currencyExpr)
 
-	if err := db.Raw(dailyQuery, args...).Scan(&dailyResults).Error; err != nil {
+	var dailyRaw []invoicePeriodCurrencyResult
+	if err := db.Raw(dailyQuery, dailyArgs...).Scan(&dailyRaw).Error; err != nil {
 		return nil, err
 	}
 
-	totalStats := entities.InvoiceStatsDto{}
+	monthlyResults := make([]entities.MonthlyInvoiceStatsDto, 0)
+	monthMap := make(map[string]int)
 
-	for _, m := range monthlyResults {
-		totalStats.TotalInvoices += m.TotalInvoices
-		totalStats.SuccessfulInvoices += m.SuccessfulInvoices
-		totalStats.PartialInvoices += m.PartialInvoices
-		totalStats.FailedInvoices += m.FailedInvoices
-		totalStats.TotalAmount += m.TotalAmount
+	totalCurrenciesMap := make(map[string]*entities.CurrencyStatsDto)
+	totalStats := entities.InvoiceStatsDto{
+		Currencies:            make([]entities.CurrencyStatsDto, 0),
+		TotalAmountByCurrency: make(map[string]float64),
+	}
+
+	for _, row := range monthlyRaw {
+		idx, exists := monthMap[row.Period]
+		if !exists {
+			monthlyResults = append(monthlyResults, entities.MonthlyInvoiceStatsDto{
+				Month:                 row.Period,
+				Currencies:            make([]entities.CurrencyStatsDto, 0),
+				TotalAmountByCurrency: make(map[string]float64),
+			})
+			idx = len(monthlyResults) - 1
+			monthMap[row.Period] = idx
+		}
+
+		m := &monthlyResults[idx]
+		m.TotalInvoices += row.TotalInvoices
+		m.SuccessfulInvoices += row.SuccessfulInvoices
+		m.PartialInvoices += row.PartialInvoices
+		m.FailedInvoices += row.FailedInvoices
+		m.TotalAmountByCurrency[row.Currency] += row.TotalAmount
+		m.Currencies = append(m.Currencies, entities.CurrencyStatsDto{
+			Currency:           row.Currency,
+			TotalAmount:        row.TotalAmount,
+			TaxAmount:          row.TaxAmount,
+			TotalInvoices:      row.TotalInvoices,
+			SuccessfulInvoices: row.SuccessfulInvoices,
+			PartialInvoices:    row.PartialInvoices,
+			FailedInvoices:     row.FailedInvoices,
+		})
+
+		// Aggregate overall totals
+		totalStats.TotalInvoices += row.TotalInvoices
+		totalStats.SuccessfulInvoices += row.SuccessfulInvoices
+		totalStats.PartialInvoices += row.PartialInvoices
+		totalStats.FailedInvoices += row.FailedInvoices
+		totalStats.TotalAmountByCurrency[row.Currency] += row.TotalAmount
+
+		cStat, cExists := totalCurrenciesMap[row.Currency]
+		if !cExists {
+			cStat = &entities.CurrencyStatsDto{
+				Currency: row.Currency,
+			}
+			totalCurrenciesMap[row.Currency] = cStat
+		}
+		cStat.TotalAmount += row.TotalAmount
+		cStat.TaxAmount += row.TaxAmount
+		cStat.TotalInvoices += row.TotalInvoices
+		cStat.SuccessfulInvoices += row.SuccessfulInvoices
+		cStat.PartialInvoices += row.PartialInvoices
+		cStat.FailedInvoices += row.FailedInvoices
+	}
+
+	currencyNames := make([]string, 0, len(totalCurrenciesMap))
+	for cur := range totalCurrenciesMap {
+		currencyNames = append(currencyNames, cur)
+	}
+	sort.Strings(currencyNames)
+
+	totalCurrencies := make([]entities.CurrencyStatsDto, 0, len(currencyNames))
+	for _, cur := range currencyNames {
+		totalCurrencies = append(totalCurrencies, *totalCurrenciesMap[cur])
+	}
+	totalStats.Currencies = totalCurrencies
+
+	dailyResults := make([]entities.DailyInvoiceStatsDto, 0)
+	dateMap := make(map[string]int)
+
+	for _, row := range dailyRaw {
+		idx, exists := dateMap[row.Period]
+		if !exists {
+			dailyResults = append(dailyResults, entities.DailyInvoiceStatsDto{
+				Date:                  row.Period,
+				Currencies:            make([]entities.CurrencyStatsDto, 0),
+				TotalAmountByCurrency: make(map[string]float64),
+			})
+			idx = len(dailyResults) - 1
+			dateMap[row.Period] = idx
+		}
+
+		d := &dailyResults[idx]
+		d.TotalInvoices += row.TotalInvoices
+		d.SuccessfulInvoices += row.SuccessfulInvoices
+		d.PartialInvoices += row.PartialInvoices
+		d.FailedInvoices += row.FailedInvoices
+		d.TotalAmountByCurrency[row.Currency] += row.TotalAmount
+		d.Currencies = append(d.Currencies, entities.CurrencyStatsDto{
+			Currency:           row.Currency,
+			TotalAmount:        row.TotalAmount,
+			TaxAmount:          row.TaxAmount,
+			TotalInvoices:      row.TotalInvoices,
+			SuccessfulInvoices: row.SuccessfulInvoices,
+			PartialInvoices:    row.PartialInvoices,
+			FailedInvoices:     row.FailedInvoices,
+		})
 	}
 
 	return &entities.InvoiceStatsResponseData{
-		Total:   totalStats,
-		Monthly: monthlyResults,
-		Daily:   dailyResults,
+		Total:                 totalStats,
+		TotalAmountByCurrency: totalStats.TotalAmountByCurrency,
+		Monthly:               monthlyResults,
+		Daily:                 dailyResults,
 	}, nil
 }

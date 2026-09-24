@@ -119,6 +119,7 @@ func (h *Handler) ResendVerificationOTP(c *fiber.Ctx) error {
 // @Summary Login
 // @Description Login to the system
 // @Tags Auth
+// @x-external true
 // @Accept json
 // @Produce json
 // @Param data body LoginRequestDto true "Login request payload"
