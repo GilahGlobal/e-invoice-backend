@@ -83,36 +83,50 @@ type MinimalInvoiceDTO struct {
 	CreatedAt     time.Time            `json:"created_at"`
 }
 
-type InvoiceStatsDto struct {
+type CurrencyStatsDto struct {
+	Currency           string  `json:"currency" example:"NGN"`
+	TotalAmount        float64 `json:"total_amount" example:"500000.00"`
+	TaxAmount          float64 `json:"tax_amount" example:"37500.00"`
 	TotalInvoices      int64   `json:"total_invoices" example:"150"`
 	SuccessfulInvoices int64   `json:"successful_invoices" example:"100"`
 	PartialInvoices    int64   `json:"partial_invoices" example:"30"`
 	FailedInvoices     int64   `json:"failed_invoices" example:"20"`
-	TotalAmount        float64 `json:"total_amount" gorm:"column:total_amount" example:"500000.00"`
+}
+
+type InvoiceStatsDto struct {
+	TotalInvoices         int64              `json:"total_invoices" example:"150"`
+	SuccessfulInvoices    int64              `json:"successful_invoices" example:"100"`
+	PartialInvoices       int64              `json:"partial_invoices" example:"30"`
+	FailedInvoices        int64              `json:"failed_invoices" example:"20"`
+	Currencies            []CurrencyStatsDto `json:"currencies"`
+	TotalAmountByCurrency map[string]float64 `json:"total_amount_by_currency,omitempty" swaggertype:"object"`
 }
 
 type MonthlyInvoiceStatsDto struct {
-	Month              string  `json:"month" example:"202401"`
-	TotalInvoices      int64   `json:"total_invoices" example:"150"`
-	SuccessfulInvoices int64   `json:"successful_invoices" example:"100"`
-	PartialInvoices    int64   `json:"partial_invoices" example:"30"`
-	FailedInvoices     int64   `json:"failed_invoices" example:"20"`
-	TotalAmount        float64 `json:"total_amount" gorm:"column:total_amount" example:"500000.00"`
+	Month                 string             `json:"month" example:"202401"`
+	TotalInvoices         int64              `json:"total_invoices" example:"150"`
+	SuccessfulInvoices    int64              `json:"successful_invoices" example:"100"`
+	PartialInvoices       int64              `json:"partial_invoices" example:"30"`
+	FailedInvoices        int64              `json:"failed_invoices" example:"20"`
+	Currencies            []CurrencyStatsDto `json:"currencies"`
+	TotalAmountByCurrency map[string]float64 `json:"total_amount_by_currency,omitempty" swaggertype:"object"`
 }
 
 type DailyInvoiceStatsDto struct {
-	Date               string  `json:"date" example:"2024-01-01"`
-	TotalInvoices      int64   `json:"total_invoices" example:"150"`
-	SuccessfulInvoices int64   `json:"successful_invoices" example:"100"`
-	PartialInvoices    int64   `json:"partial_invoices" example:"30"`
-	FailedInvoices     int64   `json:"failed_invoices" example:"20"`
-	TotalAmount        float64 `json:"total_amount" gorm:"column:total_amount" example:"500000.00"`
+	Date                  string             `json:"date" example:"2024-01-01"`
+	TotalInvoices         int64              `json:"total_invoices" example:"150"`
+	SuccessfulInvoices    int64              `json:"successful_invoices" example:"100"`
+	PartialInvoices       int64              `json:"partial_invoices" example:"30"`
+	FailedInvoices        int64              `json:"failed_invoices" example:"20"`
+	Currencies            []CurrencyStatsDto `json:"currencies"`
+	TotalAmountByCurrency map[string]float64 `json:"total_amount_by_currency,omitempty" swaggertype:"object"`
 }
 
 type InvoiceStatsResponseData struct {
-	Total   InvoiceStatsDto          `json:"total"`
-	Monthly []MonthlyInvoiceStatsDto `json:"monthly"`
-	Daily   []DailyInvoiceStatsDto   `json:"daily"`
+	Total                 InvoiceStatsDto          `json:"total"`
+	TotalAmountByCurrency map[string]float64       `json:"total_amount_by_currency,omitempty" swaggertype:"object"`
+	Monthly               []MonthlyInvoiceStatsDto `json:"monthly"`
+	Daily                 []DailyInvoiceStatsDto   `json:"daily"`
 }
 
 // BeforeCreate sets the ID if not provided
