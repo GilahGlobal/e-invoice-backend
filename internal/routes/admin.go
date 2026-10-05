@@ -38,6 +38,7 @@ func AdminRoute(router fiber.Router, version string, container *core.Container) 
 	adminAuthAll.Put("/businesses/:id", rf, handler.UpdateBusiness)
 	adminAuthAll.Get("/businesses/stats/:id", rf, handler.GetBusinessDailyInvoiceStats)
 	adminAuthAll.Get("/businesses/aggregator/:id", rf, handler.GetBusinessAggregatorInfo)
+	adminAuthAll.Get("/businesses/:id", rf, handler.GetBusinessInfo)
 
 	adminAuthAll.Get("/aggregators", rf, handler.GetAggregators)
 	adminAuthAll.Post("/aggregators", rf, handler.CreateAggregator)

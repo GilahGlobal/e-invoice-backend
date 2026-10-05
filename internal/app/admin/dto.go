@@ -34,21 +34,23 @@ type AdminLoginResponseDto struct {
 }
 
 type AdminBusinessResponseDto struct {
-	ID                    string `json:"id" example:"e4b7712b-1461-4ae1-aabd-a591ce653b8a"`
-	Name                  string `json:"name" example:"Example Name"`
-	ServiceID             string `json:"service_id" example:"8817a77d-22d9-4bcc-8b33-dcd1328e31e4"`
-	TIN                   string `json:"tin" example:"12345678-0001"`
-	Industry              string `json:"industry" example:"string"`
-	CreatedAt             string `json:"created_at" example:"2023-10-12T07:20:50.52Z"`
-	Email                 string `json:"email" example:"user@example.com"`
-	BusinessID            string `json:"business_id" example:"4f7ba55f-1c44-4ac4-989e-1d5c3d948c16"`
-	PhoneNumber           string `json:"phone_number" example:"+1234567890"`
-	CompanyName           string `json:"company_name" example:"Example Name"`
-	BmpUploadSelected     bool   `json:"bmp_upload_selected" example:"true"`
-	SubscribedPlan        string `json:"subscribed_plan" example:"string"`
-	TotalInvoicesUploaded int64  `json:"total_invoices_uploaded" example:"0"`
-	Status                int    `json:"status" example:"1"`
-	LastInvoiceUploadedAt string `json:"last_invoice_uploaded_at,omitempty" example:"2023-10-12T07:20:50.52Z"`
+	ID                    string  `json:"id" example:"e4b7712b-1461-4ae1-aabd-a591ce653b8a"`
+	Name                  string  `json:"name" example:"Example Name"`
+	ServiceID             string  `json:"service_id" example:"8817a77d-22d9-4bcc-8b33-dcd1328e31e4"`
+	TIN                   string  `json:"tin" example:"12345678-0001"`
+	Industry              string  `json:"industry" example:"string"`
+	CreatedAt             string  `json:"created_at" example:"2023-10-12T07:20:50.52Z"`
+	Email                 string  `json:"email" example:"user@example.com"`
+	BusinessID            string  `json:"business_id" example:"4f7ba55f-1c44-4ac4-989e-1d5c3d948c16"`
+	PhoneNumber           string  `json:"phone_number" example:"+1234567890"`
+	CompanyName           string  `json:"company_name" example:"Example Name"`
+	BmpUploadSelected     bool    `json:"bmp_upload_selected" example:"true"`
+	SubscribedPlan        string  `json:"subscribed_plan" example:"string"`
+	TotalInvoicesUploaded int64   `json:"total_invoices_uploaded" example:"0"`
+	Status                int     `json:"status" example:"1"`
+	LastInvoiceUploadedAt string  `json:"last_invoice_uploaded_at,omitempty" example:"2023-10-12T07:20:50.52Z"`
+	AggregatorID          *string `json:"aggregator_id,omitempty" example:"8c596cb2-ac83-489a-bb00-10e0d83c0510"`
+	IsAggregator          bool    `json:"is_aggregator" example:"false"`
 }
 
 type AdminBusinessListResponseDto struct {
@@ -205,6 +207,16 @@ type AdminBusinessDailyStatsResponseDto struct {
 type AdminBusinessAggregatorInfoResponse struct {
 	entities.Response
 	Data AdminBusinessAggregatorInfoResponseDto `json:"data"`
+}
+
+type AdminBusinessInfoResponseDto struct {
+	Business   AdminBusinessResponseDto    `json:"business"`
+	Aggregator *AdminAggregatorResponseDto `json:"aggregator,omitempty"`
+}
+
+type AdminBusinessInfoResponse struct {
+	entities.Response
+	Data AdminBusinessInfoResponseDto `json:"data"`
 }
 
 type AdminAggregatorInfoResponse struct {
