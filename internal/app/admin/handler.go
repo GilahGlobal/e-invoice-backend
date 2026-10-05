@@ -517,6 +517,33 @@ func (h *Handler) GetBusinessAggregatorInfo(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
+// GetBusinessInfo godoc
+// @Summary Business Info
+// @Description Returns business details and associated aggregator info for a business.
+// @Tags Admin Queries
+// @Accept json
+// @Produce json
+// @Param id path string true "Business ID"
+// @Success 200 {object} AdminBusinessInfoResponse
+// @Failure 500 {object} apperror.AppError
+// @Router /admin/businesses/{id} [get]
+func (h *Handler) GetBusinessInfo(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	businessID := c.Params("id")
+	info, err := h.svc.GetBusinessInfo(db, businessID)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Business info retrieved successfully", info)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
 // CreateAggregator godoc
 // @Summary Create Aggregator
 // @Description Creates a new aggregator (admin only).

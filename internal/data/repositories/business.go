@@ -257,6 +257,22 @@ func (r *BusinessRepository) GetBusinessByIDForAdmin(db database.DatabaseManager
 	return &business, nil
 }
 
+func (r *BusinessRepository) GetBusinessDetailsByIDForAdmin(db database.DatabaseManager, id string) (*AdminBusinessQueryResult, error) {
+	var business AdminBusinessQueryResult
+	query := db.DB().Table("businesses").
+		Select(`businesses.*, 
+			(SELECT COUNT(*) FROM invoices WHERE invoices.business_id = businesses.id) as total_invoices_uploaded,
+			(SELECT MAX(created_at) FROM invoices WHERE invoices.business_id = businesses.id) as last_invoice_uploaded_at,
+			(SELECT plan FROM subscriptions WHERE subscriptions.business_id = businesses.id AND subscriptions.is_active = true ORDER BY created_at DESC LIMIT 1) as subscribed_plan`).
+		Where("businesses.id = ?", id)
+
+	if err := query.First(&business).Error; err != nil {
+		return nil, err
+	}
+
+	return &business, nil
+}
+
 func (r *BusinessRepository) GetBusinessByIDForAggregator(db database.DatabaseManager, aggregatorID, businessID string) (*entities.Business, error) {
 	var business entities.Business
 	err := db.DB().Where("id = ? AND aggregator_id = ?", businessID, aggregatorID).First(&business).Error

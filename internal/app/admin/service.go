@@ -172,6 +172,8 @@ func mapBusinessesToDto(businesses []repositories.AdminBusinessQueryResult) []Ad
 			TotalInvoicesUploaded: b.TotalInvoicesUploaded,
 			Status:                b.AccStatus,
 			LastInvoiceUploadedAt: lastUpload,
+			AggregatorID:          b.AggregatorID,
+			IsAggregator:          b.IsAggregator,
 		})
 	}
 	return dtos
@@ -578,5 +580,37 @@ func (s *Service) GetBusinessAggregatorInfo(db database.DatabaseManager, busines
 	return &AdminBusinessAggregatorInfoResponseDto{
 		CurrentAggregatorID: currentAggregatorID,
 		History:             dtos,
+	}, nil
+}
+
+func (s *Service) GetBusinessInfo(db database.DatabaseManager, businessID string) (*AdminBusinessInfoResponseDto, error) {
+	businessQuery, err := s.businessRepo.GetBusinessDetailsByIDForAdmin(db, businessID)
+	if err != nil {
+		return nil, err
+	}
+
+	businessDto := mapBusinessesToDto([]repositories.AdminBusinessQueryResult{*businessQuery})[0]
+
+	var aggDto *AdminAggregatorResponseDto
+	if businessQuery.AggregatorID != nil && *businessQuery.AggregatorID != "" {
+		agg, err := s.aggregatorRepo.GetAggregatorByID(db.DB(), *businessQuery.AggregatorID)
+		if err == nil && agg != nil {
+			_, _, totalInvoices, _, _ := s.aggregatorRepo.GetDashboardStats(db.DB(), agg.ID)
+			aggDto = &AdminAggregatorResponseDto{
+				ID:                   agg.ID,
+				CompanyName:          agg.CompanyName,
+				Email:                agg.Email,
+				TIN:                  agg.TIN,
+				Industry:             agg.Industry,
+				TotalInvoicesManaged: totalInvoices,
+				Status:               agg.AccStatus,
+				CreatedAt:            agg.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			}
+		}
+	}
+
+	return &AdminBusinessInfoResponseDto{
+		Business:   businessDto,
+		Aggregator: aggDto,
 	}, nil
 }
