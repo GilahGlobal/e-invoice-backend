@@ -191,6 +191,29 @@ definitions:
       status_code:
         type: integer
     type: object
+  admin.AdminBusinessInfoResponse:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminBusinessInfoResponseDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminBusinessInfoResponseDto:
+    properties:
+      aggregator:
+        $ref: '#/definitions/admin.AdminAggregatorResponseDto'
+      business:
+        $ref: '#/definitions/admin.AdminBusinessResponseDto'
+    type: object
   admin.AdminBusinessListResponseDto:
     properties:
       data:
@@ -212,6 +235,9 @@ definitions:
     type: object
   admin.AdminBusinessResponseDto:
     properties:
+      aggregator_id:
+        example: 8c596cb2-ac83-489a-bb00-10e0d83c0510
+        type: string
       bmp_upload_selected:
         example: true
         type: boolean
@@ -233,6 +259,9 @@ definitions:
       industry:
         example: string
         type: string
+      is_aggregator:
+        example: false
+        type: boolean
       last_invoice_uploaded_at:
         example: "2023-10-12T07:20:50.52Z"
         type: string
@@ -3403,6 +3432,30 @@ paths:
       tags:
       - Admin Operations
   /admin/businesses/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns business details and associated aggregator info for a business.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessInfoResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Business Info
+      tags:
+      - Admin Queries
     put:
       consumes:
       - application/json

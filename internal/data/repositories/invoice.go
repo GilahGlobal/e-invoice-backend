@@ -506,9 +506,25 @@ func (r *InvoiceRepository) GetInvoiceStats(
 		'NGN'
 	)`
 
+	issueDateExpr := `COALESCE(
+		CASE 
+			WHEN NULLIF(TRIM(invoices.invoice_data->>'issue_date'), '') ~ '^\d{4}[-/]\d{2}[-/]\d{2}'
+				THEN REPLACE(SUBSTRING(TRIM(invoices.invoice_data->>'issue_date') FROM 1 FOR 10), '/', '-')
+			WHEN NULLIF(TRIM(invoices.invoice_data->>'invoice_date'), '') ~ '^\d{4}[-/]\d{2}[-/]\d{2}'
+				THEN REPLACE(SUBSTRING(TRIM(invoices.invoice_data->>'invoice_date') FROM 1 FOR 10), '/', '-')
+			WHEN NULLIF(TRIM(invoices.invoice_data->>'date'), '') ~ '^\d{4}[-/]\d{2}[-/]\d{2}'
+				THEN REPLACE(SUBSTRING(TRIM(invoices.invoice_data->>'date') FROM 1 FOR 10), '/', '-')
+			ELSE NULL
+		END,
+		TO_CHAR(invoices.issue_date, 'YYYY-MM-DD'),
+		TO_CHAR(DATE(invoices.created_at), 'YYYY-MM-DD')
+	)`
+
+	monthlyPeriodExpr := fmt.Sprintf(`TO_CHAR((%s)::date, 'YYYYMM')`, issueDateExpr)
+
 	monthlyQuery := fmt.Sprintf(`
 	SELECT 
-		TO_CHAR(created_at, 'YYYYMM') AS period,
+		%s AS period,
 		%s AS currency,
 		COUNT(*) AS total_invoices,
 
@@ -618,9 +634,9 @@ func (r *InvoiceRepository) GetInvoiceStats(
 	}
 
 	monthlyQuery += fmt.Sprintf(`
-	GROUP BY TO_CHAR(created_at, 'YYYYMM'), %s
+	GROUP BY %s, %s
 	ORDER BY period DESC, currency ASC;
-	`, currencyExpr)
+	`, monthlyPeriodExpr, currencyExpr)
 
 	var monthlyRaw []invoicePeriodCurrencyResult
 	if err := db.Raw(monthlyQuery, monthlyArgs...).Scan(&monthlyRaw).Error; err != nil {
@@ -629,7 +645,7 @@ func (r *InvoiceRepository) GetInvoiceStats(
 
 	dailyQuery := fmt.Sprintf(`
 	SELECT 
-		TO_CHAR(DATE(created_at), 'YYYY-MM-DD') AS period,
+		%s AS period,
 		%s AS currency,
 		COUNT(*) AS total_invoices,
 
@@ -723,8 +739,8 @@ func (r *InvoiceRepository) GetInvoiceStats(
 		LIMIT 1
 	) AS current_step ON true
 
-	WHERE deleted_at IS NULL AND created_at >= NOW() - INTERVAL '14 days'
-	`, currencyExpr)
+	WHERE deleted_at IS NULL AND (%s)::date >= CURRENT_DATE - INTERVAL '14 days'
+	`, issueDateExpr, currencyExpr, issueDateExpr)
 
 	dailyArgs := []interface{}{}
 
@@ -739,9 +755,9 @@ func (r *InvoiceRepository) GetInvoiceStats(
 	}
 
 	dailyQuery += fmt.Sprintf(`
-	GROUP BY DATE(created_at), %s
+	GROUP BY %s, %s
 	ORDER BY period DESC, currency ASC;
-	`, currencyExpr)
+	`, issueDateExpr, currencyExpr)
 
 	var dailyRaw []invoicePeriodCurrencyResult
 	if err := db.Raw(dailyQuery, dailyArgs...).Scan(&dailyRaw).Error; err != nil {

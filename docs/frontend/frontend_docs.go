@@ -627,6 +627,42 @@ const docTemplatefrontend = `{
             }
         },
         "/admin/businesses/{id}": {
+            "get": {
+                "description": "Returns business details and associated aggregator info for a business.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Queries"
+                ],
+                "summary": "Business Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminBusinessInfoResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Updates business details and status.",
                 "consumes": [
@@ -5576,6 +5612,40 @@ const docTemplatefrontend = `{
                 }
             }
         },
+        "admin.AdminBusinessInfoResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.AdminBusinessInfoResponseDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminBusinessInfoResponseDto": {
+            "type": "object",
+            "properties": {
+                "aggregator": {
+                    "$ref": "#/definitions/admin.AdminAggregatorResponseDto"
+                },
+                "business": {
+                    "$ref": "#/definitions/admin.AdminBusinessResponseDto"
+                }
+            }
+        },
         "admin.AdminBusinessListResponseDto": {
             "type": "object",
             "properties": {
@@ -5607,6 +5677,10 @@ const docTemplatefrontend = `{
         "admin.AdminBusinessResponseDto": {
             "type": "object",
             "properties": {
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "8c596cb2-ac83-489a-bb00-10e0d83c0510"
+                },
                 "bmp_upload_selected": {
                     "type": "boolean",
                     "example": true
@@ -5634,6 +5708,10 @@ const docTemplatefrontend = `{
                 "industry": {
                     "type": "string",
                     "example": "string"
+                },
+                "is_aggregator": {
+                    "type": "boolean",
+                    "example": false
                 },
                 "last_invoice_uploaded_at": {
                     "type": "string",
