@@ -600,6 +600,12 @@ func (s *Service) ConfirmInvoice(irn string, isSandbox bool) (*firs_models.FirsR
 
 func (s *Service) DownloadInvoice(irn string, isSandbox bool) (*string, *string, error) {
 	configs := config.GetConfig()
+	var apikey string
+	if isSandbox {
+		apikey = configs.FirsSandbox.FirsApiKey
+	} else {
+		apikey = configs.Firs.FirsApiKey
+	}
 	resp, err := firs.DownloadInvoice(irn, isSandbox)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to download invoice with irn: %w", err)
@@ -634,13 +640,12 @@ func (s *Service) DownloadInvoice(irn string, isSandbox bool) (*string, *string,
 		ivHex,
 		pub,
 		encryptedData,
-		configs.Firs.FirsApiKey,
+		apikey,
 	)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to decrypt invoice: %w", err)
 	}
 
-	fmt.Println("Decrypted Invoice:\n", decrypted)
 	return &decrypted, nil, nil
 }
 
