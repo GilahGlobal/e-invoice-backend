@@ -619,7 +619,7 @@ func (r *InvoiceRepository) GetInvoiceStats(
 	) AS current_step ON true
 
 	WHERE deleted_at IS NULL
-	`, currencyExpr)
+	`, monthlyPeriodExpr, currencyExpr)
 
 	monthlyArgs := []interface{}{}
 
