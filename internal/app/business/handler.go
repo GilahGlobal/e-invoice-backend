@@ -224,3 +224,78 @@ func (h *Handler) UploadIRNSigningKeys(c *fiber.Ctx) error {
 	})
 	return c.Status(http.StatusOK).JSON(rd)
 }
+
+// GetNotificationPreferences godoc
+// @Summary      Get Business Notification Preferences
+// @Description  Retrieve the email notification preferences for the authenticated business
+// @Tags         Business
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} NotificationPreferenceResponseDto "Notification preferences retrieved successfully"
+// @Failure      401 {object} entities.Response "Unauthorized"
+// @Failure      500 {object} entities.Response "Internal server error"
+// @Router       /business/notification-preferences [get]
+func (h *Handler) GetNotificationPreferences(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	prefs, err := h.svc.GetNotificationPreferences(db, userDetails.ID)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "notification preferences retrieved successfully", prefs)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// UpdateNotificationPreferences godoc
+// @Summary      Update Business Notification Preferences
+// @Description  Configure email notification preferences for the authenticated business
+// @Tags         Business
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        data body UpdateNotificationPreferenceDto true "Notification preferences payload"
+// @Success      200 {object} NotificationPreferenceResponseDto "Notification preferences updated successfully"
+// @Failure      400 {object} entities.Response "Bad request"
+// @Failure      401 {object} entities.Response "Unauthorized"
+// @Failure      422 {object} entities.Response "Validation failed"
+// @Failure      500 {object} entities.Response "Internal server error"
+// @Router       /business/notification-preferences [patch]
+func (h *Handler) UpdateNotificationPreferences(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	var req UpdateNotificationPreferenceDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	prefs, err := h.svc.UpdateNotificationPreferences(db, userDetails.ID, req)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "notification preferences updated successfully", prefs)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}

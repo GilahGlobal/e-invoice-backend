@@ -118,6 +118,21 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 			"total_invoices", stats.TotalRows,
 			"validation_errors", stats.TotalErrors)
 		// Validation errors (if any) already persisted above.
+		if qc.invoiceSvc != nil && qc.invoiceSvc.BusinessSvc() != nil {
+			db := middleware.GetDatabaseInstance(payload.IsSandbox, qc.db, qc.testDb)
+			qc.invoiceSvc.BusinessSvc().NotifyBulkUploadFinished(
+				db,
+				payload.BusinessID,
+				payload.FileKey,
+				stats.TotalRows,
+				stats.ValidRows,
+				0,
+				0,
+				stats.TotalRows,
+				stats.TotalErrors,
+				stats.Duration,
+			)
+		}
 		return nil
 	}
 
@@ -184,6 +199,22 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 
 	// 6. Summarize results
 	qc.logResults(payload.BulkID, payload.FileKey, payload.BusinessID, stats, processedResults, payload.IsSandbox)
+
+	if qc.invoiceSvc != nil && qc.invoiceSvc.BusinessSvc() != nil {
+		db := middleware.GetDatabaseInstance(payload.IsSandbox, qc.db, qc.testDb)
+		qc.invoiceSvc.BusinessSvc().NotifyBulkUploadFinished(
+			db,
+			payload.BusinessID,
+			payload.FileKey,
+			stats.TotalRows,
+			stats.ValidRows,
+			stats.SuccessfulInvoices,
+			stats.PartiallySuccessfulInvoices,
+			stats.UnsuccessfulInvoices,
+			stats.TotalErrors,
+			stats.Duration,
+		)
+	}
 
 	return nil
 }

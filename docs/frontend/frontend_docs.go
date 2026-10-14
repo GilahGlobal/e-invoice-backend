@@ -3168,6 +3168,107 @@ const docTemplatefrontend = `{
                 }
             }
         },
+        "/business/notification-preferences": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve the email notification preferences for the authenticated business",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Get Business Notification Preferences",
+                "responses": {
+                    "200": {
+                        "description": "Notification preferences retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/business.NotificationPreferenceResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Configure email notification preferences for the authenticated business",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Business"
+                ],
+                "summary": "Update Business Notification Preferences",
+                "parameters": [
+                    {
+                        "description": "Notification preferences payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/business.UpdateNotificationPreferenceDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification preferences updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/business.NotificationPreferenceResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/entity": {
             "get": {
                 "security": [
@@ -7690,6 +7791,66 @@ const docTemplatefrontend = `{
                 }
             }
         },
+        "business.NotificationPreferenceDto": {
+            "type": "object",
+            "properties": {
+                "bulk_upload_finished": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-01-16T12:00:00Z"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "b2c8f0e7-9b6a-4d1e-bd2a-2d0d6f9f93c7"
+                },
+                "invoice_validation_completed": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "invoice_validation_failed": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-01-16T12:30:00Z"
+                }
+            }
+        },
+        "business.NotificationPreferenceResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/business.NotificationPreferenceDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
         "business.PlatformConfigs": {
             "type": "object",
             "additionalProperties": {
@@ -7725,6 +7886,23 @@ const docTemplatefrontend = `{
                 "service_id": {
                     "type": "string",
                     "example": "6A2BC898"
+                }
+            }
+        },
+        "business.UpdateNotificationPreferenceDto": {
+            "type": "object",
+            "properties": {
+                "bulk_upload_finished": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "invoice_validation_completed": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "invoice_validation_failed": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },

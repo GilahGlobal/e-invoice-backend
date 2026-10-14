@@ -6,10 +6,13 @@ import (
 	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/data/entities"
 	"einvoice-access-point/internal/data/repositories"
+	"einvoice-access-point/internal/pkg/resend_email"
 	"einvoice-access-point/internal/utility"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -271,3 +274,158 @@ func (s *Service) ValidateInvoiceUploadSetup(db *gorm.DB, ownerID string) (*Invo
 		BmpUploadSelected: business.BmpUploadSelected,
 	}, nil
 }
+
+// GetNotificationPreferences returns the notification preferences for a business.
+func (s *Service) GetNotificationPreferences(db *gorm.DB, businessID string) (*NotificationPreferenceDto, error) {
+	pdb := dbinit.InitDB(db, false)
+	business, err := s.repo.FindUserByID(pdb, businessID)
+	if err != nil {
+		return nil, fmt.Errorf("business not found: %w", err)
+	}
+
+	pref, err := s.repo.GetNotificationPreference(pdb, businessID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get notification preferences: %w", err)
+	}
+
+	return &NotificationPreferenceDto{
+		ID:                         pref.ID,
+		BusinessID:                 pref.BusinessID,
+		Email:                      business.Email,
+		InvoiceValidationCompleted: pref.InvoiceValidationCompleted,
+		InvoiceValidationFailed:    pref.InvoiceValidationFailed,
+		BulkUploadFinished:         pref.BulkUploadFinished,
+		CreatedAt:                  pref.CreatedAt,
+		UpdatedAt:                  pref.UpdatedAt,
+	}, nil
+}
+
+// UpdateNotificationPreferences updates the notification preferences for a business.
+func (s *Service) UpdateNotificationPreferences(db *gorm.DB, businessID string, req UpdateNotificationPreferenceDto) (*NotificationPreferenceDto, error) {
+	pdb := dbinit.InitDB(db, false)
+	business, err := s.repo.FindUserByID(pdb, businessID)
+	if err != nil {
+		return nil, fmt.Errorf("business not found: %w", err)
+	}
+
+	pref, err := s.repo.GetNotificationPreference(pdb, businessID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get notification preferences: %w", err)
+	}
+
+	if req.InvoiceValidationCompleted != nil {
+		pref.InvoiceValidationCompleted = *req.InvoiceValidationCompleted
+	}
+	if req.InvoiceValidationFailed != nil {
+		pref.InvoiceValidationFailed = *req.InvoiceValidationFailed
+	}
+	if req.BulkUploadFinished != nil {
+		pref.BulkUploadFinished = *req.BulkUploadFinished
+	}
+
+	if err := s.repo.UpdateNotificationPreference(pdb, pref); err != nil {
+		return nil, fmt.Errorf("failed to update notification preferences: %w", err)
+	}
+
+	return &NotificationPreferenceDto{
+		ID:                         pref.ID,
+		BusinessID:                 pref.BusinessID,
+		Email:                      business.Email,
+		InvoiceValidationCompleted: pref.InvoiceValidationCompleted,
+		InvoiceValidationFailed:    pref.InvoiceValidationFailed,
+		BulkUploadFinished:         pref.BulkUploadFinished,
+		CreatedAt:                  pref.CreatedAt,
+		UpdatedAt:                  pref.UpdatedAt,
+	}, nil
+}
+
+// NotifyInvoiceValidationCompleted sends an asynchronous email when invoice validation succeeds, if preferred.
+func (s *Service) NotifyInvoiceValidationCompleted(db *gorm.DB, businessID, invoiceNumber, irn string, totalAmount float64) {
+	if s == nil || s.repo == nil || businessID == "" || db == nil {
+		return
+	}
+	pdb := dbinit.InitDB(db, false)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("recovered in NotifyInvoiceValidationCompleted: %v\n", r)
+			}
+		}()
+		pref, err := s.repo.GetNotificationPreference(pdb, businessID)
+		if err != nil || pref == nil || !pref.InvoiceValidationCompleted {
+			return
+		}
+		business, err := s.repo.FindUserByID(pdb, businessID)
+		if err != nil || business == nil || strings.TrimSpace(business.Email) == "" {
+			return
+		}
+		businessName := business.CompanyName
+		if strings.TrimSpace(businessName) == "" {
+			businessName = business.Name
+		}
+		if err := resend_email.SendInvoiceValidationCompletedEmail(business.Email, businessName, invoiceNumber, irn, totalAmount); err != nil {
+			log.Printf("Failed to send invoice validation completed email for invoice %s: %v\n", invoiceNumber, err)
+		}
+	}()
+}
+
+// NotifyInvoiceValidationFailed sends an asynchronous email when invoice validation fails, if preferred.
+func (s *Service) NotifyInvoiceValidationFailed(db *gorm.DB, businessID, invoiceNumber, failureReason string) {
+	if s == nil || s.repo == nil || businessID == "" || db == nil {
+		return
+	}
+	pdb := dbinit.InitDB(db, false)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("recovered in NotifyInvoiceValidationFailed: %v\n", r)
+			}
+		}()
+		pref, err := s.repo.GetNotificationPreference(pdb, businessID)
+		if err != nil || pref == nil || !pref.InvoiceValidationFailed {
+			return
+		}
+		business, err := s.repo.FindUserByID(pdb, businessID)
+		if err != nil || business == nil || strings.TrimSpace(business.Email) == "" {
+			return
+		}
+		businessName := business.CompanyName
+		if strings.TrimSpace(businessName) == "" {
+			businessName = business.Name
+		}
+		if err := resend_email.SendInvoiceValidationFailedEmail(business.Email, businessName, invoiceNumber, failureReason); err != nil {
+			log.Printf("Failed to send invoice validation failed email for invoice %s: %v\n", invoiceNumber, err)
+		}
+	}()
+}
+
+// NotifyBulkUploadFinished sends an asynchronous email when bulk invoice upload processing completes, if preferred.
+func (s *Service) NotifyBulkUploadFinished(db *gorm.DB, businessID, fileKey string, totalRows, validRows, successful, partial, failed, validationErrors int, duration time.Duration) {
+	if s == nil || s.repo == nil || businessID == "" || db == nil {
+		return
+	}
+	pdb := dbinit.InitDB(db, false)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("recovered in NotifyBulkUploadFinished: %v\n", r)
+			}
+		}()
+		pref, err := s.repo.GetNotificationPreference(pdb, businessID)
+		if err != nil || pref == nil || !pref.BulkUploadFinished {
+			return
+		}
+		business, err := s.repo.FindUserByID(pdb, businessID)
+		if err != nil || business == nil || strings.TrimSpace(business.Email) == "" {
+			return
+		}
+		businessName := business.CompanyName
+		if strings.TrimSpace(businessName) == "" {
+			businessName = business.Name
+		}
+		if err := resend_email.SendBulkUploadFinishedEmail(business.Email, businessName, fileKey, totalRows, validRows, successful, partial, failed, validationErrors, duration); err != nil {
+			log.Printf("Failed to send bulk upload finished email for file %s: %v\n", fileKey, err)
+		}
+	}()
+}
+

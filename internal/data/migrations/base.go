@@ -10,7 +10,6 @@ import (
 func RunAllMigrations(db *database.Database) {
 
 	MigrateModels(db.Postgresql.DB(), AuthMigrationModels(), AlterColumnModels())
-
 }
 
 func MigrateModels(db *gorm.DB, entities []interface{}, AlterColums []AlterColumn) {

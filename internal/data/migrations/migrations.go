@@ -18,6 +18,7 @@ func AuthMigrationModels() []interface{} {
 		&entities.Admin{},
 		&entities.ApiLog{},
 		&entities.BusinessAggregatorHistory{},
+		&entities.NotificationPreference{},
 	}
 
 }

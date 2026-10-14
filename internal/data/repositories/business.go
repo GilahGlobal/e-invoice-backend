@@ -3,6 +3,7 @@ package repositories
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -30,6 +31,8 @@ func (r *BusinessRepository) CreateBusiness(b *entities.Business, db database.Da
 	if err != nil {
 		return err
 	}
+	// Defensive check: ensure default notification preferences exist
+	_, _ = r.CreateDefaultNotificationPreference(db, b.ID)
 	return nil
 }
 
@@ -305,3 +308,41 @@ func (r *BusinessRepository) GetBusinessAggregatorHistory(db database.DatabaseMa
 	err := db.DB().Where("business_id = ?", businessID).Order("created_at DESC").Find(&histories).Error
 	return histories, err
 }
+
+// GetNotificationPreference fetches the notification preference for a business.
+// If no preference record exists yet, it creates and returns the default preference.
+func (r *BusinessRepository) GetNotificationPreference(db database.DatabaseManager, businessID string) (*entities.NotificationPreference, error) {
+	var pref entities.NotificationPreference
+	err := db.DB().Where("business_id = ?", businessID).First(&pref).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			defaultPref := entities.DefaultNotificationPreference(businessID)
+			if createErr := db.CreateOneRecord(defaultPref); createErr != nil {
+				return nil, createErr
+			}
+			return defaultPref, nil
+		}
+		return nil, err
+	}
+	return &pref, nil
+}
+
+// UpdateNotificationPreference updates a notification preference record.
+func (r *BusinessRepository) UpdateNotificationPreference(db database.DatabaseManager, pref *entities.NotificationPreference) error {
+	_, err := db.SaveAllFields(pref)
+	return err
+}
+
+// CreateDefaultNotificationPreference creates default notification preferences for a business if one does not exist.
+func (r *BusinessRepository) CreateDefaultNotificationPreference(db database.DatabaseManager, businessID string) (*entities.NotificationPreference, error) {
+	var count int64
+	if err := db.DB().Model(&entities.NotificationPreference{}).Where("business_id = ?", businessID).Count(&count).Error; err == nil && count > 0 {
+		return r.GetNotificationPreference(db, businessID)
+	}
+	defaultPref := entities.DefaultNotificationPreference(businessID)
+	if err := db.CreateOneRecord(defaultPref); err != nil {
+		return nil, err
+	}
+	return defaultPref, nil
+}
+
