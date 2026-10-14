@@ -30,16 +30,17 @@ type Business struct {
 	IRNPublicKey        common.EncryptedString `gorm:"column:irn_public_key;type:text" json:"-"`
 	IRNCertificate      common.EncryptedString `gorm:"column:irn_certificate;type:text" json:"-"`
 	KeysSet             bool                   `gorm:"column:keys_set;type:bool;default:false" json:"keys_set"`
-	PlatformConfigs     PlatformConfigs        `gorm:"type:jsonb;not null;default:'{}'" json:"platform_configs"`
-	Invoices            []Invoice              `gorm:"foreignKey:BusinessID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"invoices"`
-	AggregatorID        *string                `gorm:"column:aggregator_id;type:uuid;index" json:"aggregator_id,omitempty"`
-	EmailVerified       bool                   `gorm:"column:email_verified;type:bool;default:false" json:"email_verified"`
-	IsAggregator        bool                   `gorm:"column:is_aggregator;type:bool;default:false" json:"is_aggregator"`
-	CreatedByAggregator bool                   `gorm:"column:created_by_aggregator;type:bool;default:false" json:"created_by_aggregator"`
-	BmpUploadSelected   bool                   `gorm:"column:bmp_upload_selected;type:bool;default:false" json:"bmp_upload_selected"`
-	CreatedAt           time.Time              `gorm:"column:created_at;not null;autoCreateTime" json:"created_at"`
-	UpdatedAt           time.Time              `gorm:"column:updated_at;null;autoUpdateTime" json:"updated_at"`
-	DeletedAt           gorm.DeletedAt         `gorm:"index" json:"-"`
+	PlatformConfigs        PlatformConfigs         `gorm:"type:jsonb;not null;default:'{}'" json:"platform_configs"`
+	Invoices               []Invoice               `gorm:"foreignKey:BusinessID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"invoices"`
+	NotificationPreference *NotificationPreference `gorm:"foreignKey:BusinessID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"notification_preference,omitempty"`
+	AggregatorID           *string                 `gorm:"column:aggregator_id;type:uuid;index" json:"aggregator_id,omitempty"`
+	EmailVerified          bool                    `gorm:"column:email_verified;type:bool;default:false" json:"email_verified"`
+	IsAggregator           bool                    `gorm:"column:is_aggregator;type:bool;default:false" json:"is_aggregator"`
+	CreatedByAggregator    bool                    `gorm:"column:created_by_aggregator;type:bool;default:false" json:"created_by_aggregator"`
+	BmpUploadSelected      bool                    `gorm:"column:bmp_upload_selected;type:bool;default:false" json:"bmp_upload_selected"`
+	CreatedAt              time.Time               `gorm:"column:created_at;not null;autoCreateTime" json:"created_at"`
+	UpdatedAt              time.Time               `gorm:"column:updated_at;null;autoUpdateTime" json:"updated_at"`
+	DeletedAt              gorm.DeletedAt          `gorm:"index" json:"-"`
 }
 
 // PlatformConfigs represents the structure for platform-specific configurations
@@ -61,6 +62,16 @@ func (b *Business) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	return nil
+}
+
+// AfterCreate automatically creates default notification preferences for newly created businesses
+func (b *Business) AfterCreate(tx *gorm.DB) error {
+	var count int64
+	if err := tx.Model(&NotificationPreference{}).Where("business_id = ?", b.ID).Count(&count).Error; err == nil && count > 0 {
+		return nil
+	}
+	pref := DefaultNotificationPreference(b.ID)
+	return tx.Create(pref).Error
 }
 
 func (pc PlatformConfigs) Decrypt() (PlatformConfigs, error) {

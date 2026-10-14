@@ -1,0 +1,6665 @@
+definitions:
+  admin.AdminAggregatorInfoResponse:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminAggregatorInfoResponseDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminAggregatorInfoResponseDto:
+    properties:
+      aggregator:
+        $ref: '#/definitions/admin.AdminAggregatorResponseDto'
+      companies:
+        items:
+          $ref: '#/definitions/admin.AggregatorCompanyDto'
+        type: array
+      stats:
+        $ref: '#/definitions/admin.AggregatorStatsDto'
+    type: object
+  admin.AdminAggregatorInvitationDto:
+    properties:
+      company_name:
+        example: Example Name
+        type: string
+      created_at:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      id:
+        example: 76a73e5c-6fe0-4f83-9b95-715147812f65
+        type: string
+      industry:
+        example: string
+        type: string
+      status:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+    type: object
+  admin.AdminAggregatorInvitationsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminAggregatorInvitationDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminAggregatorInvoiceListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/entities.Invoice'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminAggregatorListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminAggregatorResponseDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminAggregatorResponseDto:
+    properties:
+      companies_managed:
+        example: 0
+        type: integer
+      company_name:
+        example: Example Name
+        type: string
+      created_at:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      id:
+        example: 8c596cb2-ac83-489a-bb00-10e0d83c0510
+        type: string
+      industry:
+        example: string
+        type: string
+      last_invoice_uploaded_at:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      status:
+        example: 1
+        type: integer
+      subscribed_plan:
+        example: string
+        type: string
+      tin:
+        example: 12345678-0001
+        type: string
+      total_invoices_managed:
+        example: 0
+        type: integer
+    type: object
+  admin.AdminBusinessAggregatorHistoryDto:
+    properties:
+      action:
+        type: string
+      aggregator_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+    type: object
+  admin.AdminBusinessAggregatorInfoResponse:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminBusinessAggregatorInfoResponseDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminBusinessAggregatorInfoResponseDto:
+    properties:
+      current_aggregator_id:
+        type: string
+      history:
+        items:
+          $ref: '#/definitions/admin.AdminBusinessAggregatorHistoryDto'
+        type: array
+    type: object
+  admin.AdminBusinessDailyStatsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminDailyInvoiceStatsDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminBusinessInfoResponse:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminBusinessInfoResponseDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminBusinessInfoResponseDto:
+    properties:
+      aggregator:
+        $ref: '#/definitions/admin.AdminAggregatorResponseDto'
+      business:
+        $ref: '#/definitions/admin.AdminBusinessResponseDto'
+    type: object
+  admin.AdminBusinessListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminBusinessResponseDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminBusinessResponseDto:
+    properties:
+      aggregator_id:
+        example: 8c596cb2-ac83-489a-bb00-10e0d83c0510
+        type: string
+      bmp_upload_selected:
+        example: true
+        type: boolean
+      business_id:
+        example: 4f7ba55f-1c44-4ac4-989e-1d5c3d948c16
+        type: string
+      company_name:
+        example: Example Name
+        type: string
+      created_at:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      id:
+        example: e4b7712b-1461-4ae1-aabd-a591ce653b8a
+        type: string
+      industry:
+        example: string
+        type: string
+      is_aggregator:
+        example: false
+        type: boolean
+      last_invoice_uploaded_at:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      name:
+        example: Example Name
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      service_id:
+        example: 8817a77d-22d9-4bcc-8b33-dcd1328e31e4
+        type: string
+      status:
+        example: 1
+        type: integer
+      subscribed_plan:
+        example: string
+        type: string
+      tin:
+        example: 12345678-0001
+        type: string
+      total_invoices_uploaded:
+        example: 0
+        type: integer
+    type: object
+  admin.AdminBusinessStatsDto:
+    properties:
+      total_aggregators:
+        example: 0
+        type: integer
+      total_businesses:
+        example: 0
+        type: integer
+    type: object
+  admin.AdminBusinessStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminBusinessStatsDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminCreateAggregatorDto:
+    properties:
+      company_name:
+        example: Example Name
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      industry:
+        example: string
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      tin:
+        example: 12345678-0001
+        type: string
+    required:
+    - company_name
+    - email
+    - tin
+    type: object
+  admin.AdminCreateBusinessDto:
+    properties:
+      company_name:
+        example: Example Name
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      industry:
+        example: string
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      tin:
+        example: 12345678-0001
+        type: string
+    required:
+    - company_name
+    - email
+    - tin
+    type: object
+  admin.AdminDailyInvoiceStatsDto:
+    properties:
+      date:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      failed_invoices:
+        example: 0
+        type: integer
+      partial_success_invoices:
+        example: 0
+        type: integer
+      success_invoices:
+        example: 0
+        type: integer
+    type: object
+  admin.AdminInvoiceListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/entities.MinimalInvoiceDTO'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminInvoiceStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/entities.InvoiceStatsResponseData'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminLoginRequestDto:
+    properties:
+      email:
+        example: admin@example.com
+        type: string
+      is_sandbox:
+        example: false
+        type: boolean
+      password:
+        example: password123
+        type: string
+    required:
+    - email
+    - is_sandbox
+    - password
+    type: object
+  admin.AdminLoginResponseDto:
+    properties:
+      access_token:
+        example: string
+        type: string
+      data:
+        $ref: '#/definitions/admin.AdminResponse'
+    type: object
+  admin.AdminOverviewStatsDto:
+    properties:
+      failed_invoices:
+        example: 0
+        type: integer
+      new_registrations:
+        example: 0
+        type: integer
+      partial_success_invoices:
+        example: 0
+        type: integer
+      success_invoices:
+        example: 0
+        type: integer
+      total_api_calls:
+        example: 0
+        type: integer
+      total_companies:
+        example: 0
+        type: integer
+      total_invoices:
+        example: 0
+        type: integer
+    type: object
+  admin.AdminOverviewStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/admin.AdminOverviewStatsDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminRegisterDto:
+    properties:
+      email:
+        example: admin@example.com
+        type: string
+      name:
+        example: Super Admin
+        type: string
+      password:
+        example: password123
+        minLength: 8
+        type: string
+      role_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - role_id
+    type: object
+  admin.AdminResponse:
+    properties:
+      email:
+        example: admin@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Super Admin
+        type: string
+      role:
+        example: superadmin
+        type: string
+      role_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  admin.AdminTransactionDto:
+    properties:
+      aggregator_id:
+        example: 74edb1a0-54f7-41ae-b68b-1904f9f64acf
+        type: string
+      amount:
+        example: 0
+        type: number
+      business_id:
+        example: 8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9
+        type: string
+      created_at:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+      currency:
+        example: string
+        type: string
+      id:
+        example: 0a0ecb8d-413a-4bf8-8b45-f86980c92e8f
+        type: string
+      plan:
+        example: string
+        type: string
+      plan_id:
+        example: 223f3eba-f611-4b8c-94e3-993b0201fa3f
+        type: string
+      provider:
+        example: 99a22e3e-371b-42cc-b77a-55b656af65f0
+        type: string
+      reference:
+        example: string
+        type: string
+      status:
+        example: "2023-10-12T07:20:50.52Z"
+        type: string
+    type: object
+  admin.AdminTransactionListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.AdminTransactionDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminUpdateBusinessDto:
+    properties:
+      acc_status:
+        type: integer
+      company_name:
+        example: Example Name
+        type: string
+      industry:
+        example: string
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      tin:
+        example: 12345678-0001
+        type: string
+    type: object
+  admin.AggregatorCompanyDto:
+    properties:
+      company_name:
+        example: Example Name
+        type: string
+      id:
+        example: 103e792c-c952-499d-a40c-9f3c237ac293
+        type: string
+      invoices_uploaded:
+        example: 0
+        type: integer
+      tin:
+        example: 12345678-0001
+        type: string
+    type: object
+  admin.AggregatorStatsDto:
+    properties:
+      companies_managed:
+        example: 0
+        type: integer
+      invoices_uploaded:
+        example: 0
+        type: integer
+      pending_invitations:
+        example: 0
+        type: integer
+    type: object
+  admin.RoleListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/admin.RoleResponseDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.RoleResponseDto:
+    properties:
+      description:
+        example: Super Administrator with full access
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: superadmin
+        type: string
+    type: object
+  aggregator.AggregatorActivityLogDto:
+    properties:
+      action:
+        example: single_invoice_upload
+        type: string
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      business_name:
+        example: Business Corp
+        type: string
+      created_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      details:
+        example: Uploaded invoice INV-001
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  aggregator.AggregatorActivityLogListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/aggregator.AggregatorActivityLogDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.AggregatorBulkUploadListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/entities.BulkUpload'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.AggregatorBusinessDetailDto:
+    properties:
+      accepted_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      company_name:
+        example: Business Corp
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      keys_set:
+        example: true
+        type: boolean
+      name:
+        example: Business Owner
+        type: string
+      phone_number:
+        example: "+2348012345678"
+        type: string
+      service_id:
+        example: 6A2BC898
+        type: string
+      tin:
+        example: TIN-123456789
+        type: string
+    type: object
+  aggregator.AggregatorBusinessFullDetailDto:
+    properties:
+      accepted_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      company_name:
+        example: Business Corp
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      keys_set:
+        example: true
+        type: boolean
+      name:
+        example: Business Owner
+        type: string
+      phone_number:
+        example: "+2348012345678"
+        type: string
+      service_id:
+        example: 6A2BC898
+        type: string
+      subscription:
+        $ref: '#/definitions/aggregator.BusinessSubscriptionInfoDto'
+      tin:
+        example: TIN-123456789
+        type: string
+      total_bulk_uploads:
+        example: 5
+        type: integer
+      total_invoices_uploaded:
+        example: 120
+        type: integer
+    type: object
+  aggregator.AggregatorBusinessListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/aggregator.AggregatorBusinessDetailDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.AggregatorDashboardDto:
+    properties:
+      pending_invitations:
+        example: 3
+        type: integer
+      total_bulk_uploads:
+        example: 25
+        type: integer
+      total_businesses:
+        example: 10
+        type: integer
+      total_invoices:
+        example: 500
+        type: integer
+    type: object
+  aggregator.AggregatorDashboardResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/aggregator.AggregatorDashboardDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.AggregatorGetInvoiceResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/entities.Invoice'
+      message:
+        example: Invoice details fetched successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  aggregator.AggregatorInvitationDto:
+    properties:
+      business_email:
+        example: business@example.com
+        type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      business_name:
+        example: Business Corp
+        type: string
+      created_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      status:
+        example: pending
+        type: string
+    type: object
+  aggregator.AggregatorInvitationListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/aggregator.AggregatorInvitationDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.AggregatorInvoiceListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/entities.MinimalInvoiceDTO'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.AggregatorInvoiceUploadResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/aggregator.InvoiceUploadData'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      metadata:
+        items:
+          $ref: '#/definitions/invoice.InvoiceStepMetadata'
+        type: array
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.AggregatorTransactionListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/aggregator.TransactionDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.BusinessInvitationDto:
+    properties:
+      aggregator_email:
+        example: aggregator@example.com
+        type: string
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      aggregator_name:
+        example: Aggregator Corp
+        type: string
+      created_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      status:
+        example: pending
+        type: string
+    type: object
+  aggregator.BusinessInvitationListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/aggregator.BusinessInvitationDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.BusinessSubscriptionInfoDto:
+    properties:
+      billing_cycle_days:
+        example: 30
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      next_billing_date:
+        example: "2026-05-01T00:00:00Z"
+        type: string
+      plan_amount:
+        example: 5000
+        type: number
+      plan_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      plan_name:
+        example: Starter
+        type: string
+      remaining_invoices:
+        example: 380
+        type: integer
+      total_invoices:
+        example: 500
+        type: integer
+      used_invoices:
+        example: 120
+        type: integer
+    type: object
+  aggregator.CreateBusinessDto:
+    properties:
+      company_name:
+        example: Acme Inc.
+        maxLength: 250
+        minLength: 2
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      name:
+        example: John Doe
+        maxLength: 250
+        minLength: 2
+        type: string
+      password:
+        example: Password123!
+        minLength: 6
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      tin:
+        example: "123456789"
+        type: string
+    required:
+    - company_name
+    - email
+    - name
+    - password
+    - phone_number
+    - tin
+    type: object
+  aggregator.CreateBusinessResponseDto:
+    properties:
+      message:
+        example: Business created successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 201
+        type: integer
+    type: object
+  aggregator.GetBulkUploadFailedInvoicesResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/bulk_upload.BulkUploadFailedInvoicesDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.GetBulkUploadLogsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/bulk_upload.BulkUploadLogDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        items:
+          $ref: '#/definitions/database.PaginationResponse'
+        type: array
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.GetInvoiceStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/entities.InvoiceStatsResponseData'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  aggregator.InvoiceUploadData:
+    properties:
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      invoice_number:
+        example: INV-1001
+        type: string
+      irn:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      qr_code:
+        example: iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN...
+        type: string
+      qr_code_2:
+        example: eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51...
+        type: string
+      qr_code_bmp_url:
+        example: https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp
+        type: string
+    type: object
+  aggregator.RespondToInvitationDto:
+    properties:
+      accept:
+        example: true
+        type: boolean
+      invitation_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    required:
+    - invitation_id
+    type: object
+  aggregator.SendAggregatorInvitationByEmailDto:
+    properties:
+      email:
+        example: aggregator@example.com
+        type: string
+    required:
+    - email
+    type: object
+  aggregator.SendAggregatorInvitationDto:
+    properties:
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    required:
+    - aggregator_id
+    type: object
+  aggregator.TransactionDto:
+    properties:
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      amount:
+        example: 5000
+        type: number
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      business_name:
+        example: Business Corp
+        type: string
+      created_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+      currency:
+        example: NGN
+        type: string
+      gateway_response:
+        example: Approved
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      plan:
+        example: Starter
+        type: string
+      plan_id:
+        example: plan_123
+        type: string
+      provider:
+        example: paystack
+        type: string
+      reference:
+        example: txn_123456789
+        type: string
+      status:
+        example: success
+        type: string
+      updated_at:
+        example: "2026-01-01T12:00:00Z"
+        type: string
+    type: object
+  apperror.AppError:
+    properties:
+      data: {}
+      err: {}
+      message:
+        type: string
+      status:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+  auth.AccountingPlatformConfigAuth:
+    properties:
+      api_key:
+        example: api-key-123456789
+        type: string
+      api_secret:
+        example: api-secret-123456789
+        type: string
+      auth_token:
+        example: auth-token-123456789
+        type: string
+      hmac_secret:
+        example: hmac-secret-123456789
+        type: string
+      org_id:
+        example: org-123456789
+        type: string
+    type: object
+  auth.BaseResponseDto:
+    properties:
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  auth.ChangePasswordDto:
+    properties:
+      new_password:
+        example: password123
+        minLength: 6
+        type: string
+      old_password:
+        example: password123
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  auth.CompleteForgotPasswordDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      otp:
+        example: "123456"
+        type: string
+      password:
+        example: password123
+        minLength: 6
+        type: string
+    required:
+    - email
+    - otp
+    - password
+    type: object
+  auth.InitiateForgotPasswordDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+    required:
+    - email
+    type: object
+  auth.LoginRequestDto:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      is_sandbox:
+        default: true
+        example: true
+        type: boolean
+      password:
+        example: password123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.LoginResponseDto:
+    properties:
+      access_token:
+        example: string
+        type: string
+      data:
+        $ref: '#/definitions/auth.UserResponse'
+      message:
+        example: Action performed successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  auth.PlatformConfigsAuth:
+    additionalProperties:
+      $ref: '#/definitions/auth.AccountingPlatformConfigAuth'
+    type: object
+  auth.RegisterDto:
+    properties:
+      company_name:
+        example: Acme Inc.
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      is_aggregator:
+        example: true
+        type: boolean
+      name:
+        example: John Doe
+        maxLength: 250
+        minLength: 2
+        type: string
+      password:
+        example: password123
+        minLength: 6
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      platform_configs:
+        $ref: '#/definitions/auth.PlatformConfigsAuth'
+      tin:
+        example: TIN-123456789
+        type: string
+    required:
+    - company_name
+    - email
+    - is_aggregator
+    - name
+    - password
+    - phone_number
+    - tin
+    type: object
+  auth.RegisterResponseDto:
+    properties:
+      message:
+        example: An otp has been sent to your mail, use it to verify your account
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  auth.ResendVerificationOtpDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+    required:
+    - email
+    type: object
+  auth.UserResponse:
+    properties:
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      is_aggregator:
+        example: true
+        type: boolean
+      is_sandbox:
+        example: true
+        type: boolean
+      keys_set:
+        example: true
+        type: boolean
+      name:
+        example: John Doe
+        type: string
+      service_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  auth.VerifyEmailDto:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      otp:
+        example: "123456"
+        type: string
+    required:
+    - email
+    - otp
+    type: object
+  bulk_upload.BulkUploadFailedInvoiceDto:
+    properties:
+      error:
+        type: object
+      invoice:
+        $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
+      invoice_index:
+        example: 1
+        type: integer
+      invoice_number:
+        example: VA12239
+        type: string
+      reason:
+        example: duplicate invoice sent
+        type: string
+      stage:
+        example: validated_invoice
+        type: string
+    type: object
+  bulk_upload.BulkUploadFailedInvoicesDto:
+    properties:
+      aggregator_id:
+        example: 4f6ec813-c898-49ce-8fc7-46f529a9354a
+        type: string
+      bulk_upload_id:
+        example: 019d28e5-bfad-7211-a56f-4e3376a67cf9
+        type: string
+      business_id:
+        example: ac0d4848-c898-49ce-8fc7-46f529a9354a
+        type: string
+      completed_at:
+        example: "2026-03-26T07:47:21.591765+01:00"
+        type: string
+      created_at:
+        example: "2026-03-26T07:47:19.286025+01:00"
+        type: string
+      failed_invoices:
+        items:
+          $ref: '#/definitions/bulk_upload.BulkUploadFailedInvoiceDto'
+        type: array
+      failed_invoices_count:
+        example: 3
+        type: integer
+      file_key:
+        example: invoices/sample.xlsx
+        type: string
+      file_url:
+        example: https://nexar-file-uploads.s3.amazonaws.com/invoices/sample.xlsx
+        type: string
+      partially_successful_invoices:
+        example: 1
+        type: integer
+      started_at:
+        example: "2026-03-26T07:47:21.584844+01:00"
+        type: string
+      status:
+        example: completed
+        type: string
+      successful_invoices:
+        example: 0
+        type: integer
+      total_records:
+        example: 4
+        type: integer
+      unsuccessful_invoices:
+        example: 3
+        type: integer
+      valid_records:
+        example: 3
+        type: integer
+    type: object
+  bulk_upload.BulkUploadLogDto:
+    properties:
+      business_id:
+        example: ac0d4848-c898-49ce-8fc7-46f529a9354a
+        type: string
+      completed_at:
+        example: "2026-03-26T07:47:21.591765+01:00"
+        type: string
+      created_at:
+        example: "2026-03-26T07:47:19.286025+01:00"
+        type: string
+      duration:
+        example: 6920833
+        type: integer
+      file_key:
+        example: invoices/sample.xlsx
+        type: string
+      file_url:
+        example: https://nexar-file-uploads.s3.amazonaws.com/invoices/sample.xlsx
+        type: string
+      id:
+        example: 019d28e5-bfad-7211-a56f-4e3376a67cf9
+        type: string
+      partially_successful_invoices:
+        example: 1
+        type: integer
+      started_at:
+        example: "2026-03-26T07:47:21.584844+01:00"
+        type: string
+      status:
+        example: completed
+        type: string
+      successful_invoices:
+        example: 0
+        type: integer
+      total_records:
+        example: 4
+        type: integer
+      unsuccessful_invoices:
+        example: 3
+        type: integer
+      valid_records:
+        example: 3
+        type: integer
+      validation_error_count:
+        example: 1
+        type: integer
+      validation_errors:
+        items:
+          $ref: '#/definitions/bulk_upload.BulkUploadValidationErrorDto'
+        type: array
+    type: object
+  bulk_upload.BulkUploadValidationErrorDto:
+    properties:
+      error:
+        example: 'invoice VA12239: validation failed: Key: ''UploadInvoiceRequestDto.InvoiceTypeCode''
+          Error:Field validation for ''InvoiceTypeCode'' failed on the ''oneof'' tag'
+        type: string
+      invoice:
+        $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
+      invoice_index:
+        example: 1
+        type: integer
+      invoice_number:
+        example: VA12239
+        type: string
+      stage:
+        example: validation
+        type: string
+    type: object
+  bulk_upload.GetBulkUploadFailedInvoicesResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/bulk_upload.BulkUploadFailedInvoicesDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  bulk_upload.GetBulkUploadLogsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/bulk_upload.BulkUploadLogDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        items:
+          $ref: '#/definitions/database.PaginationResponse'
+        type: array
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  business.AccountingPlatformConfig:
+    properties:
+      api_key:
+        example: api-key-123456789
+        type: string
+      auth_token:
+        example: auth-token-123456789
+        type: string
+      hmac_secret:
+        example: hmac-secret-123456789
+        type: string
+      org_id:
+        example: org-123456789
+        type: string
+    type: object
+  business.BusinessSimpleDto:
+    properties:
+      business_id:
+        example: 4f7ba55f-1c44-4ac4-989e-1d5c3d948c16
+        type: string
+      business_name:
+        example: Acme Corp
+        type: string
+      id:
+        example: e4b7712b-1461-4ae1-aabd-a591ce653b8a
+        type: string
+    type: object
+  business.BusinessSimpleListResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/business.BusinessSimpleDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  business.GetBusinessResponseDto:
+    properties:
+      acc_status:
+        example: active
+        type: string
+      api_key:
+        example: sk_test_12345
+        type: string
+      business_id:
+        example: BUS-12345
+        type: string
+      company_name:
+        example: Acme Inc.
+        maxLength: 250
+        type: string
+      created_at:
+        example: "2026-01-16T12:00:00Z"
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      id:
+        example: b2c8f0e7-9b6a-4d1e-bd2a-2d0d6f9f93c7
+        type: string
+      irn_signing_configured:
+        example: true
+        type: boolean
+      name:
+        example: Acme Inc.
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      platform_configs:
+        $ref: '#/definitions/business.PlatformConfigs'
+      service_id:
+        example: SRV-98765
+        type: string
+      tin:
+        example: "123456789"
+        type: string
+      updated_at:
+        example: "2026-01-16T12:30:00Z"
+        type: string
+    type: object
+  business.NotificationPreferenceDto:
+    properties:
+      bulk_upload_finished:
+        example: true
+        type: boolean
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      created_at:
+        example: "2026-01-16T12:00:00Z"
+        type: string
+      effective_email:
+        example: business@example.com
+        type: string
+      email:
+        example: notifications@example.com
+        type: string
+      id:
+        example: b2c8f0e7-9b6a-4d1e-bd2a-2d0d6f9f93c7
+        type: string
+      invoice_validation_completed:
+        example: true
+        type: boolean
+      invoice_validation_failed:
+        example: true
+        type: boolean
+      updated_at:
+        example: "2026-01-16T12:30:00Z"
+        type: string
+    type: object
+  business.NotificationPreferenceResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/business.NotificationPreferenceDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  business.PlatformConfigs:
+    additionalProperties:
+      $ref: '#/definitions/business.AccountingPlatformConfig'
+    type: object
+  business.UpdateBusinessDto:
+    properties:
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      company_name:
+        example: Acme Inc.
+        maxLength: 250
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      name:
+        example: John Doe
+        maxLength: 250
+        minLength: 2
+        type: string
+      phone_number:
+        example: "+1234567890"
+        type: string
+      service_id:
+        example: 6A2BC898
+        type: string
+    type: object
+  business.UpdateNotificationPreferenceDto:
+    properties:
+      bulk_upload_finished:
+        example: true
+        type: boolean
+      email:
+        example: notifications@example.com
+        type: string
+      invoice_validation_completed:
+        example: true
+        type: boolean
+      invoice_validation_failed:
+        example: true
+        type: boolean
+    type: object
+  business.UploadBusinessIRNSigningKeysDataDto:
+    properties:
+      environment:
+        example: production
+        type: string
+      file_name:
+        example: crypto_keys.txt
+        type: string
+      irn_signing_configured:
+        example: true
+        type: boolean
+    type: object
+  business.UploadBusinessIRNSigningKeysResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/business.UploadBusinessIRNSigningKeysDataDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  database.PaginationResponse:
+    properties:
+      current_page:
+        type: integer
+      page_count:
+        type: integer
+      total_pages_count:
+        type: integer
+    type: object
+  entities.BulkUpload:
+    properties:
+      aggregator_id:
+        type: string
+      business_id:
+        type: string
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      duration:
+        type: string
+      file_key:
+        type: string
+      file_url:
+        type: string
+      id:
+        type: string
+      partially_successful_invoices:
+        type: integer
+      started_at:
+        type: string
+      status:
+        type: string
+      successful_invoices:
+        type: integer
+      total_records:
+        type: integer
+      unsuccessful_invoices:
+        type: integer
+      valid_records:
+        type: integer
+      validation_error_count:
+        type: integer
+      validation_errors:
+        type: object
+    type: object
+  entities.CurrencyStatsDto:
+    properties:
+      currency:
+        example: NGN
+        type: string
+      failed_invoices:
+        example: 20
+        type: integer
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      tax_amount:
+        example: 37500
+        type: number
+      total_amount:
+        example: 500000
+        type: number
+      total_invoices:
+        example: 150
+        type: integer
+    type: object
+  entities.DailyInvoiceStatsDto:
+    properties:
+      currencies:
+        items:
+          $ref: '#/definitions/entities.CurrencyStatsDto'
+        type: array
+      date:
+        example: "2024-01-01"
+        type: string
+      failed_invoices:
+        example: 20
+        type: integer
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      total_amount_by_currency:
+        type: object
+      total_invoices:
+        example: 150
+        type: integer
+    type: object
+  entities.Invoice:
+    properties:
+      aggregator_id:
+        type: string
+      business_id:
+        type: string
+      created_at:
+        type: string
+      current_status:
+        type: string
+      encrypted_irn:
+        type: string
+      id:
+        type: string
+      invoice_data:
+        type: object
+      invoice_number:
+        type: string
+      irn:
+        type: string
+      issue_date:
+        type: string
+      payment_status:
+        type: string
+      platform:
+        description: e.g., zoho, quickbooks
+        type: string
+      platform_metadata:
+        type: object
+      qr_code:
+        type: string
+      qr_code_bmp_url:
+        type: string
+      status_history:
+        type: object
+      tax_amount:
+        type: number
+      timestamp:
+        type: string
+      total_amount:
+        type: number
+      updated_at:
+        type: string
+    type: object
+  entities.InvoiceStatsDto:
+    properties:
+      currencies:
+        items:
+          $ref: '#/definitions/entities.CurrencyStatsDto'
+        type: array
+      failed_invoices:
+        example: 20
+        type: integer
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      total_amount_by_currency:
+        type: object
+      total_invoices:
+        example: 150
+        type: integer
+    type: object
+  entities.InvoiceStatsResponseData:
+    properties:
+      daily:
+        items:
+          $ref: '#/definitions/entities.DailyInvoiceStatsDto'
+        type: array
+      monthly:
+        items:
+          $ref: '#/definitions/entities.MonthlyInvoiceStatsDto'
+        type: array
+      total:
+        $ref: '#/definitions/entities.InvoiceStatsDto'
+      total_amount_by_currency:
+        type: object
+    type: object
+  entities.MinimalInvoiceDTO:
+    properties:
+      created_at:
+        type: string
+      current_status:
+        type: string
+      id:
+        type: string
+      invoice_number:
+        type: string
+      irn:
+        type: string
+      issue_date:
+        type: string
+      metadata:
+        items:
+          $ref: '#/definitions/entities.StatusHistoryEntry'
+        type: array
+      payment_status:
+        type: string
+      platform:
+        type: string
+      qr_code:
+        type: string
+      qr_code_bmp_url:
+        type: string
+      status_text:
+        type: string
+      tax_amount:
+        type: number
+      total_amount:
+        type: number
+    type: object
+  entities.MonthlyInvoiceStatsDto:
+    properties:
+      currencies:
+        items:
+          $ref: '#/definitions/entities.CurrencyStatsDto'
+        type: array
+      failed_invoices:
+        example: 20
+        type: integer
+      month:
+        example: "202401"
+        type: string
+      partial_invoices:
+        example: 30
+        type: integer
+      successful_invoices:
+        example: 100
+        type: integer
+      total_amount_by_currency:
+        type: object
+      total_invoices:
+        example: 150
+        type: integer
+    type: object
+  entities.Ping:
+    properties:
+      message:
+        type: string
+    type: object
+  entities.Response:
+    properties:
+      data: {}
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  entities.StatusHistoryEntry:
+    properties:
+      message:
+        type: string
+      status:
+        description: success | pending | failed
+        type: string
+      step:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  entities.SubscriptionPlan:
+    properties:
+      amount:
+        type: number
+      billing_cycle:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      total_invoices:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  firs_models.AllowanceCharge:
+    properties:
+      amount:
+        example: 1500.75
+        type: number
+      charge_indicator:
+        example: true
+        type: boolean
+    required:
+    - amount
+    type: object
+  firs_models.BulkUpdateFailedItem:
+    properties:
+      error:
+        type: string
+      irn:
+        type: string
+    type: object
+  firs_models.BulkUpdateInvoiceItem:
+    properties:
+      irn:
+        type: string
+      payment_status:
+        enum:
+        - PENDING
+        - PAID
+        - REJECTED
+        type: string
+      reference:
+        type: string
+    required:
+    - irn
+    - payment_status
+    type: object
+  firs_models.BulkUpdateInvoiceRequest:
+    properties:
+      invoices:
+        items:
+          $ref: '#/definitions/firs_models.BulkUpdateInvoiceItem'
+        minItems: 1
+        type: array
+    required:
+    - invoices
+    type: object
+  firs_models.BulkUpdateInvoiceResponse:
+    properties:
+      failed:
+        items:
+          $ref: '#/definitions/firs_models.BulkUpdateFailedItem'
+        type: array
+      successful:
+        items:
+          type: string
+        type: array
+    type: object
+  firs_models.DocumentReference:
+    properties:
+      irn:
+        example: ITW001-E9E0C0D3-20240619
+        type: string
+      issue_date:
+        example: "2026-01-16"
+        type: string
+    required:
+    - irn
+    - issue_date
+    type: object
+  firs_models.FirsTransactionVatPayload:
+    properties:
+      agentTin:
+        type: string
+      baseAmount:
+        type: string
+      beneficiaryTin:
+        type: string
+      currency:
+        type: integer
+      itemDescription:
+        type: string
+      otherTaxes:
+        type: string
+      totalAmount:
+        type: string
+      transDate:
+        type: string
+      vatCalculated:
+        type: string
+      vatRate:
+        type: string
+      vatStatus:
+        type: integer
+      vendorTransactionId:
+        type: string
+    type: object
+  firs_models.GenerateIRNRequestData:
+    properties:
+      invoice_number:
+        type: string
+    required:
+    - invoice_number
+    type: object
+  firs_models.IRNSigningRequestData:
+    properties:
+      irn:
+        type: string
+    type: object
+  firs_models.InvoiceDeliveryPeriod:
+    properties:
+      end_date:
+        example: "2026-01-16"
+        type: string
+      start_date:
+        example: "2026-01-16"
+        type: string
+    required:
+    - end_date
+    - start_date
+    type: object
+  firs_models.InvoiceLine:
+    properties:
+      discount_amount:
+        example: 2500
+        type: number
+      discount_rate:
+        example: 5
+        type: number
+      fee_amount:
+        example: 450
+        type: number
+      fee_rate:
+        example: 2
+        type: number
+      hsn_code:
+        example: "1282.10"
+        type: string
+      invoiced_quantity:
+        example: 10
+        minimum: 1
+        type: integer
+      item:
+        $ref: '#/definitions/firs_models.Item'
+      line_extension_amount:
+        example: 1500.75
+        type: number
+      price:
+        $ref: '#/definitions/firs_models.Price'
+      product_category:
+        example: Electronics
+        type: string
+    required:
+    - hsn_code
+    - invoiced_quantity
+    - item
+    - line_extension_amount
+    - price
+    - product_category
+    type: object
+  firs_models.Item:
+    properties:
+      description:
+        example: A high-performance laptop suitable for gaming and work.
+        type: string
+      name:
+        example: Laptop
+        type: string
+      sellers_item_identification:
+        example: LAP-12345
+        type: string
+    required:
+    - name
+    type: object
+  firs_models.LegalMonetaryTotal:
+    properties:
+      line_extension_amount:
+        example: 1500.75
+        type: number
+      payable_amount:
+        example: 1700.75
+        type: number
+      tax_exclusive_amount:
+        example: 1500.75
+        type: number
+      tax_inclusive_amount:
+        example: 1700.75
+        type: number
+    required:
+    - line_extension_amount
+    - payable_amount
+    - tax_exclusive_amount
+    - tax_inclusive_amount
+    type: object
+  firs_models.Party:
+    properties:
+      business_description:
+        example: Acme Inc. is a leading technology company.
+        minLength: 5
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      party_name:
+        example: Acme Inc.
+        minLength: 2
+        type: string
+      postal_address:
+        $ref: '#/definitions/firs_models.PostalAddress'
+      telephone:
+        example: "+234804567890"
+        minLength: 7
+        type: string
+      tin:
+        example: "123456789012345"
+        type: string
+    required:
+    - email
+    - party_name
+    - postal_address
+    - tin
+    type: object
+  firs_models.PaymentMeans:
+    properties:
+      payment_due_date:
+        example: "2026-01-16"
+        type: string
+      payment_means_code:
+        example: "10"
+        type: string
+    required:
+    - payment_due_date
+    - payment_means_code
+    type: object
+  firs_models.PostalAddress:
+    properties:
+      city_name:
+        example: Ikeja
+        type: string
+      country:
+        example: NG
+        type: string
+      lga:
+        example: NG-AB-ANO
+        type: string
+      postal_zone:
+        example: "10001"
+        type: string
+      state:
+        example: NG-AB
+        type: string
+      street_name:
+        example: 123 Broad Street
+        type: string
+    required:
+    - city_name
+    - country
+    - lga
+    - postal_zone
+    - state
+    - street_name
+    type: object
+  firs_models.Price:
+    properties:
+      base_quantity:
+        example: 1
+        type: integer
+      price_amount:
+        example: 5000
+        type: number
+      price_unit:
+        example: NGN per 1
+        type: string
+    required:
+    - base_quantity
+    - price_amount
+    - price_unit
+    type: object
+  firs_models.TaxCategory:
+    properties:
+      id:
+        enum:
+        - STANDARD_GST
+        - REDUCED_GST
+        - ZERO_GST
+        - STANDARD_VAT
+        - REDUCED_VAT
+        - ZERO_VAT
+        - STATE_SALES_TAX
+        - LOCAL_SALES_TAX
+        - ALCOHOL_EXCISE_TAX
+        - TOBACCO_EXCISE_TAX
+        - FUEL_EXCISE_TAX
+        - CORPORATE_INCOME_TAX
+        - PERSONAL_INCOME_TAX
+        - SOCIAL_SECURITY_TAX
+        - MEDICARE_TAX
+        - REAL_ESTATE_TAX
+        - PERSONAL_PROPERTY_TAX
+        - CARBON_TAX
+        - PLASTIC_TAX
+        - IMPORT_DUTY
+        - EXPORT_DUTY
+        - LUXURY_TAX
+        - SERVICE_TAX
+        - TOURISM_TAX
+        - WITHHOLDING_TAX
+        - STAMP_DUTY
+        - EXEMPTED
+        - ZERO_RATED
+        example: STANDARD_VAT
+        type: string
+      percent:
+        example: 15
+        type: number
+    required:
+    - id
+    - percent
+    type: object
+  firs_models.TaxSubtotal:
+    properties:
+      tax_amount:
+        type: number
+      tax_category:
+        $ref: '#/definitions/firs_models.TaxCategory'
+      taxable_amount:
+        type: number
+    required:
+    - tax_amount
+    - tax_category
+    - taxable_amount
+    type: object
+  firs_models.TaxTotal:
+    properties:
+      tax_amount:
+        example: 1500.75
+        type: number
+      tax_subtotal:
+        items:
+          $ref: '#/definitions/firs_models.TaxSubtotal'
+        type: array
+    required:
+    - tax_amount
+    type: object
+  firs_models.UpdateInvoice:
+    properties:
+      payment_status:
+        enum:
+        - PENDING
+        - PAID
+        - REJECTED
+        - PARTIAL
+        type: string
+      reference:
+        type: string
+    required:
+    - payment_status
+    type: object
+  firs_models.UploadInvoiceRequestDto:
+    properties:
+      accounting_cost:
+        example: "2000"
+        type: string
+      accounting_customer_party:
+        $ref: '#/definitions/firs_models.Party'
+      accounting_supplier_party:
+        $ref: '#/definitions/firs_models.Party'
+      actual_delivery_date:
+        example: "2026-01-16"
+        type: string
+      additional_document_reference:
+        items:
+          $ref: '#/definitions/firs_models.DocumentReference'
+        type: array
+      allowance_charge:
+        items:
+          $ref: '#/definitions/firs_models.AllowanceCharge'
+        type: array
+      billing_reference:
+        items:
+          $ref: '#/definitions/firs_models.DocumentReference'
+        type: array
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      buyer_reference:
+        example: ITW001-E9E0C0D3-20240619
+        type: string
+      contract_document_reference:
+        $ref: '#/definitions/firs_models.DocumentReference'
+      dispatch_document_reference:
+        $ref: '#/definitions/firs_models.DocumentReference'
+      document_currency_code:
+        example: NGN
+        type: string
+      due_date:
+        example: "2026-01-20"
+        type: string
+      invoice_delivery_period:
+        $ref: '#/definitions/firs_models.InvoiceDeliveryPeriod'
+      invoice_kind:
+        enum:
+        - B2C
+        - B2B
+        - B2G
+        - G2B
+        example: B2B
+        type: string
+      invoice_line:
+        items:
+          $ref: '#/definitions/firs_models.InvoiceLine'
+        type: array
+      invoice_number:
+        example: INV-001
+        minLength: 1
+        type: string
+      invoice_type_code:
+        enum:
+        - "380"
+        - "381"
+        - "384"
+        - "385"
+        - "386"
+        - "388"
+        - "389"
+        - "390"
+        - "392"
+        - "393"
+        - "394"
+        - "395"
+        - "396"
+        - "397"
+        - "399"
+        - "400"
+        - "402"
+        - "404"
+        - "406"
+        - "408"
+        example: "381"
+        type: string
+      irn:
+        example: IRN-001-20122345
+        type: string
+      issue_date:
+        example: "2026-01-16"
+        type: string
+      issue_time:
+        example: "12:00:00"
+        type: string
+      legal_monetary_total:
+        $ref: '#/definitions/firs_models.LegalMonetaryTotal'
+      note:
+        example: Invoice note
+        type: string
+      order_reference:
+        example: ITW001-E9E0C0D3-20240619
+        type: string
+      originator_document_reference:
+        $ref: '#/definitions/firs_models.DocumentReference'
+      payee_party:
+        $ref: '#/definitions/firs_models.Party'
+      payment_means:
+        items:
+          $ref: '#/definitions/firs_models.PaymentMeans'
+        type: array
+      payment_status:
+        enum:
+        - PENDING
+        - PAID
+        - REJECTED
+        example: PENDING
+        type: string
+      payment_terms_note:
+        example: Payment terms note
+        type: string
+      receipt_document_reference:
+        $ref: '#/definitions/firs_models.DocumentReference'
+      tax_currency_code:
+        example: NGN
+        type: string
+      tax_point_date:
+        example: "2026-01-16"
+        type: string
+      tax_representative_party:
+        $ref: '#/definitions/firs_models.Party'
+      tax_total:
+        items:
+          $ref: '#/definitions/firs_models.TaxTotal'
+        type: array
+    required:
+    - accounting_supplier_party
+    - business_id
+    - document_currency_code
+    - invoice_kind
+    - invoice_line
+    - invoice_type_code
+    - issue_date
+    - legal_monetary_total
+    - tax_currency_code
+    - tax_total
+    type: object
+  firs_models.VerifyTinData:
+    properties:
+      tin:
+        type: string
+    required:
+    - tin
+    type: object
+  invoice.BulkUpdateInvoiceResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/firs_models.BulkUpdateInvoiceResponse'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.GetAllInvoicesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/invoice.InvoiceListItem'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination:
+        $ref: '#/definitions/database.PaginationResponse'
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.GetInvoiceDetailsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/entities.Invoice'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.GetInvoiceStatsResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/entities.InvoiceStatsResponseData'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  invoice.InvoiceListItem:
+    properties:
+      created_at:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+      current_status:
+        example: validated_irn
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      invoice_number:
+        example: INV-1001
+        type: string
+      irn:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      issue_date:
+        example: "2026-01-16"
+        type: string
+      metadata:
+        items:
+          $ref: '#/definitions/invoice.InvoiceStepMetadata'
+        type: array
+      payment_status:
+        example: PENDING
+        type: string
+      platform:
+        example: zoho
+        type: string
+      qr_code:
+        example: iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN...
+        type: string
+      qr_code_bmp_url:
+        example: https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp
+        type: string
+      status_text:
+        example: success
+        type: string
+      tax_amount:
+        example: 150
+        type: number
+      total_amount:
+        example: 1700.75
+        type: number
+    type: object
+  invoice.InvoiceStepMetadata:
+    properties:
+      message:
+        example: IRN validated successfully
+        type: string
+      status:
+        example: success
+        type: string
+      step:
+        example: validated_irn
+        type: string
+      timestamp:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+    type: object
+  invoice.InvoiceUploadData:
+    properties:
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      invoice_number:
+        example: INV-1001
+        type: string
+      irn:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      qr_code:
+        example: iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN...
+        type: string
+      qr_code_2:
+        example: eeleGz7LXrt3gignmXGi9DAeXoVS7GjMR/8WK4f8G76DSP14SA2PSyArr4oaS6ojo0EqCTlp2UBjT2eRpn51...
+        type: string
+      qr_code_bmp_url:
+        example: https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp
+        type: string
+    type: object
+  invoice.UploadInvoiceResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/invoice.InvoiceUploadData'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      metadata:
+        items:
+          $ref: '#/definitions/invoice.InvoiceStepMetadata'
+        type: array
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.CountriesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.CountryItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.CountryItemDto:
+    properties:
+      alpha_2:
+        example: AF
+        type: string
+      alpha_3:
+        example: AFG
+        type: string
+      country_code:
+        example: "004"
+        type: string
+      intermediate_region:
+        example: ""
+        type: string
+      intermediate_region_code:
+        example: ""
+        type: string
+      iso_3166_2:
+        example: ISO 3166-2:AF
+        type: string
+      name:
+        example: Afghanistan
+        type: string
+      region:
+        example: Asia
+        type: string
+      region_code:
+        example: "142"
+        type: string
+      sub_region:
+        example: Southern Asia
+        type: string
+      sub_region_code:
+        example: "034"
+        type: string
+    type: object
+  resources.CurrenciesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.CurrencyItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.CurrencyItemDto:
+    properties:
+      code:
+        example: USD
+        type: string
+      decimal_digits:
+        example: 2
+        type: integer
+      name:
+        example: US Dollar
+        type: string
+      name_plural:
+        example: US dollars
+        type: string
+      rounding:
+        example: 0
+        type: integer
+      symbol:
+        example: $
+        type: string
+      symbol_native:
+        example: $
+        type: string
+    type: object
+  resources.HSNCodesItemDto:
+    properties:
+      description:
+        example: Horses; live, pure-bred breeding animals
+        type: string
+      hscode:
+        example: "0101.21"
+        type: string
+    type: object
+  resources.HSNCodesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.HSNCodesItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.InvoiceQuantityCodeItemDto:
+    properties:
+      code:
+        example: "10"
+        type: string
+      description:
+        example: 'A unit of count defining the number of groups (group: set of items
+          classified together).'
+        type: string
+      name:
+        example: group
+        type: string
+    type: object
+  resources.InvoiceQuantityCodesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.InvoiceQuantityCodeItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.LGAItemDto:
+    properties:
+      code:
+        example: NG-AB-ANO
+        type: string
+      name:
+        example: Aba North
+        type: string
+      state_code:
+        example: NG-AB
+        type: string
+    type: object
+  resources.LGAsResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.LGAItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.ResourceItemDto:
+    properties:
+      code:
+        example: "380"
+        type: string
+      value:
+        example: Credit Note
+        type: string
+    type: object
+  resources.ResourcesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.ResourceItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.ServiceCodesItemDto:
+    properties:
+      code:
+        example: "0111"
+        type: string
+      description:
+        example: Growing of cereals (except rice), leguminous crops and oil seeds
+        type: string
+    type: object
+  resources.ServiceCodesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.ServiceCodesItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.StateItemDto:
+    properties:
+      code:
+        example: NG-AB
+        type: string
+      name:
+        example: Abia
+        type: string
+    type: object
+  resources.StatesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.StateItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.TaxCategoriesResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/resources.TaxCategoryItemDto'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  resources.TaxCategoryItemDto:
+    properties:
+      code:
+        example: STANDARD_GST
+        type: string
+      percent:
+        example: Not Available
+        type: string
+      value:
+        example: Standard Goods and Services Tax
+        type: string
+    type: object
+  subscription.AggregatorSubscribeDataDto:
+    properties:
+      authorization_url:
+        example: https://checkout.paystack.com/...
+        type: string
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      plan_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      provider:
+        example: paystack
+        type: string
+      transaction_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      transaction_ref:
+        example: aggsub_1712345678_abcdef
+        type: string
+    type: object
+  subscription.AggregatorSubscribeRequestDto:
+    properties:
+      business_id:
+        example: 657cf2f1-46e5-4977-a6a6-484a691866d5
+        type: string
+      plan_id:
+        example: f435c4ed-694e-4d4a-8d1e-75be3bb5e43b
+        type: string
+    required:
+    - business_id
+    - plan_id
+    type: object
+  subscription.AggregatorSubscribeResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/subscription.AggregatorSubscribeDataDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  subscription.CreateSubscriptionPlanDataDto:
+    properties:
+      is_sandbox:
+        example: true
+        type: boolean
+      plan:
+        $ref: '#/definitions/entities.SubscriptionPlan'
+    type: object
+  subscription.CreateSubscriptionPlanDto:
+    properties:
+      amount:
+        example: 0
+        type: number
+      billing_cycle:
+        example: 0
+        type: integer
+      is_sandbox:
+        type: boolean
+      name:
+        example: Example Name
+        type: string
+      total_invoices:
+        example: 0
+        type: integer
+    required:
+    - amount
+    - billing_cycle
+    - is_sandbox
+    - name
+    - total_invoices
+    type: object
+  subscription.CreateSubscriptionPlanResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/subscription.CreateSubscriptionPlanDataDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  subscription.SubscriptionPlansResponseDto:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/entities.SubscriptionPlan'
+        type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  utility.Response:
+    properties:
+      body:
+        items:
+          format: int32
+          type: integer
+        type: array
+      statusCode:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /admin/aggregators:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of all aggregators in the system.
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Search query
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminAggregatorListResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: List Aggregators
+      tags:
+      - Admin Queries
+    post:
+      consumes:
+      - application/json
+      description: Creates a new aggregator (admin only).
+      parameters:
+      - description: Aggregator request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminCreateAggregatorDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Aggregator created successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Create Aggregator
+      tags:
+      - Admin Operations
+  /admin/aggregators/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns stats and associated companies for an aggregator.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminAggregatorInfoResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Aggregator Info
+      tags:
+      - Admin Queries
+    put:
+      consumes:
+      - application/json
+      description: Updates aggregator details and status.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Aggregator update payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminUpdateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Aggregator updated successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Update Aggregator
+      tags:
+      - Admin Operations
+  /admin/aggregators/invitations/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns pending invitations sent by an aggregator.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminAggregatorInvitationsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Aggregator Invitations
+      tags:
+      - Admin Queries
+  /admin/aggregators/invoices/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of invoices for a specific aggregator
+        ID.
+      parameters:
+      - description: Aggregator ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminAggregatorInvoiceListResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: List Invoices by Aggregator
+      tags:
+      - Admin Queries
+  /admin/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login for admins
+      parameters:
+      - description: Login request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminLoginRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: '#/definitions/admin.AdminLoginResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Login Admin
+      tags:
+      - Admin Auth
+  /admin/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new admin (Requires SuperAdmin privileges)
+      parameters:
+      - description: Register request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminRegisterDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Admin created successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Register Admin
+      tags:
+      - Admin Auth
+  /admin/businesses:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of all businesses in the system.
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Search query
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessListResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: List Businesses
+      tags:
+      - Admin Queries
+    post:
+      consumes:
+      - application/json
+      description: Creates a new business (admin only).
+      parameters:
+      - description: Business request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminCreateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Business created successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Create Business
+      tags:
+      - Admin Operations
+  /admin/businesses/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns business details and associated aggregator info for a business.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessInfoResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Business Info
+      tags:
+      - Admin Queries
+    put:
+      consumes:
+      - application/json
+      description: Updates business details and status.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Business update payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminUpdateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business updated successfully
+          schema:
+            $ref: '#/definitions/utility.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Update Business
+      tags:
+      - Admin Operations
+  /admin/businesses/aggregator/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns current aggregator ID and relationship history for a business.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessAggregatorInfoResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Business Aggregator Info
+      tags:
+      - Admin Queries
+  /admin/businesses/invoices/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of invoices for a specific business ID.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminInvoiceListResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: List Invoices by Business
+      tags:
+      - Admin Queries
+  /admin/businesses/stats{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns daily invoice stats (last 14 days) and aggregated stats
+        for a specific business.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessDailyStatsResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Business Daily Invoice Stats
+      tags:
+      - Admin Queries
+  /admin/roles:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all roles available for admin users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Roles retrieved successfully
+          schema:
+            $ref: '#/definitions/admin.RoleListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve all roles
+      tags:
+      - Admin Roles
+  /admin/stats/businesses:
+    get:
+      consumes:
+      - application/json
+      description: Returns system-wide business statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminBusinessStatsResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: System Business Stats
+      tags:
+      - Admin Queries
+  /admin/stats/invoices:
+    get:
+      consumes:
+      - application/json
+      description: Returns system-wide invoice statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminInvoiceStatsResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: System Invoice Stats
+      tags:
+      - Admin Queries
+  /admin/stats/overview:
+    get:
+      consumes:
+      - application/json
+      description: Returns overview stats for invoices, companies, API calls, and
+        registrations based on timeframe.
+      parameters:
+      - description: 'Timeframe: today, 7_days, 30_days, custom'
+        in: query
+        name: timeframe
+        type: string
+      - description: Custom start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Custom end date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminOverviewStatsResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Admin Overview Stats
+      tags:
+      - Admin Queries
+  /admin/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated list of all subscription transactions in the
+        system.
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AdminTransactionListResponseDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: List Transactions
+      tags:
+      - Admin Queries
+  /aggregator/activity-log:
+    get:
+      description: Fetch the activity logs sequence for the aggregator
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Activity logs fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorActivityLogListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Activity Log
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads:
+    get:
+      description: Gets all bulk uploads across all businesses uploaded by this aggregator
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk uploads fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorBulkUploadListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: List All Bulk Uploads
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads/{bulk_id}/failed:
+    get:
+      description: Gets the failed invoices recorded for a specific bulk upload uploaded
+        by this aggregator
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk upload failed invoices fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.GetBulkUploadFailedInvoicesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get failed invoices from a bulk upload
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads/{bulk_id}/failed/download:
+    get:
+      description: Download the failed invoices recorded for a specific bulk upload
+        uploaded by this aggregator as csv or excel
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      - description: Export format
+        enum:
+        - csv
+        - excel
+        - xlsx
+        in: query
+        name: format
+        type: string
+      produces:
+      - text/csv
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: Bulk upload failed invoices file
+          schema:
+            type: file
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Download failed invoices from a bulk upload
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads/{business_id}:
+    get:
+      description: Gets bulk uploads uploaded by aggregator for a specific business
+      parameters:
+      - description: Business ID
+        in: path
+        name: business_id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk uploads fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.GetBulkUploadLogsResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: List Bulk Uploads by Business
+      tags:
+      - Aggregator Portal
+  /aggregator/bulk-uploads/{id}:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Bulk invoices upload for a managed business
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invoice JSON file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Invoice uploaded successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Bulk Upload Initializer
+      tags:
+      - Aggregator Portal
+  /aggregator/businesses:
+    get:
+      description: List accepted businesses for an aggregator
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Businesses fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorBusinessListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: List Businesses
+      tags:
+      - Aggregator Portal
+    post:
+      consumes:
+      - application/json
+      description: Creates a new business and associates it with the calling aggregator
+      parameters:
+      - description: Business details
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/aggregator.CreateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Business created successfully
+          schema:
+            $ref: '#/definitions/aggregator.CreateBusinessResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a business under aggregator
+      tags:
+      - Aggregator Portal
+  /aggregator/businesses/{id}:
+    delete:
+      description: Remove an accepted business from the aggregator
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business removed successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove Business
+      tags:
+      - Aggregator Portal
+    get:
+      description: Get details for a single accepted business
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorBusinessFullDetailDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Business Detail
+      tags:
+      - Aggregator Portal
+    patch:
+      consumes:
+      - multipart/form-data
+      description: Upload crypto keys and/or set service ID and business ID for a
+        managed business. At least one field must be provided.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Crypto keys document (optional)
+        in: formData
+        name: file
+        type: file
+      - description: IRN Public Key as string (optional)
+        in: formData
+        name: irn_public_key
+        type: string
+      - description: IRN Certificate as string (optional)
+        in: formData
+        name: irn_certificate
+        type: string
+      - description: Service ID (optional)
+        in: formData
+        name: service_id
+        type: string
+      - description: Business ID / FIRS identifier (optional)
+        in: formData
+        name: business_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business setup updated successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "404":
+          description: Business not found
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Update Business Setup
+      tags:
+      - Aggregator Portal
+  /aggregator/businesses/{id}/stats:
+    get:
+      consumes:
+      - application/json
+      description: Returns overall statistics for invoices including total, partial,
+        successful, and failed for a specific business managed by the aggregator.
+      parameters:
+      - description: Business ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice statistics fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.GetInvoiceStatsResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get invoice statistics for a specific business under an aggregator
+      tags:
+      - Aggregator Portal
+  /aggregator/dashboard:
+    get:
+      description: Fetch high level stats for aggregator dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard stats fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorDashboardResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Dashboard Stats
+      tags:
+      - Aggregator Portal
+  /aggregator/invitations:
+    get:
+      description: Fetch all pending invitations for the aggregator
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitations fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorInvitationListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: List Invitations
+      tags:
+      - Aggregator Portal
+  /aggregator/invitations/respond:
+    post:
+      consumes:
+      - application/json
+      description: Accept or reject an invitation
+      parameters:
+      - description: Invitation Response payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/aggregator.RespondToInvitationDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Responded to invitation successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Respond to Invitation
+      tags:
+      - Aggregator Portal
+  /aggregator/invoices:
+    get:
+      description: Gets all invoices across all businesses uploaded by this aggregator
+        with optional issue date filtering
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Filter by specific issue date (YYYY-MM-DD)
+        in: query
+        name: issue_date
+        type: string
+      - description: Filter by start issue date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Filter by end issue date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      - description: Filter by from issue date (YYYY-MM-DD)
+        in: query
+        name: from_date
+        type: string
+      - description: Filter by to issue date (YYYY-MM-DD)
+        in: query
+        name: to_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoices fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorInvoiceListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: List All Invoices
+      tags:
+      - Aggregator Portal
+  /aggregator/invoices/{id}:
+    get:
+      description: Gets invoices uploaded by aggregator for a specific business with
+        optional issue date filtering
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Filter by specific issue date (YYYY-MM-DD)
+        in: query
+        name: issue_date
+        type: string
+      - description: Filter by start issue date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Filter by end issue date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      - description: Filter by from issue date (YYYY-MM-DD)
+        in: query
+        name: from_date
+        type: string
+      - description: Filter by to issue date (YYYY-MM-DD)
+        in: query
+        name: to_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoices fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorInvoiceListResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: List Business Invoices
+      tags:
+      - Aggregator Portal
+    post:
+      consumes:
+      - application/json
+      description: Upload a single invoice for a managed business
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invoice payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Invoice generated successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorInvoiceUploadResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Upload Invoice
+      tags:
+      - Aggregator Portal
+  /aggregator/invoices/single/{invoice_id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the full details of a specific invoice uploaded by the
+        aggregator
+      parameters:
+      - description: Invoice ID
+        in: path
+        name: invoice_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice details fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorGetInvoiceResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get specific invoice details for aggregator
+      tags:
+      - Aggregator Portal
+  /aggregator/stats:
+    get:
+      consumes:
+      - application/json
+      description: Returns overall statistics for invoices including total, partial,
+        successful, and failed for all businesses under the aggregator.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice statistics fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.GetInvoiceStatsResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get invoice statistics for aggregator
+      tags:
+      - Aggregator Portal
+  /aggregator/subscription/plans:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves active plans available for aggregator subscriptions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Plans fetched successfully
+          schema:
+            $ref: '#/definitions/subscription.SubscriptionPlansResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: List Aggregator Subscription Plans
+      tags:
+      - Aggregator Subscription
+  /aggregator/subscription/subscribe:
+    post:
+      consumes:
+      - application/json
+      description: Initializes a Paystack transaction for an aggregator-managed business
+        subscription plan
+      parameters:
+      - description: Subscribe request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/subscription.AggregatorSubscribeRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription initialized successfully
+          schema:
+            $ref: '#/definitions/subscription.AggregatorSubscribeResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "502":
+          description: Bad gateway
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Subscribe A Managed Business To A Plan
+      tags:
+      - Aggregator Subscription
+  /aggregator/transactions:
+    get:
+      description: Gets all transaction history for the aggregator
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transactions fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorTransactionListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: List All Transactions
+      tags:
+      - Aggregator Portal
+  /auth/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change the password of an authenticated user by verifying the old
+        password first
+      parameters:
+      - description: Change password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ChangePasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: password changed successfully
+          schema:
+            $ref: '#/definitions/auth.BaseResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Change Password
+      tags:
+      - Auth
+  /auth/complete-forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Complete forgot password process
+      parameters:
+      - description: Complete forgot password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/auth.CompleteForgotPasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: forgot password complete successfully
+          schema:
+            $ref: '#/definitions/auth.BaseResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Complete Forgot Password
+      tags:
+      - Auth
+  /auth/initiate-forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Initiate forgot password process
+      parameters:
+      - description: Forgot password request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/auth.InitiateForgotPasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: forgot password initiated successfully
+          schema:
+            $ref: '#/definitions/auth.BaseResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Initiate Forgot Password
+      tags:
+      - Auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login to the system
+      parameters:
+      - description: Login request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successfully
+          schema:
+            $ref: '#/definitions/auth.LoginResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Login
+      tags:
+      - Auth
+      x-external: true
+  /auth/logout:
+    get:
+      consumes:
+      - application/json
+      description: Logout from the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user logout successfully
+          schema:
+            $ref: '#/definitions/auth.BaseResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Logout
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Onboard to the system
+      parameters:
+      - description: Register request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Registered successfully
+          schema:
+            $ref: '#/definitions/auth.RegisterResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Register
+      tags:
+      - Auth
+  /auth/resend-otp:
+    post:
+      consumes:
+      - application/json
+      description: Resend email verification OTP
+      parameters:
+      - description: Resend verification OTP payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ResendVerificationOtpDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP sent successfully
+          schema:
+            $ref: '#/definitions/auth.BaseResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Resend verification OTP
+      tags:
+      - Auth
+  /auth/toggle-mode:
+    get:
+      description: Toggle Application mode from either sandox to prod or vice cers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Application mode toggled successfully
+          schema:
+            $ref: '#/definitions/auth.LoginResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Toggle Application mode
+      tags:
+      - Auth
+  /auth/verify-email:
+    post:
+      consumes:
+      - application/json
+      description: Verify email of business accounts
+      parameters:
+      - description: Verify Email request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/auth.VerifyEmailDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Verified successfully
+          schema:
+            $ref: '#/definitions/auth.LoginResponseDto'
+        "400":
+          description: Bad request, validation failed
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Verify Email of Business Accounts
+      tags:
+      - Auth
+  /business:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a specific business
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business retrieved successfully
+          schema:
+            $ref: '#/definitions/business.GetBusinessResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "404":
+          description: Business not found
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Business Details
+      tags:
+      - Business
+    patch:
+      consumes:
+      - application/json
+      description: Update Business Details
+      parameters:
+      - description: Update business details request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/business.UpdateBusinessDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business updated successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "404":
+          description: Business not found
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Update Business Details
+      tags:
+      - Business
+  /business/aggregators:
+    get:
+      description: Fetch all available aggregators
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Aggregators fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.AggregatorInvitationListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: List Available Aggregators
+      tags:
+      - Business Aggregator Portal
+  /business/aggregators/invitations:
+    get:
+      description: Fetch all sent invitations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitations fetched successfully
+          schema:
+            $ref: '#/definitions/aggregator.BusinessInvitationListResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: List Sent Invitations
+      tags:
+      - Business Aggregator Portal
+  /business/aggregators/invitations/{id}:
+    delete:
+      description: Revoke an invitation
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitation revoked successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Revoke Invitation
+      tags:
+      - Business Aggregator Portal
+  /business/aggregators/invite:
+    post:
+      description: Send an invitation to an aggregator
+      parameters:
+      - description: Send aggregator invitation request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/aggregator.SendAggregatorInvitationDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitation sent successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Send Invitation
+      tags:
+      - Business Aggregator Portal
+  /business/aggregators/invite-by-email:
+    post:
+      description: Send an invitation to an aggregator by their email. If they do
+        not exist, creates a profile for them.
+      parameters:
+      - description: Send aggregator invitation by email request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/aggregator.SendAggregatorInvitationByEmailDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitation sent successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Send Invitation By Email
+      tags:
+      - Business Aggregator Portal
+  /business/all:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve an unpaginated list of all businesses with id, business_name,
+        and business_id
+      parameters:
+      - description: Query sandbox database
+        in: query
+        name: is_sandbox
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Businesses retrieved successfully
+          schema:
+            $ref: '#/definitions/business.BusinessSimpleListResponseDto'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Get All Businesses (Simple & Unauthenticated)
+      tags:
+      - Business
+  /business/crypto-keys:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads the crypto keys document for a business and stores the
+        public_key and certificate values
+      parameters:
+      - description: Crypto keys document
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Business IRN signing keys uploaded successfully
+          schema:
+            $ref: '#/definitions/business.UploadBusinessIRNSigningKeysResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Upload Business IRN Signing Keys
+      tags:
+      - Business
+  /business/notification-preferences:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the email notification preferences for the authenticated
+        business
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification preferences retrieved successfully
+          schema:
+            $ref: '#/definitions/business.NotificationPreferenceResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Business Notification Preferences
+      tags:
+      - Business
+    patch:
+      consumes:
+      - application/json
+      description: Configure email notification preferences for the authenticated
+        business
+      parameters:
+      - description: Notification preferences payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/business.UpdateNotificationPreferenceDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification preferences updated successfully
+          schema:
+            $ref: '#/definitions/business.NotificationPreferenceResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Validation failed
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Update Business Notification Preferences
+      tags:
+      - Business
+  /entity:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of entities
+      parameters:
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: reference
+        type: string
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: sortBy
+        type: string
+      - in: query
+        name: sortDirectionDesc
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Entities retrieved successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Entities
+      tags:
+      - Entity
+  /entity/{entity_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a specific entity using its ID
+      parameters:
+      - description: Entity ID
+        in: path
+        name: entity_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Entity retrieved successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "404":
+          description: Entity not found
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Entity by ID
+      tags:
+      - Entity
+  /entity/vat-payment:
+    post:
+      consumes:
+      - application/json
+      description: Submit VAT payment details to FIRS
+      parameters:
+      - description: VAT payment request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.FirsTransactionVatPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: VAT payment processed successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Validation failed
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Post VAT Payment
+      tags:
+      - Entity
+  /entity/verify-tin:
+    post:
+      consumes:
+      - application/json
+      description: Verify a taxpayer identification number (TIN)
+      parameters:
+      - description: TIN verification request
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.VerifyTinData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TIN verified successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Validation failed
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Verify TIN
+      tags:
+      - Entity
+  /health:
+    get:
+      description: Performs a basic service availability check.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ping successful
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: ping failed
+          schema:
+            $ref: '#/definitions/entities.Response'
+      summary: Health check (GET)
+      tags:
+      - Health
+    post:
+      consumes:
+      - application/json
+      description: Accepts a ping message and validates connectivity.
+      parameters:
+      - description: Ping request payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Ping'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ping successful
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: invalid request or validation failed
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: ping failed
+          schema:
+            $ref: '#/definitions/entities.Response'
+      summary: Health check (POST)
+      tags:
+      - Health
+  /health/firs:
+    get:
+      description: Calls external FIRS API to confirm connectivity.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ping successful
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: invalid response from FIRS API
+          schema:
+            $ref: '#/definitions/entities.Response'
+      summary: FIRS API Health Check
+      tags:
+      - Health
+  /invoice:
+    get:
+      description: Fetch all invoices for the authenticated user/business with optional
+        issue date filtering
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Filter by specific issue date (YYYY-MM-DD)
+        in: query
+        name: issue_date
+        type: string
+      - description: Filter by start issue date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Filter by end issue date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      - description: Filter by from issue date (YYYY-MM-DD)
+        in: query
+        name: from_date
+        type: string
+      - description: Filter by to issue date (YYYY-MM-DD)
+        in: query
+        name: to_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/invoice.GetAllInvoicesResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get All Invoices
+      tags:
+      - Invoice
+      x-external: true
+    post:
+      consumes:
+      - application/json
+      description: Submit an invoice payload to generate/sign the IRN, validate with
+        NRS, and process for transmission
+      parameters:
+      - description: Invoice Upload Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/invoice.UploadInvoiceResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Submit and Process Invoice
+      tags:
+      - Invoice
+      x-external: true
+  /invoice/{invoice_id}:
+    delete:
+      description: Delete a specific invoice by ID
+      parameters:
+      - description: Invoice ID
+        in: path
+        name: invoice_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete Invoice
+      tags:
+      - Invoice
+    get:
+      description: Fetch invoice details by its ID for the authenticated user/business
+      parameters:
+      - description: Invoice ID
+        in: path
+        name: invoice_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/invoice.GetInvoiceDetailsResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Invoice Details
+      tags:
+      - Invoice
+      x-external: true
+    put:
+      consumes:
+      - application/json
+      description: Modify an existing invoice payload
+      parameters:
+      - description: Invoice ID
+        in: path
+        name: invoice_id
+        required: true
+        type: string
+      - description: Invoice Modify Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Modify Invoice
+      tags:
+      - Invoice
+      x-external: true
+  /invoice/bulk-upload:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve paginated bulk upload logs for a business
+      parameters:
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: reference
+        type: string
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: sortBy
+        type: string
+      - in: query
+        name: sortDirectionDesc
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk upload logs fetched successfully
+          schema:
+            $ref: '#/definitions/bulk_upload.GetBulkUploadLogsResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get bulk upload logs
+      tags:
+      - Invoice
+  /invoice/bulk-upload/{bulk_id}/failed:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the failed invoices recorded for a specific bulk upload
+        belonging to the authenticated business
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bulk upload failed invoices fetched successfully
+          schema:
+            $ref: '#/definitions/bulk_upload.GetBulkUploadFailedInvoicesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get failed invoices from a bulk upload
+      tags:
+      - Invoice
+  /invoice/bulk-upload/{bulk_id}/failed/download:
+    get:
+      description: Download the failed invoices recorded for a specific bulk upload
+        belonging to the authenticated business as csv or excel
+      parameters:
+      - description: Bulk upload ID
+        in: path
+        name: bulk_id
+        required: true
+        type: string
+      - description: Export format
+        enum:
+        - csv
+        - excel
+        - xlsx
+        in: query
+        name: format
+        type: string
+      produces:
+      - text/csv
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: Bulk upload failed invoices file
+          schema:
+            type: file
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "404":
+          description: Bulk upload not found
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Download failed invoices from a bulk upload
+      tags:
+      - Invoice
+  /invoice/confirm/{irn}:
+    get:
+      description: Confirm an invoice
+      parameters:
+      - description: IRN
+        in: path
+        name: irn
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Confirm Invoice
+      tags:
+      - Invoice
+  /invoice/create:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a JSON invoice file and store it in DB
+      parameters:
+      - description: Invoice JSON File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice created successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new Invoice
+      tags:
+      - Internal Invoice
+  /invoice/download/{irn}:
+    get:
+      description: Download invoice as PDF
+      parameters:
+      - description: IRN
+        in: path
+        name: irn
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Download Invoice
+      tags:
+      - Invoice
+      x-external: true
+  /invoice/generate-irn:
+    post:
+      consumes:
+      - application/json
+      description: Generate IRN for an invoice
+      parameters:
+      - description: Generate IRN Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.GenerateIRNRequestData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Generate IRN
+      tags:
+      - Invoice
+      x-external: true
+  /invoice/sign:
+    post:
+      consumes:
+      - application/json
+      description: Sign invoice directly
+      parameters:
+      - description: Sign Invoice Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Sign Invoice
+      tags:
+      - Invoice
+      x-external: true
+  /invoice/sign-irn:
+    post:
+      consumes:
+      - application/json
+      description: Sign IRN request data
+      parameters:
+      - description: Sign IRN Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.IRNSigningRequestData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Sign IRN
+      tags:
+      - Invoice
+      x-external: true
+  /invoice/stats:
+    get:
+      description: Get statistics for invoices
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/invoice.GetInvoiceStatsResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Invoice Stats
+      tags:
+      - Invoice
+  /invoice/transmit/{irn}:
+    post:
+      description: Transmit an invoice by IRN
+      parameters:
+      - description: IRN
+        in: path
+        name: irn
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Transmit Invoice
+      tags:
+      - Invoice
+  /invoice/transmit/confirm/{irn}:
+    get:
+      description: Confirm a transmitted invoice by IRN
+      parameters:
+      - description: IRN
+        in: path
+        name: irn
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Confirm Transmitted Invoice
+      tags:
+      - Invoice
+  /invoice/transmit/health-check:
+    get:
+      description: Health check for FIRS transmission
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Transmit Health Check
+      tags:
+      - Invoice
+  /invoice/transmit/lookup-irn/{irn}:
+    get:
+      description: Look up an invoice by IRN
+      parameters:
+      - description: IRN
+        in: path
+        name: irn
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Look Up IRN
+      tags:
+      - Invoice
+  /invoice/transmit/lookup-party/{party_id}:
+    get:
+      description: Look up by Party ID
+      parameters:
+      - description: Party ID
+        in: path
+        name: party_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Look Up Party ID
+      tags:
+      - Invoice
+  /invoice/transmit/lookup-tin/{tin}:
+    get:
+      description: Look up by TIN
+      parameters:
+      - description: TIN
+        in: path
+        name: tin
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Look Up TIN
+      tags:
+      - Invoice
+  /invoice/transmit/pull:
+    get:
+      description: Pull transmitted invoices
+      parameters:
+      - description: Start Date
+        in: query
+        name: start_date
+        type: string
+      - description: End Date
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Pull Transmitted Invoices
+      tags:
+      - Invoice
+  /invoice/update:
+    patch:
+      consumes:
+      - application/json
+      description: Update multiple invoices at once
+      parameters:
+      - description: Bulk Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.BulkUpdateInvoiceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/invoice.BulkUpdateInvoiceResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Bulk Update Invoices
+      tags:
+      - Invoice
+      x-external: true
+  /invoice/update/{irn}:
+    patch:
+      consumes:
+      - application/json
+      description: Update existing invoice using IRN
+      parameters:
+      - description: IRN
+        in: path
+        name: irn
+        required: true
+        type: string
+      - description: Update Invoice Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.UpdateInvoice'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Update Invoice by IRN
+      tags:
+      - Invoice
+      x-external: true
+  /invoice/validate:
+    post:
+      consumes:
+      - application/json
+      description: Validates an invoice payload
+      parameters:
+      - description: Invoice Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Validate Invoice
+      tags:
+      - Invoice
+      x-external: true
+  /invoice/validate-irn:
+    post:
+      consumes:
+      - application/json
+      description: Validate IRN for invoice data
+      parameters:
+      - description: Invoice Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Validate IRN
+      tags:
+      - Invoice
+      x-external: true
+  /resources/countries:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all countries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.CountriesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Countries
+      tags:
+      - Resources
+      x-external: true
+  /resources/currencies:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all currencies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.CurrenciesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Currencies
+      tags:
+      - Resources
+      x-external: true
+  /resources/hsn-codes:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all HSN codes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.HSNCodesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve HSN Codes
+      tags:
+      - Resources
+      x-external: true
+  /resources/invoice-quantity:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all invoice quantity codes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.InvoiceQuantityCodesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Invoice Quantity Codes
+      tags:
+      - Resources
+      x-external: true
+  /resources/invoice-types:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all invoice types
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.ResourcesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Invoice Types
+      tags:
+      - Resources
+      x-external: true
+  /resources/lgas:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all Local Government Areas
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.LGAsResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve LGAs
+      tags:
+      - Resources
+      x-external: true
+  /resources/payment-means:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all payment means
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.ResourcesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Payment Means
+      tags:
+      - Resources
+      x-external: true
+  /resources/service-codes:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all service codes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.ServiceCodesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Service Codes
+      tags:
+      - Resources
+      x-external: true
+  /resources/states:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all states
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.StatesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve States
+      tags:
+      - Resources
+      x-external: true
+  /resources/tax-categories:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all tax categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Fetched successfully
+          schema:
+            $ref: '#/definitions/resources.TaxCategoriesResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve Tax Categories
+      tags:
+      - Resources
+      x-external: true
+  /subscription/plans:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all available subscription plans
+      parameters:
+      - description: Use sandbox database (true/false)
+        in: query
+        name: is_sandbox
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Plans fetched successfully
+          schema:
+            $ref: '#/definitions/subscription.SubscriptionPlansResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      summary: List Subscription Plans
+      tags:
+      - Subscription
+    post:
+      consumes:
+      - application/json
+      description: Creates a subscription plan in the specified environment database
+      parameters:
+      - description: Create plan request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/subscription.CreateSubscriptionPlanDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Plan created successfully
+          schema:
+            $ref: '#/definitions/subscription.CreateSubscriptionPlanResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      summary: Create Subscription Plan
+      tags:
+      - Subscription
+  /zoho/auth/access-token:
+    get:
+      consumes:
+      - application/json
+      description: Exchange an authorization code for a Zoho access token and save
+        it to the database.
+      parameters:
+      - description: Authorization Code returned from Zoho OAuth
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: Zoho Organization ID
+        in: query
+        name: organisation_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token generated successfully
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "400":
+          description: Bad request (missing code or organisation_id)
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Zoho Access Token
+      tags:
+      - Zoho
+swagger: "2.0"

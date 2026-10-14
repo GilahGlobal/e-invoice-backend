@@ -1675,6 +1675,49 @@ definitions:
         example: "2026-01-16T12:30:00Z"
         type: string
     type: object
+  business.NotificationPreferenceDto:
+    properties:
+      bulk_upload_finished:
+        example: true
+        type: boolean
+      business_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      created_at:
+        example: "2026-01-16T12:00:00Z"
+        type: string
+      email:
+        example: business@example.com
+        type: string
+      id:
+        example: b2c8f0e7-9b6a-4d1e-bd2a-2d0d6f9f93c7
+        type: string
+      invoice_validation_completed:
+        example: true
+        type: boolean
+      invoice_validation_failed:
+        example: true
+        type: boolean
+      updated_at:
+        example: "2026-01-16T12:30:00Z"
+        type: string
+    type: object
+  business.NotificationPreferenceResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/business.NotificationPreferenceDto'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
   business.PlatformConfigs:
     additionalProperties:
       $ref: '#/definitions/business.AccountingPlatformConfig'
@@ -1702,6 +1745,18 @@ definitions:
       service_id:
         example: 6A2BC898
         type: string
+    type: object
+  business.UpdateNotificationPreferenceDto:
+    properties:
+      bulk_upload_finished:
+        example: true
+        type: boolean
+      invoice_validation_completed:
+        example: true
+        type: boolean
+      invoice_validation_failed:
+        example: true
+        type: boolean
     type: object
   business.UploadBusinessIRNSigningKeysDataDto:
     properties:
@@ -5157,6 +5212,72 @@ paths:
       security:
       - BearerAuth: []
       summary: Upload Business IRN Signing Keys
+      tags:
+      - Business
+  /business/notification-preferences:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the email notification preferences for the authenticated
+        business
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification preferences retrieved successfully
+          schema:
+            $ref: '#/definitions/business.NotificationPreferenceResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Business Notification Preferences
+      tags:
+      - Business
+    patch:
+      consumes:
+      - application/json
+      description: Configure email notification preferences for the authenticated
+        business
+      parameters:
+      - description: Notification preferences payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/business.UpdateNotificationPreferenceDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification preferences updated successfully
+          schema:
+            $ref: '#/definitions/business.NotificationPreferenceResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Validation failed
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Update Business Notification Preferences
       tags:
       - Business
   /entity:

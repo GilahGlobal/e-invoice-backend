@@ -24,6 +24,9 @@ func BusinessRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 		businessUrlSec.Get("", rf, businessController.GetBusiness)
 		businessUrlSec.Patch("", rf, businessController.UpdateBusinessProfile)
 
+		businessUrlSec.Get("/notification-preferences", rf, businessController.GetNotificationPreferences)
+		businessUrlSec.Patch("/notification-preferences", rf, businessController.UpdateNotificationPreferences)
+
 		businessUrlSec.Post("/crypto-keys", rf, businessController.UploadIRNSigningKeys)
 		aggregatorController := aggregator.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB, c.Config)
 		aggregators := businessUrlSec.Group("/aggregators", rf)

@@ -718,10 +718,20 @@ func (s *Service) FirsAllInOneProcess(payload firs_models.UploadInvoiceRequestDt
 	if err != nil {
 		stageErr := formatFirsError("failed to validate invoice", theErr, err)
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		if s.businessSvc != nil {
+			s.businessSvc.NotifyInvoiceValidationFailed(db, invoiceModel.BusinessID, invoiceModel.InvoiceNumber, utility.ExtractRelevantErrorMessage(stageErr))
+		}
 		return stageErr, false
 	}
 
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
+	if s.businessSvc != nil {
+		irn := invoiceModel.IRN
+		if irn == "" && payload.IRN != nil {
+			irn = *payload.IRN
+		}
+		s.businessSvc.NotifyInvoiceValidationCompleted(db, invoiceModel.BusinessID, invoiceModel.InvoiceNumber, irn, invoiceModel.TotalAmount)
+	}
 
 	_, theErr, err = s.SignInvoice(payload, isSandbox)
 	if err != nil {
@@ -765,10 +775,20 @@ func (s *Service) UncompletedFirsProcesses(db *gorm.DB, currentStatus string, pa
 		if err != nil {
 			stageErr := formatFirsError("failed to validate invoice", theErr, err)
 			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+			if s.businessSvc != nil {
+				s.businessSvc.NotifyInvoiceValidationFailed(db, invoiceModel.BusinessID, invoiceModel.InvoiceNumber, utility.ExtractRelevantErrorMessage(stageErr))
+			}
 			return stageErr, false
 		}
 
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
+		if s.businessSvc != nil {
+			irn := invoiceModel.IRN
+			if irn == "" && payload.IRN != nil {
+				irn = *payload.IRN
+			}
+			s.businessSvc.NotifyInvoiceValidationCompleted(db, invoiceModel.BusinessID, invoiceModel.InvoiceNumber, irn, invoiceModel.TotalAmount)
+		}
 
 		_, theErr, err = s.SignInvoice(payload, isSandbox)
 		if err != nil {
@@ -898,9 +918,19 @@ func (s *Service) otherFirsProcesses(payload zoho.WebhookPayload, business *enti
 	if err != nil {
 		stageErr := formatFirsError("failed to validate invoice", theErr, err)
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
+		if s.businessSvc != nil {
+			s.businessSvc.NotifyInvoiceValidationFailed(db, invoiceModel.BusinessID, invoiceModel.InvoiceNumber, utility.ExtractRelevantErrorMessage(stageErr))
+		}
 		return stageErr
 	}
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
+	if s.businessSvc != nil {
+		irn := invoiceModel.IRN
+		if irn == "" && newInvoiceResp.IRN != nil {
+			irn = *newInvoiceResp.IRN
+		}
+		s.businessSvc.NotifyInvoiceValidationCompleted(db, invoiceModel.BusinessID, invoiceModel.InvoiceNumber, irn, invoiceModel.TotalAmount)
+	}
 
 	_, theErr, err = s.SignInvoice(newInvoiceResp, isSandBox)
 	if err != nil {

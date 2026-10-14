@@ -1,6 +1,10 @@
 package business
 
-import "einvoice-access-point/internal/data/entities"
+import (
+	"time"
+
+	"einvoice-access-point/internal/data/entities"
+)
 
 type UpdateBusinessDto struct {
 	Name        *string `json:"name" example:"John Doe" validate:"omitempty,min=2,max=250"`
@@ -58,3 +62,26 @@ type BusinessSimpleListResponseDto struct {
 	entities.Response
 	Data []BusinessSimpleDto `json:"data"`
 }
+
+type NotificationPreferenceDto struct {
+	ID                         string    `json:"id" example:"b2c8f0e7-9b6a-4d1e-bd2a-2d0d6f9f93c7"`
+	BusinessID                 string    `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Email                      string    `json:"email" example:"business@example.com"`
+	InvoiceValidationCompleted bool      `json:"invoice_validation_completed" example:"true"`
+	InvoiceValidationFailed    bool      `json:"invoice_validation_failed" example:"true"`
+	BulkUploadFinished         bool      `json:"bulk_upload_finished" example:"true"`
+	CreatedAt                  time.Time `json:"created_at" example:"2026-01-16T12:00:00Z"`
+	UpdatedAt                  time.Time `json:"updated_at" example:"2026-01-16T12:30:00Z"`
+}
+
+type UpdateNotificationPreferenceDto struct {
+	InvoiceValidationCompleted *bool `json:"invoice_validation_completed,omitempty" example:"true"`
+	InvoiceValidationFailed    *bool `json:"invoice_validation_failed,omitempty" example:"true"`
+	BulkUploadFinished         *bool `json:"bulk_upload_finished,omitempty" example:"true"`
+}
+
+type NotificationPreferenceResponseDto struct {
+	entities.Response
+	Data NotificationPreferenceDto `json:"data"`
+}
+
