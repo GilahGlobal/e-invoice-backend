@@ -671,3 +671,90 @@ func (h *Handler) GetAggregatorInvitations(c *fiber.Ctx) error {
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Aggregator invitations retrieved successfully", invitations)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
+
+// GetBusinessInvoiceDetail godoc
+// @Summary Get Specific Invoice of a Business
+// @Description Retrieve the full details of a specific invoice for a given business by business ID and invoice ID, invoice number, or IRN.
+// @Tags Admin Invoices
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Business ID"
+// @Param invoice_id path string true "Invoice ID, Invoice Number, or IRN"
+// @Success 200 {object} AdminInvoiceDetailResponseDto "Invoice details retrieved successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 404 {object} apperror.AppError "Invoice or business not found"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/businesses/invoices/{id}/{invoice_id} [get]
+func (h *Handler) GetBusinessInvoiceDetail(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	businessID := c.Params("id")
+	invoiceID := c.Params("invoice_id")
+	if businessID == "" || invoiceID == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "business id and invoice id are required", nil, nil)
+	}
+
+	invoice, err := h.svc.GetBusinessInvoiceDetail(db, businessID, invoiceID)
+	if err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice details retrieved successfully", invoice)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// DownloadInvoice godoc
+// @Summary Download Invoice
+// @Description Download decrypted invoice as PDF/data by Invoice ID, Invoice Number, or IRN.
+// @Tags Admin Invoices
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Invoice ID, Invoice Number, or IRN"
+// @Param is_sandbox query bool false "Force query sandbox environment"
+// @Success 200 {object} AdminDownloadInvoiceResponseDto "Invoice downloaded successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 404 {object} apperror.AppError "Invoice not found"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/invoices/download/{id} [get]
+func (h *Handler) DownloadInvoice(c *fiber.Ctx) error {
+	claims, ok := c.Locals("adminClaims").(*middleware.AdminDataClaims)
+	if !ok {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", nil, nil)
+	}
+
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	identifier := c.Params("id")
+	if identifier == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "invoice identifier is required", nil, nil)
+	}
+
+	isSandbox := claims.IsSandbox
+	if querySandbox := c.Query("is_sandbox"); querySandbox != "" {
+		if parsed, err := strconv.ParseBool(querySandbox); err == nil {
+			isSandbox = parsed
+		}
+	}
+
+	respData, errDetails, err := h.svc.DownloadInvoice(db, identifier, isSandbox)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), errDetails, nil)
+	}
+
+	h.logger.Info("Invoice downloaded successfully by admin", "identifier", identifier)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice downloaded successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+

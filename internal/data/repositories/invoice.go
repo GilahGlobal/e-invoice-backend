@@ -434,6 +434,26 @@ func (r *InvoiceRepository) FindInvoicesWithMetadataByBusinessID(
 	}, nil
 }
 
+func (r *InvoiceRepository) FindInvoiceByBusinessAndIdentifier(db database.DatabaseManager, businessID, identifier string) (*entities.Invoice, error) {
+	var invoice entities.Invoice
+	if err := db.DB().
+		Where("business_id = ? AND (id = ? OR invoice_number = ? OR irn = ?)", businessID, identifier, identifier, identifier).
+		First(&invoice).Error; err != nil {
+		return nil, err
+	}
+	return &invoice, nil
+}
+
+func (r *InvoiceRepository) FindInvoiceByIdentifier(db database.DatabaseManager, identifier string) (*entities.Invoice, error) {
+	var invoice entities.Invoice
+	if err := db.DB().
+		Where("id = ? OR invoice_number = ? OR irn = ?", identifier, identifier, identifier).
+		First(&invoice).Error; err != nil {
+		return nil, err
+	}
+	return &invoice, nil
+}
+
 func (r *InvoiceRepository) FindInvoiceByBusinessAndID(db database.DatabaseManager, businessID, invoiceID string) (*entities.Invoice, error) {
 	var invoice entities.Invoice
 	if err := db.DB().

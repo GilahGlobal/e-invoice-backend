@@ -371,6 +371,39 @@ definitions:
         example: 0
         type: integer
     type: object
+  admin.AdminDownloadInvoiceResponseDto:
+    properties:
+      data:
+        example: JVBERi0xLjQKJ...
+        type: string
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  admin.AdminInvoiceDetailResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/entities.Invoice'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
   admin.AdminInvoiceListResponseDto:
     properties:
       data:
@@ -3603,6 +3636,51 @@ paths:
       summary: List Invoices by Business
       tags:
       - Admin Queries
+  /admin/businesses/invoices/{id}/{invoice_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the full details of a specific invoice for a given business
+        by business ID and invoice ID, invoice number, or IRN.
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invoice ID, Invoice Number, or IRN
+        in: path
+        name: invoice_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice details retrieved successfully
+          schema:
+            $ref: '#/definitions/admin.AdminInvoiceDetailResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Invoice or business not found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Get Specific Invoice of a Business
+      tags:
+      - Admin Invoices
   /admin/businesses/stats{id}:
     get:
       consumes:
@@ -3629,6 +3707,50 @@ paths:
       summary: Business Daily Invoice Stats
       tags:
       - Admin Queries
+  /admin/invoices/download/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Download decrypted invoice as PDF/data by Invoice ID, Invoice Number,
+        or IRN.
+      parameters:
+      - description: Invoice ID, Invoice Number, or IRN
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Force query sandbox environment
+        in: query
+        name: is_sandbox
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invoice downloaded successfully
+          schema:
+            $ref: '#/definitions/admin.AdminDownloadInvoiceResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Invoice not found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Download Invoice
+      tags:
+      - Admin Invoices
   /admin/roles:
     get:
       consumes:
