@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"einvoice-access-point/internal/app/invoice"
 	"einvoice-access-point/internal/config"
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/entities"
@@ -14,6 +15,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 type Service struct {
@@ -613,4 +616,49 @@ func (s *Service) GetBusinessInfo(db database.DatabaseManager, businessID string
 		Business:   businessDto,
 		Aggregator: aggDto,
 	}, nil
+}
+
+// GetBusinessInvoiceDetail fetches the full details of a specific invoice for a specific business.
+// The businessID parameter is the business UUID (id).
+// The invoiceID parameter can be the invoice UUID (id), invoice_number, or irn.
+func (s *Service) GetBusinessInvoiceDetail(db database.DatabaseManager, businessID, invoiceID string) (*entities.Invoice, error) {
+	business, err := s.businessRepo.GetBusinessByID(db, businessID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("business not found")
+		}
+		return nil, err
+	}
+
+	invoice, err := s.invoiceRepo.FindInvoiceByBusinessAndIdentifier(db, business.ID, invoiceID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("invoice not found for this business")
+		}
+		return nil, err
+	}
+	return invoice, nil
+}
+
+// DownloadInvoice downloads and decrypts an invoice by invoice ID, invoice number, or IRN.
+func (s *Service) DownloadInvoice(db database.DatabaseManager, identifier string, isSandbox bool) (*string, *string, error) {
+	irn := strings.TrimSpace(identifier)
+
+	// Attempt to locate invoice in DB by id, invoice_number, or irn
+	inv, err := s.invoiceRepo.FindInvoiceByIdentifier(db, identifier)
+	if err == nil && inv != nil {
+		if strings.TrimSpace(inv.IRN) != "" {
+			irn = strings.TrimSpace(inv.IRN)
+		} else {
+			errDetails := "invoice does not have an IRN (it may not have been confirmed or transmitted yet)"
+			return nil, &errDetails, errors.New(errDetails)
+		}
+	}
+
+	if irn == "" {
+		errDetails := "IRN is required to download invoice"
+		return nil, &errDetails, errors.New(errDetails)
+	}
+
+	return invoice.DownloadAndDecryptInvoice(irn, isSandbox)
 }

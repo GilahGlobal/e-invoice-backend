@@ -47,7 +47,10 @@ func AdminRoute(router fiber.Router, version string, container *core.Container) 
 	adminAuthAll.Get("/aggregators/invitations/:id", rf, handler.GetAggregatorInvitations)
 
 	adminAuthAll.Get("/businesses/invoices/:id", rf, handler.GetInvoicesByBusiness)
+	adminAuthAll.Get("/businesses/invoices/:id/:invoice_id", rf, handler.GetBusinessInvoiceDetail)
 	adminAuthAll.Get("/aggregators/invoices/:id", rf, handler.GetInvoicesByAggregator)
+
+	adminAuthAll.Get("/invoices/download/:id", rf, handler.DownloadInvoice)
 	adminAuthAll.Get("/transactions", rf, handler.GetTransactions)
 	adminAuthAll.Get("/stats/invoices", rf, handler.GetInvoiceStats)
 	adminAuthAll.Get("/stats/businesses", rf, handler.GetBusinessStats)

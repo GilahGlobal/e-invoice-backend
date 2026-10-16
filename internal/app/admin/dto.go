@@ -239,3 +239,14 @@ type RoleListResponseDto struct {
 	entities.Response
 	Data []RoleResponseDto `json:"data"`
 }
+
+type AdminInvoiceDetailResponseDto struct {
+	entities.Response
+	Data entities.Invoice `json:"data"`
+}
+
+type AdminDownloadInvoiceResponseDto struct {
+	entities.Response
+	Data string `json:"data" example:"JVBERi0xLjQKJ..."`
+}
+

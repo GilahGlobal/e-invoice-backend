@@ -598,7 +598,8 @@ func (s *Service) ConfirmInvoice(irn string, isSandbox bool) (*firs_models.FirsR
 	return theResp, nil, nil
 }
 
-func (s *Service) DownloadInvoice(irn string, isSandbox bool) (*string, *string, error) {
+// DownloadAndDecryptInvoice downloads an invoice from FIRS and decrypts the payload
+func DownloadAndDecryptInvoice(irn string, isSandbox bool) (*string, *string, error) {
 	configs := config.GetConfig()
 	var apikey string
 	if isSandbox {
@@ -647,6 +648,10 @@ func (s *Service) DownloadInvoice(irn string, isSandbox bool) (*string, *string,
 	}
 
 	return &decrypted, nil, nil
+}
+
+func (s *Service) DownloadInvoice(irn string, isSandbox bool) (*string, *string, error) {
+	return DownloadAndDecryptInvoice(irn, isSandbox)
 }
 
 func (s *Service) UpdateInvoice(invoiceUpdate firs_models.UpdateInvoice, irn string, isSandbox bool) (*firs_models.FirsResponse, *string, error) {

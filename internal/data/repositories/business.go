@@ -232,6 +232,14 @@ func (r *BusinessRepository) ListAllBusinesses(db database.DatabaseManager, sear
 	return businesses, total, nil
 }
 
+func (r *BusinessRepository) GetBusinessByID(db database.DatabaseManager, id string) (*entities.Business, error) {
+	var business entities.Business
+	if err := db.DB().Where("id = ?", id).First(&business).Error; err != nil {
+		return nil, err
+	}
+	return &business, nil
+}
+
 func (r *BusinessRepository) FindBusinessByID(db database.DatabaseManager, id string) (*entities.Business, error) {
 	var business entities.Business
 	query := db.DB().Where("id = ? AND acc_status = ?", id, 0)
