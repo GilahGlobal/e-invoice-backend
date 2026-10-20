@@ -7,11 +7,13 @@ import (
 	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/middleware"
 	"einvoice-access-point/internal/utility"
+	"errors"
 	"strconv"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type Handler struct {
@@ -447,8 +449,15 @@ func (h *Handler) GetBusinessDailyInvoiceStats(c *fiber.Ctx) error {
 	db := dbinit.InitDB(rawDb, false)
 
 	businessID := c.Params("id")
+	if strings.TrimSpace(businessID) == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
+	}
+
 	stats, err := h.svc.GetBusinessDailyInvoiceStatsDto(db, businessID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(strings.ToLower(err.Error()), "not found") {
+			return apperror.New(fiber.StatusNotFound, "error", "business not found", nil, nil)
+		}
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
@@ -466,6 +475,7 @@ func (h *Handler) GetBusinessDailyInvoiceStats(c *fiber.Ctx) error {
 // @Param data body AdminUpdateBusinessDto true "Business update payload"
 // @Success 200 {object} utility.Response "Business updated successfully"
 // @Failure 400 {object} apperror.AppError
+// @Failure 404 {object} apperror.AppError
 // @Failure 500 {object} apperror.AppError
 // @Router /admin/businesses/{id} [put]
 func (h *Handler) UpdateBusiness(c *fiber.Ctx) error {
@@ -476,6 +486,10 @@ func (h *Handler) UpdateBusiness(c *fiber.Ctx) error {
 	db := dbinit.InitDB(rawDb, false)
 
 	businessID := c.Params("id")
+	if strings.TrimSpace(businessID) == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
+	}
+
 	var req AdminUpdateBusinessDto
 	if err := c.BodyParser(&req); err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
@@ -483,6 +497,9 @@ func (h *Handler) UpdateBusiness(c *fiber.Ctx) error {
 
 	err = h.svc.UpdateBusiness(db, businessID, req)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(strings.ToLower(err.Error()), "not found") {
+			return apperror.New(fiber.StatusNotFound, "error", "business not found", nil, nil)
+		}
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
@@ -498,6 +515,8 @@ func (h *Handler) UpdateBusiness(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path string true "Business ID"
 // @Success 200 {object} AdminBusinessAggregatorInfoResponse
+// @Failure 400 {object} apperror.AppError
+// @Failure 404 {object} apperror.AppError
 // @Failure 500 {object} apperror.AppError
 // @Router /admin/businesses/aggregator/{id} [get]
 func (h *Handler) GetBusinessAggregatorInfo(c *fiber.Ctx) error {
@@ -508,8 +527,15 @@ func (h *Handler) GetBusinessAggregatorInfo(c *fiber.Ctx) error {
 	db := dbinit.InitDB(rawDb, false)
 
 	businessID := c.Params("id")
+	if strings.TrimSpace(businessID) == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
+	}
+
 	info, err := h.svc.GetBusinessAggregatorInfo(db, businessID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(strings.ToLower(err.Error()), "not found") {
+			return apperror.New(fiber.StatusNotFound, "error", "business not found", nil, nil)
+		}
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
@@ -525,6 +551,8 @@ func (h *Handler) GetBusinessAggregatorInfo(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path string true "Business ID"
 // @Success 200 {object} AdminBusinessInfoResponse
+// @Failure 400 {object} apperror.AppError
+// @Failure 404 {object} apperror.AppError
 // @Failure 500 {object} apperror.AppError
 // @Router /admin/businesses/{id} [get]
 func (h *Handler) GetBusinessInfo(c *fiber.Ctx) error {
@@ -535,8 +563,15 @@ func (h *Handler) GetBusinessInfo(c *fiber.Ctx) error {
 	db := dbinit.InitDB(rawDb, false)
 
 	businessID := c.Params("id")
+	if strings.TrimSpace(businessID) == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "business id is required", nil, nil)
+	}
+
 	info, err := h.svc.GetBusinessInfo(db, businessID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(strings.ToLower(err.Error()), "not found") {
+			return apperror.New(fiber.StatusNotFound, "error", "business not found", nil, nil)
+		}
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
@@ -604,6 +639,10 @@ func (h *Handler) UpdateAggregator(c *fiber.Ctx) error {
 	db := dbinit.InitDB(rawDb, false)
 
 	aggregatorID := c.Params("id")
+	if strings.TrimSpace(aggregatorID) == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "aggregator id is required", nil, nil)
+	}
+
 	var req AdminUpdateBusinessDto
 	if err := c.BodyParser(&req); err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
@@ -611,6 +650,9 @@ func (h *Handler) UpdateAggregator(c *fiber.Ctx) error {
 
 	err = h.svc.UpdateAggregator(db, aggregatorID, req)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(strings.ToLower(err.Error()), "not found") {
+			return apperror.New(fiber.StatusNotFound, "error", "aggregator not found", nil, nil)
+		}
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
@@ -626,6 +668,8 @@ func (h *Handler) UpdateAggregator(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path string true "Aggregator ID"
 // @Success 200 {object} AdminAggregatorInfoResponse
+// @Failure 400 {object} apperror.AppError
+// @Failure 404 {object} apperror.AppError
 // @Failure 500 {object} apperror.AppError
 // @Router /admin/aggregators/{id} [get]
 func (h *Handler) GetAggregatorInfo(c *fiber.Ctx) error {
@@ -636,8 +680,15 @@ func (h *Handler) GetAggregatorInfo(c *fiber.Ctx) error {
 	db := dbinit.InitDB(rawDb, false)
 
 	aggregatorID := c.Params("id")
+	if strings.TrimSpace(aggregatorID) == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "aggregator id is required", nil, nil)
+	}
+
 	info, err := h.svc.GetAggregatorInfo(db, aggregatorID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(strings.ToLower(err.Error()), "not found") {
+			return apperror.New(fiber.StatusNotFound, "error", "aggregator not found", nil, nil)
+		}
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 

@@ -353,4 +353,3 @@ func (r *BusinessRepository) CreateDefaultNotificationPreference(db database.Dat
 	}
 	return defaultPref, nil
 }
-

@@ -15,6 +15,7 @@ import (
 	"einvoice-access-point/internal/data/dbinit"
 	"einvoice-access-point/internal/data/entities"
 	"einvoice-access-point/internal/data/repositories"
+	"einvoice-access-point/internal/pkg/cloudinary"
 	"einvoice-access-point/internal/pkg/firs"
 	"einvoice-access-point/internal/pkg/firs_models"
 	"einvoice-access-point/internal/pkg/zoho"
@@ -194,6 +195,189 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 	}
 
 	return invoice, nil, nil, isInvoiceSigned
+}
+
+// SystemIntegratorInvoice handles the standalone system integrator flow:
+// validates setup, generates and cryptographically signs the IRN, persists the invoice up to signed_irn,
+// and returns the QR code without validating or transmitting to FIRS.
+func (s *Service) SystemIntegratorInvoice(
+	db *gorm.DB,
+	payload firs_models.UploadInvoiceRequestDto,
+	businessID string,
+	isSandbox bool,
+	client string,
+	fallbackKeys *utility.CryptoKeys,
+) (*entities.Invoice, *InvoiceData, string, bool, error) {
+	setup, err := s.businessSvc.ValidateInvoiceUploadSetup(db, businessID)
+	if err != nil {
+		return nil, nil, "", false, err
+	}
+
+	pdb := dbinit.InitDB(db, false)
+	invoiceExists, err := s.repo.FindInvoiceByNumberAndBusinessID(pdb, payload.InvoiceNumber, businessID)
+	if err != nil {
+		return nil, nil, "", false, fmt.Errorf("failed to verify existing invoice: %w", err)
+	}
+
+	if invoiceExists != nil {
+		blockedStatuses := map[string]bool{
+			entities.StatusSignedInvoice: true,
+			entities.StatusTransmitted:   true,
+			entities.StatusConfirmed:     true,
+		}
+
+		isBlocked := blockedStatuses[invoiceExists.CurrentStatus]
+		if invoiceExists.CurrentStatus == entities.StatusSignedInvoice && invoiceExists.HasFailedStatus() {
+			isBlocked = false
+		}
+
+		if isBlocked {
+			qrCode := invoiceExists.QrCode
+			if qrCode == "" {
+				qrCode = invoiceExists.EncryptedIRN
+			}
+
+			irnPayload := &InvoiceData{
+				InvoiceNumber: invoiceExists.InvoiceNumber,
+				IRN:           invoiceExists.IRN,
+				QRCode:        qrCode,
+				QRCode2:       invoiceExists.EncryptedIRN,
+			}
+			return invoiceExists, irnPayload, invoiceExists.QrCodeBmpUrl, true, nil
+		}
+	}
+
+	var irnPayload InvoiceData
+	if payload.IRN == nil || *payload.IRN == "" {
+		irnResp, errResp := s.IRNGeneration(db, businessID, payload.InvoiceNumber, setup.ServiceID, payload.BusinessID, isSandbox)
+		if errResp != nil {
+			return nil, nil, "", false, fmt.Errorf("%v", errResp.Message)
+		}
+		irnPayload = *irnResp
+		payload.IRN = &irnPayload.IRN
+	} else {
+		if invoiceExists == nil {
+			keys, err := s.businessSvc.ResolveBusinessIRNSigningKeys(db, businessID, isSandbox, fallbackKeys)
+			if err != nil {
+				return nil, nil, "", false, fmt.Errorf("failed to resolve signing keys: %w", err)
+			}
+
+			signedIRN, err := s.SignIRN(*payload.IRN, keys)
+			if err != nil {
+				return nil, nil, "", false, fmt.Errorf("failed to sign IRN: %w", err)
+			}
+
+			irnPayload = InvoiceData{
+				InvoiceNumber: payload.InvoiceNumber,
+				IRN:           *payload.IRN,
+				QRCode:        signedIRN.QrCodeImage,
+				QRCode2:       signedIRN.EncryptedIRN,
+				QRCodeBMP:     signedIRN.QrCodeImageBMP,
+			}
+		} else {
+			qrCode := invoiceExists.QrCode
+			if qrCode == "" {
+				qrCode = invoiceExists.EncryptedIRN
+			}
+			irnPayload = InvoiceData{
+				InvoiceNumber: payload.InvoiceNumber,
+				IRN:           *payload.IRN,
+				QRCode:        qrCode,
+				QRCode2:       invoiceExists.EncryptedIRN,
+				QRCodeBMP:     "",
+			}
+		}
+	}
+
+	qrCodeBMPURL := ""
+	if setup.BmpUploadSelected && irnPayload.QRCodeBMP != "" {
+		uploadedURL, err := cloudinary.UploadBMPBase64(irnPayload.QRCodeBMP, utility.GenerateUUID())
+		if err == nil {
+			qrCodeBMPURL = uploadedURL
+		}
+	}
+
+	totalAmount, taxAmount, issueDate := extractInvoiceTotalsAndIssueDate(payload)
+
+	invoiceData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, nil, "", false, fmt.Errorf("failed to marshal invoice data: %w", err)
+	}
+
+	currentStatus, statusHistory, err := entities.InitNewInvoiceStatus()
+	if err != nil {
+		return nil, nil, "", false, fmt.Errorf("failed to initialize invoice status: %w", err)
+	}
+
+	platform := "internal"
+	if client != "" {
+		platform = client
+	}
+
+	var invoice *entities.Invoice
+	if invoiceExists != nil {
+		invoiceExists.Platform = platform
+		invoiceExists.InvoiceData = invoiceData
+		invoiceExists.TotalAmount = totalAmount
+		invoiceExists.TaxAmount = taxAmount
+		if payload.IRN != nil && *payload.IRN != "" {
+			invoiceExists.IRN = *payload.IRN
+		}
+		if irnPayload.QRCode != "" {
+			invoiceExists.QrCode = irnPayload.QRCode
+		}
+		if irnPayload.QRCode2 != "" {
+			invoiceExists.EncryptedIRN = irnPayload.QRCode2
+		}
+		if qrCodeBMPURL != "" {
+			invoiceExists.QrCodeBmpUrl = qrCodeBMPURL
+		}
+		if issueDate != nil {
+			invoiceExists.IssueDate = issueDate
+		}
+		invoiceExists.CurrentStatus = currentStatus
+		invoiceExists.StatusHistory = datatypes.JSON(statusHistory)
+
+		if err := s.repo.SaveInvoice(pdb, invoiceExists); err != nil {
+			return nil, nil, "", false, fmt.Errorf("failed to update invoice: %w", err)
+		}
+		invoice = invoiceExists
+	} else {
+		paymentStatus := "PENDING"
+		if payload.PaymentStatus != nil && *payload.PaymentStatus != "" {
+			paymentStatus = strings.ToUpper(*payload.PaymentStatus)
+		}
+
+		irn := ""
+		if payload.IRN != nil {
+			irn = *payload.IRN
+		}
+
+		invoice = &entities.Invoice{
+			InvoiceNumber:    payload.InvoiceNumber,
+			IRN:              irn,
+			QrCode:           irnPayload.QRCode,
+			QrCodeBmpUrl:     qrCodeBMPURL,
+			EncryptedIRN:     irnPayload.QRCode2,
+			BusinessID:       businessID,
+			Platform:         platform,
+			PlatformMetadata: datatypes.JSON("{}"),
+			InvoiceData:      invoiceData,
+			CurrentStatus:    currentStatus,
+			PaymentStatus:    paymentStatus,
+			StatusHistory:    datatypes.JSON(statusHistory),
+			TotalAmount:      totalAmount,
+			TaxAmount:        taxAmount,
+			IssueDate:        issueDate,
+			Timestamp:        time.Now(),
+		}
+
+		if err := s.repo.CreateInvoice(pdb, invoice); err != nil {
+			return nil, nil, "", false, fmt.Errorf("failed to save invoice: %w", err)
+		}
+	}
+
+	return invoice, &irnPayload, qrCodeBMPURL, false, nil
 }
 
 func (s *Service) DeleteInvoice(db *gorm.DB, businessID, invoiceID string) error {

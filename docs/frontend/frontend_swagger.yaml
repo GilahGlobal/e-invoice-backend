@@ -2755,6 +2755,22 @@ definitions:
         example: https://res.cloudinary.com/demo/image/upload/v1712345678/invoice-bmp-123.bmp
         type: string
     type: object
+  invoice.SystemIntegratorResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/invoice.InvoiceUploadData'
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
   invoice.UploadInvoiceResponseDto:
     properties:
       data:
@@ -3284,6 +3300,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/admin.AdminAggregatorInfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal Server Error
           schema:
@@ -3537,6 +3561,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/admin.AdminBusinessInfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal Server Error
           schema:
@@ -3571,6 +3603,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal Server Error
           schema:
@@ -3596,6 +3632,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/admin.AdminBusinessAggregatorInfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
         "500":
           description: Internal Server Error
           schema:
@@ -6147,6 +6191,44 @@ paths:
       summary: Get Invoice Stats
       tags:
       - Invoice
+  /invoice/system-integrator:
+    post:
+      consumes:
+      - application/json
+      description: Prepares an invoice, generates and signs the IRN, and returns the
+        QR code without validating or transmitting to FIRS.
+      parameters:
+      - description: System Integrator Invoice Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/firs_models.UploadInvoiceRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/invoice.SystemIntegratorResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: System Integrator Invoice Upload
+      tags:
+      - Invoice
+      x-external: true
   /invoice/transmit/{irn}:
     post:
       description: Transmit an invoice by IRN
