@@ -362,6 +362,77 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(rd)
 }
 
+// SystemIntegrator godoc
+// @Summary System Integrator Invoice Upload
+// @Description Prepares an invoice, generates and signs the IRN, and returns the QR code without validating or transmitting to FIRS.
+// @Tags Invoice
+// @x-external true
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body firs_models.UploadInvoiceRequestDto true "System Integrator Invoice Request"
+// @Success 201 {object} SystemIntegratorResponseDto
+// @Failure 400 {object} entities.Response
+// @Failure 401 {object} entities.Response
+// @Failure 422 {object} entities.Response
+// @Router /invoice/system-integrator [post]
+func (h *Handler) SystemIntegrator(c *fiber.Ctx) error {
+	client := c.Get("client")
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "unable to get user claims", nil, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	var req firs_models.UploadInvoiceRequestDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(
+			fiber.StatusUnprocessableEntity,
+			"error", "Validation failed",
+			utility.ValidationErrorsToJSON(err, firs_models.UploadInvoiceRequestDto{}),
+			nil,
+		)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	invoice, irnData, qrCodeBMPURL, isPreviouslyUploaded, err := h.svc.SystemIntegratorInvoice(db, req, userDetails.ID, userDetails.IsSandbox, client, h.Keys)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+	}
+
+	dataMap := map[string]interface{}{}
+	if invoice != nil {
+		dataMap = map[string]interface{}{
+			"id":             invoice.ID,
+			"invoice_number": irnData.InvoiceNumber,
+			"irn":            irnData.IRN,
+			"qr_code":        invoice.QrCode,
+			"qr_code_2":      invoice.EncryptedIRN,
+		}
+		if qrCodeBMPURL != "" {
+			dataMap["qr_code_bmp_url"] = qrCodeBMPURL
+		} else if invoice.QrCodeBmpUrl != "" {
+			dataMap["qr_code_bmp_url"] = invoice.QrCodeBmpUrl
+		}
+	}
+
+	if isPreviouslyUploaded {
+		rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice previously uploaded successfully", dataMap)
+		return c.Status(fiber.StatusOK).JSON(rd)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Invoice IRN signed and QR code generated successfully", dataMap)
+	return c.Status(fiber.StatusCreated).JSON(rd)
+}
+
 // @Summary Modify Invoice
 // @Description Modify an existing invoice payload
 // @Tags Invoice
