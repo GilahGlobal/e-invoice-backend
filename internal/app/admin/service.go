@@ -589,6 +589,9 @@ func (s *Service) GetBusinessAggregatorInfo(db database.DatabaseManager, busines
 func (s *Service) GetBusinessInfo(db database.DatabaseManager, businessID string) (*AdminBusinessInfoResponseDto, error) {
 	businessQuery, err := s.businessRepo.GetBusinessDetailsByIDForAdmin(db, businessID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("business not found")
+		}
 		return nil, err
 	}
 
