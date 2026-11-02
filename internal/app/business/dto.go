@@ -13,6 +13,7 @@ type UpdateBusinessDto struct {
 	CompanyName *string `json:"company_name" example:"Acme Inc." validate:"omitempty,max=250"`
 	BusinessID  *string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000" validate:"omitempty,uuid"`
 	ServiceID   *string `json:"service_id" example:"6A2BC898" validate:"omitempty"`
+	TIN         *string `json:"tin" example:"12345678-0001" validate:"omitempty,max=20"`
 }
 
 type GetBusinessResponseDto struct {

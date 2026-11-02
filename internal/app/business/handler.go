@@ -162,7 +162,9 @@ func (h *Handler) UpdateBusinessProfile(c *fiber.Ctx) error {
 		return apperror.New(http.StatusBadRequest, "error", err.Error(), err, nil)
 	}
 
-	h.svc.UpdateBusinessDetails(db, *businessData, req)
+	if err := h.svc.UpdateBusinessDetails(db, *businessData, req); err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", "Failed to update business profile", err, nil)
+	}
 
 	rd := utility.BuildSuccessResponse(http.StatusOK, "business profile updated successfully", nil)
 	return c.Status(http.StatusOK).JSON(rd)
