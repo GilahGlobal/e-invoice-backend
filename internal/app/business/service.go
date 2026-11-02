@@ -160,6 +160,9 @@ func (s *Service) UpdateBusinessDetails(db *gorm.DB, business entities.Business,
 	if payload.ServiceID != nil {
 		updates["service_id"] = *payload.ServiceID
 	}
+	if payload.TIN != nil {
+		updates["tin"] = strings.TrimSpace(*payload.TIN)
+	}
 
 	_, err := pdb.UpdateFields(business, updates, business.ID)
 	if err != nil {

@@ -8168,6 +8168,11 @@ const docTemplatefrontend = `{
                 "service_id": {
                     "type": "string",
                     "example": "6A2BC898"
+                },
+                "tin": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "example": "12345678-0001"
                 }
             }
         },

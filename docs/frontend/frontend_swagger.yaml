@@ -1778,6 +1778,10 @@ definitions:
       service_id:
         example: 6A2BC898
         type: string
+      tin:
+        example: 12345678-0001
+        maxLength: 20
+        type: string
     type: object
   business.UpdateNotificationPreferenceDto:
     properties:
