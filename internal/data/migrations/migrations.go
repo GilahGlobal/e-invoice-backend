@@ -19,8 +19,8 @@ func AuthMigrationModels() []interface{} {
 		&entities.ApiLog{},
 		&entities.BusinessAggregatorHistory{},
 		&entities.NotificationPreference{},
+		&entities.SubscriptionReminderLog{},
 	}
-
 }
 
 func AlterColumnModels() []AlterColumn {

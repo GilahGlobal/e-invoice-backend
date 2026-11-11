@@ -55,4 +55,23 @@ func AdminRoute(router fiber.Router, version string, container *core.Container) 
 	adminAuthAll.Get("/stats/invoices", rf, handler.GetInvoiceStats)
 	adminAuthAll.Get("/stats/businesses", rf, handler.GetBusinessStats)
 	adminAuthAll.Get("/stats/overview", rf, handler.GetOverviewStats)
+
+	// Subscription Plans Management (Exclusive to Admin)
+	adminAuthAll.Get("/plans", rf, handler.GetSubscriptionPlans)
+	adminAuthAll.Post("/plans", rf, handler.CreateSubscriptionPlan)
+	adminAuthAll.Get("/plans/:id", rf, handler.GetSubscriptionPlanByID)
+	adminAuthAll.Put("/plans/:id", rf, handler.UpdateSubscriptionPlan)
+	adminAuthAll.Patch("/plans/:id/status", rf, handler.ToggleSubscriptionPlanStatus)
+	adminAuthAll.Delete("/plans/:id", rf, handler.DeleteSubscriptionPlan)
+
+	adminAuthAll.Get("/subscriptions/plans", rf, handler.GetSubscriptionPlans)
+	adminAuthAll.Post("/subscriptions/plans", rf, handler.CreateSubscriptionPlan)
+	adminAuthAll.Get("/subscriptions/plans/:id", rf, handler.GetSubscriptionPlanByID)
+	adminAuthAll.Put("/subscriptions/plans/:id", rf, handler.UpdateSubscriptionPlan)
+	adminAuthAll.Patch("/subscriptions/plans/:id/status", rf, handler.ToggleSubscriptionPlanStatus)
+	adminAuthAll.Delete("/subscriptions/plans/:id", rf, handler.DeleteSubscriptionPlan)
+
+	adminAuthAll.Get("/subscriptions", rf, handler.GetSubscriptions)
+	adminAuthAll.Get("/subscriptions/stats", rf, handler.GetSubscriptionStats)
+	adminAuthAll.Get("/subscriptions/:id", rf, handler.GetSubscriptionByID)
 }

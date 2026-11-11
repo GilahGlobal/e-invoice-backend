@@ -250,3 +250,108 @@ type AdminDownloadInvoiceResponseDto struct {
 	Data string `json:"data" example:"JVBERi0xLjQKJ..."`
 }
 
+type AdminSubscriptionResponseDto struct {
+	ID                 string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	BusinessID         string `json:"business_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	BusinessName       string `json:"business_name" example:"Acme Corp"`
+	BusinessEmail      string `json:"business_email" example:"business@example.com"`
+	BusinessCompany    string `json:"business_company" example:"Acme Limited"`
+	BusinessTIN        string `json:"business_tin" example:"12345678-0001"`
+	BusinessPhone      string `json:"business_phone" example:"+2348012345678"`
+	AggregatorID       string `json:"aggregator_id,omitempty" example:"8c596cb2-ac83-489a-bb00-10e0d83c0510"`
+	AggregatorName     string `json:"aggregator_name,omitempty" example:"Aggregator Partner"`
+	AggregatorEmail    string `json:"aggregator_email,omitempty" example:"aggregator@example.com"`
+	AggregatorCompany  string `json:"aggregator_company,omitempty" example:"Partner Corp"`
+	PlanID             string `json:"plan_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Plan               string `json:"plan" example:"Professional"`
+	IsActive           bool   `json:"is_active" example:"true"`
+	TotalInvoices      int    `json:"total_invoices" example:"1000"`
+	RemainingInvoices  int    `json:"remaining_invoices" example:"450"`
+	UsedInvoices       int    `json:"used_invoices" example:"550"`
+	NextBillingDate    string `json:"next_billing_date" example:"2026-11-20T00:00:00Z"`
+	DaysUntilExpiry    int    `json:"days_until_expiry" example:"10"`
+	StatusLabel        string `json:"status_label" example:"active"`
+	RemindersSentCount int    `json:"reminders_sent_count" example:"1"`
+	LastReminderSentAt string `json:"last_reminder_sent_at,omitempty" example:"2026-11-10T08:00:00Z"`
+	CreatedAt          string `json:"created_at" example:"2026-10-20T00:00:00Z"`
+	UpdatedAt          string `json:"updated_at" example:"2026-10-20T00:00:00Z"`
+}
+
+type AdminSubscriptionListResponseDto struct {
+	entities.Response
+	Data       []AdminSubscriptionResponseDto  `json:"data"`
+	Pagination database.PaginationResponse     `json:"pagination"`
+}
+
+type AdminSubscriptionDetailDto struct {
+	AdminSubscriptionResponseDto
+	ReminderLogs []entities.SubscriptionReminderLog `json:"reminder_logs"`
+	Transactions []entities.Transaction             `json:"transactions"`
+}
+
+type AdminSubscriptionDetailResponseDto struct {
+	entities.Response
+	Data AdminSubscriptionDetailDto `json:"data"`
+}
+
+type AdminSubscriptionStatsDto struct {
+	TotalSubscriptions   int64 `json:"total_subscriptions" example:"120"`
+	ActiveSubscriptions  int64 `json:"active_subscriptions" example:"95"`
+	ExpiringIn3Days      int64 `json:"expiring_in_3_days" example:"5"`
+	ExpiringIn7Days      int64 `json:"expiring_in_7_days" example:"12"`
+	ExpiringIn14Days     int64 `json:"expiring_in_14_days" example:"25"`
+	ExpiredSubscriptions int64 `json:"expired_subscriptions" example:"25"`
+}
+
+type AdminSubscriptionStatsResponseDto struct {
+	entities.Response
+	Data AdminSubscriptionStatsDto `json:"data"`
+}
+
+type AdminCreatePlanDto struct {
+	Name               string  `json:"name" validate:"required" example:"Enterprise Annual"`
+	Amount             float64 `json:"amount" validate:"required,gt=0" example:"120000.00"`
+	TotalInvoices      int     `json:"total_invoices" validate:"required,gt=0" example:"5000"`
+	BillingCycle       int     `json:"billing_cycle" validate:"required,gt=0" example:"365"`
+	ReminderDaysBefore []int   `json:"reminder_days_before,omitempty"`
+	IsActive           *bool   `json:"is_active,omitempty" example:"true"`
+}
+
+type AdminUpdatePlanDto struct {
+	Name               *string  `json:"name,omitempty" example:"Enterprise Annual"`
+	Amount             *float64 `json:"amount,omitempty" validate:"omitempty,gt=0" example:"120000.00"`
+	TotalInvoices      *int     `json:"total_invoices,omitempty" validate:"omitempty,gt=0" example:"5000"`
+	BillingCycle       *int     `json:"billing_cycle,omitempty" validate:"omitempty,gt=0" example:"365"`
+	ReminderDaysBefore []int    `json:"reminder_days_before,omitempty"`
+	IsActive           *bool    `json:"is_active,omitempty" example:"true"`
+}
+
+type AdminTogglePlanStatusDto struct {
+	IsActive *bool `json:"is_active,omitempty" example:"false"`
+}
+
+type AdminPlanResponseDto struct {
+	ID                     string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Name                   string  `json:"name" example:"Enterprise Annual"`
+	Amount                 float64 `json:"amount" example:"120000.00"`
+	IsActive               bool    `json:"is_active" example:"true"`
+	TotalInvoices          int     `json:"total_invoices" example:"5000"`
+	BillingCycle           int     `json:"billing_cycle" example:"365"`
+	ReminderDaysBefore     []int   `json:"reminder_days_before"`
+	ActiveSubscribersCount int64   `json:"active_subscribers_count" example:"42"`
+	TotalSubscribersCount  int64   `json:"total_subscribers_count" example:"58"`
+	CreatedAt              string  `json:"created_at" example:"2026-10-01T00:00:00Z"`
+	UpdatedAt              string  `json:"updated_at" example:"2026-11-10T12:00:00Z"`
+}
+
+type AdminPlanListResponseDto struct {
+	entities.Response
+	Data []AdminPlanResponseDto `json:"data"`
+}
+
+type AdminPlanDetailResponseDto struct {
+	entities.Response
+	Data AdminPlanResponseDto `json:"data"`
+}
+
+

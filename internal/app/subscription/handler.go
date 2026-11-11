@@ -68,7 +68,7 @@ func (h *Handler) GetPlans(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
-	plans, err := h.svc.ListPlans(db)
+	plans, err := h.svc.ListActivePlans(db)
 	if err != nil {
 		return apperror.New(http.StatusInternalServerError, "error", "failed to fetch plans", err, nil)
 	}
@@ -77,18 +77,7 @@ func (h *Handler) GetPlans(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// CreatePlan godoc
-// @Summary Create Subscription Plan
-// @Description Creates a subscription plan in the specified environment database
-// @Tags Subscription
-// @Accept json
-// @Produce json
-// @Param data body CreateSubscriptionPlanDto true "Create plan request payload"
-// @Success 201 {object} CreateSubscriptionPlanResponseDto "Plan created successfully"
-// @Failure 400 {object} entities.Response "Bad request"
-// @Failure 422 {object} entities.Response "Unprocessable entity"
-// @Failure 500 {object} entities.Response "Internal server error"
-// @Router /subscription/plans [post]
+// CreatePlan creates a subscription plan (deprecated: use /admin/plans)
 func (h *Handler) CreatePlan(c *fiber.Ctx) error {
 	var req CreateSubscriptionPlanDto
 	if err := c.BodyParser(&req); err != nil {

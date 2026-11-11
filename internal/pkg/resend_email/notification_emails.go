@@ -1,6 +1,7 @@
 package resend_email
 
 import (
+	"einvoice-access-point/templates"
 	"fmt"
 	"strings"
 	"time"
@@ -26,65 +27,16 @@ func SendInvoiceValidationCompletedEmail(to, businessName, invoiceNumber, irn st
 
 	amountDisplay := fmt.Sprintf("NGN %.2f", totalAmount)
 
-	bodyHtml := fmt.Sprintf(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice Validation Completed</title>
-</head>
-<body style="margin: 0; padding: 24px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-    <div style="background-color: #0f172a; padding: 24px; text-align: center;">
-      <h1 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Nexar e-Invoice</h1>
-    </div>
-    <div style="padding: 32px 28px;">
-      <div style="display: inline-block; padding: 6px 12px; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 9999px; color: #047857; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
-        &#10003; Validation Completed Successfully
-      </div>
-      <h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 600; color: #0f172a;">Invoice Validated</h2>
-      <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 24px; color: #475569;">
-        Hello <strong>%s</strong>,<br>
-        Your invoice <strong>#%s</strong> has passed validation successfully and is progressing through the electronic invoicing workflow.
-      </p>
-      <div style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 28px;">
-        <table style="width: 100%%; border-collapse: collapse; font-size: 14px;">
-          <tr>
-            <td style="padding: 8px 0; color: #64748b; width: 40%%;">Invoice Number:</td>
-            <td style="padding: 8px 0; font-weight: 600; color: #0f172a;">%s</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; color: #64748b;">Total Amount:</td>
-            <td style="padding: 8px 0; font-weight: 600; color: #0f172a;">%s</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; color: #64748b;">IRN:</td>
-            <td style="padding: 8px 0; font-family: monospace; color: #0f172a; word-break: break-all;">%s</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; color: #64748b;">Validation Time:</td>
-            <td style="padding: 8px 0; color: #0f172a;">%s</td>
-          </tr>
-        </table>
-      </div>
-      <p style="margin: 0; font-size: 13px; line-height: 20px; color: #94a3b8;">
-        This is an automated notification based on your notification preferences. You can update your email preferences anytime in your Business Settings.
-      </p>
-    </div>
-    <div style="background-color: #f1f5f9; padding: 16px 28px; text-align: center; border-top: 1px solid #e2e8f0;">
-      <p style="margin: 0; font-size: 12px; color: #64748b;">&copy; %d Nexar e-Invoice Access Point. All rights reserved.</p>
-    </div>
-  </div>
-</body>
-</html>`,
-		businessName,
-		invoiceNumber,
-		invoiceNumber,
-		amountDisplay,
-		irnDisplay,
-		time.Now().UTC().Format("Jan 02, 2006 15:04:05 UTC"),
-		time.Now().UTC().Year(),
-	)
+	bodyHtml, err := templates.RenderEmail("invoice_validation_completed.html", map[string]any{
+		"BusinessName":   businessName,
+		"InvoiceNumber":  invoiceNumber,
+		"AmountDisplay":  amountDisplay,
+		"IRN":            irnDisplay,
+		"ValidationTime": time.Now().UTC().Format("Jan 02, 2006 15:04:05 UTC"),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to render invoice validation completed email: %w", err)
+	}
 
 	return sendEmailInternal(to, subject, bodyHtml)
 }
@@ -106,60 +58,15 @@ func SendInvoiceValidationFailedEmail(to, businessName, invoiceNumber, failureRe
 
 	subject := fmt.Sprintf("Action Required: Invoice Validation Failed (#%s)", invoiceNumber)
 
-	bodyHtml := fmt.Sprintf(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice Validation Failed</title>
-</head>
-<body style="margin: 0; padding: 24px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-    <div style="background-color: #0f172a; padding: 24px; text-align: center;">
-      <h1 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Nexar e-Invoice</h1>
-    </div>
-    <div style="padding: 32px 28px;">
-      <div style="display: inline-block; padding: 6px 12px; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 9999px; color: #dc2626; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
-        &#9888; Validation Failed
-      </div>
-      <h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 600; color: #0f172a;">Invoice Validation Issue</h2>
-      <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 24px; color: #475569;">
-        Hello <strong>%s</strong>,<br>
-        Your invoice <strong>#%s</strong> could not be validated. Please review the error details below and make the necessary corrections before re-submitting.
-      </p>
-      <div style="background-color: #fff1f2; border-radius: 8px; border: 1px solid #ffe4e6; padding: 20px; margin-bottom: 24px;">
-        <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #9f1239; text-transform: uppercase; letter-spacing: 0.5px;">Reason for Failure</p>
-        <p style="margin: 0; font-size: 14px; line-height: 22px; color: #881337; font-family: monospace; white-space: pre-wrap; word-break: break-word;">%s</p>
-      </div>
-      <div style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; padding: 16px 20px; margin-bottom: 28px;">
-        <table style="width: 100%%; border-collapse: collapse; font-size: 14px;">
-          <tr>
-            <td style="padding: 6px 0; color: #64748b; width: 40%%;">Invoice Number:</td>
-            <td style="padding: 6px 0; font-weight: 600; color: #0f172a;">%s</td>
-          </tr>
-          <tr>
-            <td style="padding: 6px 0; color: #64748b;">Timestamp:</td>
-            <td style="padding: 6px 0; color: #0f172a;">%s</td>
-          </tr>
-        </table>
-      </div>
-      <p style="margin: 0; font-size: 13px; line-height: 20px; color: #94a3b8;">
-        This is an automated notification based on your notification preferences. You can update your email preferences anytime in your Business Settings.
-      </p>
-    </div>
-    <div style="background-color: #f1f5f9; padding: 16px 28px; text-align: center; border-top: 1px solid #e2e8f0;">
-      <p style="margin: 0; font-size: 12px; color: #64748b;">&copy; %d Nexar e-Invoice Access Point. All rights reserved.</p>
-    </div>
-  </div>
-</body>
-</html>`,
-		businessName,
-		invoiceNumber,
-		failureReason,
-		invoiceNumber,
-		time.Now().UTC().Format("Jan 02, 2006 15:04:05 UTC"),
-		time.Now().UTC().Year(),
-	)
+	bodyHtml, err := templates.RenderEmail("invoice_validation_failed.html", map[string]any{
+		"BusinessName":  businessName,
+		"InvoiceNumber": invoiceNumber,
+		"FailureReason": failureReason,
+		"Timestamp":     time.Now().UTC().Format("Jan 02, 2006 15:04:05 UTC"),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to render invoice validation failed email: %w", err)
+	}
 
 	return sendEmailInternal(to, subject, bodyHtml)
 }
@@ -187,90 +94,185 @@ func SendBulkUploadFinishedEmail(to, businessName, fileKey string, totalRows, va
 		durationStr = "N/A"
 	}
 
-	bodyHtml := fmt.Sprintf(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bulk Upload Finished</title>
-</head>
-<body style="margin: 0; padding: 24px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-    <div style="background-color: #0f172a; padding: 24px; text-align: center;">
-      <h1 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Nexar e-Invoice</h1>
-    </div>
-    <div style="padding: 32px 28px;">
-      <div style="display: inline-block; padding: 6px 12px; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 9999px; color: #1d4ed8; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
-        &#9432; Processing Completed
-      </div>
-      <h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 600; color: #0f172a;">Bulk Upload Finished Processing</h2>
-      <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 24px; color: #475569;">
-        Hello <strong>%s</strong>,<br>
-        Your bulk invoice upload batch (<strong>%s</strong>) has finished processing. Here is the summary of the run:
-      </p>
-
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px;">
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center;">
-          <div style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Total Rows</div>
-          <div style="font-size: 22px; font-weight: 700; color: #0f172a; margin-top: 4px;">%d</div>
-        </div>
-        <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 14px; text-align: center;">
-          <div style="font-size: 12px; font-weight: 600; color: #047857; text-transform: uppercase;">Successful</div>
-          <div style="font-size: 22px; font-weight: 700; color: #047857; margin-top: 4px;">%d</div>
-        </div>
-        <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px; text-align: center;">
-          <div style="font-size: 12px; font-weight: 600; color: #b45309; text-transform: uppercase;">Partially Successful</div>
-          <div style="font-size: 22px; font-weight: 700; color: #b45309; margin-top: 4px;">%d</div>
-        </div>
-        <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px; text-align: center;">
-          <div style="font-size: 12px; font-weight: 600; color: #dc2626; text-transform: uppercase;">Failed / Errors</div>
-          <div style="font-size: 22px; font-weight: 700; color: #dc2626; margin-top: 4px;">%d</div>
-        </div>
-      </div>
-
-      <div style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; padding: 16px 20px; margin-bottom: 28px;">
-        <table style="width: 100%%; border-collapse: collapse; font-size: 14px;">
-          <tr>
-            <td style="padding: 6px 0; color: #64748b; width: 45%%;">File Name:</td>
-            <td style="padding: 6px 0; font-weight: 600; color: #0f172a; word-break: break-all;">%s</td>
-          </tr>
-          <tr>
-            <td style="padding: 6px 0; color: #64748b;">Valid Schema Rows:</td>
-            <td style="padding: 6px 0; color: #0f172a;">%d</td>
-          </tr>
-          <tr>
-            <td style="padding: 6px 0; color: #64748b;">Validation Errors:</td>
-            <td style="padding: 6px 0; color: #0f172a;">%d</td>
-          </tr>
-          <tr>
-            <td style="padding: 6px 0; color: #64748b;">Processing Duration:</td>
-            <td style="padding: 6px 0; color: #0f172a;">%s</td>
-          </tr>
-        </table>
-      </div>
-
-      <p style="margin: 0; font-size: 13px; line-height: 20px; color: #94a3b8;">
-        This is an automated notification based on your notification preferences. You can view full error breakdowns and logs directly in your Bulk Upload portal.
-      </p>
-    </div>
-    <div style="background-color: #f1f5f9; padding: 16px 28px; text-align: center; border-top: 1px solid #e2e8f0;">
-      <p style="margin: 0; font-size: 12px; color: #64748b;">&copy; %d Nexar e-Invoice Access Point. All rights reserved.</p>
-    </div>
-  </div>
-</body>
-</html>`,
-		businessName,
-		cleanFileKey,
-		totalRows,
-		successful,
-		partial,
-		failed,
-		cleanFileKey,
-		validRows,
-		validationErrors,
-		durationStr,
-		time.Now().UTC().Year(),
-	)
+	bodyHtml, err := templates.RenderEmail("bulk_upload_finished.html", map[string]any{
+		"BusinessName":     businessName,
+		"FileName":         cleanFileKey,
+		"TotalRows":        totalRows,
+		"Successful":       successful,
+		"Partial":          partial,
+		"Failed":           failed,
+		"ValidRows":        validRows,
+		"ValidationErrors": validationErrors,
+		"Duration":         durationStr,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to render bulk upload finished email: %w", err)
+	}
 
 	return sendEmailInternal(to, subject, bodyHtml)
 }
+
+func formatNairaAmount(amount float64) string {
+	parts := strings.Split(fmt.Sprintf("%.2f", amount), ".")
+	intPart := parts[0]
+	decPart := parts[1]
+
+	var result []byte
+	n := len(intPart)
+	for i, c := range intPart {
+		if i > 0 && (n-i)%3 == 0 {
+			result = append(result, ',')
+		}
+		result = append(result, byte(c))
+	}
+	return "₦" + string(result) + "." + decPart
+}
+
+// SendSubscriptionExpiringReminderEmail sends an email notifying the business or aggregator that their subscription is expiring soon.
+func SendSubscriptionExpiringReminderEmail(to, recipientName, planName string, daysRemaining, remainingInvoices int, nextBillingDate time.Time, planAmount float64, billingCycleDays int, subscriptionID string) error {
+	to = strings.TrimSpace(to)
+	if to == "" {
+		return fmt.Errorf("recipient email is required")
+	}
+
+	if recipientName == "" {
+		recipientName = "Valued Customer"
+	}
+
+	if planName == "" {
+		planName = "Nexar Standard"
+	}
+
+	daysText := fmt.Sprintf("%d days", daysRemaining)
+	if daysRemaining == 2 {
+		daysText = "2 days (48 hours)"
+	} else if daysRemaining == 1 {
+		daysText = "1 day (24 hours)"
+	} else if daysRemaining <= 0 {
+		daysText = "today"
+	}
+
+	formattedDate := nextBillingDate.Format("02 January 2006")
+	subject := fmt.Sprintf("Your %s plan ends in %s.", planName, daysText)
+	if daysRemaining > 14 {
+		subject = fmt.Sprintf("Your %s payment is due on %s.", planName, formattedDate)
+	}
+
+	billingCycleText := ""
+	if billingCycleDays >= 360 {
+		billingCycleText = "Yearly"
+	} else if billingCycleDays >= 28 && billingCycleDays <= 31 {
+		billingCycleText = "Monthly"
+	} else if billingCycleDays == 7 {
+		billingCycleText = "Weekly"
+	} else if billingCycleDays > 0 {
+		billingCycleText = fmt.Sprintf("%d Days", billingCycleDays)
+	}
+
+	referenceID := ""
+	if strings.TrimSpace(subscriptionID) != "" {
+		idClean := strings.ReplaceAll(subscriptionID, "-", "")
+		if len(idClean) > 6 {
+			idClean = idClean[:6]
+		}
+		referenceID = fmt.Sprintf("NXR-%s-%s", nextBillingDate.Format("2006"), strings.ToUpper(idClean))
+	}
+
+	amountDue := ""
+	if planAmount > 0 {
+		amountDue = formatNairaAmount(planAmount)
+	}
+
+	renewalURL := "https://app.nexar.ng/dashboard/subscriptions"
+
+	bodyHtml, err := templates.RenderEmail("subscription_expiring_reminder.html", map[string]any{
+		"RecipientName":    recipientName,
+		"PlanName":         planName,
+		"DaysRemaining":    daysRemaining,
+		"DaysText":         daysText,
+		"ExpirationDate":   formattedDate,
+		"BillingCycleText": billingCycleText,
+		"ReferenceID":      referenceID,
+		"AmountDue":        amountDue,
+		"RemainingInvoices": remainingInvoices,
+		"RenewalURL":       renewalURL,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to render subscription expiring reminder email: %w", err)
+	}
+
+	return sendEmailInternal(to, subject, bodyHtml)
+}
+
+// SendSubscriptionPaymentReceiptEmail sends a payment receipt and confirmation email to the subscriber.
+func SendSubscriptionPaymentReceiptEmail(
+	to, recipientName, planName, businessName, reference, paymentChannel string,
+	amount float64, totalInvoices, billingCycleDays int,
+	paymentDate, nextBillingDate time.Time,
+) error {
+	to = strings.TrimSpace(to)
+	if to == "" {
+		return fmt.Errorf("recipient email is required")
+	}
+
+	if recipientName == "" {
+		recipientName = "Valued Customer"
+	}
+
+	if planName == "" {
+		planName = "Nexar Subscription Plan"
+	}
+
+	if paymentDate.IsZero() {
+		paymentDate = time.Now().UTC()
+	}
+
+	if strings.TrimSpace(reference) == "" {
+		reference = fmt.Sprintf("NXR-REC-%d", time.Now().Unix())
+	}
+
+	amountFormatted := formatNairaAmount(amount)
+
+	billingCycleText := ""
+	if billingCycleDays >= 360 {
+		billingCycleText = "Yearly"
+	} else if billingCycleDays >= 28 && billingCycleDays <= 31 {
+		billingCycleText = "Monthly"
+	} else if billingCycleDays == 7 {
+		billingCycleText = "Weekly"
+	} else if billingCycleDays > 0 {
+		billingCycleText = fmt.Sprintf("%d Days", billingCycleDays)
+	}
+
+	channelDisplay := paymentChannel
+	if channelDisplay == "" {
+		channelDisplay = "Card / Paystack"
+	} else {
+		channelDisplay = strings.ReplaceAll(channelDisplay, "_", " ")
+		if len(channelDisplay) > 0 {
+			channelDisplay = strings.ToUpper(channelDisplay[:1]) + channelDisplay[1:]
+		}
+	}
+
+	subject := fmt.Sprintf("Payment Receipt: %s Subscription (%s)", planName, reference)
+
+	bodyHtml, err := templates.RenderEmail("subscription_payment_receipt.html", map[string]any{
+		"RecipientName":    recipientName,
+		"PlanName":         planName,
+		"BusinessName":     businessName,
+		"Reference":        reference,
+		"AmountPaid":       amountFormatted,
+		"TotalInvoices":    totalInvoices,
+		"BillingCycleText": billingCycleText,
+		"PaymentDate":      paymentDate.Format("02 January 2006, 15:04 UTC"),
+		"PaymentChannel":   channelDisplay,
+		"NextBillingDate":  nextBillingDate.Format("02 January 2006"),
+		"DashboardURL":     "https://app.nexar.ng/dashboard",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to render subscription payment receipt email: %w", err)
+	}
+
+	return sendEmailInternal(to, subject, bodyHtml)
+}
+

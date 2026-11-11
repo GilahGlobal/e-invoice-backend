@@ -14,6 +14,7 @@ type NotificationPreference struct {
 	InvoiceValidationCompleted bool           `gorm:"column:invoice_validation_completed;type:bool;default:true;not null" json:"invoice_validation_completed"`
 	InvoiceValidationFailed    bool           `gorm:"column:invoice_validation_failed;type:bool;default:true;not null" json:"invoice_validation_failed"`
 	BulkUploadFinished         bool           `gorm:"column:bulk_upload_finished;type:bool;default:true;not null" json:"bulk_upload_finished"`
+	SubscriptionExpiring       bool           `gorm:"column:subscription_expiring;type:bool;default:true;not null" json:"subscription_expiring"`
 	CreatedAt                  time.Time      `gorm:"column:created_at;not null;autoCreateTime" json:"created_at"`
 	UpdatedAt                  time.Time      `gorm:"column:updated_at;null;autoUpdateTime" json:"updated_at"`
 	DeletedAt                  gorm.DeletedAt `gorm:"index" json:"-"`
@@ -34,5 +35,6 @@ func DefaultNotificationPreference(businessID string) *NotificationPreference {
 		InvoiceValidationCompleted: true,
 		InvoiceValidationFailed:    true,
 		BulkUploadFinished:         true,
+		SubscriptionExpiring:       true,
 	}
 }

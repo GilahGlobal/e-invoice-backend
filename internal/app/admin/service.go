@@ -9,13 +9,17 @@ import (
 	"einvoice-access-point/internal/middleware"
 	"einvoice-access-point/internal/pkg/resend_email"
 	"einvoice-access-point/internal/utility"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
+	"time"
 
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -664,4 +668,321 @@ func (s *Service) DownloadInvoice(db database.DatabaseManager, identifier string
 	}
 
 	return invoice.DownloadAndDecryptInvoice(irn, isSandbox)
+}
+
+func mapSubscriptionItemToDto(item repositories.AdminSubscriptionItem, now time.Time) AdminSubscriptionResponseDto {
+	daysUntilExpiry := int(math.Ceil(item.NextBillingDate.Sub(now).Hours() / 24))
+	statusLabel := "active"
+	if !item.IsActive || item.NextBillingDate.Before(now) {
+		statusLabel = "expired"
+	} else if daysUntilExpiry <= 7 {
+		statusLabel = "expiring_soon"
+	}
+
+	lastReminder := ""
+	if item.LastReminderSentAt != nil {
+		lastReminder = item.LastReminderSentAt.Format(time.RFC3339)
+	}
+
+	return AdminSubscriptionResponseDto{
+		ID:                 item.ID,
+		BusinessID:         item.BusinessID,
+		BusinessName:       item.BusinessName,
+		BusinessEmail:      item.BusinessEmail,
+		BusinessCompany:    item.BusinessCompany,
+		BusinessTIN:        item.BusinessTIN,
+		BusinessPhone:      item.BusinessPhone,
+		AggregatorID:       item.AggregatorID,
+		AggregatorName:     item.AggregatorName,
+		AggregatorEmail:    item.AggregatorEmail,
+		AggregatorCompany:  item.AggregatorCompany,
+		PlanID:             item.PlanID,
+		Plan:               item.Plan,
+		IsActive:           item.IsActive,
+		TotalInvoices:      item.TotalInvoices,
+		RemainingInvoices:  item.RemainingInvoices,
+		UsedInvoices:       item.UsedInvoices,
+		NextBillingDate:    item.NextBillingDate.Format(time.RFC3339),
+		DaysUntilExpiry:    daysUntilExpiry,
+		StatusLabel:        statusLabel,
+		RemindersSentCount: item.RemindersSentCount,
+		LastReminderSentAt: lastReminder,
+		CreatedAt:          item.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:          item.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
+func (s *Service) GetSubscriptions(db database.DatabaseManager, filter repositories.AdminSubscriptionFilter, page, size int) ([]AdminSubscriptionResponseDto, *database.PaginationResponse, error) {
+	items, total, err := s.subscriptionRepo.ListSubscriptions(db, filter, page, size)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to list subscriptions: %w", err)
+	}
+
+	now := time.Now().UTC()
+	dtos := make([]AdminSubscriptionResponseDto, 0, len(items))
+	for _, item := range items {
+		dtos = append(dtos, mapSubscriptionItemToDto(item, now))
+	}
+
+	return dtos, buildPagination(page, size, total), nil
+}
+
+func (s *Service) GetSubscriptionByID(db database.DatabaseManager, subscriptionID string) (*AdminSubscriptionDetailDto, error) {
+	item, err := s.subscriptionRepo.GetSubscriptionByIDWithDetails(db, subscriptionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch subscription: %w", err)
+	}
+	if item == nil {
+		return nil, fmt.Errorf("subscription not found")
+	}
+
+	now := time.Now().UTC()
+	baseDto := mapSubscriptionItemToDto(*item, now)
+
+	reminderLogs, err := s.subscriptionRepo.GetReminderLogsBySubscriptionID(db, subscriptionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch reminder logs: %w", err)
+	}
+
+	var transactions []entities.Transaction
+	_ = db.DB().Where("business_id = ?", item.BusinessID).Order("created_at desc").Limit(20).Find(&transactions).Error
+
+	return &AdminSubscriptionDetailDto{
+		AdminSubscriptionResponseDto: baseDto,
+		ReminderLogs:                 reminderLogs,
+		Transactions:                 transactions,
+	}, nil
+}
+
+func (s *Service) GetSubscriptionStats(db database.DatabaseManager) (*AdminSubscriptionStatsDto, error) {
+	stats, err := s.subscriptionRepo.GetSubscriptionStats(db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch subscription stats: %w", err)
+	}
+
+	return &AdminSubscriptionStatsDto{
+		TotalSubscriptions:   stats.TotalSubscriptions,
+		ActiveSubscriptions:  stats.ActiveSubscriptions,
+		ExpiringIn3Days:      stats.ExpiringIn3Days,
+		ExpiringIn7Days:      stats.ExpiringIn7Days,
+		ExpiringIn14Days:     stats.ExpiringIn14Days,
+		ExpiredSubscriptions: stats.ExpiredSubscriptions,
+	}, nil
+}
+
+func mapPlanToAdminDto(plan entities.SubscriptionPlan, activeCount, totalCount int64) AdminPlanResponseDto {
+	return AdminPlanResponseDto{
+		ID:                     plan.ID,
+		Name:                   plan.Name,
+		Amount:                 plan.Amount,
+		IsActive:               plan.IsActive,
+		TotalInvoices:          plan.TotalInvoices,
+		BillingCycle:           plan.BillingCycle,
+		ReminderDaysBefore:     plan.GetReminderDays(),
+		ActiveSubscribersCount: activeCount,
+		TotalSubscribersCount:  totalCount,
+		CreatedAt:              plan.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:              plan.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
+func (s *Service) GetSubscriptionPlans(db database.DatabaseManager) ([]AdminPlanResponseDto, error) {
+	items, err := s.subscriptionRepo.GetPlansWithSubscriberCounts(db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch subscription plans: %w", err)
+	}
+
+	result := make([]AdminPlanResponseDto, 0, len(items))
+	for _, it := range items {
+		result = append(result, mapPlanToAdminDto(it.SubscriptionPlan, it.ActiveSubscribersCount, it.TotalSubscribersCount))
+	}
+	return result, nil
+}
+
+func (s *Service) GetSubscriptionPlanByID(db database.DatabaseManager, planID string) (*AdminPlanResponseDto, error) {
+	plan, err := s.subscriptionRepo.GetPlanByID(planID, db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch plan: %w", err)
+	}
+	if plan == nil {
+		return nil, fmt.Errorf("subscription plan not found")
+	}
+
+	activeCount, _ := s.subscriptionRepo.CountSubscriptionsByPlanID(plan.ID, true, db)
+	totalCount, _ := s.subscriptionRepo.CountSubscriptionsByPlanID(plan.ID, false, db)
+
+	dto := mapPlanToAdminDto(*plan, activeCount, totalCount)
+	return &dto, nil
+}
+
+func (s *Service) CreateSubscriptionPlan(db database.DatabaseManager, req AdminCreatePlanDto) (*AdminPlanResponseDto, error) {
+	planName := strings.TrimSpace(req.Name)
+	if planName == "" {
+		return nil, fmt.Errorf("plan name is required")
+	}
+
+	existingPlan, err := s.subscriptionRepo.GetPlanByName(planName, db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check existing plan: %w", err)
+	}
+	if existingPlan != nil {
+		return nil, fmt.Errorf("a subscription plan with name %q already exists", planName)
+	}
+
+	reminderDays := req.ReminderDaysBefore
+	if len(reminderDays) == 0 {
+		reminderDays = []int{7, 3, 1}
+	} else {
+		seen := make(map[int]bool)
+		var cleaned []int
+		for _, d := range reminderDays {
+			if d > 0 && !seen[d] {
+				seen[d] = true
+				cleaned = append(cleaned, d)
+			}
+		}
+		if len(cleaned) == 0 {
+			cleaned = []int{7, 3, 1}
+		} else {
+			sort.Sort(sort.Reverse(sort.IntSlice(cleaned)))
+		}
+		reminderDays = cleaned
+	}
+	reminderDaysBytes, _ := json.Marshal(reminderDays)
+
+	isActive := true
+	if req.IsActive != nil {
+		isActive = *req.IsActive
+	}
+
+	plan := &entities.SubscriptionPlan{
+		ID:                 utility.GenerateUUID(),
+		Name:               planName,
+		Amount:             req.Amount,
+		IsActive:           isActive,
+		TotalInvoices:      req.TotalInvoices,
+		BillingCycle:       req.BillingCycle,
+		ReminderDaysBefore: datatypes.JSON(reminderDaysBytes),
+	}
+
+	if err := s.subscriptionRepo.CreatePlan(plan, db); err != nil {
+		return nil, fmt.Errorf("failed to create subscription plan: %w", err)
+	}
+
+	dto := mapPlanToAdminDto(*plan, 0, 0)
+	return &dto, nil
+}
+
+func (s *Service) UpdateSubscriptionPlan(db database.DatabaseManager, planID string, req AdminUpdatePlanDto) (*AdminPlanResponseDto, error) {
+	plan, err := s.subscriptionRepo.GetPlanByID(planID, db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch plan: %w", err)
+	}
+	if plan == nil {
+		return nil, fmt.Errorf("subscription plan not found")
+	}
+
+	if req.Name != nil && strings.TrimSpace(*req.Name) != "" {
+		newName := strings.TrimSpace(*req.Name)
+		if !strings.EqualFold(newName, plan.Name) {
+			existing, err := s.subscriptionRepo.GetPlanByName(newName, db)
+			if err != nil {
+				return nil, fmt.Errorf("failed to check plan name uniqueness: %w", err)
+			}
+			if existing != nil && existing.ID != plan.ID {
+				return nil, fmt.Errorf("a subscription plan with name %q already exists", newName)
+			}
+			plan.Name = newName
+		}
+	}
+
+	if req.Amount != nil && *req.Amount > 0 {
+		plan.Amount = *req.Amount
+	}
+	if req.TotalInvoices != nil && *req.TotalInvoices > 0 {
+		plan.TotalInvoices = *req.TotalInvoices
+	}
+	if req.BillingCycle != nil && *req.BillingCycle > 0 {
+		plan.BillingCycle = *req.BillingCycle
+	}
+	if req.IsActive != nil {
+		plan.IsActive = *req.IsActive
+	}
+
+	if len(req.ReminderDaysBefore) > 0 {
+		seen := make(map[int]bool)
+		var cleaned []int
+		for _, d := range req.ReminderDaysBefore {
+			if d > 0 && !seen[d] {
+				seen[d] = true
+				cleaned = append(cleaned, d)
+			}
+		}
+		if len(cleaned) > 0 {
+			sort.Sort(sort.Reverse(sort.IntSlice(cleaned)))
+			b, _ := json.Marshal(cleaned)
+			plan.ReminderDaysBefore = datatypes.JSON(b)
+		}
+	}
+
+	if err := s.subscriptionRepo.UpdatePlan(plan, db); err != nil {
+		return nil, fmt.Errorf("failed to update subscription plan: %w", err)
+	}
+
+	activeCount, _ := s.subscriptionRepo.CountSubscriptionsByPlanID(plan.ID, true, db)
+	totalCount, _ := s.subscriptionRepo.CountSubscriptionsByPlanID(plan.ID, false, db)
+
+	dto := mapPlanToAdminDto(*plan, activeCount, totalCount)
+	return &dto, nil
+}
+
+func (s *Service) ToggleSubscriptionPlanStatus(db database.DatabaseManager, planID string, isActive *bool) (*AdminPlanResponseDto, error) {
+	plan, err := s.subscriptionRepo.GetPlanByID(planID, db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch plan: %w", err)
+	}
+	if plan == nil {
+		return nil, fmt.Errorf("subscription plan not found")
+	}
+
+	targetStatus := !plan.IsActive
+	if isActive != nil {
+		targetStatus = *isActive
+	}
+
+	if err := s.subscriptionRepo.UpdatePlanStatus(plan.ID, targetStatus, db); err != nil {
+		return nil, fmt.Errorf("failed to update plan status: %w", err)
+	}
+	plan.IsActive = targetStatus
+
+	activeCount, _ := s.subscriptionRepo.CountSubscriptionsByPlanID(plan.ID, true, db)
+	totalCount, _ := s.subscriptionRepo.CountSubscriptionsByPlanID(plan.ID, false, db)
+
+	dto := mapPlanToAdminDto(*plan, activeCount, totalCount)
+	return &dto, nil
+}
+
+func (s *Service) DeleteSubscriptionPlan(db database.DatabaseManager, planID string, force bool) error {
+	plan, err := s.subscriptionRepo.GetPlanByID(planID, db)
+	if err != nil {
+		return fmt.Errorf("failed to fetch plan: %w", err)
+	}
+	if plan == nil {
+		return fmt.Errorf("subscription plan not found")
+	}
+
+	activeCount, err := s.subscriptionRepo.CountSubscriptionsByPlanID(plan.ID, true, db)
+	if err != nil {
+		return fmt.Errorf("failed to verify active subscriptions: %w", err)
+	}
+
+	if activeCount > 0 && !force {
+		return fmt.Errorf("cannot delete plan %q: %d active subscription(s) are currently running on this plan. Deactivate the plan instead so existing subscriptions can complete their cycle", plan.Name, activeCount)
+	}
+
+	if err := s.subscriptionRepo.DeletePlan(plan.ID, db); err != nil {
+		return fmt.Errorf("failed to delete subscription plan: %w", err)
+	}
+
+	return nil
 }

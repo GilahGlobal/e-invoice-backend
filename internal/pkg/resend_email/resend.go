@@ -1,10 +1,10 @@
 package resend_email
 
 import (
+	internalConfig "einvoice-access-point/internal/config"
+	"einvoice-access-point/templates"
 	"fmt"
 	"log"
-
-	internalConfig "einvoice-access-point/internal/config"
 
 	"github.com/resend/resend-go/v3"
 )
@@ -15,21 +15,17 @@ func getResendClient() *resend.Client {
 }
 
 func SendEmail(email, otp string) {
-	client := getResendClient()
-
-	params := &resend.SendEmailRequest{
-		From:    "Nexar <noreply@einvoice.nexar.ng>",
-		To:      []string{email},
-		Html:    fmt.Sprintf("<h1>Otp: %s </h1>", otp),
-		Subject: "Your OTP Code",
-	}
-
-	sent, err := client.Emails.Send(params)
+	htmlBody, err := templates.RenderEmail("otp.html", map[string]any{
+		"OTP": otp,
+	})
 	if err != nil {
-		panic(err)
+		log.Printf("Failed to render otp.html template: %v", err)
+		return
 	}
 
-	fmt.Println("Email sent:", sent.Id)
+	if err := sendEmailInternal(email, "Your OTP Code", htmlBody); err != nil {
+		log.Printf("Failed to send OTP email: %v", err)
+	}
 }
 
 type EmailRequest struct {
@@ -39,26 +35,12 @@ type EmailRequest struct {
 }
 
 func Send(email, otp string) error {
-	client := getResendClient()
-
-	params := &resend.SendEmailRequest{
-		From: "Nexar <noreply@einvoice.nexar.ng>",
-		To:   []string{email},
-		Html: fmt.Sprintf(`
-			<h2>Verification Code</h2>
-			<p>Your OTP is:</p>
-			<h1>%s</h1>
-			<p>This code will expire shortly.</p>
-		`, otp),
-		Subject: "Your OTP Code",
-	}
-
-	a, err := client.Emails.Send(params)
+	htmlBody, err := templates.RenderEmail("otp.html", map[string]any{
+		"OTP": otp,
+	})
 	if err != nil {
-		log.Println("err: ", err)
-		return err
+		return fmt.Errorf("failed to render otp.html template: %w", err)
 	}
-	log.Println("response: ", *a)
 
-	return nil
+	return sendEmailInternal(email, "Your OTP Code", htmlBody)
 }

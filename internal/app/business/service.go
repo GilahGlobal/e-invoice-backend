@@ -298,6 +298,7 @@ func (s *Service) GetNotificationPreferences(db *gorm.DB, businessID string) (*N
 		InvoiceValidationCompleted: pref.InvoiceValidationCompleted,
 		InvoiceValidationFailed:    pref.InvoiceValidationFailed,
 		BulkUploadFinished:         pref.BulkUploadFinished,
+		SubscriptionExpiring:       pref.SubscriptionExpiring,
 		CreatedAt:                  pref.CreatedAt,
 		UpdatedAt:                  pref.UpdatedAt,
 	}, nil
@@ -325,6 +326,9 @@ func (s *Service) UpdateNotificationPreferences(db *gorm.DB, businessID string, 
 	if req.BulkUploadFinished != nil {
 		pref.BulkUploadFinished = *req.BulkUploadFinished
 	}
+	if req.SubscriptionExpiring != nil {
+		pref.SubscriptionExpiring = *req.SubscriptionExpiring
+	}
 
 	if err := s.repo.UpdateNotificationPreference(pdb, pref); err != nil {
 		return nil, fmt.Errorf("failed to update notification preferences: %w", err)
@@ -337,6 +341,7 @@ func (s *Service) UpdateNotificationPreferences(db *gorm.DB, businessID string, 
 		InvoiceValidationCompleted: pref.InvoiceValidationCompleted,
 		InvoiceValidationFailed:    pref.InvoiceValidationFailed,
 		BulkUploadFinished:         pref.BulkUploadFinished,
+		SubscriptionExpiring:       pref.SubscriptionExpiring,
 		CreatedAt:                  pref.CreatedAt,
 		UpdatedAt:                  pref.UpdatedAt,
 	}, nil

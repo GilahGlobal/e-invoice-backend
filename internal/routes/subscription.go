@@ -17,6 +17,5 @@ func SubscriptionRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	rf := middleware.RequireFrontend()
 	{
 		subscriptionGroup.Get("/plans", rf, middleware.SelectDatabaseFromQuery("is_sandbox", c.DB, c.TestDB), subscriptionController.GetPlans)
-		subscriptionGroup.Post("/plans", rf, middleware.SelectDatabaseFromJSONPath("is_sandbox", c.DB, c.TestDB), subscriptionController.CreatePlan)
 	}
 }

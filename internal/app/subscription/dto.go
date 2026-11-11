@@ -7,11 +7,12 @@ type SubscriptionPlanQueryDto struct {
 }
 
 type CreateSubscriptionPlanDto struct {
-	IsSandbox     *bool   `json:"is_sandbox" validate:"required"`
-	Name          string  `json:"name" validate:"required" example:"Example Name"`
-	Amount        float64 `json:"amount" validate:"required,gt=0" example:"0.0"`
-	TotalInvoices int     `json:"total_invoices" validate:"required,gt=0" example:"0"`
-	BillingCycle  int     `json:"billing_cycle" validate:"required,gt=0" example:"0"`
+	IsSandbox          *bool   `json:"is_sandbox" validate:"required"`
+	Name               string  `json:"name" validate:"required" example:"Example Name"`
+	Amount             float64 `json:"amount" validate:"required,gt=0" example:"0.0"`
+	TotalInvoices      int     `json:"total_invoices" validate:"required,gt=0" example:"0"`
+	BillingCycle       int     `json:"billing_cycle" validate:"required,gt=0" example:"0"`
+	ReminderDaysBefore []int   `json:"reminder_days_before,omitempty"`
 }
 
 type SubscriptionPlansResponseDto struct {

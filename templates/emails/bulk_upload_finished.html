@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bulk Upload Processing Finished</title>
+  <style>
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; border-radius: 0 !important; }
+      .content-padding { padding: 24px 20px !important; }
+      .stats-table td { display: block !important; width: 100% !important; box-sizing: border-box !important; margin-bottom: 10px !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 24px 12px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; -webkit-font-smoothing: antialiased;">
+  <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center">
+        <div class="email-container" style="max-width: 580px; width: 100%; background-color: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04); text-align: left;">
+          
+          {{template "header" (dict "NoticeType" "BULK UPLOAD RUN")}}
+
+          <div class="content-padding" style="padding: 32px 32px;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #7c3aed; text-transform: uppercase; margin-bottom: 12px;">
+              NEXAR &middot; BATCH PROCESSING
+            </div>
+
+            <h1 style="margin: 0; font-size: 24px; font-weight: 800; line-height: 1.3; color: #0f172a; letter-spacing: -0.5px;">
+              Bulk Upload Finished Processing
+            </h1>
+            <div style="width: 44px; height: 3px; background-color: #6d28d9; border-radius: 99px; margin-top: 10px; margin-bottom: 24px;"></div>
+
+            <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 24px; color: #1e293b;">
+              Hello, <strong>{{.BusinessName}}</strong>,
+            </p>
+
+            <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 24px; color: #475569;">
+              Your bulk invoice upload batch (<strong>{{.FileName}}</strong>) has finished processing. Here is the summary of the run:
+            </p>
+
+            <!-- 2x2 Stats Grid -->
+            <table class="stats-table" cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: separate; border-spacing: 10px 10px; margin-bottom: 20px;">
+              <tr>
+                <td style="width: 50%; background-color: #f5f3ff; border: 1px solid #ede9fe; border-radius: 12px; padding: 16px; text-align: center;">
+                  <div style="font-size: 11px; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px;">Total Rows</div>
+                  <div style="font-size: 26px; font-weight: 800; color: #5b21b6; margin-top: 4px; line-height: 1.2;">{{.TotalRows}}</div>
+                </td>
+                <td style="width: 50%; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; text-align: center;">
+                  <div style="font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 1px;">Successful</div>
+                  <div style="font-size: 26px; font-weight: 800; color: #047857; margin-top: 4px; line-height: 1.2;">{{.Successful}}</div>
+                </td>
+              </tr>
+              <tr>
+                <td style="width: 50%; background-color: #fffbeb; border: 1px solid #fef08a; border-radius: 12px; padding: 16px; text-align: center;">
+                  <div style="font-size: 11px; font-weight: 700; color: #b45309; text-transform: uppercase; letter-spacing: 1px;">Partially Valid</div>
+                  <div style="font-size: 26px; font-weight: 800; color: #b45309; margin-top: 4px; line-height: 1.2;">{{.Partial}}</div>
+                </td>
+                <td style="width: 50%; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px; text-align: center;">
+                  <div style="font-size: 11px; font-weight: 700; color: #dc2626; text-transform: uppercase; letter-spacing: 1px;">Failed / Errors</div>
+                  <div style="font-size: 26px; font-weight: 800; color: #dc2626; margin-top: 4px; line-height: 1.2;">{{.Failed}}</div>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Batch Details Card -->
+            <div style="background-color: #f5f3ff; border: 1px solid #ede9fe; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #7c3aed; text-transform: uppercase; margin-bottom: 14px;">
+                BATCH DETAILS
+              </div>
+              <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; width: 45%;">File Name</td>
+                  <td style="padding: 10px 0; font-weight: 700; color: #0f172a; text-align: right; word-break: break-all;">{{.FileName}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; border-top: 1px solid #ede9fe;">Valid Schema Rows</td>
+                  <td style="padding: 10px 0; font-weight: 600; color: #0f172a; text-align: right; border-top: 1px solid #ede9fe;">{{.ValidRows}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; border-top: 1px solid #ede9fe;">Validation Errors</td>
+                  <td style="padding: 10px 0; font-weight: 600; color: #0f172a; text-align: right; border-top: 1px solid #ede9fe;">{{.ValidationErrors}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; border-top: 1px solid #ede9fe;">Processing Duration</td>
+                  <td style="padding: 10px 0; color: #0f172a; text-align: right; border-top: 1px solid #ede9fe;">{{.Duration}}</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- CTA Button -->
+            <div style="margin: 0 0 24px 0;">
+              <a href="https://app.nexar.ng/dashboard/bulk-upload" style="display: block; width: 100%; box-sizing: border-box; text-align: center; background-color: #5b21b6; color: #ffffff; padding: 15px 24px; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow: 0 2px 4px rgba(91, 33, 182, 0.25);">
+                View Full Batch Logs
+              </a>
+            </div>
+
+            <p style="margin: 0 0 24px 0; font-size: 13px; line-height: 20px; color: #64748b;">
+              You can download individual failed row reports with suggested schema fixes directly in your Bulk Upload portal.
+            </p>
+
+            {{template "preference_note" .}}
+          </div>
+
+          {{template "footer" .}}
+
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

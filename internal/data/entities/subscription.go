@@ -14,7 +14,9 @@ type Subscription struct {
 	TotalInvoices     int       `gorm:"column:total_invoices; type:int" json:"total_invoices"`
 	RemainingInvoices int       `gorm:"column:remaining_invoices; type:int" json:"remaining_invoices"`
 	UsedInvoices      int       `gorm:"column:used_invoices; type:int; default:0" json:"used_invoices"`
-	NextBillingDate   time.Time `gorm:"column:next_billing_date; type:timestamp" json:"next_billing_date"`
-	CreatedAt         time.Time `gorm:"column:created_at; autoCreateTime" json:"created_at"`
-	UpdatedAt         time.Time `gorm:"column:updated_at; autoUpdateTime" json:"updated_at"`
+	NextBillingDate    time.Time  `gorm:"column:next_billing_date; type:timestamp" json:"next_billing_date"`
+	RemindersSentCount int        `gorm:"column:reminders_sent_count; type:int; default:0; not null" json:"reminders_sent_count"`
+	LastReminderSentAt *time.Time `gorm:"column:last_reminder_sent_at; type:timestamp" json:"last_reminder_sent_at,omitempty"`
+	CreatedAt          time.Time  `gorm:"column:created_at; autoCreateTime" json:"created_at"`
+	UpdatedAt          time.Time  `gorm:"column:updated_at; autoUpdateTime" json:"updated_at"`
 }

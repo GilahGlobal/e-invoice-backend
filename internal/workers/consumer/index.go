@@ -22,7 +22,8 @@ type QueueConsumer struct {
 	svr    *asynq.Server
 	logger *utility.Logger
 
-	bulkupload *bulkupload.BulkUploadConsumer
+	bulkupload           *bulkupload.BulkUploadConsumer
+	subscriptionConsumer *SubscriptionConsumer
 }
 
 func NewQueueConsumer(db, testDB *database.Database, redisConnection asynq.RedisClientOpt) *QueueConsumer {
@@ -45,13 +46,20 @@ func NewQueueConsumer(db, testDB *database.Database, redisConnection asynq.Redis
 	subRepo := repositories.NewSubscriptionRepository(prodDB, testDBImpl)
 	subSvc := subscription.NewService(subRepo, businessRepo)
 	bulkupload := bulkupload.NewBulkUploadConsumer(db, testDB, utility.NewLogger(), invoiceSvc, bulkUploadSvc, subSvc)
-	return &QueueConsumer{svr: svr, logger: utility.NewLogger(), bulkupload: bulkupload}
+	subscriptionConsumer := NewSubscriptionConsumer(db, testDB, utility.NewLogger(), subRepo, businessRepo)
+	return &QueueConsumer{
+		svr:                  svr,
+		logger:               utility.NewLogger(),
+		bulkupload:           bulkupload,
+		subscriptionConsumer: subscriptionConsumer,
+	}
 }
 
 func (qc *QueueConsumer) Start() error {
 	mux := asynq.NewServeMux()
 
 	mux.HandleFunc(TypeBulkUpload, qc.bulkupload.HandleBulkUploadTask)
+	mux.HandleFunc(TypeSubscriptionCheckExpiring, qc.subscriptionConsumer.HandleCheckExpiringSubscriptionsTask)
 	log.Println("Asynq worker started, listening for jobs...")
 	return qc.svr.Run(mux)
 }

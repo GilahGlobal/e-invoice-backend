@@ -5,9 +5,11 @@ import (
 	"einvoice-access-point/internal/config"
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/dbinit"
+	"einvoice-access-point/internal/data/repositories"
 	"einvoice-access-point/internal/middleware"
 	"einvoice-access-point/internal/utility"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -806,6 +808,341 @@ func (h *Handler) DownloadInvoice(c *fiber.Ctx) error {
 
 	h.logger.Info("Invoice downloaded successfully by admin", "identifier", identifier)
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Invoice downloaded successfully", respData)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Retrieve Subscriptions
+// @Description Retrieve a paginated list of subscriptions with status, expiration tracking, business and aggregator details
+// @Tags Admin Subscriptions
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number" default(1)
+// @Param page_size query int false "Items per page" default(10)
+// @Param status query string false "Filter by status: active, expiring_soon, expired, all" default(all)
+// @Param expiring_days query int false "Filter subscriptions expiring within N days"
+// @Param search query string false "Search by business name, email, company, aggregator, or plan"
+// @Param business_id query string false "Filter by business ID"
+// @Param aggregator_id query string false "Filter by aggregator ID"
+// @Param plan_id query string false "Filter by plan ID"
+// @Success 200 {object} AdminSubscriptionListResponseDto "Subscriptions retrieved successfully"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/subscriptions [get]
+func (h *Handler) GetSubscriptions(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	if page < 1 {
+		page = 1
+	}
+	pageSize, _ := strconv.Atoi(c.Query("page_size", "10"))
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 10
+	}
+
+	expiringDays, _ := strconv.Atoi(c.Query("expiring_days", "0"))
+
+	filter := repositories.AdminSubscriptionFilter{
+		Status:       c.Query("status", "all"),
+		ExpiringDays: expiringDays,
+		Search:       c.Query("search", ""),
+		BusinessID:   c.Query("business_id", ""),
+		AggregatorID: c.Query("aggregator_id", ""),
+		PlanID:       c.Query("plan_id", ""),
+	}
+
+	subscriptions, pagination, err := h.svc.GetSubscriptions(db, filter, page, pageSize)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", "Failed to retrieve subscriptions", err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Subscriptions retrieved successfully", subscriptions)
+	rd.Pagination = pagination
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Retrieve Subscription Details
+// @Description Retrieve details of a single subscription including reminder logs and transaction history
+// @Tags Admin Subscriptions
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Subscription ID"
+// @Success 200 {object} AdminSubscriptionDetailResponseDto "Subscription retrieved successfully"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 404 {object} apperror.AppError "Subscription not found"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/subscriptions/{id} [get]
+func (h *Handler) GetSubscriptionByID(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	id := c.Params("id")
+	if id == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "Subscription ID is required", nil, nil)
+	}
+
+	detail, err := h.svc.GetSubscriptionByID(db, id)
+	if err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Subscription details retrieved successfully", detail)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Subscription Statistics & Expiration Overview
+// @Description Retrieve subscription metrics including active, expired, and upcoming expirations in 3, 7, and 14 days
+// @Tags Admin Subscriptions
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} AdminSubscriptionStatsResponseDto "Subscription stats retrieved successfully"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/subscriptions/stats [get]
+func (h *Handler) GetSubscriptionStats(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	stats, err := h.svc.GetSubscriptionStats(db)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", "Failed to retrieve subscription stats", err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Subscription stats retrieved successfully", stats)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary List Subscription Plans
+// @Description Retrieve all subscription plans with active and total subscriber counts
+// @Tags Admin Subscription Plans
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} AdminPlanListResponseDto "Subscription plans retrieved successfully"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/plans [get]
+func (h *Handler) GetSubscriptionPlans(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	plans, err := h.svc.GetSubscriptionPlans(db)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", "Failed to retrieve subscription plans", err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Subscription plans retrieved successfully", plans)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Retrieve Subscription Plan Details
+// @Description Retrieve details of a single subscription plan by ID
+// @Tags Admin Subscription Plans
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Plan ID"
+// @Success 200 {object} AdminPlanDetailResponseDto "Subscription plan retrieved successfully"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 404 {object} apperror.AppError "Plan not found"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/plans/{id} [get]
+func (h *Handler) GetSubscriptionPlanByID(c *fiber.Ctx) error {
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	id := c.Params("id")
+	if strings.TrimSpace(id) == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "Plan ID is required", nil, nil)
+	}
+
+	plan, err := h.svc.GetSubscriptionPlanByID(db, id)
+	if err != nil {
+		return apperror.New(fiber.StatusNotFound, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Subscription plan retrieved successfully", plan)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Create Subscription Plan
+// @Description Exclusive to Admin. Creates a new subscription plan with pricing, quota, and reminder intervals
+// @Tags Admin Subscription Plans
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param data body AdminCreatePlanDto true "Plan creation payload"
+// @Success 201 {object} AdminPlanDetailResponseDto "Subscription plan created successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 422 {object} entities.Response "Validation error"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/plans [post]
+func (h *Handler) CreateSubscriptionPlan(c *fiber.Ctx) error {
+	var req AdminCreatePlanDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	plan, err := h.svc.CreateSubscriptionPlan(db, req)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "Subscription plan created successfully", plan)
+	return c.Status(fiber.StatusCreated).JSON(rd)
+}
+
+// @Summary Update Subscription Plan
+// @Description Updates plan details (name, amount, quota, cycle, reminder intervals, status)
+// @Tags Admin Subscription Plans
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Plan ID"
+// @Param data body AdminUpdatePlanDto true "Plan update payload"
+// @Success 200 {object} AdminPlanDetailResponseDto "Subscription plan updated successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 404 {object} apperror.AppError "Plan not found"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/plans/{id} [put]
+func (h *Handler) UpdateSubscriptionPlan(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if strings.TrimSpace(id) == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "Plan ID is required", nil, nil)
+	}
+
+	var req AdminUpdatePlanDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	plan, err := h.svc.UpdateSubscriptionPlan(db, id, req)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Subscription plan updated successfully", plan)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Toggle Plan Status (Activate/Deactivate)
+// @Description Activates or deactivates a subscription plan
+// @Tags Admin Subscription Plans
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Plan ID"
+// @Param data body AdminTogglePlanStatusDto false "Toggle payload (optional)"
+// @Success 200 {object} AdminPlanDetailResponseDto "Subscription plan status updated"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 404 {object} apperror.AppError "Plan not found"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/plans/{id}/status [patch]
+func (h *Handler) ToggleSubscriptionPlanStatus(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if strings.TrimSpace(id) == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "Plan ID is required", nil, nil)
+	}
+
+	var req AdminTogglePlanStatusDto
+	_ = c.BodyParser(&req)
+
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	plan, err := h.svc.ToggleSubscriptionPlanStatus(db, id, req.IsActive)
+	if err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	action := "activated"
+	if !plan.IsActive {
+		action = "deactivated"
+	}
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, fmt.Sprintf("Subscription plan %s successfully", action), plan)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Delete Subscription Plan
+// @Description Deletes a subscription plan if no active subscriptions are running on it
+// @Tags Admin Subscription Plans
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Plan ID"
+// @Param force query bool false "Force delete even if active subscriptions exist"
+// @Success 200 {object} entities.Response "Subscription plan deleted successfully"
+// @Failure 400 {object} apperror.AppError "Cannot delete plan with active subscriptions"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 404 {object} apperror.AppError "Plan not found"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/plans/{id} [delete]
+func (h *Handler) DeleteSubscriptionPlan(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if strings.TrimSpace(id) == "" {
+		return apperror.New(fiber.StatusBadRequest, "error", "Plan ID is required", nil, nil)
+	}
+
+	force, _ := strconv.ParseBool(c.Query("force"))
+
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	if err := h.svc.DeleteSubscriptionPlan(db, id, force); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Subscription plan deleted successfully", nil)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 

@@ -9,6 +9,7 @@ import (
 	"einvoice-access-point/internal/data/entities"
 	"einvoice-access-point/internal/data/repositories"
 	"einvoice-access-point/internal/pkg/paystack"
+	"einvoice-access-point/internal/pkg/resend_email"
 	"einvoice-access-point/internal/utility"
 	"encoding/hex"
 	"encoding/json"
@@ -16,11 +17,13 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -149,13 +152,35 @@ func (s *Service) CreatePlan(req CreateSubscriptionPlanDto, db *gorm.DB) (*entit
 		return nil, fmt.Errorf("plan with name %s already exists", planName)
 	}
 
+	reminderDays := req.ReminderDaysBefore
+	if len(reminderDays) == 0 {
+		reminderDays = []int{7, 3, 1}
+	} else {
+		seen := make(map[int]bool)
+		var cleaned []int
+		for _, d := range reminderDays {
+			if d > 0 && !seen[d] {
+				seen[d] = true
+				cleaned = append(cleaned, d)
+			}
+		}
+		if len(cleaned) == 0 {
+			cleaned = []int{7, 3, 1}
+		} else {
+			sort.Sort(sort.Reverse(sort.IntSlice(cleaned)))
+		}
+		reminderDays = cleaned
+	}
+	reminderDaysBytes, _ := json.Marshal(reminderDays)
+
 	plan := &entities.SubscriptionPlan{
-		ID:            utility.GenerateUUID(),
-		Name:          planName,
-		Amount:        req.Amount,
-		IsActive:      true,
-		TotalInvoices: req.TotalInvoices,
-		BillingCycle:  req.BillingCycle,
+		ID:                 utility.GenerateUUID(),
+		Name:               planName,
+		Amount:             req.Amount,
+		IsActive:           true,
+		TotalInvoices:      req.TotalInvoices,
+		BillingCycle:       req.BillingCycle,
+		ReminderDaysBefore: datatypes.JSON(reminderDaysBytes),
 	}
 
 	if err := s.repo.CreatePlan(plan, pdb); err != nil {
@@ -341,10 +366,90 @@ func (s *Service) HandlePaystackWebhook(payload *paystack.PaystackWebhookPayload
 		subscription.UsedInvoices = 0
 		subscription.RemainingInvoices = plan.TotalInvoices
 		subscription.NextBillingDate = time.Now().UTC().AddDate(0, 0, plan.BillingCycle)
+		subscription.RemindersSentCount = 0
+		subscription.LastReminderSentAt = nil
 
 		if err := s.repo.SaveSubscription(subscription, pdb); err != nil {
 			return nil, http.StatusInternalServerError, fmt.Errorf("failed to update subscription: %w", err)
 		}
+
+		// Dispatch payment receipt to payer (aggregator) and covered business
+		biz, _ := s.businessRepo.GetBusinessByID(pdb, transactionRecord.BusinessID)
+		bizName := ""
+		bizEmail := ""
+		if biz != nil {
+			bizName = biz.CompanyName
+			if bizName == "" {
+				bizName = biz.Name
+			}
+			bizEmail = strings.TrimSpace(biz.Email)
+		}
+
+		agg, _ := s.businessRepo.FindUserByID(pdb, transactionRecord.AggregatorID)
+		if agg == nil {
+			agg, _ = s.businessRepo.GetBusinessByID(pdb, transactionRecord.AggregatorID)
+		}
+		aggName := ""
+		aggEmail := ""
+		if agg != nil {
+			aggName = agg.CompanyName
+			if aggName == "" {
+				aggName = agg.Name
+			}
+			aggEmail = strings.TrimSpace(agg.Email)
+		}
+		if aggEmail == "" && payload.Data.Customer.Email != "" {
+			aggEmail = strings.TrimSpace(payload.Data.Customer.Email)
+		}
+
+		paidAt := parsePaystackDate(payload.Data.PaidAt)
+		receiptAmount := transactionRecord.Amount
+		if receiptAmount <= 0 && payload.Data.Amount > 0 {
+			receiptAmount = float64(payload.Data.Amount) / 100.0
+		}
+
+		go func(payerEmail, payerName, targetBizEmail, targetBizName, planName, ref, channel string, amount float64, totalInvoices, billingCycle int, paymentDate, nextBilling time.Time) {
+			// Send official payment receipt to the payer (aggregator)
+			if payerEmail != "" {
+				recipient := payerName
+				if recipient == "" {
+					recipient = "Valued Customer"
+				}
+				_ = resend_email.SendSubscriptionPaymentReceiptEmail(
+					payerEmail,
+					recipient,
+					planName,
+					targetBizName,
+					ref,
+					channel,
+					amount,
+					totalInvoices,
+					billingCycle,
+					paymentDate,
+					nextBilling,
+				)
+			}
+			// Also notify covered business if distinct email exists
+			if targetBizEmail != "" && !strings.EqualFold(targetBizEmail, payerEmail) {
+				recipient := targetBizName
+				if recipient == "" {
+					recipient = "Valued Business"
+				}
+				_ = resend_email.SendSubscriptionPaymentReceiptEmail(
+					targetBizEmail,
+					recipient,
+					planName,
+					targetBizName,
+					ref,
+					channel,
+					amount,
+					totalInvoices,
+					billingCycle,
+					paymentDate,
+					nextBilling,
+				)
+			}
+		}(aggEmail, aggName, bizEmail, bizName, plan.Name, transactionRecord.Reference, payload.Data.Channel, receiptAmount, plan.TotalInvoices, plan.BillingCycle, paidAt, subscription.NextBillingDate)
 	}
 
 	response := fiber.Map{
@@ -465,3 +570,22 @@ func generateTransactionReference() string {
 		strings.ReplaceAll(utility.GenerateUUID(), "-", ""),
 	)
 }
+
+func parsePaystackDate(ts string) time.Time {
+	ts = strings.TrimSpace(ts)
+	if ts == "" {
+		return time.Now().UTC()
+	}
+	for _, layout := range []string{
+		time.RFC3339,
+		"2006-01-02T15:04:05.000Z",
+		"2006-01-02T15:04:05Z",
+		"2006-01-02 15:04:05",
+	} {
+		if t, err := time.Parse(layout, ts); err == nil {
+			return t.UTC()
+		}
+	}
+	return time.Now().UTC()
+}
+

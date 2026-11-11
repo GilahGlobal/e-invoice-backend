@@ -1,0 +1,19 @@
+{{define "badge"}}
+{{if eq .Type "success"}}
+<div style="display: inline-block; padding: 6px 14px; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 9999px; color: #047857; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 20px;">
+  &#10003; {{.Text}}
+</div>
+{{else if eq .Type "error"}}
+<div style="display: inline-block; padding: 6px 14px; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 9999px; color: #dc2626; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 20px;">
+  &#9888; {{.Text}}
+</div>
+{{else if eq .Type "warning"}}
+<div style="display: inline-block; padding: 6px 14px; background-color: #fffbeb; border: 1px solid #fef08a; border-radius: 9999px; color: #b45309; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 20px;">
+  &#9888; {{.Text}}
+</div>
+{{else}}
+<div style="display: inline-block; padding: 6px 14px; background-color: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 9999px; color: #6d28d9; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 20px;">
+  {{if .Icon}}{{.Icon}} {{end}}{{.Text}}
+</div>
+{{end}}
+{{end}}

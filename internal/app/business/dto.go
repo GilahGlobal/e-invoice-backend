@@ -71,6 +71,7 @@ type NotificationPreferenceDto struct {
 	InvoiceValidationCompleted bool      `json:"invoice_validation_completed" example:"true"`
 	InvoiceValidationFailed    bool      `json:"invoice_validation_failed" example:"true"`
 	BulkUploadFinished         bool      `json:"bulk_upload_finished" example:"true"`
+	SubscriptionExpiring       bool      `json:"subscription_expiring" example:"true"`
 	CreatedAt                  time.Time `json:"created_at" example:"2026-01-16T12:00:00Z"`
 	UpdatedAt                  time.Time `json:"updated_at" example:"2026-01-16T12:30:00Z"`
 }
@@ -79,6 +80,7 @@ type UpdateNotificationPreferenceDto struct {
 	InvoiceValidationCompleted *bool `json:"invoice_validation_completed,omitempty" example:"true"`
 	InvoiceValidationFailed    *bool `json:"invoice_validation_failed,omitempty" example:"true"`
 	BulkUploadFinished         *bool `json:"bulk_upload_finished,omitempty" example:"true"`
+	SubscriptionExpiring       *bool `json:"subscription_expiring,omitempty" example:"true"`
 }
 
 type NotificationPreferenceResponseDto struct {

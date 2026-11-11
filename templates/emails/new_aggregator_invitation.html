@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invitation to Join Nexar</title>
+  <style>
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; border-radius: 0 !important; }
+      .content-padding { padding: 24px 20px !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 24px 12px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; -webkit-font-smoothing: antialiased;">
+  <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center">
+        <div class="email-container" style="max-width: 580px; width: 100%; background-color: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04); text-align: left;">
+          
+          {{template "header" (dict "NoticeType" "JOIN NEXAR")}}
+
+          <div class="content-padding" style="padding: 32px 32px;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #7c3aed; text-transform: uppercase; margin-bottom: 12px;">
+              NEXAR &middot; PARTNERSHIP INVITE
+            </div>
+
+            <h1 style="margin: 0; font-size: 24px; font-weight: 800; line-height: 1.3; color: #0f172a; letter-spacing: -0.5px;">
+              Invitation to Manage Invoices
+            </h1>
+            <div style="width: 44px; height: 3px; background-color: #6d28d9; border-radius: 99px; margin-top: 10px; margin-bottom: 24px;"></div>
+
+            <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 24px; color: #1e293b;">
+              Hello,
+            </p>
+
+            <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 24px; color: #475569;">
+              <strong>{{.BusinessName}}</strong> has invited you to manage their electronic invoices as an authorized aggregator on the Nexar platform.
+            </p>
+
+            <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 22px; color: #475569;">
+              It looks like you do not have an aggregator account yet. Please click the button below to register your account and accept this invitation:
+            </p>
+
+            <!-- CTA Button -->
+            {{template "button" (dict "URL" .SignupLink "Text" "Create Account & Accept Invite")}}
+
+            <!-- Link Box -->
+            <div style="background-color: #f5f3ff; border-radius: 12px; border: 1px solid #ede9fe; padding: 16px 20px; margin-bottom: 24px;">
+              <p style="margin: 0 0 6px 0; font-size: 12px; color: #6b7280; font-weight: 600;">Or copy and paste this link into your browser:</p>
+              <p style="margin: 0; font-size: 13px; word-break: break-all; color: #5b21b6; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight: 600;">{{.SignupLink}}</p>
+            </div>
+
+            <p style="margin: 0 0 28px 0; font-size: 14px; line-height: 22px; color: #334155;">
+              Regards,<br>
+              <strong style="color: #0f172a;">The Nexar Team</strong>
+            </p>
+
+            <!-- Support Box -->
+            <div style="background-color: #f8fafc; border-radius: 12px; padding: 20px 24px; border: 1px solid #e2e8f0; margin-bottom: 8px;">
+              <h3 style="margin: 0 0 6px 0; font-size: 15px; font-weight: 700; color: #0f172a;">
+                Did not expect this invitation?
+              </h3>
+              <p style="margin: 0 0 12px 0; font-size: 13px; line-height: 20px; color: #475569;">
+                If you did not expect an invitation from this business, you can safely ignore this email or contact support.
+              </p>
+              <a href="mailto:support@nexar.ng" style="color: #5b21b6; font-size: 13px; font-weight: 700; text-decoration: none;">support@nexar.ng</a>
+            </div>
+
+          </div>
+
+          {{template "footer" .}}
+
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
