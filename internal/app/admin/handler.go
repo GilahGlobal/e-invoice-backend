@@ -1036,7 +1036,7 @@ func (h *Handler) CreateSubscriptionPlan(c *fiber.Ctx) error {
 // @Failure 401 {object} apperror.AppError "Unauthorized"
 // @Failure 404 {object} apperror.AppError "Plan not found"
 // @Failure 500 {object} apperror.AppError "Internal server error"
-// @Router /admin/plans/{id} [put]
+// @Router /admin/plans/{id} [patch]
 func (h *Handler) UpdateSubscriptionPlan(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if strings.TrimSpace(id) == "" {
@@ -1075,21 +1075,17 @@ func (h *Handler) UpdateSubscriptionPlan(c *fiber.Ctx) error {
 // @Produce json
 // @Security BearerAuth
 // @Param id path string true "Plan ID"
-// @Param data body AdminTogglePlanStatusDto false "Toggle payload (optional)"
-// @Success 200 {object} AdminPlanDetailResponseDto "Subscription plan status updated"
+// @Success 200 {object} entities.Response "Subscription plan status updated successfully"
 // @Failure 400 {object} apperror.AppError "Bad request"
 // @Failure 401 {object} apperror.AppError "Unauthorized"
 // @Failure 404 {object} apperror.AppError "Plan not found"
 // @Failure 500 {object} apperror.AppError "Internal server error"
-// @Router /admin/plans/{id}/status [patch]
+// @Router /admin/plans/status/{id} [patch]
 func (h *Handler) ToggleSubscriptionPlanStatus(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if strings.TrimSpace(id) == "" {
 		return apperror.New(fiber.StatusBadRequest, "error", "Plan ID is required", nil, nil)
 	}
-
-	var req AdminTogglePlanStatusDto
-	_ = c.BodyParser(&req)
 
 	rawDb, err := middleware.GetDatabase(c)
 	if err != nil {
@@ -1097,16 +1093,12 @@ func (h *Handler) ToggleSubscriptionPlanStatus(c *fiber.Ctx) error {
 	}
 	db := dbinit.InitDB(rawDb, false)
 
-	plan, err := h.svc.ToggleSubscriptionPlanStatus(db, id, req.IsActive)
+	action, err := h.svc.ToggleSubscriptionPlanStatus(db, id)
 	if err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
 	}
 
-	action := "activated"
-	if !plan.IsActive {
-		action = "deactivated"
-	}
-	rd := utility.BuildSuccessResponse(fiber.StatusOK, fmt.Sprintf("Subscription plan %s successfully", action), plan)
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, fmt.Sprintf("Subscription plan %s successfully", action), nil)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
@@ -1145,4 +1137,3 @@ func (h *Handler) DeleteSubscriptionPlan(c *fiber.Ctx) error {
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Subscription plan deleted successfully", nil)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
-

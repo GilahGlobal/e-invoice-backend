@@ -936,30 +936,25 @@ func (s *Service) UpdateSubscriptionPlan(db database.DatabaseManager, planID str
 	return &dto, nil
 }
 
-func (s *Service) ToggleSubscriptionPlanStatus(db database.DatabaseManager, planID string, isActive *bool) (*AdminPlanResponseDto, error) {
+func (s *Service) ToggleSubscriptionPlanStatus(db database.DatabaseManager, planID string) (string, error) {
 	plan, err := s.subscriptionRepo.GetPlanByID(planID, db)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch plan: %w", err)
+		return "", fmt.Errorf("failed to fetch plan: %w", err)
 	}
 	if plan == nil {
-		return nil, fmt.Errorf("subscription plan not found")
+		return "", fmt.Errorf("subscription plan not found")
 	}
 
 	targetStatus := !plan.IsActive
-	if isActive != nil {
-		targetStatus = *isActive
-	}
-
 	if err := s.subscriptionRepo.UpdatePlanStatus(plan.ID, targetStatus, db); err != nil {
-		return nil, fmt.Errorf("failed to update plan status: %w", err)
+		return "", fmt.Errorf("failed to update plan status: %w", err)
 	}
-	plan.IsActive = targetStatus
 
-	activeCount, _ := s.subscriptionRepo.CountSubscriptionsByPlanID(plan.ID, true, db)
-	totalCount, _ := s.subscriptionRepo.CountSubscriptionsByPlanID(plan.ID, false, db)
-
-	dto := mapPlanToAdminDto(*plan, activeCount, totalCount)
-	return &dto, nil
+	action := "activated"
+	if !targetStatus {
+		action = "deactivated"
+	}
+	return action, nil
 }
 
 func (s *Service) DeleteSubscriptionPlan(db database.DatabaseManager, planID string, force bool) error {

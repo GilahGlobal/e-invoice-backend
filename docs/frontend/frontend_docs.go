@@ -993,6 +993,67 @@ const docTemplatefrontend = `{
                 }
             }
         },
+        "/admin/plans/status/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Activates or deactivates a subscription plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscription Plans"
+                ],
+                "summary": "Toggle Plan Status (Activate/Deactivate)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription plan status updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Plan not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/plans/{id}": {
             "get": {
                 "security": [
@@ -1025,74 +1086,6 @@ const docTemplatefrontend = `{
                         "description": "Subscription plan retrieved successfully",
                         "schema": {
                             "$ref": "#/definitions/admin.AdminPlanDetailResponseDto"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/apperror.AppError"
-                        }
-                    },
-                    "404": {
-                        "description": "Plan not found",
-                        "schema": {
-                            "$ref": "#/definitions/apperror.AppError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/apperror.AppError"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Updates plan details (name, amount, quota, cycle, reminder intervals, status)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Admin Subscription Plans"
-                ],
-                "summary": "Update Subscription Plan",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Plan ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Plan update payload",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/admin.AdminUpdatePlanDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Subscription plan updated successfully",
-                        "schema": {
-                            "$ref": "#/definitions/admin.AdminPlanDetailResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/apperror.AppError"
                         }
                     },
                     "401": {
@@ -1179,16 +1172,14 @@ const docTemplatefrontend = `{
                         }
                     }
                 }
-            }
-        },
-        "/admin/plans/{id}/status": {
+            },
             "patch": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Activates or deactivates a subscription plan",
+                "description": "Updates plan details (name, amount, quota, cycle, reminder intervals, status)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1198,7 +1189,7 @@ const docTemplatefrontend = `{
                 "tags": [
                     "Admin Subscription Plans"
                 ],
-                "summary": "Toggle Plan Status (Activate/Deactivate)",
+                "summary": "Update Subscription Plan",
                 "parameters": [
                     {
                         "type": "string",
@@ -1208,17 +1199,18 @@ const docTemplatefrontend = `{
                         "required": true
                     },
                     {
-                        "description": "Toggle payload (optional)",
+                        "description": "Plan update payload",
                         "name": "data",
                         "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/admin.AdminTogglePlanStatusDto"
+                            "$ref": "#/definitions/admin.AdminUpdatePlanDto"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Subscription plan status updated",
+                        "description": "Subscription plan updated successfully",
                         "schema": {
                             "$ref": "#/definitions/admin.AdminPlanDetailResponseDto"
                         }
@@ -7388,15 +7380,6 @@ const docTemplatefrontend = `{
                 },
                 "status_code": {
                     "type": "integer"
-                }
-            }
-        },
-        "admin.AdminTogglePlanStatusDto": {
-            "type": "object",
-            "properties": {
-                "is_active": {
-                    "type": "boolean",
-                    "example": false
                 }
             }
         },

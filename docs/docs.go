@@ -231,6 +231,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/admin.AdminAggregatorInfoResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -528,6 +540,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/admin.AdminBusinessAggregatorInfoResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -580,6 +604,74 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/businesses/invoices/{id}/{invoice_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve the full details of a specific invoice for a given business by business ID and invoice ID, invoice number, or IRN.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Invoices"
+                ],
+                "summary": "Get Specific Invoice of a Business",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Business ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Invoice ID, Invoice Number, or IRN",
+                        "name": "invoice_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice details retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminInvoiceDetailResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Invoice or business not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/apperror.AppError"
                         }
@@ -654,6 +746,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/admin.AdminBusinessInfoResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -705,8 +809,431 @@ const docTemplate = `{
                             "$ref": "#/definitions/apperror.AppError"
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/invoices/download/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Download decrypted invoice as PDF/data by Invoice ID, Invoice Number, or IRN.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Invoices"
+                ],
+                "summary": "Download Invoice",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Invoice ID, Invoice Number, or IRN",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force query sandbox environment",
+                        "name": "is_sandbox",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice downloaded successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminDownloadInvoiceResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Invoice not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plans": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all subscription plans with active and total subscriber counts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscription Plans"
+                ],
+                "summary": "List Subscription Plans",
+                "responses": {
+                    "200": {
+                        "description": "Subscription plans retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminPlanListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Exclusive to Admin. Creates a new subscription plan with pricing, quota, and reminder intervals",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscription Plans"
+                ],
+                "summary": "Create Subscription Plan",
+                "parameters": [
+                    {
+                        "description": "Plan creation payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminCreatePlanDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Subscription plan created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminPlanDetailResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plans/status/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Activates or deactivates a subscription plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscription Plans"
+                ],
+                "summary": "Toggle Plan Status (Activate/Deactivate)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription plan status updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Plan not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/plans/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve details of a single subscription plan by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscription Plans"
+                ],
+                "summary": "Retrieve Subscription Plan Details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription plan retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminPlanDetailResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Plan not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes a subscription plan if no active subscriptions are running on it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscription Plans"
+                ],
+                "summary": "Delete Subscription Plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force delete even if active subscriptions exist",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription plan deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Cannot delete plan with active subscriptions",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Plan not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates plan details (name, amount, quota, cycle, reminder intervals, status)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscription Plans"
+                ],
+                "summary": "Update Subscription Plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Plan update payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminUpdatePlanDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription plan updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminPlanDetailResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Plan not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/apperror.AppError"
                         }
@@ -854,6 +1381,194 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/subscriptions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a paginated list of subscriptions with status, expiration tracking, business and aggregator details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscriptions"
+                ],
+                "summary": "Retrieve Subscriptions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "all",
+                        "description": "Filter by status: active, expiring_soon, expired, all",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter subscriptions expiring within N days",
+                        "name": "expiring_days",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by business name, email, company, aggregator, or plan",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by business ID",
+                        "name": "business_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by aggregator ID",
+                        "name": "aggregator_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by plan ID",
+                        "name": "plan_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscriptions retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminSubscriptionListResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/subscriptions/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve subscription metrics including active, expired, and upcoming expirations in 3, 7, and 14 days",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscriptions"
+                ],
+                "summary": "Subscription Statistics \u0026 Expiration Overview",
+                "responses": {
+                    "200": {
+                        "description": "Subscription stats retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminSubscriptionStatsResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/subscriptions/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve details of a single subscription including reminder logs and transaction history",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscriptions"
+                ],
+                "summary": "Retrieve Subscription Details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subscription ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminSubscriptionDetailResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Subscription not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/apperror.AppError"
                         }
@@ -4277,6 +4992,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/invoice/system-integrator": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Prepares an invoice, generates and signs the IRN, and returns the QR code without validating or transmitting to FIRS.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Invoice"
+                ],
+                "summary": "System Integrator Invoice Upload",
+                "parameters": [
+                    {
+                        "description": "System Integrator Invoice Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/firs_models.UploadInvoiceRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/invoice.SystemIntegratorResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                },
+                "x-external": true
+            }
+        },
         "/invoice/transmit/confirm/{irn}": {
             "get": {
                 "security": [
@@ -5320,56 +6093,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "description": "Creates a subscription plan in the specified environment database",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Subscription"
-                ],
-                "summary": "Create Subscription Plan",
-                "parameters": [
-                    {
-                        "description": "Create plan request payload",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/subscription.CreateSubscriptionPlanDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Plan created successfully",
-                        "schema": {
-                            "$ref": "#/definitions/subscription.CreateSubscriptionPlanResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
             }
         },
         "/zoho/auth/access-token": {
@@ -5943,6 +6666,43 @@ const docTemplate = `{
                 }
             }
         },
+        "admin.AdminCreatePlanDto": {
+            "type": "object",
+            "required": [
+                "amount",
+                "billing_cycle",
+                "name",
+                "total_invoices"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 120000
+                },
+                "billing_cycle": {
+                    "type": "integer",
+                    "example": 365
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Enterprise Annual"
+                },
+                "reminder_days_before": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 5000
+                }
+            }
+        },
         "admin.AdminDailyInvoiceStatsDto": {
             "type": "object",
             "properties": {
@@ -5961,6 +6721,53 @@ const docTemplate = `{
                 "success_invoices": {
                     "type": "integer",
                     "example": 0
+                }
+            }
+        },
+        "admin.AdminDownloadInvoiceResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": "JVBERi0xLjQKJ..."
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminInvoiceDetailResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/entities.Invoice"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
                 }
             }
         },
@@ -6105,6 +6912,106 @@ const docTemplate = `{
                 }
             }
         },
+        "admin.AdminPlanDetailResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.AdminPlanResponseDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminPlanListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.AdminPlanResponseDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminPlanResponseDto": {
+            "type": "object",
+            "properties": {
+                "active_subscribers_count": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "amount": {
+                    "type": "number",
+                    "example": 120000
+                },
+                "billing_cycle": {
+                    "type": "integer",
+                    "example": 365
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-10-01T00:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Enterprise Annual"
+                },
+                "reminder_days_before": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 5000
+                },
+                "total_subscribers_count": {
+                    "type": "integer",
+                    "example": 58
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-11-10T12:00:00Z"
+                }
+            }
+        },
         "admin.AdminRegisterDto": {
             "type": "object",
             "required": [
@@ -6155,6 +7062,323 @@ const docTemplate = `{
                 "role_id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "admin.AdminSubscriptionDetailDto": {
+            "type": "object",
+            "properties": {
+                "aggregator_company": {
+                    "type": "string",
+                    "example": "Partner Corp"
+                },
+                "aggregator_email": {
+                    "type": "string",
+                    "example": "aggregator@example.com"
+                },
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "8c596cb2-ac83-489a-bb00-10e0d83c0510"
+                },
+                "aggregator_name": {
+                    "type": "string",
+                    "example": "Aggregator Partner"
+                },
+                "business_company": {
+                    "type": "string",
+                    "example": "Acme Limited"
+                },
+                "business_email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "business_name": {
+                    "type": "string",
+                    "example": "Acme Corp"
+                },
+                "business_phone": {
+                    "type": "string",
+                    "example": "+2348012345678"
+                },
+                "business_tin": {
+                    "type": "string",
+                    "example": "12345678-0001"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-10-20T00:00:00Z"
+                },
+                "days_until_expiry": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "last_reminder_sent_at": {
+                    "type": "string",
+                    "example": "2026-11-10T08:00:00Z"
+                },
+                "next_billing_date": {
+                    "type": "string",
+                    "example": "2026-11-20T00:00:00Z"
+                },
+                "plan": {
+                    "type": "string",
+                    "example": "Professional"
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "remaining_invoices": {
+                    "type": "integer",
+                    "example": 450
+                },
+                "reminder_logs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.SubscriptionReminderLog"
+                    }
+                },
+                "reminders_sent_count": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "status_label": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 1000
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Transaction"
+                    }
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-10-20T00:00:00Z"
+                },
+                "used_invoices": {
+                    "type": "integer",
+                    "example": 550
+                }
+            }
+        },
+        "admin.AdminSubscriptionDetailResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.AdminSubscriptionDetailDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminSubscriptionListResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.AdminSubscriptionResponseDto"
+                    }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/database.PaginationResponse"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminSubscriptionResponseDto": {
+            "type": "object",
+            "properties": {
+                "aggregator_company": {
+                    "type": "string",
+                    "example": "Partner Corp"
+                },
+                "aggregator_email": {
+                    "type": "string",
+                    "example": "aggregator@example.com"
+                },
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "8c596cb2-ac83-489a-bb00-10e0d83c0510"
+                },
+                "aggregator_name": {
+                    "type": "string",
+                    "example": "Aggregator Partner"
+                },
+                "business_company": {
+                    "type": "string",
+                    "example": "Acme Limited"
+                },
+                "business_email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "business_name": {
+                    "type": "string",
+                    "example": "Acme Corp"
+                },
+                "business_phone": {
+                    "type": "string",
+                    "example": "+2348012345678"
+                },
+                "business_tin": {
+                    "type": "string",
+                    "example": "12345678-0001"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-10-20T00:00:00Z"
+                },
+                "days_until_expiry": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "last_reminder_sent_at": {
+                    "type": "string",
+                    "example": "2026-11-10T08:00:00Z"
+                },
+                "next_billing_date": {
+                    "type": "string",
+                    "example": "2026-11-20T00:00:00Z"
+                },
+                "plan": {
+                    "type": "string",
+                    "example": "Professional"
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "remaining_invoices": {
+                    "type": "integer",
+                    "example": 450
+                },
+                "reminders_sent_count": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "status_label": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 1000
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-10-20T00:00:00Z"
+                },
+                "used_invoices": {
+                    "type": "integer",
+                    "example": 550
+                }
+            }
+        },
+        "admin.AdminSubscriptionStatsDto": {
+            "type": "object",
+            "properties": {
+                "active_subscriptions": {
+                    "type": "integer",
+                    "example": 95
+                },
+                "expired_subscriptions": {
+                    "type": "integer",
+                    "example": 25
+                },
+                "expiring_in_14_days": {
+                    "type": "integer",
+                    "example": 25
+                },
+                "expiring_in_3_days": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "expiring_in_7_days": {
+                    "type": "integer",
+                    "example": 12
+                },
+                "total_subscriptions": {
+                    "type": "integer",
+                    "example": 120
+                }
+            }
+        },
+        "admin.AdminSubscriptionStatsResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.AdminSubscriptionStatsDto"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
                 }
             }
         },
@@ -6256,6 +7480,37 @@ const docTemplate = `{
                 "tin": {
                     "type": "string",
                     "example": "12345678-0001"
+                }
+            }
+        },
+        "admin.AdminUpdatePlanDto": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 120000
+                },
+                "billing_cycle": {
+                    "type": "integer",
+                    "example": 365
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Enterprise Annual"
+                },
+                "reminder_days_before": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 5000
                 }
             }
         },
@@ -7805,13 +9060,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2026-01-16T12:00:00Z"
                 },
-                "effective_email": {
-                    "type": "string",
-                    "example": "business@example.com"
-                },
                 "email": {
                     "type": "string",
-                    "example": "notifications@example.com"
+                    "example": "business@example.com"
                 },
                 "id": {
                     "type": "string",
@@ -7822,6 +9073,10 @@ const docTemplate = `{
                     "example": true
                 },
                 "invoice_validation_failed": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "subscription_expiring": {
                     "type": "boolean",
                     "example": true
                 },
@@ -7889,6 +9144,11 @@ const docTemplate = `{
                 "service_id": {
                     "type": "string",
                     "example": "6A2BC898"
+                },
+                "tin": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "example": "12345678-0001"
                 }
             }
         },
@@ -7899,15 +9159,15 @@ const docTemplate = `{
                     "type": "boolean",
                     "example": true
                 },
-                "email": {
-                    "type": "string",
-                    "example": "notifications@example.com"
-                },
                 "invoice_validation_completed": {
                     "type": "boolean",
                     "example": true
                 },
                 "invoice_validation_failed": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "subscription_expiring": {
                     "type": "boolean",
                     "example": true
                 }
@@ -8361,6 +9621,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "reminder_days_before": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "total_invoices": {
                     "type": "integer"
                 },
@@ -8368,6 +9634,114 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "entities.SubscriptionReminderLog": {
+            "type": "object",
+            "properties": {
+                "aggregator_id": {
+                    "type": "string"
+                },
+                "business_id": {
+                    "type": "string"
+                },
+                "days_before_expiry": {
+                    "type": "integer"
+                },
+                "error_message": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "next_billing_date": {
+                    "type": "string"
+                },
+                "recipient_email": {
+                    "type": "string"
+                },
+                "recipient_type": {
+                    "description": "\"business\" or \"aggregator\"",
+                    "type": "string"
+                },
+                "reminder_number": {
+                    "type": "integer"
+                },
+                "sent_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "\"sent\", \"failed\"",
+                    "type": "string"
+                },
+                "subscription_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Transaction": {
+            "type": "object",
+            "properties": {
+                "aggregator_id": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "number"
+                },
+                "business_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "error_message": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "plan": {
+                    "type": "string"
+                },
+                "plan_id": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "provider_response_metadata": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/entities.TransactionStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.TransactionStatus": {
+            "type": "string",
+            "enum": [
+                "initialized",
+                "success",
+                "failed",
+                "processing"
+            ],
+            "x-enum-varnames": [
+                "TransactionStatusInitialized",
+                "TransactionStatusSuccess",
+                "TransactionStatusFailed",
+                "TransactionStatusProcessing"
+            ]
         },
         "firs_models.AllowanceCharge": {
             "type": "object",
@@ -9271,6 +10645,29 @@ const docTemplate = `{
                 }
             }
         },
+        "invoice.SystemIntegratorResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/invoice.InvoiceUploadData"
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
         "invoice.UploadInvoiceResponseDto": {
             "type": "object",
             "properties": {
@@ -9770,72 +11167,6 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/subscription.AggregatorSubscribeDataDto"
-                },
-                "error": {},
-                "extra": {},
-                "message": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "pagination": {},
-                "status": {
-                    "type": "string"
-                },
-                "status_code": {
-                    "type": "integer"
-                }
-            }
-        },
-        "subscription.CreateSubscriptionPlanDataDto": {
-            "type": "object",
-            "properties": {
-                "is_sandbox": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "plan": {
-                    "$ref": "#/definitions/entities.SubscriptionPlan"
-                }
-            }
-        },
-        "subscription.CreateSubscriptionPlanDto": {
-            "type": "object",
-            "required": [
-                "amount",
-                "billing_cycle",
-                "is_sandbox",
-                "name",
-                "total_invoices"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "number",
-                    "example": 0
-                },
-                "billing_cycle": {
-                    "type": "integer",
-                    "example": 0
-                },
-                "is_sandbox": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Example Name"
-                },
-                "total_invoices": {
-                    "type": "integer",
-                    "example": 0
-                }
-            }
-        },
-        "subscription.CreateSubscriptionPlanResponseDto": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/subscription.CreateSubscriptionPlanDataDto"
                 },
                 "error": {},
                 "extra": {},

@@ -870,12 +870,6 @@ definitions:
       status_code:
         type: integer
     type: object
-  admin.AdminTogglePlanStatusDto:
-    properties:
-      is_active:
-        example: false
-        type: boolean
-    type: object
   admin.AdminTransactionDto:
     properties:
       aggregator_id:
@@ -4336,7 +4330,7 @@ paths:
       summary: Retrieve Subscription Plan Details
       tags:
       - Admin Subscription Plans
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates plan details (name, amount, quota, cycle, reminder intervals,
@@ -4381,7 +4375,7 @@ paths:
       summary: Update Subscription Plan
       tags:
       - Admin Subscription Plans
-  /admin/plans/{id}/status:
+  /admin/plans/status/{id}:
     patch:
       consumes:
       - application/json
@@ -4392,18 +4386,13 @@ paths:
         name: id
         required: true
         type: string
-      - description: Toggle payload (optional)
-        in: body
-        name: data
-        schema:
-          $ref: '#/definitions/admin.AdminTogglePlanStatusDto'
       produces:
       - application/json
       responses:
         "200":
-          description: Subscription plan status updated
+          description: Subscription plan status updated successfully
           schema:
-            $ref: '#/definitions/admin.AdminPlanDetailResponseDto'
+            $ref: '#/definitions/entities.Response'
         "400":
           description: Bad request
           schema:
