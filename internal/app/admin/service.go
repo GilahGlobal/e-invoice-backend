@@ -2,6 +2,7 @@ package admin
 
 import (
 	"einvoice-access-point/internal/app/invoice"
+	"einvoice-access-point/internal/app/subscription"
 	"einvoice-access-point/internal/config"
 	"einvoice-access-point/internal/data/database"
 	"einvoice-access-point/internal/data/entities"
@@ -30,6 +31,7 @@ type Service struct {
 	aggregatorRepo   *repositories.AggregatorRepository
 	invoiceRepo      *repositories.InvoiceRepository
 	subscriptionRepo *repositories.SubscriptionRepository
+	subscriptionSvc  *subscription.Service
 	cfg              *config.Configuration
 }
 
@@ -48,8 +50,68 @@ func NewServiceWithDB(prodDB, testDB database.DatabaseManager, cfg *config.Confi
 		aggregatorRepo:   aggregatorRepo,
 		invoiceRepo:      invoiceRepo,
 		subscriptionRepo: subscriptionRepo,
+		subscriptionSvc:  subscription.NewService(subscriptionRepo, businessRepo),
 		cfg:              cfg,
 	}
+}
+
+// ManualSubscribeBusiness records an offline payment and activates (or extends) the business subscription.
+func (s *Service) ManualSubscribeBusiness(db database.DatabaseManager, req AdminManualSubscribeDto, adminID, adminEmail string) (*AdminManualSubscribeDataDto, int, error) {
+	var paymentDate *time.Time
+	if raw := strings.TrimSpace(req.PaymentDate); raw != "" {
+		parsed, err := parsePaymentDate(raw)
+		if err != nil {
+			return nil, http.StatusBadRequest, err
+		}
+		paymentDate = &parsed
+	}
+
+	sendReceipt := true
+	if req.SendReceipt != nil {
+		sendReceipt = *req.SendReceipt
+	}
+
+	result, status, err := s.subscriptionSvc.RecordManualSubscription(db, subscription.ManualSubscriptionInput{
+		BusinessID:       req.BusinessID,
+		PlanID:           req.PlanID,
+		PaymentReference: req.PaymentReference,
+		AmountPaid:       req.AmountPaid,
+		PaymentDate:      paymentDate,
+		PaymentMethod:    req.PaymentMethod,
+		Notes:            req.Notes,
+		SendReceipt:      sendReceipt,
+		AdminID:          adminID,
+		AdminEmail:       adminEmail,
+	})
+	if err != nil {
+		return nil, status, err
+	}
+
+	return &AdminManualSubscribeDataDto{
+		SubscriptionID:    result.SubscriptionID,
+		TransactionID:     result.TransactionID,
+		Reference:         result.Reference,
+		BusinessID:        result.BusinessID,
+		AggregatorID:      result.AggregatorID,
+		PlanID:            result.PlanID,
+		Plan:              result.Plan,
+		AmountPaid:        result.AmountPaid,
+		PaymentMethod:     result.PaymentMethod,
+		TotalInvoices:     result.TotalInvoices,
+		RemainingInvoices: result.RemainingInvoices,
+		NextBillingDate:   result.NextBillingDate.Format(time.RFC3339),
+		Renewed:           result.Renewed,
+	}, status, nil
+}
+
+// parsePaymentDate accepts either a date (2006-01-02) or a full RFC3339 timestamp.
+func parsePaymentDate(raw string) (time.Time, error) {
+	for _, layout := range []string{"2006-01-02", time.RFC3339} {
+		if t, err := time.Parse(layout, raw); err == nil {
+			return t.UTC(), nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("invalid payment_date: use YYYY-MM-DD or RFC3339")
 }
 
 func (s *Service) RegisterAdmin(req AdminRegisterDto, isSandbox bool) (int, error) {
@@ -237,10 +299,14 @@ func (s *Service) GetAggregators(db database.DatabaseManager, search string, pag
 func mapTransactionsToDto(transactions []entities.Transaction) []AdminTransactionDto {
 	var dtos []AdminTransactionDto
 	for _, txn := range transactions {
+		aggID := ""
+		if txn.AggregatorID != nil {
+			aggID = *txn.AggregatorID
+		}
 		dtos = append(dtos, AdminTransactionDto{
 			ID:           txn.ID,
 			BusinessID:   txn.BusinessID,
-			AggregatorID: txn.AggregatorID,
+			AggregatorID: aggID,
 			Reference:    txn.Reference,
 			Provider:     txn.Provider,
 			Status:       string(txn.Status),

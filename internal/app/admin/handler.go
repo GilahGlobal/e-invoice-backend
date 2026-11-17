@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"einvoice-access-point/internal/app/subscription"
 	"einvoice-access-point/internal/apperror"
 	"einvoice-access-point/internal/config"
 	"einvoice-access-point/internal/data/database"
@@ -1135,5 +1136,102 @@ func (h *Handler) DeleteSubscriptionPlan(c *fiber.Ctx) error {
 	}
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Subscription plan deleted successfully", nil)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Manually Subscribe Business (Offline Payment)
+// @Description Super Admin only. Records an offline payment (e.g. bank transfer) and activates the business subscription.
+// @Description If the business already has an active subscription, the new cycle is added to the current expiry and unused invoices carry over.
+// @Description The business must be managed by an aggregator. payment_reference must be unique.
+// @Tags Admin Subscriptions
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param data body AdminManualSubscribeDto true "Offline payment details"
+// @Success 201 {object} AdminManualSubscribeResponseDto "Subscription activated successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 403 {object} apperror.AppError "Forbidden: Super Admin only"
+// @Failure 404 {object} apperror.AppError "Business or plan not found"
+// @Failure 409 {object} apperror.AppError "Payment reference already recorded"
+// @Failure 422 {object} entities.Response "Validation error"
+// @Failure 500 {object} apperror.AppError "Internal server error"
+// @Router /admin/subscriptions [post]
+func (h *Handler) ManualSubscribeBusiness(c *fiber.Ctx) error {
+	var req AdminManualSubscribeDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	claims, ok := c.Locals("adminClaims").(*middleware.AdminDataClaims)
+	if !ok || claims == nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", nil, nil)
+	}
+
+	rawDb, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+	db := dbinit.InitDB(rawDb, false)
+
+	data, status, err := h.svc.ManualSubscribeBusiness(db, req, claims.ID, claims.Email)
+	if err != nil {
+		return apperror.New(status, "error", err.Error(), err, nil)
+	}
+
+	message := "Subscription activated successfully"
+	if data.Renewed {
+		message = "Subscription extended successfully"
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusCreated, message, nil)
+	return c.Status(fiber.StatusCreated).JSON(rd)
+}
+
+// @Summary Get Direct Subscription Enforcement Status
+// @Description Super Admin only. Retrieves whether direct businesses are required to have active subscriptions to upload invoices
+// @Tags Admin Subscriptions
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} SubscriptionEnforcementResponseDto "Enforcement status retrieved successfully"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 403 {object} apperror.AppError "Forbidden: Super Admin only"
+// @Router /admin/subscriptions/enforcement [get]
+func (h *Handler) GetSubscriptionEnforcement(c *fiber.Ctx) error {
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Enforcement setting retrieved successfully", SubscriptionEnforcementDto{
+		EnforceDirectSubscriptions: subscription.IsDirectSubscriptionEnforced(),
+	})
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// @Summary Toggle Direct Subscription Enforcement
+// @Description Super Admin only. Enables or disables subscription enforcement on direct invoice uploads
+// @Tags Admin Subscriptions
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param data body SubscriptionEnforcementDto true "Enforcement toggle payload"
+// @Success 200 {object} SubscriptionEnforcementResponseDto "Enforcement status updated successfully"
+// @Failure 400 {object} apperror.AppError "Bad request"
+// @Failure 401 {object} apperror.AppError "Unauthorized"
+// @Failure 403 {object} apperror.AppError "Forbidden: Super Admin only"
+// @Router /admin/subscriptions/enforcement [patch]
+func (h *Handler) UpdateSubscriptionEnforcement(c *fiber.Ctx) error {
+	var req SubscriptionEnforcementDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	subscription.SetDirectSubscriptionEnforced(req.EnforceDirectSubscriptions)
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "Enforcement setting updated successfully", SubscriptionEnforcementDto{
+		EnforceDirectSubscriptions: subscription.IsDirectSubscriptionEnforced(),
+	})
 	return c.Status(fiber.StatusOK).JSON(rd)
 }

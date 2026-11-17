@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -43,29 +44,31 @@ func NewHandler(validator *validator.Validate, logger *utility.Logger, db, testD
 // @Tags Subscription
 // @Accept json
 // @Produce json
-// @Param is_sandbox query string true "Use sandbox database (true/false)"
+// @Param is_sandbox query string false "Use sandbox database (true/false) when unauthenticated"
 // @Success 200 {object} SubscriptionPlansResponseDto "Plans fetched successfully"
 // @Failure 400 {object} entities.Response "Bad request"
 // @Failure 422 {object} entities.Response "Unprocessable entity"
 // @Failure 500 {object} entities.Response "Internal server error"
 // @Router /subscription/plans [get]
 func (h *Handler) GetPlans(c *fiber.Ctx) error {
-	var query SubscriptionPlanQueryDto
-	if err := c.QueryParser(&query); err != nil {
-		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse query params", err, nil)
-	}
-
-	if err := h.Validator.Struct(&query); err != nil {
-		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
-	}
-
-	if _, err := strconv.ParseBool(query.IsSandbox); err != nil {
-		return apperror.New(fiber.StatusBadRequest, "error", "is_sandbox must be true or false", err, nil)
-	}
 	db, err := middleware.GetDatabase(c)
 	if err != nil {
-		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+		isSandboxQuery := c.Query("is_sandbox")
+		if isSandboxQuery != "" {
+			isSandbox, parseErr := strconv.ParseBool(isSandboxQuery)
+			if parseErr != nil {
+				return apperror.New(fiber.StatusBadRequest, "error", "is_sandbox must be true or false", parseErr, nil)
+			}
+			if isSandbox {
+				db = h.TestDb.Postgresql.DB()
+			} else {
+				db = h.Db.Postgresql.DB()
+			}
+			err = nil
+		}
+	}
+	if err != nil || db == nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", "failed to determine database connection", err, nil)
 	}
 
 	plans, err := h.svc.ListActivePlans(db)
@@ -74,6 +77,88 @@ func (h *Handler) GetPlans(c *fiber.Ctx) error {
 	}
 
 	rd := utility.BuildSuccessResponse(fiber.StatusOK, "plans fetched successfully", plans)
+	return c.Status(fiber.StatusOK).JSON(rd)
+}
+
+// Subscribe godoc
+// @Summary Subscribe To A Plan
+// @Description Initializes a Paystack transaction for a business or aggregator subscription plan
+// @Tags Subscription
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param data body SubscribeRequestDto true "Subscribe request payload"
+// @Success 200 {object} SubscribeResponseDto "Subscription initialized successfully"
+// @Failure 400 {object} entities.Response "Bad request"
+// @Failure 401 {object} entities.Response "Unauthorized"
+// @Failure 422 {object} entities.Response "Unprocessable entity"
+// @Failure 502 {object} entities.Response "Bad gateway"
+// @Router /subscription/subscribe [post]
+func (h *Handler) Subscribe(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	var req SubscribeRequestDto
+	if err := c.BodyParser(&req); err != nil {
+		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+	}
+
+	if err := h.Validator.Struct(&req); err != nil {
+		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	respData, code, err := h.svc.InitializeSubscription(req, userDetails, db)
+	if err != nil {
+		return apperror.New(code, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(http.StatusOK, "subscription initialized successfully", respData)
+	return c.Status(code).JSON(rd)
+}
+
+// GetSubscriptionStatus godoc
+// @Summary Get Current Subscription Status
+// @Description Retrieves active subscription details and remaining quota for authenticated business
+// @Tags Subscription
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} SubscriptionStatusResponseDto "Subscription status fetched successfully"
+// @Failure 401 {object} entities.Response "Unauthorized"
+// @Failure 500 {object} entities.Response "Internal server error"
+// @Router /subscription/status [get]
+func (h *Handler) GetSubscriptionStatus(c *fiber.Ctx) error {
+	userDetails, err := middleware.GetUserDetails(c)
+	if err != nil {
+		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
+	}
+
+	db, err := middleware.GetDatabase(c)
+	if err != nil {
+		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
+	}
+
+	businessID := userDetails.ID
+	if userDetails.IsAggregator {
+		if queryBizID := strings.TrimSpace(c.Query("business_id")); queryBizID != "" {
+			businessID = queryBizID
+		}
+	}
+
+	status, code, err := h.svc.GetBusinessSubscriptionStatus(db, businessID)
+	if err != nil {
+		return apperror.New(code, "error", err.Error(), err, nil)
+	}
+
+	rd := utility.BuildSuccessResponse(fiber.StatusOK, "subscription status fetched successfully", status)
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
@@ -164,97 +249,4 @@ func (h *Handler) PaystackWebhook(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(rd)
 }
 
-type AggregatorHandler struct {
-	svc       *Service
-	Validator *validator.Validate
-	Logger    *utility.Logger
-	Db        *database.Database
-	TestDB    *database.Database
-}
 
-func NewAggregatorHandler(validator *validator.Validate, logger *utility.Logger, db, testDb *database.Database) *AggregatorHandler {
-	prodDB := dbinit.InitDB(db.Postgresql.DB(), false)
-	testDBConn := dbinit.InitDB(testDb.Postgresql.DB(), false)
-	svc := NewServiceWithDB(prodDB, testDBConn)
-	return &AggregatorHandler{
-		svc:       svc,
-		Validator: validator,
-		Logger:    logger,
-		Db:        db,
-		TestDB:    testDb,
-	}
-}
-
-// GetPlans godoc
-// @Summary List Aggregator Subscription Plans
-// @Description Retrieves active plans available for aggregator subscriptions
-// @Tags Aggregator Subscription
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Success 200 {object} SubscriptionPlansResponseDto "Plans fetched successfully"
-// @Failure 401 {object} entities.Response "Unauthorized"
-// @Failure 500 {object} entities.Response "Internal server error"
-// @Router /aggregator/subscription/plans [get]
-func (h *AggregatorHandler) GetPlans(c *fiber.Ctx) error {
-	if _, err := middleware.GetUserDetails(c); err != nil {
-		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
-	}
-
-	db, err := middleware.GetDatabase(c)
-	if err != nil {
-		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
-	}
-
-	plans, err := h.svc.ListActivePlans(db)
-	if err != nil {
-		return apperror.New(http.StatusInternalServerError, "error", "failed to fetch plans", err, nil)
-	}
-
-	rd := utility.BuildSuccessResponse(http.StatusOK, "plans fetched successfully", plans)
-	return c.Status(http.StatusOK).JSON(rd)
-}
-
-// Subscribe godoc
-// @Summary Subscribe A Managed Business To A Plan
-// @Description Initializes a Paystack transaction for an aggregator-managed business subscription plan
-// @Tags Aggregator Subscription
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Param data body AggregatorSubscribeRequestDto true "Subscribe request payload"
-// @Success 200 {object} AggregatorSubscribeResponseDto "Subscription initialized successfully"
-// @Failure 400 {object} entities.Response "Bad request"
-// @Failure 401 {object} entities.Response "Unauthorized"
-// @Failure 422 {object} entities.Response "Unprocessable entity"
-// @Failure 502 {object} entities.Response "Bad gateway"
-// @Router /aggregator/subscription/subscribe [post]
-func (h *AggregatorHandler) Subscribe(c *fiber.Ctx) error {
-	userDetails, err := middleware.GetUserDetails(c)
-	if err != nil {
-		return apperror.New(fiber.StatusUnauthorized, "error", "Unauthorized", err, nil)
-	}
-
-	var req AggregatorSubscribeRequestDto
-	if err := c.BodyParser(&req); err != nil {
-		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
-	}
-
-	if err := h.Validator.Struct(&req); err != nil {
-		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
-	}
-
-	db, err := middleware.GetDatabase(c)
-	if err != nil {
-		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
-	}
-
-	respData, code, err := h.svc.SubscribeBusinessToPlan(req, userDetails.ID, userDetails.IsSandbox, db)
-	if err != nil {
-		return apperror.New(code, "error", err.Error(), err, nil)
-	}
-
-	rd := utility.BuildSuccessResponse(http.StatusOK, "subscription initialized successfully", respData)
-	return c.Status(code).JSON(rd)
-}

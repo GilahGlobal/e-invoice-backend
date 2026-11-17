@@ -489,6 +489,56 @@ definitions:
       data:
         $ref: '#/definitions/admin.AdminResponse'
     type: object
+  admin.AdminManualSubscribeDto:
+    properties:
+      amount_paid:
+        example: 120000
+        type: number
+      business_id:
+        example: 8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9
+        type: string
+      notes:
+        example: Transfer confirmed by finance
+        maxLength: 500
+        type: string
+      payment_date:
+        example: "2026-11-15"
+        type: string
+      payment_method:
+        enum:
+        - bank_transfer
+        - cash
+        - cheque
+        - other
+        example: bank_transfer
+        type: string
+      payment_reference:
+        example: GTB-TRF-889201
+        maxLength: 100
+        type: string
+      plan_id:
+        example: 223f3eba-f611-4b8c-94e3-993b0201fa3f
+        type: string
+      send_receipt:
+        example: true
+        type: boolean
+    required:
+    - business_id
+    - payment_reference
+    - plan_id
+    type: object
+  admin.AdminManualSubscribeResponseDto:
+    properties:
+      message:
+        example: Subscription activated successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 201
+        type: integer
+    type: object
   admin.AdminOverviewStatsDto:
     properties:
       failed_invoices:
@@ -3005,6 +3055,7 @@ definitions:
         - PENDING
         - PAID
         - REJECTED
+        - PARTIAL
         example: PENDING
         type: string
       payment_terms_note:
@@ -4565,6 +4616,60 @@ paths:
       security:
       - BearerAuth: []
       summary: Retrieve Subscriptions
+      tags:
+      - Admin Subscriptions
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Super Admin only. Records an offline payment (e.g. bank transfer) and activates the business subscription.
+        If the business already has an active subscription, the new cycle is added to the current expiry and unused invoices carry over.
+        The business must be managed by an aggregator. payment_reference must be unique.
+      parameters:
+      - description: Offline payment details
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminManualSubscribeDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Subscription activated successfully
+          schema:
+            $ref: '#/definitions/admin.AdminManualSubscribeResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "403":
+          description: 'Forbidden: Super Admin only'
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Business or plan not found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "409":
+          description: Payment reference already recorded
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Manually Subscribe Business (Offline Payment)
       tags:
       - Admin Subscriptions
   /admin/subscriptions/{id}:

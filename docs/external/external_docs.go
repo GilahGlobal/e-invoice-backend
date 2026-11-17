@@ -1955,7 +1955,8 @@ const docTemplateexternal = `{
                     "enum": [
                         "PENDING",
                         "PAID",
-                        "REJECTED"
+                        "REJECTED",
+                        "PARTIAL"
                     ],
                     "example": "PENDING"
                 },

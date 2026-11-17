@@ -490,6 +490,56 @@ definitions:
       data:
         $ref: '#/definitions/admin.AdminResponse'
     type: object
+  admin.AdminManualSubscribeDto:
+    properties:
+      amount_paid:
+        example: 120000
+        type: number
+      business_id:
+        example: 8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9
+        type: string
+      notes:
+        example: Transfer confirmed by finance
+        maxLength: 500
+        type: string
+      payment_date:
+        example: "2026-11-15"
+        type: string
+      payment_method:
+        enum:
+        - bank_transfer
+        - cash
+        - cheque
+        - other
+        example: bank_transfer
+        type: string
+      payment_reference:
+        example: GTB-TRF-889201
+        maxLength: 100
+        type: string
+      plan_id:
+        example: 223f3eba-f611-4b8c-94e3-993b0201fa3f
+        type: string
+      send_receipt:
+        example: true
+        type: boolean
+    required:
+    - business_id
+    - payment_reference
+    - plan_id
+    type: object
+  admin.AdminManualSubscribeResponseDto:
+    properties:
+      message:
+        example: Subscription activated successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 201
+        type: integer
+    type: object
   admin.AdminOverviewStatsDto:
     properties:
       failed_invoices:
@@ -1020,6 +1070,26 @@ definitions:
       name:
         example: superadmin
         type: string
+    type: object
+  admin.SubscriptionEnforcementDto:
+    properties:
+      enforce_direct_subscriptions:
+        example: false
+        type: boolean
+    type: object
+  admin.SubscriptionEnforcementResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/admin.SubscriptionEnforcementDto'
+      message:
+        example: Enforcement setting retrieved successfully
+        type: string
+      status:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
     type: object
   aggregator.AggregatorActivityLogDto:
     properties:
@@ -3006,6 +3076,7 @@ definitions:
         - PENDING
         - PAID
         - REJECTED
+        - PARTIAL
         example: PENDING
         type: string
       payment_terms_note:
@@ -3524,8 +3595,40 @@ definitions:
         example: Standard Goods and Services Tax
         type: string
     type: object
-  subscription.AggregatorSubscribeDataDto:
+  subscription.BusinessSubscriptionStatusDto:
     properties:
+      days_remaining:
+        example: 25
+        type: integer
+      has_active_subscription:
+        example: true
+        type: boolean
+      next_billing_date:
+        type: string
+      plan:
+        example: Growth
+        type: string
+      plan_id:
+        example: plan_123
+        type: string
+      remaining_invoices:
+        example: 450
+        type: integer
+      subscription_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      total_invoices:
+        example: 500
+        type: integer
+      used_invoices:
+        example: 50
+        type: integer
+    type: object
+  subscription.SubscribeDataDto:
+    properties:
+      aggregator_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       authorization_url:
         example: https://checkout.paystack.com/...
         type: string
@@ -3542,10 +3645,10 @@ definitions:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
       transaction_ref:
-        example: aggsub_1712345678_abcdef
+        example: sub_1712345678_abcdef
         type: string
     type: object
-  subscription.AggregatorSubscribeRequestDto:
+  subscription.SubscribeRequestDto:
     properties:
       business_id:
         example: 657cf2f1-46e5-4977-a6a6-484a691866d5
@@ -3554,13 +3657,12 @@ definitions:
         example: f435c4ed-694e-4d4a-8d1e-75be3bb5e43b
         type: string
     required:
-    - business_id
     - plan_id
     type: object
-  subscription.AggregatorSubscribeResponseDto:
+  subscription.SubscribeResponseDto:
     properties:
       data:
-        $ref: '#/definitions/subscription.AggregatorSubscribeDataDto'
+        $ref: '#/definitions/subscription.SubscribeDataDto'
       error: {}
       extra: {}
       message:
@@ -3579,6 +3681,22 @@ definitions:
         items:
           $ref: '#/definitions/entities.SubscriptionPlan'
         type: array
+      error: {}
+      extra: {}
+      message:
+        type: string
+      name:
+        type: string
+      pagination: {}
+      status:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  subscription.SubscriptionStatusResponseDto:
+    properties:
+      data:
+        $ref: '#/definitions/subscription.BusinessSubscriptionStatusDto'
       error: {}
       extra: {}
       message:
@@ -4572,6 +4690,60 @@ paths:
       summary: Retrieve Subscriptions
       tags:
       - Admin Subscriptions
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Super Admin only. Records an offline payment (e.g. bank transfer) and activates the business subscription.
+        If the business already has an active subscription, the new cycle is added to the current expiry and unused invoices carry over.
+        The business must be managed by an aggregator. payment_reference must be unique.
+      parameters:
+      - description: Offline payment details
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminManualSubscribeDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Subscription activated successfully
+          schema:
+            $ref: '#/definitions/admin.AdminManualSubscribeResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "403":
+          description: 'Forbidden: Super Admin only'
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Business or plan not found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "409":
+          description: Payment reference already recorded
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "422":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Manually Subscribe Business (Offline Payment)
+      tags:
+      - Admin Subscriptions
   /admin/subscriptions/{id}:
     get:
       consumes:
@@ -4606,6 +4778,68 @@ paths:
       security:
       - BearerAuth: []
       summary: Retrieve Subscription Details
+      tags:
+      - Admin Subscriptions
+  /admin/subscriptions/enforcement:
+    get:
+      consumes:
+      - application/json
+      description: Super Admin only. Retrieves whether direct businesses are required
+        to have active subscriptions to upload invoices
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Enforcement status retrieved successfully
+          schema:
+            $ref: '#/definitions/admin.SubscriptionEnforcementResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "403":
+          description: 'Forbidden: Super Admin only'
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Get Direct Subscription Enforcement Status
+      tags:
+      - Admin Subscriptions
+    patch:
+      consumes:
+      - application/json
+      description: Super Admin only. Enables or disables subscription enforcement
+        on direct invoice uploads
+      parameters:
+      - description: Enforcement toggle payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.SubscriptionEnforcementDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Enforcement status updated successfully
+          schema:
+            $ref: '#/definitions/admin.SubscriptionEnforcementResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "403":
+          description: 'Forbidden: Super Admin only'
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Toggle Direct Subscription Enforcement
       tags:
       - Admin Subscriptions
   /admin/subscriptions/stats:
@@ -5428,72 +5662,6 @@ paths:
       summary: Get invoice statistics for aggregator
       tags:
       - Aggregator Portal
-  /aggregator/subscription/plans:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves active plans available for aggregator subscriptions
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Plans fetched successfully
-          schema:
-            $ref: '#/definitions/subscription.SubscriptionPlansResponseDto'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/entities.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/entities.Response'
-      security:
-      - BearerAuth: []
-      summary: List Aggregator Subscription Plans
-      tags:
-      - Aggregator Subscription
-  /aggregator/subscription/subscribe:
-    post:
-      consumes:
-      - application/json
-      description: Initializes a Paystack transaction for an aggregator-managed business
-        subscription plan
-      parameters:
-      - description: Subscribe request payload
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/subscription.AggregatorSubscribeRequestDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Subscription initialized successfully
-          schema:
-            $ref: '#/definitions/subscription.AggregatorSubscribeResponseDto'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/entities.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/entities.Response'
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/entities.Response'
-        "502":
-          description: Bad gateway
-          schema:
-            $ref: '#/definitions/entities.Response'
-      security:
-      - BearerAuth: []
-      summary: Subscribe A Managed Business To A Plan
-      tags:
-      - Aggregator Subscription
   /aggregator/transactions:
     get:
       description: Gets all transaction history for the aggregator
@@ -7507,10 +7675,9 @@ paths:
       - application/json
       description: Retrieves all available subscription plans
       parameters:
-      - description: Use sandbox database (true/false)
+      - description: Use sandbox database (true/false) when unauthenticated
         in: query
         name: is_sandbox
-        required: true
         type: string
       produces:
       - application/json
@@ -7532,6 +7699,73 @@ paths:
           schema:
             $ref: '#/definitions/entities.Response'
       summary: List Subscription Plans
+      tags:
+      - Subscription
+  /subscription/status:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves active subscription details and remaining quota for authenticated
+        business
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription status fetched successfully
+          schema:
+            $ref: '#/definitions/subscription.SubscriptionStatusResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Current Subscription Status
+      tags:
+      - Subscription
+  /subscription/subscribe:
+    post:
+      consumes:
+      - application/json
+      description: Initializes a Paystack transaction for a business or aggregator
+        subscription plan
+      parameters:
+      - description: Subscribe request payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/subscription.SubscribeRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription initialized successfully
+          schema:
+            $ref: '#/definitions/subscription.SubscribeResponseDto'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/entities.Response'
+        "502":
+          description: Bad gateway
+          schema:
+            $ref: '#/definitions/entities.Response'
+      security:
+      - BearerAuth: []
+      summary: Subscribe To A Plan
       tags:
       - Subscription
   /zoho/auth/access-token:

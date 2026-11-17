@@ -152,3 +152,37 @@ func AuthorizeAdmin(db, testDB *gorm.DB, requiredRoles ...string) fiber.Handler 
 		return c.Next()
 	}
 }
+
+// RequireAdminRoles restricts a route to the given admin roles.
+// It must run after AuthorizeAdmin and SelectDatabaseFromClaims, as it relies on the
+// admin claims and selected database they place in the request context.
+func RequireAdminRoles(allowedRoles ...string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		claims, ok := c.Locals("adminClaims").(*AdminDataClaims)
+		if !ok || claims == nil {
+			rd := utility.BuildErrorResponse(fiber.StatusUnauthorized, "error", "Invalid admin claims", "Unauthorized", nil)
+			return c.Status(fiber.StatusUnauthorized).JSON(rd)
+		}
+
+		rawDb, err := GetDatabase(c)
+		if err != nil {
+			rd := utility.BuildErrorResponse(fiber.StatusInternalServerError, "error", err.Error(), "Internal server error", nil)
+			return c.Status(fiber.StatusInternalServerError).JSON(rd)
+		}
+
+		var role entities.Role
+		if err := rawDb.Where("id = ?", claims.RoleID).First(&role).Error; err != nil {
+			rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Forbidden: Role not found", "Forbidden", nil)
+			return c.Status(fiber.StatusForbidden).JSON(rd)
+		}
+
+		for _, allowed := range allowedRoles {
+			if role.Name == allowed {
+				return c.Next()
+			}
+		}
+
+		rd := utility.BuildErrorResponse(fiber.StatusForbidden, "error", "Forbidden: Insufficient privileges", "Forbidden", nil)
+		return c.Status(fiber.StatusForbidden).JSON(rd)
+	}
+}

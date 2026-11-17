@@ -1480,6 +1480,180 @@ const docTemplatefrontend = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Super Admin only. Records an offline payment (e.g. bank transfer) and activates the business subscription.\nIf the business already has an active subscription, the new cycle is added to the current expiry and unused invoices carry over.\nThe business must be managed by an aggregator. payment_reference must be unique.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscriptions"
+                ],
+                "summary": "Manually Subscribe Business (Offline Payment)",
+                "parameters": [
+                    {
+                        "description": "Offline payment details",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminManualSubscribeDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Subscription activated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminManualSubscribeResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: Super Admin only",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Business or plan not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "409": {
+                        "description": "Payment reference already recorded",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/subscriptions/enforcement": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Super Admin only. Retrieves whether direct businesses are required to have active subscriptions to upload invoices",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscriptions"
+                ],
+                "summary": "Get Direct Subscription Enforcement Status",
+                "responses": {
+                    "200": {
+                        "description": "Enforcement status retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.SubscriptionEnforcementResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: Super Admin only",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Super Admin only. Enables or disables subscription enforcement on direct invoice uploads",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscriptions"
+                ],
+                "summary": "Toggle Direct Subscription Enforcement",
+                "parameters": [
+                    {
+                        "description": "Enforcement toggle payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.SubscriptionEnforcementDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Enforcement status updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.SubscriptionEnforcementResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: Super Admin only",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
             }
         },
         "/admin/subscriptions/stats": {
@@ -2797,109 +2971,6 @@ const docTemplatefrontend = `{
                     },
                     "401": {
                         "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/aggregator/subscription/plans": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieves active plans available for aggregator subscriptions",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Aggregator Subscription"
-                ],
-                "summary": "List Aggregator Subscription Plans",
-                "responses": {
-                    "200": {
-                        "description": "Plans fetched successfully",
-                        "schema": {
-                            "$ref": "#/definitions/subscription.SubscriptionPlansResponseDto"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/aggregator/subscription/subscribe": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Initializes a Paystack transaction for an aggregator-managed business subscription plan",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Aggregator Subscription"
-                ],
-                "summary": "Subscribe A Managed Business To A Plan",
-                "parameters": [
-                    {
-                        "description": "Subscribe request payload",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/subscription.AggregatorSubscribeRequestDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Subscription initialized successfully",
-                        "schema": {
-                            "$ref": "#/definitions/subscription.AggregatorSubscribeResponseDto"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Response"
-                        }
-                    },
-                    "502": {
-                        "description": "Bad gateway",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -6062,10 +6133,9 @@ const docTemplatefrontend = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Use sandbox database (true/false)",
+                        "description": "Use sandbox database (true/false) when unauthenticated",
                         "name": "is_sandbox",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6089,6 +6159,109 @@ const docTemplatefrontend = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscription/status": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves active subscription details and remaining quota for authenticated business",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Get Current Subscription Status",
+                "responses": {
+                    "200": {
+                        "description": "Subscription status fetched successfully",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubscriptionStatusResponseDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscription/subscribe": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Initializes a Paystack transaction for a business or aggregator subscription plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Subscribe To A Plan",
+                "parameters": [
+                    {
+                        "description": "Subscribe request payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubscribeRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription initialized successfully",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubscribeResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad gateway",
                         "schema": {
                             "$ref": "#/definitions/entities.Response"
                         }
@@ -6857,6 +7030,73 @@ const docTemplatefrontend = `{
                 }
             }
         },
+        "admin.AdminManualSubscribeDto": {
+            "type": "object",
+            "required": [
+                "business_id",
+                "payment_reference",
+                "plan_id"
+            ],
+            "properties": {
+                "amount_paid": {
+                    "type": "number",
+                    "example": 120000
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9"
+                },
+                "notes": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "Transfer confirmed by finance"
+                },
+                "payment_date": {
+                    "type": "string",
+                    "example": "2026-11-15"
+                },
+                "payment_method": {
+                    "type": "string",
+                    "enum": [
+                        "bank_transfer",
+                        "cash",
+                        "cheque",
+                        "other"
+                    ],
+                    "example": "bank_transfer"
+                },
+                "payment_reference": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "GTB-TRF-889201"
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "223f3eba-f611-4b8c-94e3-993b0201fa3f"
+                },
+                "send_receipt": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "admin.AdminManualSubscribeResponseDto": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Subscription activated successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 201
+                }
+            }
+        },
         "admin.AdminOverviewStatsDto": {
             "type": "object",
             "properties": {
@@ -7593,6 +7833,35 @@ const docTemplatefrontend = `{
                 "name": {
                     "type": "string",
                     "example": "superadmin"
+                }
+            }
+        },
+        "admin.SubscriptionEnforcementDto": {
+            "type": "object",
+            "properties": {
+                "enforce_direct_subscriptions": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "admin.SubscriptionEnforcementResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/admin.SubscriptionEnforcementDto"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Enforcement setting retrieved successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
                 }
             }
         },
@@ -10395,7 +10664,8 @@ const docTemplatefrontend = `{
                     "enum": [
                         "PENDING",
                         "PAID",
-                        "REJECTED"
+                        "REJECTED",
+                        "PARTIAL"
                     ],
                     "example": "PENDING"
                 },
@@ -11117,9 +11387,53 @@ const docTemplatefrontend = `{
                 }
             }
         },
-        "subscription.AggregatorSubscribeDataDto": {
+        "subscription.BusinessSubscriptionStatusDto": {
             "type": "object",
             "properties": {
+                "days_remaining": {
+                    "type": "integer",
+                    "example": 25
+                },
+                "has_active_subscription": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "next_billing_date": {
+                    "type": "string"
+                },
+                "plan": {
+                    "type": "string",
+                    "example": "Growth"
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "plan_123"
+                },
+                "remaining_invoices": {
+                    "type": "integer",
+                    "example": 450
+                },
+                "subscription_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "total_invoices": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "used_invoices": {
+                    "type": "integer",
+                    "example": 50
+                }
+            }
+        },
+        "subscription.SubscribeDataDto": {
+            "type": "object",
+            "properties": {
+                "aggregator_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
                 "authorization_url": {
                     "type": "string",
                     "example": "https://checkout.paystack.com/..."
@@ -11142,14 +11456,13 @@ const docTemplatefrontend = `{
                 },
                 "transaction_ref": {
                     "type": "string",
-                    "example": "aggsub_1712345678_abcdef"
+                    "example": "sub_1712345678_abcdef"
                 }
             }
         },
-        "subscription.AggregatorSubscribeRequestDto": {
+        "subscription.SubscribeRequestDto": {
             "type": "object",
             "required": [
-                "business_id",
                 "plan_id"
             ],
             "properties": {
@@ -11163,11 +11476,11 @@ const docTemplatefrontend = `{
                 }
             }
         },
-        "subscription.AggregatorSubscribeResponseDto": {
+        "subscription.SubscribeResponseDto": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/subscription.AggregatorSubscribeDataDto"
+                    "$ref": "#/definitions/subscription.SubscribeDataDto"
                 },
                 "error": {},
                 "extra": {},
@@ -11194,6 +11507,29 @@ const docTemplatefrontend = `{
                     "items": {
                         "$ref": "#/definitions/entities.SubscriptionPlan"
                     }
+                },
+                "error": {},
+                "extra": {},
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pagination": {},
+                "status": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "subscription.SubscriptionStatusResponseDto": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/subscription.BusinessSubscriptionStatusDto"
                 },
                 "error": {},
                 "extra": {},

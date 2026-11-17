@@ -1468,6 +1468,85 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Super Admin only. Records an offline payment (e.g. bank transfer) and activates the business subscription.\nIf the business already has an active subscription, the new cycle is added to the current expiry and unused invoices carry over.\nThe business must be managed by an aggregator. payment_reference must be unique.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Subscriptions"
+                ],
+                "summary": "Manually Subscribe Business (Offline Payment)",
+                "parameters": [
+                    {
+                        "description": "Offline payment details",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminManualSubscribeDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Subscription activated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminManualSubscribeResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: Super Admin only",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "404": {
+                        "description": "Business or plan not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "409": {
+                        "description": "Payment reference already recorded",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperror.AppError"
+                        }
+                    }
+                }
             }
         },
         "/admin/subscriptions/stats": {
@@ -6845,6 +6924,73 @@
                 }
             }
         },
+        "admin.AdminManualSubscribeDto": {
+            "type": "object",
+            "required": [
+                "business_id",
+                "payment_reference",
+                "plan_id"
+            ],
+            "properties": {
+                "amount_paid": {
+                    "type": "number",
+                    "example": 120000
+                },
+                "business_id": {
+                    "type": "string",
+                    "example": "8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9"
+                },
+                "notes": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "Transfer confirmed by finance"
+                },
+                "payment_date": {
+                    "type": "string",
+                    "example": "2026-11-15"
+                },
+                "payment_method": {
+                    "type": "string",
+                    "enum": [
+                        "bank_transfer",
+                        "cash",
+                        "cheque",
+                        "other"
+                    ],
+                    "example": "bank_transfer"
+                },
+                "payment_reference": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "GTB-TRF-889201"
+                },
+                "plan_id": {
+                    "type": "string",
+                    "example": "223f3eba-f611-4b8c-94e3-993b0201fa3f"
+                },
+                "send_receipt": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "admin.AdminManualSubscribeResponseDto": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Subscription activated successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 201
+                }
+            }
+        },
         "admin.AdminOverviewStatsDto": {
             "type": "object",
             "properties": {
@@ -10383,7 +10529,8 @@
                     "enum": [
                         "PENDING",
                         "PAID",
-                        "REJECTED"
+                        "REJECTED",
+                        "PARTIAL"
                     ],
                     "example": "PENDING"
                 },

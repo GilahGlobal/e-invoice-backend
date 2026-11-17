@@ -350,4 +350,49 @@ type AdminPlanDetailResponseDto struct {
 	Data AdminPlanResponseDto `json:"data"`
 }
 
+// AdminManualSubscribeDto records an offline payment (e.g. bank transfer) and activates the business subscription.
+type AdminManualSubscribeDto struct {
+	BusinessID       string   `json:"business_id" validate:"required,uuid" example:"8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9"`
+	PlanID           string   `json:"plan_id" validate:"required" example:"223f3eba-f611-4b8c-94e3-993b0201fa3f"`
+	PaymentReference string   `json:"payment_reference" validate:"required,max=100" example:"GTB-TRF-889201"`
+	AmountPaid       *float64 `json:"amount_paid,omitempty" validate:"omitempty,gt=0" example:"120000.00"`
+	PaymentDate      string   `json:"payment_date,omitempty" example:"2026-11-15"`
+	PaymentMethod    string   `json:"payment_method,omitempty" validate:"omitempty,oneof=bank_transfer cash cheque other" example:"bank_transfer"`
+	Notes            string   `json:"notes,omitempty" validate:"omitempty,max=500" example:"Transfer confirmed by finance"`
+	SendReceipt      *bool    `json:"send_receipt,omitempty" example:"true"`
+}
+
+type AdminManualSubscribeDataDto struct {
+	SubscriptionID    string  `json:"subscription_id" example:"0a0ecb8d-413a-4bf8-8b45-f86980c92e8f"`
+	TransactionID     string  `json:"transaction_id" example:"74edb1a0-54f7-41ae-b68b-1904f9f64acf"`
+	Reference         string  `json:"reference" example:"MAN-GTB-TRF-889201"`
+	BusinessID        string  `json:"business_id" example:"8e2fde82-5ab0-4f1b-ba5e-6f50f831daa9"`
+	AggregatorID      string  `json:"aggregator_id" example:"99a22e3e-371b-42cc-b77a-55b656af65f0"`
+	PlanID            string  `json:"plan_id" example:"223f3eba-f611-4b8c-94e3-993b0201fa3f"`
+	Plan              string  `json:"plan" example:"Enterprise Annual"`
+	AmountPaid        float64 `json:"amount_paid" example:"120000.00"`
+	PaymentMethod     string  `json:"payment_method" example:"bank_transfer"`
+	TotalInvoices     int     `json:"total_invoices" example:"5000"`
+	RemainingInvoices int     `json:"remaining_invoices" example:"5000"`
+	NextBillingDate   string  `json:"next_billing_date" example:"2027-11-16T10:00:00Z"`
+	Renewed           bool    `json:"renewed" example:"false"`
+}
+
+type AdminManualSubscribeResponseDto struct {
+	Status     string `json:"status" example:"success"`
+	StatusCode int    `json:"status_code" example:"201"`
+	Message    string `json:"message" example:"Subscription activated successfully"`
+}
+
+type SubscriptionEnforcementDto struct {
+	EnforceDirectSubscriptions bool `json:"enforce_direct_subscriptions" example:"false"`
+}
+
+type SubscriptionEnforcementResponseDto struct {
+	Status     string                     `json:"status" example:"success"`
+	StatusCode int                        `json:"status_code" example:"200"`
+	Message    string                     `json:"message" example:"Enforcement setting retrieved successfully"`
+	Data       SubscriptionEnforcementDto `json:"data"`
+}
+
 

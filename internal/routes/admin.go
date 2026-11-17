@@ -65,6 +65,9 @@ func AdminRoute(router fiber.Router, version string, container *core.Container) 
 	adminAuthAll.Delete("/plans/:id", rf, handler.DeleteSubscriptionPlan)
 
 	adminAuthAll.Get("/subscriptions", rf, handler.GetSubscriptions)
+	adminAuthAll.Post("/subscriptions", rf, handler.ManualSubscribeBusiness)
+	adminAuthAll.Get("/subscriptions/enforcement", rf, handler.GetSubscriptionEnforcement)
+	adminAuthAll.Patch("/subscriptions/enforcement", rf, handler.UpdateSubscriptionEnforcement)
 	adminAuthAll.Get("/subscriptions/stats", rf, handler.GetSubscriptionStats)
 	adminAuthAll.Get("/subscriptions/:id", rf, handler.GetSubscriptionByID)
 }

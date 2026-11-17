@@ -426,6 +426,24 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 				return false, FailureStageSubscription, fmt.Errorf("subscription guard failed (%d): %w", status, err)
 			}
 		}
+	} else {
+		if subscription.IsDirectSubscriptionEnforced() {
+			if _, _, err := qc.subSvc.RequireBusinessSubscription(db, id); err != nil {
+				return false, FailureStageSubscription, err
+			}
+		}
+		if invoiceExists == nil {
+			sub, _ := qc.subSvc.GetActiveBusinessSubscription(db, id)
+			if sub != nil {
+				if sub.RemainingInvoices <= 0 {
+					return false, FailureStageSubscription, fmt.Errorf("subscription invoice quota exhausted")
+				}
+				ok, _ := qc.subSvc.ReserveBusinessSubscriptionInvoice(db, sub.ID)
+				if ok {
+					reservedSubscriptionID = sub.ID
+				}
+			}
+		}
 	}
 
 	var irnPayload dtos.InvoiceData
@@ -455,7 +473,7 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 	}
 
 	createdInvoice, _, err, invoiceSigned := qc.invoiceSvc.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, qrCodeBMPURL, irnPayload.QRCode2, invoiceExists, isSandbox, aggregatorID, "internal")
-	if reservedSubscriptionID != "" && createdInvoice == nil {
+	if reservedSubscriptionID != "" && !invoiceSigned && err != nil {
 		_ = qc.subSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
 	}
 	currentStatus := ""
