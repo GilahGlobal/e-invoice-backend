@@ -19,14 +19,12 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -157,59 +155,7 @@ func (s *Service) GetActivePlanByID(planID string, db *gorm.DB) (*entities.Subsc
 	return plan, true, nil
 }
 
-func (s *Service) CreatePlan(req CreateSubscriptionPlanDto, db *gorm.DB) (*entities.SubscriptionPlan, error) {
-	if db == nil {
-		return nil, fmt.Errorf("database connection is required")
-	}
 
-	pdb := dbinit.InitDB(db, false)
-	planName := strings.TrimSpace(req.Name)
-
-	existingPlan, err := s.repo.GetPlanByName(planName, pdb)
-	if err != nil {
-		return nil, err
-	}
-	if existingPlan != nil {
-		return nil, fmt.Errorf("plan with name %s already exists", planName)
-	}
-
-	reminderDays := req.ReminderDaysBefore
-	if len(reminderDays) == 0 {
-		reminderDays = []int{7, 3, 1}
-	} else {
-		seen := make(map[int]bool)
-		var cleaned []int
-		for _, d := range reminderDays {
-			if d > 0 && !seen[d] {
-				seen[d] = true
-				cleaned = append(cleaned, d)
-			}
-		}
-		if len(cleaned) == 0 {
-			cleaned = []int{7, 3, 1}
-		} else {
-			sort.Sort(sort.Reverse(sort.IntSlice(cleaned)))
-		}
-		reminderDays = cleaned
-	}
-	reminderDaysBytes, _ := json.Marshal(reminderDays)
-
-	plan := &entities.SubscriptionPlan{
-		ID:                 utility.GenerateUUID(),
-		Name:               planName,
-		Amount:             req.Amount,
-		IsActive:           true,
-		TotalInvoices:      req.TotalInvoices,
-		BillingCycle:       req.BillingCycle,
-		ReminderDaysBefore: datatypes.JSON(reminderDaysBytes),
-	}
-
-	if err := s.repo.CreatePlan(plan, pdb); err != nil {
-		return nil, err
-	}
-
-	return plan, nil
-}
 
 func (s *Service) InitializeSubscription(req SubscribeRequestDto, userDetails *middleware.UserDataClaims, db *gorm.DB) (fiber.Map, int, error) {
 	if db == nil {

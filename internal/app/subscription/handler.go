@@ -162,35 +162,6 @@ func (h *Handler) GetSubscriptionStatus(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rd)
 }
 
-// CreatePlan creates a subscription plan (deprecated: use /admin/plans)
-func (h *Handler) CreatePlan(c *fiber.Ctx) error {
-	var req CreateSubscriptionPlanDto
-	if err := c.BodyParser(&req); err != nil {
-		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
-	}
-
-	if err := h.Validator.Struct(&req); err != nil {
-		rd := utility.BuildErrorResponse(fiber.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, h.Validator), nil)
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(rd)
-	}
-
-	db, err := middleware.GetDatabase(c)
-	if err != nil {
-		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
-	}
-
-	createdPlan, err := h.svc.CreatePlan(req, db)
-	if err != nil {
-		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), err, nil)
-	}
-
-	rd := utility.BuildSuccessResponse(fiber.StatusCreated, "plan created successfully", fiber.Map{
-		"is_sandbox": *req.IsSandbox,
-		"plan":       createdPlan,
-	})
-	return c.Status(fiber.StatusCreated).JSON(rd)
-}
-
 func (h *Handler) PaystackWebhook(c *fiber.Ctx) error {
 	// signature := c.Get("x-paystack-signature")
 	// if signature == "" {
@@ -248,5 +219,3 @@ func (h *Handler) PaystackWebhook(c *fiber.Ctx) error {
 	rd := utility.BuildSuccessResponse(http.StatusOK, "webhook accepted for processing", nil)
 	return c.Status(http.StatusOK).JSON(rd)
 }
-
-

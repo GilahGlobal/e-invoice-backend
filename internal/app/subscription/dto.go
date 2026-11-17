@@ -47,28 +47,9 @@ type SubscriptionPlanQueryDto struct {
 	IsSandbox string `query:"is_sandbox" validate:"required,oneof=true false"`
 }
 
-type CreateSubscriptionPlanDto struct {
-	IsSandbox          *bool   `json:"is_sandbox" validate:"required"`
-	Name               string  `json:"name" validate:"required" example:"Example Name"`
-	Amount             float64 `json:"amount" validate:"required,gt=0" example:"0.0"`
-	TotalInvoices      int     `json:"total_invoices" validate:"required,gt=0" example:"0"`
-	BillingCycle       int     `json:"billing_cycle" validate:"required,gt=0" example:"0"`
-	ReminderDaysBefore []int   `json:"reminder_days_before,omitempty"`
-}
-
 type SubscriptionPlansResponseDto struct {
 	entities.Response
 	Data []entities.SubscriptionPlan `json:"data"`
-}
-
-type CreateSubscriptionPlanDataDto struct {
-	IsSandbox bool                      `json:"is_sandbox" example:"true"`
-	Plan      entities.SubscriptionPlan `json:"plan"`
-}
-
-type CreateSubscriptionPlanResponseDto struct {
-	entities.Response
-	Data CreateSubscriptionPlanDataDto `json:"data"`
 }
 
 type SubscribeRequestDto struct {
