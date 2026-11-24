@@ -9,6 +9,7 @@ import (
 	"einvoice-access-point/internal/data/entities"
 	"einvoice-access-point/internal/middleware"
 	"einvoice-access-point/internal/pkg/cloudinary"
+	"einvoice-access-point/internal/pkg/resend_email"
 	"einvoice-access-point/internal/utility"
 	"einvoice-access-point/internal/workers"
 	"einvoice-access-point/internal/workers/consumer/bulk-upload/dtos"
@@ -106,6 +107,8 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 		qc.storeValidationErrors(payload.BulkID, payload.FileKey, payload.BusinessID, validationErrors, payload.IsSandbox)
 	}
 
+	initialValidationErrors := append([]error(nil), validationErrors...)
+
 	log.Println("Processing bulk upload",
 		"file_key", payload.FileKey,
 		"total_rows", stats.TotalRows,
@@ -119,6 +122,25 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 			"validation_errors", stats.TotalErrors)
 		// Validation errors (if any) already persisted above.
 		if qc.invoiceSvc != nil && qc.invoiceSvc.BusinessSvc() != nil {
+			var reportItems []resend_email.BulkInvoiceReportItem
+			for _, err := range initialValidationErrors {
+				invNum := ""
+				reason := err.Error()
+				if pie, ok := err.(*InvoiceProcessingError); ok {
+					invNum = pie.InvoiceNumber
+					if invNum == "" && pie.InvoiceIndex > 0 {
+						invNum = fmt.Sprintf("Row %d", pie.InvoiceIndex)
+					}
+				}
+				if invNum == "" {
+					invNum = "Invalid Row"
+				}
+				reportItems = append(reportItems, resend_email.BulkInvoiceReportItem{
+					InvoiceNumber: invNum,
+					Status:        "Failed",
+					ErrorMessage:  reason,
+				})
+			}
 			db := middleware.GetDatabaseInstance(payload.IsSandbox, qc.db, qc.testDb)
 			qc.invoiceSvc.BusinessSvc().NotifyBulkUploadFinished(
 				db,
@@ -131,6 +153,7 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 				stats.TotalRows,
 				stats.TotalErrors,
 				stats.Duration,
+				reportItems...,
 			)
 		}
 		return nil
@@ -201,6 +224,27 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 	qc.logResults(payload.BulkID, payload.FileKey, payload.BusinessID, stats, processedResults, payload.IsSandbox)
 
 	if qc.invoiceSvc != nil && qc.invoiceSvc.BusinessSvc() != nil {
+		var reportItems []resend_email.BulkInvoiceReportItem
+		for _, err := range initialValidationErrors {
+			invNum := ""
+			reason := err.Error()
+			if pie, ok := err.(*InvoiceProcessingError); ok {
+				invNum = pie.InvoiceNumber
+				if invNum == "" && pie.InvoiceIndex > 0 {
+					invNum = fmt.Sprintf("Row %d", pie.InvoiceIndex)
+				}
+			}
+			if invNum == "" {
+				invNum = "Invalid Row"
+			}
+			reportItems = append(reportItems, resend_email.BulkInvoiceReportItem{
+				InvoiceNumber: invNum,
+				Status:        "Failed",
+				ErrorMessage:  reason,
+			})
+		}
+		reportItems = append(reportItems, processedResults.ReportItems...)
+
 		db := middleware.GetDatabaseInstance(payload.IsSandbox, qc.db, qc.testDb)
 		qc.invoiceSvc.BusinessSvc().NotifyBulkUploadFinished(
 			db,
@@ -213,6 +257,7 @@ func (qc *BulkUploadConsumer) HandleBulkUploadTask(ctx context.Context, t *asynq
 			stats.UnsuccessfulInvoices,
 			stats.TotalErrors,
 			stats.Duration,
+			reportItems...,
 		)
 	}
 
@@ -253,13 +298,35 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 		close(resultsChan)
 	}()
 
+	getIRN := func(inv *dtos.UploadInvoiceRequestDto) string {
+		if inv != nil && inv.IRN != nil {
+			return *inv.IRN
+		}
+		return ""
+	}
+
 	// Aggregate results
 	for result := range resultsChan {
 		mu.Lock()
+		invNum := ""
+		if result.Invoice != nil {
+			invNum = result.Invoice.InvoiceNumber
+		}
+
 		if result.Status == entities.StatusConfirmed || result.Posted {
 			results.SuccessCount++
+			results.ReportItems = append(results.ReportItems, resend_email.BulkInvoiceReportItem{
+				InvoiceNumber: invNum,
+				Status:        "Successful",
+				IRN:           getIRN(result.Invoice),
+			})
 		} else if result.Status == entities.StatusTransmitted {
 			results.PartialCount++
+			results.ReportItems = append(results.ReportItems, resend_email.BulkInvoiceReportItem{
+				InvoiceNumber: invNum,
+				Status:        "Partially Successful",
+				IRN:           getIRN(result.Invoice),
+			})
 		} else if result.Status == entities.StatusSignedInvoice {
 			db := middleware.GetDatabaseInstance(isSandbox, qc.db, qc.testDb)
 			invoiceExists, _ := qc.invoiceSvc.GetInvoiceByInvoiceNumber(db, result.Invoice.InvoiceNumber, id)
@@ -282,6 +349,11 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 
 			if hasSuccess {
 				results.PartialCount++
+				results.ReportItems = append(results.ReportItems, resend_email.BulkInvoiceReportItem{
+					InvoiceNumber: invNum,
+					Status:        "Partially Successful",
+					IRN:           getIRN(result.Invoice),
+				})
 			} else {
 				results.ErrorCount++
 				errStr := failureMessage
@@ -294,6 +366,11 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 					Invoice:       cloneInvoiceForError(*result.Invoice),
 					Error:         errStr,
 				})
+				results.ReportItems = append(results.ReportItems, resend_email.BulkInvoiceReportItem{
+					InvoiceNumber: invNum,
+					Status:        "Failed",
+					ErrorMessage:  errStr,
+				})
 			}
 		} else if result.Error != nil {
 			if strings.HasPrefix(result.Error.Error(), "invoice cannot be overwritten:") {
@@ -302,10 +379,20 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 				if invoiceExists != nil {
 					if invoiceExists.CurrentStatus == entities.StatusConfirmed {
 						results.SuccessCount++
+						results.ReportItems = append(results.ReportItems, resend_email.BulkInvoiceReportItem{
+							InvoiceNumber: invNum,
+							Status:        "Successful",
+							IRN:           invoiceExists.IRN,
+						})
 						mu.Unlock()
 						continue
 					} else if invoiceExists.CurrentStatus == entities.StatusTransmitted {
 						results.PartialCount++
+						results.ReportItems = append(results.ReportItems, resend_email.BulkInvoiceReportItem{
+							InvoiceNumber: invNum,
+							Status:        "Partially Successful",
+							IRN:           invoiceExists.IRN,
+						})
 						mu.Unlock()
 						continue
 					} else if invoiceExists.CurrentStatus == entities.StatusSignedInvoice {
@@ -327,6 +414,11 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 						
 						if hasSuccess {
 							results.PartialCount++
+							results.ReportItems = append(results.ReportItems, resend_email.BulkInvoiceReportItem{
+								InvoiceNumber: invNum,
+								Status:        "Partially Successful",
+								IRN:           invoiceExists.IRN,
+							})
 							mu.Unlock()
 							continue
 						} else if failureMessage != "" {
@@ -336,12 +428,18 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 				}
 			}
 
+			errStr := result.Error.Error()
 			results.ErrorCount++
 			results.Errors = append(results.Errors, ProcessError{
 				InvoiceNumber: result.Invoice.InvoiceNumber,
 				Stage:         normalizeFailureStage(result.Status, result.Error),
 				Invoice:       cloneInvoiceForError(*result.Invoice),
-				Error:         result.Error.Error(),
+				Error:         errStr,
+			})
+			results.ReportItems = append(results.ReportItems, resend_email.BulkInvoiceReportItem{
+				InvoiceNumber: invNum,
+				Status:        "Failed",
+				ErrorMessage:  errStr,
 			})
 		} else {
 			results.ErrorCount++
@@ -350,6 +448,11 @@ func (qc *BulkUploadConsumer) processValidatedInvoices(ctx context.Context, invo
 				Stage:         normalizeFailureStage(result.Status, nil),
 				Invoice:       cloneInvoiceForError(*result.Invoice),
 				Error:         "invoice did not reach signed/transmitted/confirmed status",
+			})
+			results.ReportItems = append(results.ReportItems, resend_email.BulkInvoiceReportItem{
+				InvoiceNumber: invNum,
+				Status:        "Failed",
+				ErrorMessage:  "invoice did not reach signed/transmitted/confirmed status",
 			})
 		}
 		mu.Unlock()
@@ -426,6 +529,24 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 				return false, FailureStageSubscription, fmt.Errorf("subscription guard failed (%d): %w", status, err)
 			}
 		}
+	} else {
+		if subscription.IsDirectSubscriptionEnforced() {
+			if _, _, err := qc.subSvc.RequireBusinessSubscription(db, id); err != nil {
+				return false, FailureStageSubscription, err
+			}
+		}
+		if invoiceExists == nil {
+			sub, _ := qc.subSvc.GetActiveBusinessSubscription(db, id)
+			if sub != nil {
+				if sub.RemainingInvoices <= 0 {
+					return false, FailureStageSubscription, fmt.Errorf("subscription invoice quota exhausted")
+				}
+				ok, _ := qc.subSvc.ReserveBusinessSubscriptionInvoice(db, sub.ID)
+				if ok {
+					reservedSubscriptionID = sub.ID
+				}
+			}
+		}
 	}
 
 	var irnPayload dtos.InvoiceData
@@ -454,8 +575,8 @@ func (qc *BulkUploadConsumer) processSingleInvoice(ctx context.Context, invoiceP
 		qrCodeBMPURL, _ = cloudinary.UploadBMPBase64(irnPayload.QRCodeBMP, utility.GenerateUUID())
 	}
 
-	createdInvoice, _, err, invoiceSigned := qc.invoiceSvc.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, qrCodeBMPURL, irnPayload.QRCode2, invoiceExists, isSandbox, aggregatorID, "internal")
-	if reservedSubscriptionID != "" && createdInvoice == nil {
+	createdInvoice, _, err, invoiceSigned := qc.invoiceSvc.CreateInvoice(db, *invoicePayload, invoicePayload.InvoiceNumber, id, irnPayload.QRCode, qrCodeBMPURL, irnPayload.QRCode2, invoiceExists, isSandbox, aggregatorID, "bulk", true)
+	if reservedSubscriptionID != "" && !invoiceSigned && err != nil {
 		_ = qc.subSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
 	}
 	currentStatus := ""

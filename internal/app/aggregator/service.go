@@ -657,11 +657,15 @@ func (s *Service) ListAllTransactions(aggregatorID string, page, size int, db *g
 			}
 		}
 
+		aggID := ""
+		if t.AggregatorID != nil {
+			aggID = *t.AggregatorID
+		}
 		result = append(result, TransactionDto{
 			ID:           t.ID,
 			BusinessID:   t.BusinessID,
 			BusinessName: businessName,
-			AggregatorID: t.AggregatorID,
+			AggregatorID: aggID,
 			Reference:    t.Reference,
 			Provider:     t.Provider,
 			Status:       string(t.Status),

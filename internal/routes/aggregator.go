@@ -2,7 +2,6 @@ package routes
 
 import (
 	"einvoice-access-point/internal/app/aggregator"
-	"einvoice-access-point/internal/app/subscription"
 	"einvoice-access-point/internal/core"
 	"einvoice-access-point/internal/middleware"
 
@@ -11,7 +10,6 @@ import (
 
 func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
 	controller := aggregator.NewHandler(c.Validator, c.Logger, c.DB, c.TestDB, c.Config)
-	subHandler := subscription.NewAggregatorHandler(c.Validator, c.Logger, c.DB, c.TestDB)
 
 	aggregatorRoute := r.Group(ApiVersion + "/aggregator")
 
@@ -70,12 +68,5 @@ func AggregatorRoute(r fiber.Router, ApiVersion string, c *core.Container) {
 	// Transactions
 	{
 		protected.Get("/transactions", rf, controller.ListAllTransactions)
-	}
-
-	// Subscription
-	subscription := protected.Group("/subscription", rf)
-	{
-		subscription.Get("/plans", subHandler.GetPlans)
-		subscription.Post("/subscribe", subHandler.Subscribe)
 	}
 }

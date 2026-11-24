@@ -2,6 +2,7 @@ package invoice
 
 import (
 	"einvoice-access-point/internal/app/business"
+	"einvoice-access-point/internal/app/subscription"
 	"einvoice-access-point/internal/app/token"
 	"einvoice-access-point/internal/apperror"
 	"einvoice-access-point/internal/data/database"
@@ -30,6 +31,7 @@ type GetAllInvoicesQuery struct {
 type Handler struct {
 	svc         *Service
 	businessSvc *business.Service
+	subSvc      *subscription.Service
 	Validator   *validator.Validate
 	Logger      *utility.Logger
 	Db          *database.Database
@@ -42,10 +44,12 @@ func NewHandler(validator *validator.Validate, logger *utility.Logger, db, testD
 	testDBConn := dbinit.InitDB(testDB.Postgresql.DB(), false)
 	tokenSvc := token.NewServiceWithDB(prodDB, testDBConn)
 	businessSvc := business.NewServiceWithDB(prodDB, testDBConn)
+	subSvc := subscription.NewServiceWithDB(prodDB, testDBConn)
 	svc := NewServiceWithDB(prodDB, testDBConn, tokenSvc, businessSvc)
 	return &Handler{
 		svc:         svc,
 		businessSvc: businessSvc,
+		subSvc:      subSvc,
 		Validator:   validator,
 		Logger:      logger,
 		Db:          db,
@@ -219,6 +223,25 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
 	}
 
+	var activeSubscription *entities.Subscription
+	if !userDetails.IsAggregator {
+		if subscription.IsDirectSubscriptionEnforced() {
+			sub, status, subErr := h.subSvc.RequireBusinessSubscription(db, userDetails.ID)
+			if subErr != nil {
+				return apperror.New(status, "error", subErr.Error(), subErr, nil)
+			}
+			activeSubscription = sub
+		} else {
+			sub, subErr := h.subSvc.GetActiveBusinessSubscription(db, userDetails.ID)
+			if subErr == nil && sub != nil {
+				if sub.RemainingInvoices <= 0 {
+					return apperror.New(fiber.StatusForbidden, "error", "subscription invoice quota exhausted", nil, nil)
+				}
+				activeSubscription = sub
+			}
+		}
+	}
+
 	var req firs_models.UploadInvoiceRequestDto
 	err = c.BodyParser(&req)
 	if err != nil {
@@ -332,6 +355,9 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	createdInvoice, _, err, isInvoiceSigned := h.svc.CreateInvoice(db, req, req.InvoiceNumber, userDetails.ID, irnPayload.QRCode, qrCodeBMPURL, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, nil, client)
+	if activeSubscription != nil && invoiceExists == nil && (isInvoiceSigned || err == nil) {
+		_, _ = h.subSvc.ReserveBusinessSubscriptionInvoice(db, activeSubscription.ID)
+	}
 
 	response := map[string]interface{}{}
 	if createdInvoice != nil {
@@ -388,6 +414,25 @@ func (h *Handler) SystemIntegrator(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusInternalServerError, "error", err.Error(), err, nil)
 	}
 
+	var activeSubscription *entities.Subscription
+	if !userDetails.IsAggregator {
+		if subscription.IsDirectSubscriptionEnforced() {
+			sub, status, subErr := h.subSvc.RequireBusinessSubscription(db, userDetails.ID)
+			if subErr != nil {
+				return apperror.New(status, "error", subErr.Error(), subErr, nil)
+			}
+			activeSubscription = sub
+		} else {
+			sub, subErr := h.subSvc.GetActiveBusinessSubscription(db, userDetails.ID)
+			if subErr == nil && sub != nil {
+				if sub.RemainingInvoices <= 0 {
+					return apperror.New(fiber.StatusForbidden, "error", "subscription invoice quota exhausted", nil, nil)
+				}
+				activeSubscription = sub
+			}
+		}
+	}
+
 	var req firs_models.UploadInvoiceRequestDto
 	if err := c.BodyParser(&req); err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", "Failed to parse request body", err, nil)
@@ -406,6 +451,10 @@ func (h *Handler) SystemIntegrator(c *fiber.Ctx) error {
 	invoice, irnData, qrCodeBMPURL, isPreviouslyUploaded, err := h.svc.SystemIntegratorInvoice(db, req, userDetails.ID, userDetails.IsSandbox, client, h.Keys)
 	if err != nil {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
+	}
+
+	if activeSubscription != nil && !isPreviouslyUploaded && invoice != nil {
+		_, _ = h.subSvc.ReserveBusinessSubscriptionInvoice(db, activeSubscription.ID)
 	}
 
 	dataMap := map[string]interface{}{}

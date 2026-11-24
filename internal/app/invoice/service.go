@@ -119,7 +119,7 @@ func (s *Service) GetInvoiceDetails(db *gorm.DB, businessID, invoiceID string) (
 	return s.repo.FindInvoiceByBusinessAndID(pdb, businessID, invoiceID)
 }
 
-func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode, qrCodeBMPURL, encryptedIRN string, invoiceExists *entities.Invoice, isSandbox bool, aggregatorID *string, client string) (*entities.Invoice, *string, error, bool) {
+func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRequestDto, invoiceNumber, businessID, qrCode, qrCodeBMPURL, encryptedIRN string, invoiceExists *entities.Invoice, isSandbox bool, aggregatorID *string, client string, skipNotification ...bool) (*entities.Invoice, *string, error, bool) {
 	pdb := dbinit.InitDB(db, false)
 	isInvoiceSigned := false
 	var invoice *entities.Invoice
@@ -127,6 +127,7 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 	if client == "" {
 		platform = "API"
 	}
+	suppressNotification := (client == "bulk") || (len(skipNotification) > 0 && skipNotification[0])
 
 	totalAmount, taxAmount, issueDate := extractInvoiceTotalsAndIssueDate(payload)
 
@@ -156,7 +157,7 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 		}
 
 		invoice = invoiceExists
-		if err, isInvoiceSigned = s.UncompletedFirsProcesses(db, invoiceExists.CurrentStatus, payload, invoiceExists, isSandbox); err != nil {
+		if err, isInvoiceSigned = s.UncompletedFirsProcesses(db, invoiceExists.CurrentStatus, payload, invoiceExists, isSandbox, suppressNotification); err != nil {
 			return invoice, nil, errors.New(utility.ExtractRelevantErrorMessage(err)), isInvoiceSigned
 		}
 	} else {
@@ -189,7 +190,7 @@ func (s *Service) CreateInvoice(db *gorm.DB, payload firs_models.UploadInvoiceRe
 			errDetails := "failed to save invoice"
 			return nil, &errDetails, fmt.Errorf("%s: %w", errDetails, err), isInvoiceSigned
 		}
-		if err, isInvoiceSigned = s.FirsAllInOneProcess(payload, invoice, db, isSandbox); err != nil {
+		if err, isInvoiceSigned = s.FirsAllInOneProcess(payload, invoice, db, isSandbox, suppressNotification); err != nil {
 			return invoice, nil, errors.New(utility.ExtractRelevantErrorMessage(err)), isInvoiceSigned
 		}
 	}
@@ -900,21 +901,22 @@ func formatFirsError(msg string, theErr *string, err error) error {
 	return fmt.Errorf("%s: %v", msg, err)
 }
 
-func (s *Service) FirsAllInOneProcess(payload firs_models.UploadInvoiceRequestDto, invoiceModel *entities.Invoice, db *gorm.DB, isSandbox bool) (error, bool) {
+func (s *Service) FirsAllInOneProcess(payload firs_models.UploadInvoiceRequestDto, invoiceModel *entities.Invoice, db *gorm.DB, isSandbox bool, skipNotification ...bool) (error, bool) {
 	pdb := dbinit.InitDB(db, false)
+	suppress := len(skipNotification) > 0 && skipNotification[0]
 
 	_, theErr, err := s.ValidateInvoice(payload, isSandbox)
 	if err != nil {
 		stageErr := formatFirsError("failed to validate invoice", theErr, err)
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
-		if s.businessSvc != nil {
+		if !suppress && s.businessSvc != nil {
 			s.businessSvc.NotifyInvoiceValidationFailed(db, invoiceModel.BusinessID, invoiceModel.InvoiceNumber, utility.ExtractRelevantErrorMessage(stageErr))
 		}
 		return stageErr, false
 	}
 
 	_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
-	if s.businessSvc != nil {
+	if !suppress && s.businessSvc != nil {
 		irn := invoiceModel.IRN
 		if irn == "" && payload.IRN != nil {
 			irn = *payload.IRN
@@ -955,8 +957,9 @@ func (s *Service) FirsAllInOneProcess(payload firs_models.UploadInvoiceRequestDt
 	return nil, true
 }
 
-func (s *Service) UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload firs_models.UploadInvoiceRequestDto, invoiceModel *entities.Invoice, isSandbox bool) (error, bool) {
+func (s *Service) UncompletedFirsProcesses(db *gorm.DB, currentStatus string, payload firs_models.UploadInvoiceRequestDto, invoiceModel *entities.Invoice, isSandbox bool, skipNotification ...bool) (error, bool) {
 	pdb := dbinit.InitDB(db, false)
+	suppress := len(skipNotification) > 0 && skipNotification[0]
 
 	switch currentStatus {
 	case entities.StatusValidatedInvoice:
@@ -964,14 +967,14 @@ func (s *Service) UncompletedFirsProcesses(db *gorm.DB, currentStatus string, pa
 		if err != nil {
 			stageErr := formatFirsError("failed to validate invoice", theErr, err)
 			_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "failed", utility.ExtractRelevantErrorMessage(stageErr))
-			if s.businessSvc != nil {
+			if !suppress && s.businessSvc != nil {
 				s.businessSvc.NotifyInvoiceValidationFailed(db, invoiceModel.BusinessID, invoiceModel.InvoiceNumber, utility.ExtractRelevantErrorMessage(stageErr))
 			}
 			return stageErr, false
 		}
 
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusValidatedInvoice, "success")
-		if s.businessSvc != nil {
+		if !suppress && s.businessSvc != nil {
 			irn := invoiceModel.IRN
 			if irn == "" && payload.IRN != nil {
 				irn = *payload.IRN
@@ -1011,7 +1014,7 @@ func (s *Service) UncompletedFirsProcesses(db *gorm.DB, currentStatus string, pa
 		_ = s.repo.UpdateInvoiceStatus(pdb, invoiceModel, entities.StatusConfirmed, "success")
 		return nil, true
 	case entities.StatusSignedIRN:
-		return s.FirsAllInOneProcess(payload, invoiceModel, db, isSandbox)
+		return s.FirsAllInOneProcess(payload, invoiceModel, db, isSandbox, suppress)
 	case entities.StatusSignedInvoice:
 		if invoiceModel.HasFailedStatus() {
 			_, theErr, err := s.SignInvoice(payload, isSandbox)

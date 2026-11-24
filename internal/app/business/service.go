@@ -210,14 +210,6 @@ func (s *Service) SaveBusinessIRNSigningKeys(db *gorm.DB, id string, fileContent
 }
 
 func (s *Service) ResolveBusinessIRNSigningKeys(db *gorm.DB, id string, isSandbox bool, fallbackKeys *utility.CryptoKeys) (*utility.CryptoKeys, error) {
-	if isSandbox {
-		if fallbackKeys != nil {
-			return fallbackKeys, nil
-		}
-
-		return utility.LoadCryptoKeys("crypto_keys.txt")
-	}
-
 	business, err := s.GetBusinessDetails(db, id)
 	if err != nil {
 		return nil, err
@@ -298,6 +290,7 @@ func (s *Service) GetNotificationPreferences(db *gorm.DB, businessID string) (*N
 		InvoiceValidationCompleted: pref.InvoiceValidationCompleted,
 		InvoiceValidationFailed:    pref.InvoiceValidationFailed,
 		BulkUploadFinished:         pref.BulkUploadFinished,
+		SubscriptionExpiring:       pref.SubscriptionExpiring,
 		CreatedAt:                  pref.CreatedAt,
 		UpdatedAt:                  pref.UpdatedAt,
 	}, nil
@@ -325,6 +318,9 @@ func (s *Service) UpdateNotificationPreferences(db *gorm.DB, businessID string, 
 	if req.BulkUploadFinished != nil {
 		pref.BulkUploadFinished = *req.BulkUploadFinished
 	}
+	if req.SubscriptionExpiring != nil {
+		pref.SubscriptionExpiring = *req.SubscriptionExpiring
+	}
 
 	if err := s.repo.UpdateNotificationPreference(pdb, pref); err != nil {
 		return nil, fmt.Errorf("failed to update notification preferences: %w", err)
@@ -337,6 +333,7 @@ func (s *Service) UpdateNotificationPreferences(db *gorm.DB, businessID string, 
 		InvoiceValidationCompleted: pref.InvoiceValidationCompleted,
 		InvoiceValidationFailed:    pref.InvoiceValidationFailed,
 		BulkUploadFinished:         pref.BulkUploadFinished,
+		SubscriptionExpiring:       pref.SubscriptionExpiring,
 		CreatedAt:                  pref.CreatedAt,
 		UpdatedAt:                  pref.UpdatedAt,
 	}, nil
@@ -403,7 +400,7 @@ func (s *Service) NotifyInvoiceValidationFailed(db *gorm.DB, businessID, invoice
 }
 
 // NotifyBulkUploadFinished sends an asynchronous email when bulk invoice upload processing completes, if preferred.
-func (s *Service) NotifyBulkUploadFinished(db *gorm.DB, businessID, fileKey string, totalRows, validRows, successful, partial, failed, validationErrors int, duration time.Duration) {
+func (s *Service) NotifyBulkUploadFinished(db *gorm.DB, businessID, fileKey string, totalRows, validRows, successful, partial, failed, validationErrors int, duration time.Duration, reportItems ...resend_email.BulkInvoiceReportItem) {
 	if s == nil || s.repo == nil || businessID == "" || db == nil {
 		return
 	}
@@ -426,9 +423,8 @@ func (s *Service) NotifyBulkUploadFinished(db *gorm.DB, businessID, fileKey stri
 		if strings.TrimSpace(businessName) == "" {
 			businessName = business.Name
 		}
-		if err := resend_email.SendBulkUploadFinishedEmail(business.Email, businessName, fileKey, totalRows, validRows, successful, partial, failed, validationErrors, duration); err != nil {
+		if err := resend_email.SendBulkUploadFinishedEmail(business.Email, businessName, fileKey, totalRows, validRows, successful, partial, failed, validationErrors, duration, reportItems...); err != nil {
 			log.Printf("Failed to send bulk upload finished email for file %s: %v\n", fileKey, err)
 		}
 	}()
 }
-

@@ -15,8 +15,17 @@ func SubscriptionRoute(app *fiber.App, ApiVersion string, c *core.Container) {
 	app.Post(ApiVersion+"/paystack/webhook", middleware.SelectDatabaseFromJSONPath("data.metadata.is_sandbox", c.DB, c.TestDB), subscriptionController.PaystackWebhook)
 	subscriptionGroup := app.Group(fmt.Sprintf("%v/subscription", ApiVersion))
 	rf := middleware.RequireFrontend()
+
+	// Public query-based plans lookup
+	subscriptionGroup.Get("/plans/public", rf, middleware.SelectDatabaseFromQuery("is_sandbox", c.DB, c.TestDB), subscriptionController.GetPlans)
+
+	// Protected routes for either business or aggregator subscriptions
+	protected := subscriptionGroup.Group("/", rf)
+	protected.Use(middleware.Authorize(c.DB.Postgresql.DB(), c.TestDB.Postgresql.DB()))
+	protected.Use(middleware.SelectDatabaseFromClaims(c.DB, c.TestDB))
 	{
-		subscriptionGroup.Get("/plans", rf, middleware.SelectDatabaseFromQuery("is_sandbox", c.DB, c.TestDB), subscriptionController.GetPlans)
-		subscriptionGroup.Post("/plans", rf, middleware.SelectDatabaseFromJSONPath("is_sandbox", c.DB, c.TestDB), subscriptionController.CreatePlan)
+		protected.Get("/plans", subscriptionController.GetPlans)
+		protected.Post("/subscribe", subscriptionController.Subscribe)
+		protected.Get("/status", subscriptionController.GetSubscriptionStatus)
 	}
 }

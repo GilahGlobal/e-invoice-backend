@@ -27,10 +27,9 @@ func NewScheduler(redisConnection asynq.RedisClientOpt) *Scheduler {
 }
 
 func (p *Scheduler) Start() error {
-	// err := p.ScheduleTask("bulkUpload", "0 0 0 0")
-	// if err != nil {
-	// 	return err
-	// }
+	if err := p.ScheduleTask("subscription:check_expiring", "0 8 * * *"); err != nil {
+		log.Printf("⚠️ Failed to schedule subscription expiration check task: %v", err)
+	}
 
 	go func() {
 		if err := p.scheduler.Run(); err != nil {

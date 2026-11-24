@@ -24,7 +24,6 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type Service struct {
 	repo         *repositories.AuthRepository
 	businessRepo *repositories.BusinessRepository

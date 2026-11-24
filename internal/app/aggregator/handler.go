@@ -1068,8 +1068,12 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		return apperror.New(fiber.StatusBadRequest, "error", err.Error(), nil, nil)
 	}
 
-	if _, status, err = h.subSvc.RequireAggregatorBusinessSubscription(db, userDetails.ID, businessID); err != nil {
+	subRecord, status, err := h.subSvc.RequireAggregatorBusinessSubscription(db, userDetails.ID, businessID)
+	if err != nil {
 		return apperror.New(status, "error", err.Error(), err, nil)
+	}
+	if subRecord.RemainingInvoices <= 0 {
+		return apperror.New(fiber.StatusForbidden, "error", "subscription invoice limit exhausted for this business", nil, nil)
 	}
 
 	invoiceSvc := h.invoiceSvc
@@ -1114,17 +1118,10 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 		}
 	}
 
-	reservedSubscriptionID := ""
-	if invoiceExists == nil {
-	}
-
 	var irnPayload InvoiceData
 	if req.IRN == nil {
 		IRNData, irnErr := invoiceSvc.IRNGeneration(db, businessID, req.InvoiceNumber, setup.ServiceID, req.BusinessID, userDetails.IsSandbox)
 		if irnErr != nil {
-			if reservedSubscriptionID != "" {
-				_ = h.subSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
-			}
 			return c.Status(fiber.StatusBadRequest).JSON(*irnErr)
 		}
 		irnPayload = *IRNData
@@ -1173,8 +1170,8 @@ func (h *Handler) UploadInvoice(c *fiber.Ctx) error {
 	}
 
 	createdInvoice, _, err, isInvoiceSigned := invoiceSvc.CreateInvoice(db, req, req.InvoiceNumber, businessID, irnPayload.QRCode, qrCodeBMPURL, irnPayload.QRCode2, invoiceExists, userDetails.IsSandbox, &userDetails.ID, client)
-	if reservedSubscriptionID != "" && createdInvoice == nil {
-		_ = h.subSvc.ReleaseReservedInvoices(db, reservedSubscriptionID, 1)
+	if subRecord != nil && invoiceExists == nil && (isInvoiceSigned || err == nil) {
+		_, _ = h.subSvc.ReserveBusinessSubscriptionInvoice(db, subRecord.ID)
 	}
 
 	response := map[string]interface{}{}

@@ -17,7 +17,7 @@ const (
 type Transaction struct {
 	ID                       string            `gorm:"column:id; type:uuid; not null; primaryKey; unique;" json:"id"`
 	BusinessID               string            `gorm:"column:business_id; type:uuid; not null; index" json:"business_id"`
-	AggregatorID             string            `gorm:"column:aggregator_id; type:uuid; not null; index" json:"aggregator_id"`
+	AggregatorID             *string           `gorm:"column:aggregator_id; type:uuid; index" json:"aggregator_id,omitempty"`
 	Reference                string            `gorm:"column:reference; type:varchar(120); uniqueIndex; not null" json:"reference"`
 	Provider                 string            `gorm:"column:provider; type:varchar(50); not null" json:"provider"`
 	Status                   TransactionStatus `gorm:"column:status; type:varchar(50); not null; default:pending" json:"status"`
