@@ -210,14 +210,6 @@ func (s *Service) SaveBusinessIRNSigningKeys(db *gorm.DB, id string, fileContent
 }
 
 func (s *Service) ResolveBusinessIRNSigningKeys(db *gorm.DB, id string, isSandbox bool, fallbackKeys *utility.CryptoKeys) (*utility.CryptoKeys, error) {
-	if isSandbox {
-		if fallbackKeys != nil {
-			return fallbackKeys, nil
-		}
-
-		return utility.LoadCryptoKeys("crypto_keys.txt")
-	}
-
 	business, err := s.GetBusinessDetails(db, id)
 	if err != nil {
 		return nil, err
@@ -436,4 +428,3 @@ func (s *Service) NotifyBulkUploadFinished(db *gorm.DB, businessID, fileKey stri
 		}
 	}()
 }
-
