@@ -2,6 +2,7 @@ package bulkupload
 
 import (
 	"einvoice-access-point/internal/pkg/firs_models"
+	"einvoice-access-point/internal/pkg/resend_email"
 	"time"
 )
 
@@ -48,6 +49,7 @@ type ProcessResults struct {
 	PartialCount int
 	ErrorCount   int
 	Errors       []ProcessError
+	ReportItems  []resend_email.BulkInvoiceReportItem
 }
 
 type ProcessResult struct {

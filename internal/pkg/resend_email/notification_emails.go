@@ -71,8 +71,17 @@ func SendInvoiceValidationFailedEmail(to, businessName, invoiceNumber, failureRe
 	return sendEmailInternal(to, subject, bodyHtml)
 }
 
+// BulkInvoiceReportItem represents an individual invoice row status within a bulk upload report email.
+type BulkInvoiceReportItem struct {
+	InvoiceNumber string  `json:"invoice_number"`
+	Status        string  `json:"status"` // "Successful", "Partially Successful", "Failed"
+	IRN           string  `json:"irn,omitempty"`
+	TotalAmount   float64 `json:"total_amount,omitempty"`
+	ErrorMessage  string  `json:"error_message,omitempty"`
+}
+
 // SendBulkUploadFinishedEmail sends an email to the business when a bulk invoice batch finishes processing.
-func SendBulkUploadFinishedEmail(to, businessName, fileKey string, totalRows, validRows, successful, partial, failed, validationErrors int, duration time.Duration) error {
+func SendBulkUploadFinishedEmail(to, businessName, fileKey string, totalRows, validRows, successful, partial, failed, validationErrors int, duration time.Duration, reportItems ...BulkInvoiceReportItem) error {
 	to = strings.TrimSpace(to)
 	if to == "" {
 		return fmt.Errorf("recipient email is required")
@@ -94,6 +103,14 @@ func SendBulkUploadFinishedEmail(to, businessName, fileKey string, totalRows, va
 		durationStr = "N/A"
 	}
 
+	displayItems := reportItems
+	truncatedCount := 0
+	const maxDisplayItems = 50
+	if len(reportItems) > maxDisplayItems {
+		displayItems = reportItems[:maxDisplayItems]
+		truncatedCount = len(reportItems) - maxDisplayItems
+	}
+
 	bodyHtml, err := templates.RenderEmail("bulk_upload_finished.html", map[string]any{
 		"BusinessName":     businessName,
 		"FileName":         cleanFileKey,
@@ -104,6 +121,10 @@ func SendBulkUploadFinishedEmail(to, businessName, fileKey string, totalRows, va
 		"ValidRows":        validRows,
 		"ValidationErrors": validationErrors,
 		"Duration":         durationStr,
+		"ReportItems":      displayItems,
+		"HasReportItems":   len(displayItems) > 0,
+		"TruncatedCount":   truncatedCount,
+		"TotalReportItems": len(reportItems),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to render bulk upload finished email: %w", err)

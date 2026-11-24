@@ -408,7 +408,7 @@ func (s *Service) NotifyInvoiceValidationFailed(db *gorm.DB, businessID, invoice
 }
 
 // NotifyBulkUploadFinished sends an asynchronous email when bulk invoice upload processing completes, if preferred.
-func (s *Service) NotifyBulkUploadFinished(db *gorm.DB, businessID, fileKey string, totalRows, validRows, successful, partial, failed, validationErrors int, duration time.Duration) {
+func (s *Service) NotifyBulkUploadFinished(db *gorm.DB, businessID, fileKey string, totalRows, validRows, successful, partial, failed, validationErrors int, duration time.Duration, reportItems ...resend_email.BulkInvoiceReportItem) {
 	if s == nil || s.repo == nil || businessID == "" || db == nil {
 		return
 	}
@@ -431,7 +431,7 @@ func (s *Service) NotifyBulkUploadFinished(db *gorm.DB, businessID, fileKey stri
 		if strings.TrimSpace(businessName) == "" {
 			businessName = business.Name
 		}
-		if err := resend_email.SendBulkUploadFinishedEmail(business.Email, businessName, fileKey, totalRows, validRows, successful, partial, failed, validationErrors, duration); err != nil {
+		if err := resend_email.SendBulkUploadFinishedEmail(business.Email, businessName, fileKey, totalRows, validRows, successful, partial, failed, validationErrors, duration, reportItems...); err != nil {
 			log.Printf("Failed to send bulk upload finished email for file %s: %v\n", fileKey, err)
 		}
 	}()
